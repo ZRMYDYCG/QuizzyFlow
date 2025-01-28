@@ -1,8 +1,9 @@
-const Home = () => {
+import Banner from './components/Banner/index.tsx'
 
+const Home = () => {
     return (
         <div>
-            <p>Home</p>
+            <Banner />
         </div>
     )
 }
