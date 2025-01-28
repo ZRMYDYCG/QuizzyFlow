@@ -1,7 +1,9 @@
+import List from './pages/List/index.tsx'
+
 function App() {
   return (
     <>
-        问卷星项目控制器
+        <List />
     </>
   )
 }
