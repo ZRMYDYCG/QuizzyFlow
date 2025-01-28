@@ -1,4 +1,4 @@
-import QuestionsCard from "../../../components/QuestionsCard.tsx"
+import QuestionsCard from "./components/QuestionsCard.tsx"
 import { useState } from "react";
 import { useTitle } from "ahooks"
 
@@ -15,7 +15,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -31,7 +31,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -47,7 +47,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -63,7 +63,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -79,7 +79,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -95,7 +95,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -111,7 +111,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -127,7 +127,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -143,7 +143,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -159,7 +159,7 @@ const QuestionList = [
         /*答卷人数*/
         answerCount: 8,
         /*是否收藏*/
-        isStart: true,
+        isStar: true,
         /*是否发布*/
         isPublish: true,
     },
@@ -192,7 +192,7 @@ const List = () => {
             </div>
             {/*问卷列表底部*/}
             <div className="text-center">
-                底部
+                Loading...
             </div>
         </>
     )
