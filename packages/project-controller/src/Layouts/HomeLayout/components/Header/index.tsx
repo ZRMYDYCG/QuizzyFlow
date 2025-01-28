@@ -1,7 +1,7 @@
 import { Layout, Dropdown, Button, Menu, Drawer } from 'antd'
 import { useMediaQuery } from 'react-responsive'
 import { DownOutlined, MenuOutlined } from '@ant-design/icons'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const { Header } = Layout
 
@@ -67,6 +67,13 @@ const HeaderComponent: React.FC = () => {
     )
 
     const isMobile = useMediaQuery({ maxWidth: 768 })
+
+    // 使用 useEffect 监听 isMobile 的变化
+    useEffect(() => {
+        if (!isMobile && mobileMenuVisible) {
+            setMobileMenuVisible(false)
+        }
+    }, [isMobile, mobileMenuVisible])
 
     return (
         <Header className="bg-white px-8 shadow">
