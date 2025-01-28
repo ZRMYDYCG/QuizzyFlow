@@ -1,5 +1,6 @@
 import QuestionsCard from "../../../components/QuestionsCard.tsx"
 import { useState } from "react";
+import { useTitle } from "ahooks"
 
 const QuestionList = [
     {
@@ -166,6 +167,7 @@ const QuestionList = [
 ]
 
 const List = () => {
+    useTitle("一刻 • 问卷 | 问卷列表")
     const [questionList] = useState(QuestionList)
     return (
         <>
