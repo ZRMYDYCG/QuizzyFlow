@@ -1,10 +1,9 @@
-import List from './pages/List/index.tsx'
+import { RouterProvider } from "react-router-dom";
+import routerConfig from "./router"
 
 function App() {
   return (
-    <>
-        <List />
-    </>
+      <RouterProvider router={routerConfig}></RouterProvider>
   )
 }
 

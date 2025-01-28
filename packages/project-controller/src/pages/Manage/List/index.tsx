@@ -1,4 +1,4 @@
-import QuestionsCard from "../../components/QuestionsCard"
+import QuestionsCard from "../../../components/QuestionsCard.tsx"
 import { useState } from "react";
 
 const QuestionList = [
@@ -166,7 +166,7 @@ const QuestionList = [
 ]
 
 const List = () => {
-    const [questionList, setQuestionList] = useState(QuestionList)
+    const [questionList] = useState(QuestionList)
     return (
         <>
             {/*问卷列表头部*/}

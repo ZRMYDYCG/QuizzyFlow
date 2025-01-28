@@ -11,7 +11,7 @@ interface QuestionCardProps {
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, title, type, createdAt, answerCount, isStart, isPublish} = props;
+  const { _id, answerCount, isPublish} = props;
   return (
       <div className="mb-4 p-3 rounded-sm bg-white border border-gray-200 hover:shadow-sm transition duration-300 ease-in-out">
         <div className="flex items-center justify-between border-b pb-3">
