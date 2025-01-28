@@ -1,26 +1,26 @@
-import { Layout, Dropdown, Button, Menu, Drawer } from 'antd';
-import { useMediaQuery } from 'react-responsive';
-import { DownOutlined, MenuOutlined } from '@ant-design/icons';
-import React, { useState, useEffect, useRef } from 'react';
-import useScroll from '../../../../hooks/useScroll.ts';
+import { Layout, Dropdown, Button, Menu, Drawer } from 'antd'
+import { useMediaQuery } from 'react-responsive'
+import { DownOutlined, MenuOutlined } from '@ant-design/icons'
+import React, { useState, useEffect, useRef } from 'react'
+import useScroll from '../../../../hooks/useScroll.ts'
 
-const { Header } = Layout;
+const { Header } = Layout
 
 const HeaderComponent: React.FC = () => {
-    const [surveyMenuVisible, setSurveyMenuVisible] = useState(false);
-    const [serviceMenuVisible, setServiceMenuVisible] = useState(false);
-    const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-    const [headerBackground, setHeaderBackground] = useState('transparent');
+    const [surveyMenuVisible, setSurveyMenuVisible] = useState(false)
+    const [serviceMenuVisible, setServiceMenuVisible] = useState(false)
+    const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
+    const [headerBackground, setHeaderBackground] = useState('transparent')
 
-    const headerRef = useRef<HTMLDivElement | null>(null);
-    const documentRef = useRef<Document>(document);
+    const headerRef = useRef<HTMLDivElement | null>(null)
+    const documentRef = useRef<Document>(document)
 
     useScroll(documentRef, 30,
         () => {
-            setHeaderBackground('white');
+            setHeaderBackground('white')
         },
         () => {
-            setHeaderBackground('transparent');
+            setHeaderBackground('transparent')
         }
     );
 
@@ -31,7 +31,7 @@ const HeaderComponent: React.FC = () => {
         { label: '报告套餐', key: 'report' },
         { label: '在线测评', key: 'online-assessment' },
         { label: '在线投票', key: 'vote' }
-    ];
+    ]
 
     const serviceItems = [
         { label: '用户体系', key: 'user-system' },
@@ -39,11 +39,11 @@ const HeaderComponent: React.FC = () => {
         { label: '人才盘点', key: 'talent-assessment' },
         { label: '员工体验管理', key: 'employee-experience' },
         { label: '客户体验管理', key: 'customer-experience' },
-    ];
+    ]
 
     const renderMenu = (items: { label: string, key: string }[]) => (
         <Menu items={items} className="p-4 grid grid-cols-3 gap-4" />
-    );
+    )
 
     const renderMobileMenu = () => (
         <Menu
@@ -78,9 +78,9 @@ const HeaderComponent: React.FC = () => {
                 },
             ]}
         />
-    );
+    )
 
-    const isMobile = useMediaQuery({ maxWidth: 768 });
+    const isMobile = useMediaQuery({ maxWidth: 768 })
 
     // 使用 useEffect 监听 isMobile 的变化
     useEffect(() => {
@@ -148,7 +148,7 @@ const HeaderComponent: React.FC = () => {
                 {renderMobileMenu()}
             </Drawer>
         </Header>
-    );
-};
+    )
+}
 
-export default HeaderComponent;
+export default HeaderComponent
