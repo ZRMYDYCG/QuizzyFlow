@@ -1,7 +1,8 @@
 import QuestionsCard from "../../Manage/List/components/QuestionsCard.tsx"
-import { useState } from "react";
+import { useState } from "react"
 import { useTitle } from "ahooks"
-import {Empty, Typography} from "antd";
+import {Empty, Typography} from "antd"
+import ListSearch from "../../../components/list-search.tsx"
 
 const { Title } = Typography
 
@@ -68,7 +69,7 @@ const Star = () => {
                 </div>
                 <div className="mb-5">
                     {/*搜索框*/}
-                    搜索框
+                    <ListSearch />
                 </div>
             </div>
             {/*问卷列表主体*/}

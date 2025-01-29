@@ -2,6 +2,7 @@ import QuestionsCard from "./components/QuestionsCard.tsx"
 import { useState } from "react";
 import { useTitle } from "ahooks"
 import {Typography} from "antd";
+import ListSearch from "../../../components/list-search.tsx"
 
 const { Title } = Typography
 
@@ -181,7 +182,7 @@ const List = () => {
                 </div>
                 <div className="mb-5">
                     {/*搜索框*/}
-                    搜索框
+                    <ListSearch />
                 </div>
             </div>
             {/*问卷列表主体*/}

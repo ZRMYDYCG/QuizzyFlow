@@ -2,6 +2,7 @@ import React from "react"
 import {Empty, Typography, Table, Tag, Button, Space, Modal} from "antd"
 import { useTitle } from "ahooks"
 import { useState } from "react"
+import ListSearch from "../../../components/list-search.tsx"
 
 const { Title } = Typography
 const { confirm } = Modal
@@ -247,7 +248,7 @@ const Trash: React.FC =() => {
                 </div>
                 <div className="mb-5">
                     {/*搜索框*/}
-                    搜索框
+                    <ListSearch />
                 </div>
             </div>
             <div>
