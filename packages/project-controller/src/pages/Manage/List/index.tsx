@@ -1,6 +1,9 @@
 import QuestionsCard from "./components/QuestionsCard.tsx"
 import { useState } from "react";
 import { useTitle } from "ahooks"
+import {Typography} from "antd";
+
+const { Title } = Typography
 
 const QuestionList = [
     {
@@ -174,7 +177,7 @@ const List = () => {
             {/*问卷列表头部*/}
             <div className="flex justify-between items-center">
                 <div className="">
-                    <h1 className="font-bold text-xl">问卷列表</h1>
+                    <Title level={3}>问卷列表</Title>
                 </div>
                 <div className="mb-5">
                     {/*搜索框*/}

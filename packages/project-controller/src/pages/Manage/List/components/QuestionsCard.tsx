@@ -1,12 +1,14 @@
 import type { FC } from 'react'
-import { Button, Space, Divider, Tag } from 'antd'
+import {Button, Space, Divider, Tag, Popconfirm, Modal, message} from 'antd'
 import {EditOutlined, LineChartOutlined, CopyOutlined, DeleteOutlined, StarOutlined} from '@ant-design/icons'
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"
+
+const { confirm } = Modal
 
 interface QuestionCardProps {
-  _id: string;
-  title: string;
-  type: string;
+  _id: string
+  title: string
+  type: string
   createdAt: string;
   answerCount: number
   isStar: boolean
@@ -14,8 +16,26 @@ interface QuestionCardProps {
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, answerCount, isPublish, isStar} = props;
-  const navigate = useNavigate();
+  const { _id, answerCount, isPublish, isStar} = props
+  const navigate = useNavigate()
+
+  const duplicate = async (_id: string) => {
+    console.log(_id)
+   await message.success('复制成功')
+  }
+
+  const deleteConfirm = () => {
+    confirm({
+      title: '确认删除该问卷？',
+      content: '删除后将无法恢复，请谨慎操作！',
+      onOk() {
+        console.log('OK')
+      },
+      onCancel() {
+        console.log('Cancel')
+      },
+    })
+  }
 
   return (
       <div className="mb-4 p-3 rounded-sm bg-white border border-gray-200 hover:shadow-sm transition duration-300 ease-in-out">
@@ -45,11 +65,13 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
                 <StarOutlined />
                 {isStar ? '取消星标' : '标星'}
               </Button>
-              <Button type="text">
-                <CopyOutlined />
-                复制
-              </Button>
-              <Button type="text">
+              <Popconfirm title="确认复制该问卷？" okText="确认" cancelText="取消" onConfirm={() => { duplicate(_id) }}>
+                <Button type="text">
+                  <CopyOutlined />
+                  复制
+                </Button>
+              </Popconfirm>
+              <Button type="text" onClick={deleteConfirm}>
                 <DeleteOutlined />
                 删除
               </Button>
@@ -57,7 +79,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
           </div>
         </div>
       </div>
-  );
-};
+  )
+}
 
-export default QuestionsCard;
+export default QuestionsCard
