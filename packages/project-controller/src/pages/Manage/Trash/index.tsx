@@ -1,14 +1,15 @@
 import React from "react"
-import {Empty, Typography, Table, Tag} from "antd"
+import {Empty, Typography, Table, Tag, Button, Space, Modal} from "antd"
 import { useTitle } from "ahooks"
 import { useState } from "react"
 
 const { Title } = Typography
+const { confirm } = Modal
 
 const QuestionList = [
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '2566582',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -24,7 +25,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '256682',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -40,7 +41,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '2966582',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -56,7 +57,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '2559682',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -72,7 +73,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '255236582',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -88,7 +89,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '2554346582',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -104,7 +105,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '323966582',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -120,7 +121,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '2559323282',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -136,7 +137,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '255961122',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -152,7 +153,7 @@ const QuestionList = [
     },
     {
         /*问卷ID*/
-        _id: '255966582',
+        _id: '23542',
         /*问卷标题*/
         title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
         /*问卷类型 enum*/
@@ -172,7 +173,7 @@ const QuestionList = [
 const Trash: React.FC =() => {
     useTitle("一刻 • 问卷 | 回收站")
 
-    const [questionList, setQuestionList] = useState(QuestionList)
+    const [questionList] = useState(QuestionList)
     const tableColumns = [
         {
             title: '标题',
@@ -198,6 +199,45 @@ const Trash: React.FC =() => {
             // key: 'createdAt',
         }
     ]
+    const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+    const del = () => {
+        confirm({
+            title: '确认删除吗？',
+            content: '删除后将无法恢复，请谨慎操作！',
+            onOk() {
+                console.log('OK')
+            },
+            onCancel() {
+                console.log('Cancel')
+            }
+        })
+    }
+
+    const TableElement = <>
+        <Space>
+            <Button disabled={selectedIds.length === 0} type="primary" onClick={() => {
+                console.log(selectedIds)
+            }}>
+                恢复
+            </Button>
+            <Button disabled={selectedIds.length === 0} danger onClick={del}>
+                彻底删除
+            </Button>
+        </Space>
+        <Table
+            dataSource={questionList}
+            columns={tableColumns}
+            pagination={false}
+            rowKey={q => q._id}
+            rowSelection={{
+                type: "checkbox",
+                onChange: (selectedRowKeys) => {
+                    setSelectedIds(selectedRowKeys as string[])
+                }
+            }}
+        />
+    </>
 
     return (
         <>
@@ -212,7 +252,7 @@ const Trash: React.FC =() => {
             </div>
             <div>
                 {questionList.length === 0 && <Empty />}
-                {questionList.length > 0 && <Table dataSource={questionList} columns={tableColumns} pagination={false} /> }
+                {questionList.length > 0 &&  TableElement}
             </div>
         </>
     )
