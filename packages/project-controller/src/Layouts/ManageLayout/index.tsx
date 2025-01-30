@@ -5,7 +5,7 @@ import {Button, Space, Divider, message} from "antd"
 import { PlusOutlined, BranchesOutlined, StarOutlined, DeleteOutlined } from "@ant-design/icons"
 import { useNavigate, useLocation } from "react-router-dom"
 import { createQuestion } from "../../api/modules/question.ts"
-import {useState} from "react";
+import { useState } from "react";
 
 const ManageLayout = () => {
     const navigate = useNavigate()
@@ -39,9 +39,27 @@ const ManageLayout = () => {
                             新建问卷
                         </Button>
                         <Divider />
-                        <Button type={pathname.startsWith('/manage/list')? 'primary' : 'default'} size="large" icon={<BranchesOutlined />} onClick={() => navigate('/manage/list')}>我的问卷</Button>
-                        <Button type={pathname.startsWith('/manage/star')? 'primary' : 'default'} size="large" icon={<StarOutlined />} onClick={() => navigate('/manage/star')}>星标问卷</Button>
-                        <Button type={pathname.startsWith('/manage/trash')? 'primary' : 'default'} size="large" icon={<DeleteOutlined />} onClick={() => navigate('/manage/trash')}>回收站</Button>
+                        <Button
+                            type={pathname.startsWith('/manage/list')? 'primary' : 'default'}
+                            size="large" icon={<BranchesOutlined />}
+                            onClick={() => navigate('/manage/list')}
+                        >
+                            我的问卷
+                        </Button>
+                        <Button
+                            type={pathname.startsWith('/manage/star')? 'primary' : 'default'}
+                            size="large" icon={<StarOutlined />}
+                            onClick={() => navigate('/manage/star')}
+                        >
+                            星标问卷
+                        </Button>
+                        <Button
+                            type={pathname.startsWith('/manage/trash')? 'primary' : 'default'}
+                            size="large" icon={<DeleteOutlined />}
+                            onClick={() => navigate('/manage/trash')}
+                        >
+                            回收站
+                        </Button>
                     </Space>
                 </div>
                 <div className="flex-1 ml-[60px]">
