@@ -5,25 +5,23 @@ import {Button, Space, Divider, message} from "antd"
 import { PlusOutlined, BranchesOutlined, StarOutlined, DeleteOutlined } from "@ant-design/icons"
 import { useNavigate, useLocation } from "react-router-dom"
 import { createQuestion } from "../../api/modules/question.ts"
-import { useState } from "react";
+import { useRequest } from "ahooks"
 
 const ManageLayout = () => {
     const navigate = useNavigate()
     const { pathname } = useLocation()
-    const [loading, setLoading] = useState<boolean>(false)
 
-    const handleCreateClick = async () => {
-        setLoading(true)
-        const res = await createQuestion()
-        const { id } = res || {}
+    const { loading, run: handleCreate } = useRequest(createQuestion, {
+        manual: true,
+        onSuccess: async (res) => {
+            const { id } = res || {}
 
-        if(id) {
-            navigate(`/question/edit/${id}`)
-            message.success('创建成功')
-        }
-        setLoading(false)
-    }
-
+            if(id) {
+                navigate(`/question/edit/${id}`)
+                message.success('创建成功')
+            }
+        },
+    })
     return (
         <div>
             <Header />
@@ -33,7 +31,7 @@ const ManageLayout = () => {
                         <Button
                             type="primary"
                             size="large" icon={<PlusOutlined />}
-                            onClick={handleCreateClick}
+                            onClick={handleCreate}
                             disabled={loading}
                         >
                             新建问卷
