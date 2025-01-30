@@ -1,6 +1,6 @@
-import { useEffect, RefObject } from 'react';
+import { useEffect, RefObject } from 'react'
 
-type DocumentOrHTMLElement = Document | HTMLElement;
+type DocumentOrHTMLElement = Document | HTMLElement
 
 const useScroll = (
     ref: RefObject<DocumentOrHTMLElement>,
@@ -10,29 +10,29 @@ const useScroll = (
 ) => {
     useEffect(() => {
         const handleScroll = () => {
-            const node = ref.current;
+            const node = ref.current
             if (node) {
-                const scrollTop = node instanceof Document ? node.documentElement.scrollTop || node.body.scrollTop : node.scrollTop;
+                const scrollTop = node instanceof Document ? node.documentElement.scrollTop || node.body.scrollTop : node.scrollTop
                 if (scrollTop >= threshold) {
-                    callbackAboveThreshold();
+                    callbackAboveThreshold()
                 } else {
-                    callbackBelowThreshold();
+                    callbackBelowThreshold()
                 }
             }
         };
 
-        const node = ref.current;
+        const node = ref.current
         if (node) {
-            node.addEventListener('scroll', handleScroll);
+            node.addEventListener('scroll', handleScroll)
         }
 
         // 清理
         return () => {
             if (node) {
-                node.removeEventListener('scroll', handleScroll);
+                node.removeEventListener('scroll', handleScroll)
             }
-        };
-    }, [ref, threshold, callbackAboveThreshold, callbackBelowThreshold]);
-};
+        }
+    }, [ref, threshold, callbackAboveThreshold, callbackBelowThreshold])
+}
 
-export default useScroll;
+export default useScroll

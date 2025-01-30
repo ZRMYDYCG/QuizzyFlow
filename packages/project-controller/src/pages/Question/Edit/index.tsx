@@ -3,11 +3,11 @@ import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
 
 
 const EditQuestionPage: React.FC = () => {
-  const { loading, questionData }= useLoadQuestionData()
+  const { loading, data }= useLoadQuestionData()
 
   return (
       <div>
-        {loading ? <div>Loading...</div> : <div>{JSON.stringify(questionData)}</div>}
+        {loading ? <div>Loading...</div> : <div>{JSON.stringify(data)}</div>}
       </div>
   )
 }

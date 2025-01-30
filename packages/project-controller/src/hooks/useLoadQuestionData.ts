@@ -1,22 +1,18 @@
-import {useEffect, useState} from "react"
-import { useParams } from "react-router-dom"
-import { getQuestion } from "../api/modules/question.ts"
+import {useParams} from "react-router-dom"
+import {getQuestion} from "../api/modules/question.ts"
+import { useRequest } from "ahooks";
 
 const useLoadQuestionData = () => {
     const { id = '' } = useParams()
-    const [loading, setLoading] = useState(true)
-    const [questionData, setQuestionData] = useState({})
 
-    useEffect(() => {
-        async function getQuestionData() {
-            const question = await getQuestion(id)
-            setQuestionData(question)
-            setLoading(false)
-        }
-        getQuestionData()
-    }, [id])
+    const load = async () => {
+        return await getQuestion(id)
+    }
+    const { loading, data, error } = useRequest(load)
 
-    return { loading, questionData, id }
+    console.log(loading, data, error)
+
+    return { loading, data, error, id }
 }
 
 export default useLoadQuestionData
