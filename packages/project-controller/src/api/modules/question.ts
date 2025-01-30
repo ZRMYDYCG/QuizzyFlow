@@ -8,3 +8,7 @@ export async function getQuestion(id: string): Promise<ResDataType> {
 export async function createQuestion(): Promise<ResDataType> {
     return await instance.post(`/api/question`)
 }
+
+export async function getQuestionList(params: any): Promise<ResDataType> {
+    return await instance.get(`/api/question`, { params })
+}

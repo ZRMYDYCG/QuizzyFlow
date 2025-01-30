@@ -8,7 +8,6 @@ const { confirm } = Modal
 interface QuestionCardProps {
   _id: string
   title: string
-  type: string
   createdAt: string;
   answerCount: number
   isStar: boolean
@@ -16,7 +15,7 @@ interface QuestionCardProps {
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, answerCount, isPublish, isStar} = props
+  const { _id, answerCount, isPublish, isStar, createdAt, title } = props
   const navigate = useNavigate()
 
   const duplicate = async (_id: string) => {
@@ -41,14 +40,14 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
       <div className="mb-4 p-3 rounded-sm bg-white border border-gray-200 hover:shadow-sm transition duration-300 ease-in-out">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}>2023级电子科技小组项目组预备组员选拔 — WEB 前端开发</Link>
+            <Link to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}>{title}</Link>
             <div className="text-red-400 text-sm bg-red-300/20 rounded-sm px-1">考试</div>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-400">
             <div>ID: { _id }</div>
             { isPublish ? <Tag color="success">已发布</Tag> : <Tag>未发布</Tag> }
             <div>答卷: <span className="text-blue-500">{ answerCount }</span></div>
-            <div>2024/2/29 18:16</div>
+            <div>{ createdAt }</div>
           </div>
         </div>
         <Divider />
