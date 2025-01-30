@@ -4,21 +4,22 @@
 const Mock = require('mockjs')
 const Random = Mock.Random
 
-const getQuestionList = (len = 10, isDeleted = false) => {
+const getQuestionList = ( options = {} ) => {
+
+    const { len = 10, isDeleted = false,  isStar = false } = options
     const list = []
 
     for(let i = 0; i < len; i++) {
         list.push({
             _id: Random.id(),
             title: Random.ctitle(),
-            isPublished: Random.boolean(),
-            isStar: Random.boolean(),
+            isPublish: Random.boolean(),
+            isStar: isStar,
             answerCount: Random.integer(0, 100),
             createdAt: Random.datetime(),
-            isDeleted: Random.boolean()  // 软删除
+            isDeleted: isDeleted  // 软删除
         })
     }
-
     return list
 }
 

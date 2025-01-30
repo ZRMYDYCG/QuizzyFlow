@@ -40,11 +40,14 @@ module.exports = [
          * */
         url: '/api/question',
         method: 'get',
-        response() {
+        response(ctx) {
+            const isDeleted = ctx.query.isDeleted
+            const isStar = ctx.query.isPublish
+
             return {
                 errno: 0,
                 data: {
-                    list: getQuestionList(), // 当前页的列表
+                    list: getQuestionList({ isDeleted, isStar}), // 当前页的列表
                     total: 100, // 总数
                 }
             }

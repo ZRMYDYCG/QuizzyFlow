@@ -6,10 +6,10 @@ const app = new Koa();
 const router = new Router();
 
 // 增加响应时间
-async function getRes(fn) {
+async function getRes(fn, ctx) {
   return new Promise(resolve => {
     setTimeout(() => {
-      const res = fn();
+      const res = fn(ctx);
       resolve(res);
     }, 1000);
   });
@@ -24,7 +24,7 @@ mockList.forEach(item => {
 
   router[item.method](item.url, async (ctx) => {
     console.log(`Handling request for ${item.method.toUpperCase()} ${item.url}`);
-    ctx.body = await getRes(item.response);
+    ctx.body = await getRes(item.response, ctx);
   });
 });
 

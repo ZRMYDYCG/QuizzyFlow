@@ -1,180 +1,20 @@
 import React from "react"
-import {Empty, Typography, Table, Tag, Button, Space, Modal} from "antd"
+import {Empty, Typography, Table, Tag, Button, Space, Modal, Spin} from "antd"
 import { useTitle } from "ahooks"
 import { useState } from "react"
 import ListSearch from "../../../components/list-search.tsx"
+import useLoadQuestionListData from "../../../hooks/useLoadQuestionListData.ts";
 
 const { Title } = Typography
 const { confirm } = Modal
 
-const QuestionList = [
-    {
-        /*问卷ID*/
-        _id: '2566582',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '256682',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '2966582',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '2559682',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '255236582',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '2554346582',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '323966582',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '2559323282',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '255961122',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-    {
-        /*问卷ID*/
-        _id: '23542',
-        /*问卷标题*/
-        title: "2023级电子科技小组项目组预备组员选拔赛 —— Web前端开发",
-        /*问卷类型 enum*/
-        type: "考试",
-        /*问卷创建时间*/
-        createdAt: "2025-01-01 14:30:00",
-        /*答卷人数*/
-        answerCount: 8,
-        /*是否收藏*/
-        isStar: true,
-        /*是否发布*/
-        isPublish: true,
-    },
-
-]
-
 const Trash: React.FC =() => {
     useTitle("一刻 • 问卷 | 回收站")
 
-    const [questionList] = useState(QuestionList)
+    const { data = {}, loading } = useLoadQuestionListData({ isDeleted: true })
+    const { list = [] } = data
+
+
     const tableColumns = [
         {
             title: '标题',
@@ -227,10 +67,10 @@ const Trash: React.FC =() => {
             </Button>
         </Space>
         <Table
-            dataSource={questionList}
+            dataSource={list}
             columns={tableColumns}
             pagination={false}
-            rowKey={q => q._id}
+            rowKey={(q: any) => q._id}
             rowSelection={{
                 type: "checkbox",
                 onChange: (selectedRowKeys) => {
@@ -252,8 +92,9 @@ const Trash: React.FC =() => {
                 </div>
             </div>
             <div>
-                {questionList.length === 0 && <Empty />}
-                {questionList.length > 0 &&  TableElement}
+                {loading && <div className="flex justify-center"><Spin /></div>}
+                {!loading && list.length === 0 && <Empty />}
+                {list.length > 0 &&  TableElement}
             </div>
         </>
     )
