@@ -6,8 +6,10 @@ const Random = Mock.Random
 
 const getQuestionList = ( options = {} ) => {
 
-    const { len = 10, isDeleted = false,  isStar = false } = options
+    const { len = 10, isDeleted = false,  isStar = false, page = 1 } = options
     const list = []
+
+    console.log(options)
 
     for(let i = 0; i < len; i++) {
         list.push({

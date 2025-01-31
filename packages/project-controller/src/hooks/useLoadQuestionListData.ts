@@ -6,6 +6,8 @@ interface Options {
     keyword: string
     isStar: boolean
     isDeleted: boolean
+    page: number
+    pageSize: number
 }
 
 function useLoadQuestionListData(options: Partial<Options> = {}) {
@@ -14,8 +16,14 @@ function useLoadQuestionListData(options: Partial<Options> = {}) {
 
     const {data, loading, error} = useRequest(
         async () => {
+            console.log(searchParams)
         const  keyword = searchParams.get('keyword')  || ''
-        return await getQuestionList({keyword, isStar, isDeleted})
+        const page = parseInt(searchParams.get('page')  || '')  || 1
+        const pageSize = parseInt(searchParams.get('pageSize') || '') || 10
+
+        console.log('page', page, 'pageSize', pageSize, 'keyword', keyword, 'isStar', isStar, 'isDeleted', isDeleted)
+
+        return await getQuestionList({keyword, isStar, isDeleted, page, pageSize})
     }, {refreshDeps: [searchParams]})
 
     return {data, loading, error}

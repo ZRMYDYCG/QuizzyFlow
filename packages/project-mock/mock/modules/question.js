@@ -43,11 +43,15 @@ module.exports = [
         response(ctx) {
             const isDeleted = ctx.query.isDeleted
             const isStar = ctx.query.isPublish
+            const page = ctx.query.page || 1
+            const pageSize = ctx.query.pageSize || 10
+
+            console.log(isDeleted, isStar, page, pageSize)
 
             return {
                 errno: 0,
                 data: {
-                    list: getQuestionList({ isDeleted, isStar}), // 当前页的列表
+                    list: getQuestionList({ isDeleted, isStar, page, len: pageSize }), // 当前页的列表
                     total: 100, // 总数
                 }
             }

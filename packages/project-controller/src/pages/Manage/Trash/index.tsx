@@ -4,6 +4,7 @@ import { useTitle } from "ahooks"
 import { useState } from "react"
 import ListSearch from "../../../components/list-search.tsx"
 import useLoadQuestionListData from "../../../hooks/useLoadQuestionListData.ts";
+import ListPage from "../../../components/list-page.tsx"
 
 const { Title } = Typography
 const { confirm } = Modal
@@ -12,7 +13,7 @@ const Trash: React.FC =() => {
     useTitle("一刻 • 问卷 | 回收站")
 
     const { data = {}, loading } = useLoadQuestionListData({ isDeleted: true })
-    const { list = [] } = data
+    const { list = [], total = 0 } = data
 
 
     const tableColumns = [
@@ -56,7 +57,7 @@ const Trash: React.FC =() => {
     }
 
     const TableElement = <>
-        <Space>
+        <Space className="mb-5">
             <Button disabled={selectedIds.length === 0} type="primary" onClick={() => {
                 console.log(selectedIds)
             }}>
@@ -95,6 +96,9 @@ const Trash: React.FC =() => {
                 {loading && <div className="flex justify-center"><Spin /></div>}
                 {!loading && list.length === 0 && <Empty />}
                 {list.length > 0 &&  TableElement}
+            </div>
+            <div className="flex justify-center mt-5">
+                <ListPage total={total} />
             </div>
         </>
     )

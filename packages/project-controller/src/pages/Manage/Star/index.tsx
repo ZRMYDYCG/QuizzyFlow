@@ -3,6 +3,7 @@ import {Empty, Spin, Typography} from "antd"
 import ListSearch from "../../../components/list-search.tsx"
 import QuestionsCard from "../../Manage/List/components/QuestionsCard.tsx"
 import useLoadQuestionListData from "../../../hooks/useLoadQuestionListData.ts"
+import ListPage from "../../../components/list-page.tsx"
 
 const { Title } = Typography
 
@@ -10,7 +11,7 @@ const Star = () => {
     useTitle("一刻 • 问卷 | 星标问卷")
 
     const { data = {}, loading } = useLoadQuestionListData({ isStar: true })
-    const { list = [] } = data
+    const { list = [], total = 0 } = data
 
     return (
         <>
@@ -38,7 +39,8 @@ const Star = () => {
                 })}
             </div>
             {/*问卷列表底部*/}
-            <div className="text-center">
+            <div className="flex justify-center mt-5">
+                <ListPage total={total} />
             </div>
         </>
     )

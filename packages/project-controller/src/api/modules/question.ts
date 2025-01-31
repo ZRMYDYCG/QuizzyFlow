@@ -5,6 +5,8 @@ interface SearchOption {
     keyword: string
     isStar: boolean
     isDeleted: boolean
+    page: number // 第几页
+    pageSize: number // 每页多少条
 }
 
 export async function getQuestion(id: string): Promise<ResDataType> {
