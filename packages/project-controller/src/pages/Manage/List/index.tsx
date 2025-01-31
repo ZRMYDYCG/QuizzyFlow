@@ -1,9 +1,10 @@
 import QuestionsCard from "./components/QuestionsCard.tsx"
-import { useTitle, useDebounceFn } from "ahooks"
-import {Spin, Typography} from "antd";
+import {useDebounceFn, useRequest, useTitle} from "ahooks"
+import {getQuestionList} from "../../../api/modules/question.ts"
+import {Empty, Spin, Typography} from "antd";
 import ListSearch from "../../../components/list-search.tsx"
-import {useEffect, useState} from "react"
-import { useSearchParams } from "react-router-dom"
+import {useEffect, useRef, useState} from "react"
+import {useSearchParams} from "react-router-dom"
 
 const { Title } = Typography
 
@@ -12,19 +13,41 @@ const List = () => {
     const [searchParams] = useSearchParams()
 
     const [list, setList] = useState([]) // 全部的列表数据
-    const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
     const haveMoreData = total > list.length
 
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    // 真正加载
+    const {run: load, loading } = useRequest(async () => {
+        return await getQuestionList({page, pageSize: 10, keyword: searchParams.get('keyword') || ''})
+    }, {
+        manual: true,
+        onSuccess(result) {
+            const { list: newList = [], total = 0 } = result
+            setList(list.concat(newList))
+            setTotal(total)
+            setPage(page + 1)
+        }
+    })
+
+    // 尝试加载
     const {run: tryLoadMore} = useDebounceFn(() => {
-        console.log("tryLoadMore")
+        const container = containerRef.current
+        if(container === null) return
+        const domRect = container.getBoundingClientRect()
+        if(domRect === null) return
+        const { bottom } = domRect
+        if(bottom <= document.documentElement.clientHeight) {
+            load()
+        }
     }, { wait: 500 })
 
     // 页面加载或searchParams变化时, 获取问卷列表数据
     useEffect(() => {
         tryLoadMore()
-    }, []);
+    }, [])
 
     // 页面滚动时, 尝试加载更多数据
     useEffect(() => {
@@ -37,6 +60,13 @@ const List = () => {
             window.removeEventListener("scroll", tryLoadMore)
         }
     }, [searchParams])
+
+    const LoadingMoreContentElement = () => {
+        if(loading) return <Spin />
+        if(total === 0) return <Empty description="暂无数据" />
+        if(!haveMoreData) return <>没有更多了</>
+        return <>加载中...</>
+    }
 
     return (
         <>
@@ -52,11 +82,7 @@ const List = () => {
             </div>
             {/*问卷列表主体*/}
             <div>
-                <div style={{height: '2000px'}}></div>
-                {loading && <div className="flex justify-center">
-                    <Spin />
-                </div>}
-                {(!loading && list.length > 0) &&
+                { list.length > 0 &&
                     list.map((question: any) => {
                         const { _id } = question
                         return (
@@ -66,6 +92,9 @@ const List = () => {
             </div>
             {/*问卷列表底部*/}
             <div className="text-center">
+                <div ref={containerRef}>
+                    {LoadingMoreContentElement()}S
+                </div>
             </div>
         </>
     )
