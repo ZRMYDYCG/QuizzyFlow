@@ -3,7 +3,7 @@ import {useDebounceFn, useRequest, useTitle} from "ahooks"
 import {getQuestionList} from "../../../api/modules/question.ts"
 import {Empty, Spin, Typography} from "antd";
 import ListSearch from "../../../components/list-search.tsx"
-import {useEffect, useRef, useState} from "react"
+import {useEffect, useRef, useState, useMemo} from "react"
 import {useSearchParams} from "react-router-dom"
 
 const { Title } = Typography
@@ -73,11 +73,11 @@ const List = () => {
         setList([])
     }, [keyword])
 
-    const LoadingMoreContentElement = () => {
+    const LoadingMoreContentElement = useMemo(() => {
         if(!started || loading) return <Spin />
         if(total === 0) return <Empty description="暂无数据" />
         if(!haveMoreData) return <>--没有更多了--</>
-    }
+    }, [started, loading, haveMoreData])
 
     return (
         <>
@@ -104,7 +104,7 @@ const List = () => {
             {/*问卷列表底部*/}
             <div className="text-center">
                 <div ref={containerRef}>
-                    {LoadingMoreContentElement()}
+                    {LoadingMoreContentElement}
                 </div>
             </div>
         </>
