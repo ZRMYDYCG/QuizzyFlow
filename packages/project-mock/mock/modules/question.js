@@ -83,5 +83,17 @@ module.exports = [
                 }
             }
         }
+    },
+    {
+        /**
+         * @api {delete} /api/question/:id 批量删除问卷
+         * */
+        url: '/api/question',
+        method: 'delete',
+        response() {
+            return {
+                errno: 0
+            }
+        }
     }
 ]

@@ -28,3 +28,8 @@ export async function updateQuestion(id: string, data: { [key: string]: any }): 
 export async function duplicateQuestion(id: string): Promise<ResDataType> {
     return await instance.post(`/api/question/duplicate/${id}`)
 }
+
+// 批量删除
+export async function deleteQuestion(ids: string[]): Promise<ResDataType> {
+    return await instance.delete('/api/question', { data: { ids } })
+}

@@ -7,6 +7,7 @@ import useLoadQuestionListData from "../../../hooks/useLoadQuestionListData.ts";
 import ListPage from "../../../components/list-page.tsx"
 import { updateQuestion } from "../../../api/modules/question.ts"
 import { useRequest } from "ahooks"
+import { deleteQuestion } from "../../../api/modules/question.ts"
 
 const { Title } = Typography
 const { confirm } = Modal
@@ -56,6 +57,7 @@ const Trash: React.FC =() => {
         onSuccess: async () => {
             message.success('恢复成功')
             refresh() // 手动刷新列表
+            setSelectedIds([])
         }
     })
 
@@ -63,14 +65,24 @@ const Trash: React.FC =() => {
         confirm({
             title: '确认删除吗？',
             content: '删除后将无法恢复，请谨慎操作！',
-            onOk() {
-                console.log('OK')
-            },
+            onOk: deleteQuestions,
             onCancel() {
                 console.log('Cancel')
             }
         })
     }
+
+    // 批量删除
+    const { run: deleteQuestions } = useRequest(async () => {
+        return await deleteQuestion(selectedIds)
+    }, {
+        manual: true,
+        onSuccess: async () => {
+            message.success('删除成功')
+            refresh()
+            setSelectedIds([])
+        }
+    })
 
     const TableElement = <>
         <Space className="mb-5">
