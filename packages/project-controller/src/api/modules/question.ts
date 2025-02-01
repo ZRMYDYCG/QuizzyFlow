@@ -20,3 +20,7 @@ export async function createQuestion(): Promise<ResDataType> {
 export async function getQuestionList(opt: Partial<SearchOption> = {}): Promise<ResDataType> {
     return await instance.get(`/api/question`, { params: opt })
 }
+
+export async function updateQuestion(id: string, data: { [key: string]: any }): Promise<ResDataType> {
+    return await instance.patch(`/api/question/${id}`, data)
+}
