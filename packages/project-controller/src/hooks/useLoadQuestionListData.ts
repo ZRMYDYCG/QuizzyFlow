@@ -14,9 +14,8 @@ function useLoadQuestionListData(options: Partial<Options> = {}) {
     const { isStar = false, isDeleted = false } = options
     const [searchParams] = useSearchParams()
 
-    const {data, loading, error} = useRequest(
+    const {data, loading, error, refresh} = useRequest(
         async () => {
-            console.log(searchParams)
         const  keyword = searchParams.get('keyword')  || ''
         const page = parseInt(searchParams.get('page')  || '')  || 1
         const pageSize = parseInt(searchParams.get('pageSize') || '') || 10
@@ -26,7 +25,7 @@ function useLoadQuestionListData(options: Partial<Options> = {}) {
         return await getQuestionList({keyword, isStar, isDeleted, page, pageSize})
     }, {refreshDeps: [searchParams]})
 
-    return {data, loading, error}
+    return {data, loading, error, refresh}
 }
 
 export default useLoadQuestionListData

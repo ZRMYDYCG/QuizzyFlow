@@ -1,10 +1,12 @@
 import React from "react"
-import {Empty, Typography, Table, Tag, Button, Space, Modal, Spin} from "antd"
+import {Empty, Typography, Table, Tag, Button, Space, Modal, Spin, message} from "antd"
 import { useTitle } from "ahooks"
 import { useState } from "react"
 import ListSearch from "../../../components/list-search.tsx"
 import useLoadQuestionListData from "../../../hooks/useLoadQuestionListData.ts";
 import ListPage from "../../../components/list-page.tsx"
+import { updateQuestion } from "../../../api/modules/question.ts"
+import { useRequest } from "ahooks"
 
 const { Title } = Typography
 const { confirm } = Modal
@@ -12,7 +14,7 @@ const { confirm } = Modal
 const Trash: React.FC =() => {
     useTitle("一刻 • 问卷 | 回收站")
 
-    const { data = {}, loading } = useLoadQuestionListData({ isDeleted: true })
+    const { data = {}, loading, refresh } = useLoadQuestionListData({ isDeleted: true })
     const { list = [], total = 0 } = data
 
 
@@ -43,6 +45,20 @@ const Trash: React.FC =() => {
     ]
     const [selectedIds, setSelectedIds] = useState<string[]>([])
 
+    // 恢复删除
+    const { run: restore } = useRequest(async () => {
+        for await (const id of selectedIds) {
+            await updateQuestion(id, { isDeleted: false })
+        }
+    }, {
+        manual: true,
+        debounceWait: 500, // 防抖
+        onSuccess: async () => {
+            message.success('恢复成功')
+            refresh() // 手动刷新列表
+        }
+    })
+
     const del = () => {
         confirm({
             title: '确认删除吗？',
@@ -58,9 +74,7 @@ const Trash: React.FC =() => {
 
     const TableElement = <>
         <Space className="mb-5">
-            <Button disabled={selectedIds.length === 0} type="primary" onClick={() => {
-                console.log(selectedIds)
-            }}>
+            <Button type="primary" onClick={restore} disabled={selectedIds.length === 0}  >
                 恢复
             </Button>
             <Button disabled={selectedIds.length === 0} danger onClick={del}>
