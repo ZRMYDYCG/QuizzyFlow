@@ -1,12 +1,27 @@
-import {Form, Typography, Input, Space, Button} from 'antd'
-import { Link } from 'react-router-dom'
+import {Form, Typography, Input, Space, Button,message} from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
+import { registerUser } from "../../api/modules/user.ts"
+import { useRequest } from "ahooks"
 
 const { Title } = Typography
 
 const Register = () => {
-    const onFinish = (values: never) => {
-        console.log(values)
+    const navigate = useNavigate()
+
+    const onFinish = (values: any) => {
+        register(values)
     }
+
+    const { run: register } = useRequest(async (values: any) => {
+        const { username, password, nickname } = values
+        await registerUser({ username, password, nickname })
+    }, {
+        manual: true,
+        onSuccess: async () => {
+            message.success('注册成功，请登录')
+            navigate('/login')
+        }
+    })
 
     return (
         <div className="h-[calc(100vh-60px-71px)] flex justify-center items-center flex-col">

@@ -1,22 +1,27 @@
-import {Form, Typography, Input, Space, Button, Checkbox} from 'antd'
-import { Link } from 'react-router-dom'
-import { useEffect } from "react"
-import axios from "axios"
+import {Form, Typography, Input, Space, Button, Checkbox,message} from 'antd'
+import { Link, useNavigate } from 'react-router-dom'
+import { loginUser } from "../../api/modules/user.ts"
+import { useRequest } from "ahooks"
 
 const { Title } = Typography
 
 const Register = () => {
+    const navigate = useNavigate()
     const onFinish = (values: never) => {
-        console.log(values)
+        login(values)
     }
 
-    useEffect(() => {
-        axios.get('/api/question/1').then(res => {
-            console.log(res.data)
-        }).catch(err => {
-            console.log(err)
-        })
-    }, [])
+    const { run: login } = useRequest(async (values: any) => {
+        return await loginUser(values)
+    }, {
+        manual: true,
+        onSuccess: async (result: any) => {
+            const { token = '' } = result
+            localStorage.setItem('token', token)
+            message.success('登录成功')
+            navigate('/manage/list')
+        }
+    })
 
     return (
         <div className="h-[calc(100vh-60px-71px)] flex justify-center items-center flex-col">
@@ -37,7 +42,7 @@ const Register = () => {
                     </Form.Item>
                     <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
                         <Space>
-                            <Button type="primary" htmlType="submit">登录</Button>
+                            <Button type="primary" htmlType="submit" onClick={onFinish}>登录</Button>
                             <Link to="/login">注册新用户</Link>
                         </Space>
                     </Form.Item>
