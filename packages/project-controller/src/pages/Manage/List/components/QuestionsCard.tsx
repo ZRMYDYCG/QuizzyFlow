@@ -2,7 +2,7 @@ import {FC, useState} from 'react'
 import {Button, Space, Divider, Tag, Popconfirm, Modal, message} from 'antd'
 import {EditOutlined, LineChartOutlined, CopyOutlined, DeleteOutlined, StarOutlined} from '@ant-design/icons'
 import { useNavigate, Link } from "react-router-dom"
-import { updateQuestion } from "../../../../api/modules/question.ts"
+import { updateQuestion, duplicateQuestion } from "../../../../api/modules/question.ts"
 import { useRequest } from "ahooks"
 
 const { confirm } = Modal
@@ -20,10 +20,15 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   const { _id, answerCount, isPublish, isStar, createdAt, title } = props
   const navigate = useNavigate()
 
-  const duplicate = async (_id: string) => {
-    console.log(_id)
-   await message.success('复制成功')
-  }
+  const { loading: duplicateLoading, run: duplicate } = useRequest(async () => {
+    return await duplicateQuestion(_id)
+  }, {
+    manual: true,
+    onSuccess: async (res: any) => {
+      await message.success('复制成功')
+      navigate(`/question/edit/${res._id}`)
+    }
+  })
 
   const [isStarState, setIsStarState] = useState(isStar)
   const { run: changeStar, loading: changeStarLoading } = useRequest(async () => {
@@ -77,7 +82,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
                 <StarOutlined />
                 {isStarState ? '取消星标' : '标星'}
               </Button>
-              <Popconfirm title="确认复制该问卷？" okText="确认" cancelText="取消" onConfirm={() => { duplicate(_id) }}>
+              <Popconfirm title="确认复制该问卷？" okText="确认" cancelText="取消" onConfirm={duplicate} disabled={duplicateLoading}>
                 <Button type="text">
                   <CopyOutlined />
                   复制

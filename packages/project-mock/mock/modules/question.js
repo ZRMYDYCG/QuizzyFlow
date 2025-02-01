@@ -68,5 +68,20 @@ module.exports = [
                 errno: 0,
             }
         }
+    },
+    {
+        /**
+         *  @api {post} /api/question/duplicate/:id 复制问卷
+         * */
+        url: '/api/question/duplicate/:id',
+        method: 'post',
+        response() {
+            return {
+                errno: 0,
+                data: {
+                    id: Random.id(),
+                }
+            }
+        }
     }
 ]

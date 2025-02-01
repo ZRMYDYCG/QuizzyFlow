@@ -24,3 +24,7 @@ export async function getQuestionList(opt: Partial<SearchOption> = {}): Promise<
 export async function updateQuestion(id: string, data: { [key: string]: any }): Promise<ResDataType> {
     return await instance.patch(`/api/question/${id}`, data)
 }
+
+export async function duplicateQuestion(id: string): Promise<ResDataType> {
+    return await instance.post(`/api/question/duplicate/${id}`)
+}
