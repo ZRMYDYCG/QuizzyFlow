@@ -41,11 +41,22 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
     }
   })
 
+  // 删除
+  const { loading: deleteLoading, run: del } = useRequest(async () => {
+    await updateQuestion(_id, { isDelete: true })
+  }, {
+    manual: true,
+    onSuccess: async () => {
+      await message.success('删除成功')
+    }
+  })
+
   const deleteConfirm = () => {
     confirm({
       title: '确认删除该问卷？',
       content: '删除后将无法恢复，请谨慎操作！',
       onOk() {
+        del()
         console.log('OK')
       },
       onCancel() {
@@ -88,7 +99,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
                   复制
                 </Button>
               </Popconfirm>
-              <Button type="text" onClick={deleteConfirm}>
+              <Button type="text" onClick={deleteConfirm} disabled={deleteLoading}>
                 <DeleteOutlined />
                 删除
               </Button>
