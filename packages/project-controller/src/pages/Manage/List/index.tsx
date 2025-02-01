@@ -11,17 +11,20 @@ const { Title } = Typography
 const List = () => {
     useTitle("一刻 • 问卷 | 问卷列表")
     const [searchParams] = useSearchParams()
+    const keyword = searchParams.get('keyword') || ''
 
+    const [started, setStarted] = useState(false) // 是否已经开始加载（处理防抖的延迟时间）
     const [list, setList] = useState([]) // 全部的列表数据
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
     const haveMoreData = total > list.length
 
+
     const containerRef = useRef<HTMLDivElement>(null)
 
     // 真正加载
     const {run: load, loading } = useRequest(async () => {
-        return await getQuestionList({page, pageSize: 10, keyword: searchParams.get('keyword') || ''})
+        return await getQuestionList({page, pageSize: 10, keyword})
     }, {
         manual: true,
         onSuccess(result) {
@@ -41,13 +44,14 @@ const List = () => {
         const { bottom } = domRect
         if(bottom <= document.documentElement.clientHeight) {
             load()
+            setStarted(true)
         }
     }, { wait: 500 })
 
     // 页面加载或searchParams变化时, 获取问卷列表数据
     useEffect(() => {
         tryLoadMore()
-    }, [])
+    }, [searchParams])
 
     // 页面滚动时, 尝试加载更多数据
     useEffect(() => {
@@ -61,11 +65,18 @@ const List = () => {
         }
     }, [searchParams])
 
+    // 重置
+    useEffect(() => {
+        setStarted(false)
+        setPage(1)
+        setTotal(0)
+        setList([])
+    }, [keyword])
+
     const LoadingMoreContentElement = () => {
-        if(loading) return <Spin />
+        if(!started || loading) return <Spin />
         if(total === 0) return <Empty description="暂无数据" />
-        if(!haveMoreData) return <>没有更多了</>
-        return <>加载中...</>
+        if(!haveMoreData) return <>--没有更多了--</>
     }
 
     return (
@@ -93,7 +104,7 @@ const List = () => {
             {/*问卷列表底部*/}
             <div className="text-center">
                 <div ref={containerRef}>
-                    {LoadingMoreContentElement()}S
+                    {LoadingMoreContentElement()}
                 </div>
             </div>
         </>
