@@ -1,12 +1,20 @@
 import { Outlet } from "react-router-dom";
+import useLoadUserData from "../../hooks/useLoadUserData.ts";
+import useNavPage from "../../hooks/useNavPage.ts";
+import {Spin} from "antd";
 
 const QuestionLayout = () => {
+    const { waitingUserData } = useLoadUserData()
+    useNavPage(waitingUserData)
     return (
-        <div className="flex py-[24px] w-[1200px] m-auto">
-            <div className="w-[120px]">QuestionLayout left</div>
-            <div className="flex-1 ml-[60px]">
+        <div className="h-screen">
+            {waitingUserData ? (
+                <div style={{ textAlign: "center", marginTop: "60px" }}>
+                    <Spin />
+                </div>
+            ) : (
                 <Outlet />
-            </div>
+            )}
         </div>
     )
 }
