@@ -15,6 +15,8 @@ module.exports = [
                     nickname: Random.cname(),
 
                 }
+                // errno: 1000,
+                // message: '获取用户信息失败'
             }
         }
     },

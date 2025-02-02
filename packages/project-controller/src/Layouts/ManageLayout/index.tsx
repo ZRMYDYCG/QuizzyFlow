@@ -1,15 +1,19 @@
 import { Outlet } from "react-router-dom"
 import Header from "./components/Header"
 // import Footer from "./components/Footer"
+import useNavPage from "../../hooks/useNavPage.ts"
 import {Button, Space, Divider, message} from "antd"
 import { PlusOutlined, BranchesOutlined, StarOutlined, DeleteOutlined } from "@ant-design/icons"
 import { useNavigate, useLocation } from "react-router-dom"
 import { createQuestion } from "../../api/modules/question.ts"
 import { useRequest } from "ahooks"
+import useLoadUserData from "../../hooks/useLoadUserData.ts"
 
 const ManageLayout = () => {
     const navigate = useNavigate()
     const { pathname } = useLocation()
+    const { waitingUserData } = useLoadUserData()
+    useNavPage(waitingUserData)
 
     const { loading, run: handleCreate } = useRequest(createQuestion, {
         manual: true,
