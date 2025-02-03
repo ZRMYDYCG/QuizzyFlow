@@ -1,5 +1,5 @@
 import React from'react'
-
+import EditCanvas from "../components/edit-canvas.tsx";
 
 const EditQuestionPage: React.FC = () => {
 
@@ -11,7 +11,9 @@ const EditQuestionPage: React.FC = () => {
                   <div className="w-[285px] bg-white px-[12px]">Left</div>
                   <div className="flex-1 flex justify-center items-center">
                       <div className="w-[400px] h-[712px] bg-white overflow-auto shadow-md">
-                          <div className="h-[800px]"></div>
+                          <div className="h-[800px]">
+                              <EditCanvas />
+                          </div>
                       </div>
                   </div>
                   <div className="w-[300px] bg-white px-[12px]">Right</div>

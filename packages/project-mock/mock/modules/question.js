@@ -15,6 +15,40 @@ module.exports = [
                 data: {
                     id: Random.id(),
                     title: Random.ctitle(),
+                    // 该问卷的组件列表
+                    componentList: [
+                        // Title
+                        {
+                            id: Random.id(),
+                            type: 'question-title',
+                            title: '标题',
+                            props: {
+                                text: '个人信息调研问卷',
+                                level: 1,
+                                isCenter: false,
+                            }
+                        },
+                        // Input
+                        {
+                            id: Random.id(),
+                            type: 'question-input',
+                            title: '输入框',
+                            props: {
+                                title: '你的姓名',
+                                placeholder: '请输入你的姓名...',
+                            }
+                        },
+                        // Input
+                        {
+                            id: Random.id(),
+                            type: 'question-input',
+                            title: '输入框',
+                            props: {
+                                title: '你的电话号码',
+                                placeholder: '请输入你的电话号码...',
+                            }
+                        }
+                    ]
                 },
             };
         },
