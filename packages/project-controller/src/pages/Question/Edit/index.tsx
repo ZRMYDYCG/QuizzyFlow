@@ -1,7 +1,10 @@
 import React from'react'
 import EditCanvas from "../components/edit-canvas.tsx";
+import useLoadQuestionData from "../../../hooks/useLoadQuestionData.ts"
 
 const EditQuestionPage: React.FC = () => {
+
+  const { loading } = useLoadQuestionData()
 
   return (
       <div className="flex flex-col h-screen bg-[#f0f2f5]">
@@ -12,7 +15,7 @@ const EditQuestionPage: React.FC = () => {
                   <div className="flex-1 flex justify-center items-center">
                       <div className="w-[400px] h-[712px] bg-white overflow-auto shadow-md">
                           <div className="h-[800px]">
-                              <EditCanvas />
+                              <EditCanvas loading={loading} />
                           </div>
                       </div>
                   </div>
