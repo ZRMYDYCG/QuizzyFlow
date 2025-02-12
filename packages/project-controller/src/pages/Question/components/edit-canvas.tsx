@@ -27,7 +27,8 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
 
     const { componentList = [], selectedId } = useGetComponentInfo()
 
-    function handleClick(id: string) {
+    function handleClick(event: React.MouseEvent,id: string) {
+        event.stopPropagation()
         dispatch(changeSelectedId(id))
     }
 
@@ -42,7 +43,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
                 const isActive = fe_id === selectedId
                 return <div 
                     key={fe_id} 
-                    onClick={() => handleClick(fe_id)} 
+                    onClick={(e) => handleClick(e, fe_id)} 
                     className={`m-[12px] border p-[12px] rounded-[8px] bg-white 
                     ${isActive ? 'border-blue-500' : 'border-white hover:border-blue-500'}
                     cursor-pointer`}
