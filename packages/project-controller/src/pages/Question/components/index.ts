@@ -21,6 +21,18 @@ const componentConfigList: ComponentConfigType[] = [
     QuestionTitleConfig,
 ]
 
+// 组件进行分组
+export const componentConfigGroup = [
+    {
+        groupName: "文本显示",
+        components: [QuestionTitleConfig]
+    },
+    {
+        groupName: "用户输入",
+        components: [QuestionInputConfig]
+    }
+]
+
 export function getComponentConfigByType(type: string) {
     return componentConfigList.find(config => config.type === type) as ComponentConfigType
 }
