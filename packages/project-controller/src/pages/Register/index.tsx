@@ -28,7 +28,7 @@ const Register = () => {
             <div className="flex items-center">
                 <img className="w-[80px] h-[80px] mb-[20px]" src="/public/vite.svg" alt="register" />
                 <Title level={4}>注册</Title>
-            </div>
+            </div>  
             <div>
                 <Form labelCol={{ span: 6 }} wrapperCol={{ span: 16 }} onFinish={onFinish}>
                     <Form.Item label="用户名" name="username" rules={[{ required: true, message: '请输入用户名' }, { min: 5, max: 20, message: '用户名长度至少为 5' }]}>

@@ -5,7 +5,6 @@ import { getUserInfo } from '../api/modules/user.ts'
 import { useDispatch } from "react-redux";
 import {loginReducer} from "../store/modules/user.ts";
 
-
 const useLoadUserData = () => {
     const [waitingUserData, setWaitingUserData] = useState(true)
     const dispatch = useDispatch()
