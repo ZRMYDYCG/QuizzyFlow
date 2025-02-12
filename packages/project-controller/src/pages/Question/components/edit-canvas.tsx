@@ -1,11 +1,23 @@
 import React from "react"
 import { Spin } from "antd"
-import QuestionTitle from "./question-title/index.tsx"
-import QuestionInput from "./question-input/index.tsx"
 import useGetComponentInfo from "../../../hooks/useGetComponentInfo.ts"
+import { QuestionComponentType } from "../../../store/modules/question-component.ts"
+import { getComponentConfigByType } from "./index.ts"
 
 interface IPopsEditCanvas {
     loading: boolean
+}
+
+function genComponent(componentInfo: QuestionComponentType) {
+    const { type, props } = componentInfo
+    const componentConfig  = getComponentConfigByType(type)
+    if(componentConfig === null) return null
+
+    const { component: Component } = componentConfig
+
+    return <>
+        <Component {...props} />
+    </>
 }
 
 const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
@@ -15,20 +27,17 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
 
     const { componentList } = useGetComponentInfo()
 
-    console.log("componentList", componentList)
 
     return (
         <div>
-            <div className="m-[12px] border p-[12px] rounded-[8px] bg-white border-white hover:border-blue-500 cursor-pointer">
-                <div className="pointer-events-none">
-                    <QuestionTitle />
+            {componentList.map((item: QuestionComponentType) => {
+                const { fe_id } = item 
+                return <div key={fe_id} className="m-[12px] border p-[12px] rounded-[8px] bg-white border-white hover:border-blue-500 cursor-pointer">
+                    <div className="pointer-events-none">
+                        {genComponent(item)}
+                    </div>
                 </div>
-            </div>
-            <div className="m-[12px] border p-[12px] rounded-[8px] bg-white border-white hover:border-blue-500 cursor-pointer">
-                <div className="pointer-events-none">
-                    <QuestionInput />
-                </div>
-            </div>
+            })}
         </div>
     )
 }

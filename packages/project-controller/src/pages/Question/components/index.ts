@@ -22,5 +22,5 @@ const componentConfigList: ComponentConfigType[] = [
 ]
 
 export function getComponentConfigByType(type: string) {
-    return componentConfigList.find(config => config.type === type)
+    return componentConfigList.find(config => config.type === type) as ComponentConfigType
 }
