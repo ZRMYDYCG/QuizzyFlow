@@ -4,11 +4,11 @@ import { stateType } from "../store"
 function useGetComponentInfo() {
     const components = useSelector<stateType>(state => state.questionComponent) as any
 
-    console.log("useGetComponentInfoHooks测试",components)
-    const { componentList = [] } = components
+    const { componentList = [], selectedId } = components
 
     return {
-        componentList
+        componentList,
+        selectedId
     }
 }
 

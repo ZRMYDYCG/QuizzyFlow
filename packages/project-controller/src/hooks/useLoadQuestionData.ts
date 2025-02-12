@@ -23,7 +23,7 @@ const useLoadQuestionData = () => {
 
         console.log(title, componentList)
 
-        dispatch(resetComponents({ componentList }))
+        dispatch(resetComponents({ componentList, selectedId: "" }))
     }, [data])
 
     // 判断 id 变化
