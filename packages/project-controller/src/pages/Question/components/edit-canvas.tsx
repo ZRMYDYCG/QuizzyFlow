@@ -2,6 +2,7 @@ import React from "react"
 import { Spin } from "antd"
 import QuestionTitle from "./question-title/index.tsx"
 import QuestionInput from "./question-input/index.tsx"
+import useGetComponentInfo from "../../../hooks/useGetComponentInfo.ts"
 
 interface IPopsEditCanvas {
     loading: boolean
@@ -9,8 +10,12 @@ interface IPopsEditCanvas {
 
 const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
     if (loading) {
-        return <Spin size="large" style={{textAlign: "center", width: "100%", marginTop: "20px"}}/>
+        return <Spin style={{textAlign: "center", width: "100%", marginTop: "20px"}}/>
     }
+
+    const { componentList } = useGetComponentInfo()
+
+    console.log("componentList", componentList)
 
     return (
         <div>

@@ -3,7 +3,6 @@ import EditCanvas from "../components/edit-canvas.tsx";
 import useLoadQuestionData from "../../../hooks/useLoadQuestionData.ts"
 
 const EditQuestionPage: React.FC = () => {
-
   const { loading } = useLoadQuestionData()
 
   return (

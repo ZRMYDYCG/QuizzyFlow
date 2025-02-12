@@ -19,7 +19,7 @@ module.exports = [
                     componentList: [
                         // Title
                         {
-                            id: Random.id(),
+                            fe_id: Random.id(),
                             type: 'question-title',
                             title: '标题',
                             props: {
@@ -30,7 +30,7 @@ module.exports = [
                         },
                         // Input
                         {
-                            id: Random.id(),
+                            fe_id: Random.id(),
                             type: 'question-input',
                             title: '输入框',
                             props: {
@@ -40,7 +40,7 @@ module.exports = [
                         },
                         // Input
                         {
-                            id: Random.id(),
+                            fe_id: Random.id(),
                             type: 'question-input',
                             title: '输入框',
                             props: {

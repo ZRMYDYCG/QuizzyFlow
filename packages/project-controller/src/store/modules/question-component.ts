@@ -20,9 +20,8 @@ export const questionComponentSlice = createSlice({
     name: "questionComponent",
     initialState,
     reducers: {
-        // 重置所有组件
         resetComponents(state: QuestionComponentStateType, action: PayloadAction<QuestionComponentStateType>) {
-            console.log(state)
+            console.log("resetComponents reducer called", action.payload)
             return action.payload
         }
     }

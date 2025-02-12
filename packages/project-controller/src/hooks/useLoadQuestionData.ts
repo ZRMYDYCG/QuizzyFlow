@@ -1,8 +1,8 @@
 import {useParams} from "react-router-dom"
 import {getQuestion} from "../api/modules/question.ts"
 import { useRequest } from "ahooks"
-import {useEffect} from "react";
-import { useDispatch } from "react-redux";
+import {useEffect} from "react"
+import { useDispatch } from "react-redux"
 import { resetComponents } from "../store/modules/question-component.ts"
 
 const useLoadQuestionData = () => {
@@ -21,10 +21,10 @@ const useLoadQuestionData = () => {
         if(!data) return
         const { title = '', componentList = [] } = data
 
-        console.log(title)
+        console.log(title, componentList)
 
         dispatch(resetComponents({ componentList }))
-    }, [])
+    }, [data])
 
     // 判断 id 变化
     useEffect(() => {
