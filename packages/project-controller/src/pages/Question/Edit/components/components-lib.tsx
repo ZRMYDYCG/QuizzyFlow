@@ -6,7 +6,7 @@ const ComponentsLib: React.FC = () => {
     return (
         <>
             {componentConfigGroup.map((group, index) => {
-                return <div key={index}>
+                return <div key={index} className={index > 0 ? 'mt-[20px]' : ''}>
                     <Typography.Title level={3}>{group.groupName}</Typography.Title>
                 </div>
             })}
