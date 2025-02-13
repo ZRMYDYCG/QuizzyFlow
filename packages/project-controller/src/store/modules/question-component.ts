@@ -33,10 +33,26 @@ export const questionComponentSlice = createSlice({
                 ...state,
                 selectedId: action.payload
             }
+        },
+        // 组件列表新增控件
+        addComponent(state: QuestionComponentStateType, action: PayloadAction<QuestionComponentType>) {
+            const { selectedId, componentList } = state
+            const index = componentList.findIndex((item) => item.fe_id === selectedId)
+            // 如果没有选中控件，则新增到末尾
+            if(index < 0) {
+                state.componentList = [...state.componentList, action.payload]
+            } else {
+                // 如果选中控件，则插入到选中控件之后
+                state.componentList = [
+                   ...state.componentList.slice(0, index + 1),
+                    action.payload,
+                   ...state.componentList.slice(index + 1)
+                ]
+            }
         }
     }
 })
 
-export const { resetComponents, changeSelectedId } = questionComponentSlice.actions
+export const { resetComponents, changeSelectedId, addComponent } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

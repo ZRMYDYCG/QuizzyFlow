@@ -1,14 +1,27 @@
-import React from "react";
-import { Typography } from "antd";
-import { componentConfigGroup } from "../../components/index";
-import { ComponentConfigType } from "../../components/index";
-import { cn } from "../../../../utils/index";
+import React from "react"
+import { Typography } from "antd"
+import { nanoid } from "nanoid"
+import { componentConfigGroup } from "../../components/index"
+import { ComponentConfigType } from "../../components/index"
+import { cn } from "../../../../utils/index"
+import { addComponent } from "../../../../store/modules/question-component"
+import { useDispatch } from "react-redux"
 
 function generateComponent(c: ComponentConfigType) {
-    const { title, type, component: Component } = c;
+    const { title, type, component: Component, defaultProps } = c;
+    const dispatch = useDispatch();
+
+    function handleClick() {
+        dispatch(addComponent({
+            fe_id: nanoid(),
+            title: title,
+            type: type,
+            props: defaultProps
+        }))
+    }
 
     return (
-        <div className={cn('mb-[12px] cursor-pointer bg-[#fff] border-[1px] border-[#fff] hover:border-[#e5e5e5] rounded-[4px] p-[12px]')}>
+        <div onClick={handleClick} className={cn('mb-[12px] cursor-pointer bg-[#fff] border-[1px] border-[#fff] hover:border-[#e5e5e5] rounded-[4px] p-[12px]')}>
             <div className="pointer-events-none">
                 <Component />
             </div>
