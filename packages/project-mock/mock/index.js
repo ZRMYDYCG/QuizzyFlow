@@ -1,7 +1,4 @@
-const questionMock = require('./modules/question');
+const questionMock = require('./modules/question')
 const userMock = require('./modules/user')
 
-module.exports = [
-    ...questionMock,
-    ...userMock,
-]
+module.exports = [...questionMock, ...userMock]

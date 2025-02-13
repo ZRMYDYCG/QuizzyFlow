@@ -1,38 +1,38 @@
 import axios from 'axios'
-import { message } from "antd";
+import { message } from 'antd'
 
-export interface ResType  {
-    errno: number,
-    data?: ResDataType,
-    msg?: string
+export interface ResType {
+  errno: number
+  data?: ResDataType
+  msg?: string
 }
 
 export interface ResDataType {
-    [key: string]: any
+  [key: string]: any
 }
 
 const instance = axios.create({
-    timeout: 10000,
+  timeout: 10000,
 })
 
 instance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token')
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 instance.interceptors.response.use(async (response) => {
-    const res = (response.data || {}) as ResType
-    const { errno, data, msg } = res
-    if(errno!== 0) {
-        if(msg) {
-            await message.error(msg)
-        }
-        throw new Error(msg)
+  const res = (response.data || {}) as ResType
+  const { errno, data, msg } = res
+  if (errno !== 0) {
+    if (msg) {
+      await message.error(msg)
     }
-    return data as any
+    throw new Error(msg)
+  }
+  return data as any
 })
 
 export default instance

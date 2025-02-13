@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "format": "prettier --write '**/*.{js,jsx,ts,tsx,css,md}'"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.5.0"
+  }
 }
