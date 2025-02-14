@@ -4,6 +4,7 @@ import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
 import { useDispatch } from 'react-redux'
 import { changeSelectedId } from '../../../store/modules/question-component.ts'
 import LeftPanel from './components/left-panel.tsx'
+import RightPanel from './components/right-panel.tsx'
 
 const EditQuestionPage: React.FC = () => {
   const dispatch = useDispatch()
@@ -31,7 +32,9 @@ const EditQuestionPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="w-[325px] bg-white px-[12px]">Right</div>
+          <div className="w-[325px] bg-white px-[12px]">
+            <RightPanel />
+          </div>
         </div>
       </div>
     </div>

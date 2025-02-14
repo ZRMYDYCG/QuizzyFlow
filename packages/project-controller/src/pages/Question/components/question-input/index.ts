@@ -7,7 +7,7 @@ export * from './interface.ts'
 export default {
   title: '输入框',
   type: 'question-input',
-  InputProps,
+  PropComponent: InputProps,
   component: QuestionInput,
   defaultProps: QuestionInputDefaultData,
 }

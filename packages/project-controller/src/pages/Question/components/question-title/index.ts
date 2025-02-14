@@ -7,7 +7,7 @@ export * from './interface.ts'
 export default {
   title: '标题',
   type: 'question-title',
-  TitleProps, // 编辑器组件
+  PropComponent: TitleProps, // 编辑器组件
   component: QuestionTitle,  // 画布显示的组件
   defaultProps: QuestionTitleDefaultData,
 }
