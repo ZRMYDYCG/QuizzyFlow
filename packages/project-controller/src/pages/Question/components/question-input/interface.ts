@@ -6,7 +6,8 @@ export interface IQuestionInputProps {
   title?: string
   // 输入框提示信息
   placeholder?: string
-
+  // 是否禁用
+  disabled?: boolean
   onChange?: (value: IQuestionInputProps) => void
 }
 

@@ -7,6 +7,7 @@ export interface QuestionComponentType {
   type: string
   title: string
   isHidden?: boolean
+  isLocked: boolean
   props: ComponentPropsType
 }
 
@@ -109,7 +110,7 @@ export const questionComponentSlice = createSlice({
       if (currentComponent) {
         currentComponent.isHidden = isHidden
 
-        if(isHidden) {
+        if (isHidden) {
           // 如果要隐藏
           const filterCallback = (component: QuestionComponentType) =>
             !component.isHidden
@@ -124,6 +125,19 @@ export const questionComponentSlice = createSlice({
         }
       }
     },
+    // 锁定/解锁控件
+    changeComponentsLock(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ fe_id: string }>
+    ) {
+      const { fe_id } = action.payload
+      const currentComponent = state.componentList.find(
+        (item) => item.fe_id === fe_id
+      )
+      if (currentComponent) {
+        currentComponent.isLocked = !currentComponent.isLocked
+      }
+    }
   },
 })
 
@@ -134,6 +148,7 @@ export const {
   changeComponentProps,
   extraComponents,
   changeComponentsVisible,
+  changeComponentsLock,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

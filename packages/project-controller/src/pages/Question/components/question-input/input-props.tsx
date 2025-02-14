@@ -5,7 +5,7 @@ import { IQuestionInputProps } from './interface'
 const InputProps: React.FC<IQuestionInputProps> = (
   props: IQuestionInputProps
 ) => {
-  const { title, placeholder, onChange } = props
+  const { title, placeholder, onChange, disabled } = props
   const [form] = Form.useForm()
 
   useEffect(() => {
@@ -24,6 +24,7 @@ const InputProps: React.FC<IQuestionInputProps> = (
       layout="vertical"
       initialValues={{ title, placeholder }}
       form={form}
+      disabled={disabled}
     >
       <Form.Item
         name="title"

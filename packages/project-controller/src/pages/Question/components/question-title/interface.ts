@@ -8,6 +8,8 @@ export interface IQuestionTitleProps {
   level?: 1 | 2 | 3 | 4 | 5
   // 是否居中
   isCenter?: boolean
+  // 是否禁用
+  disabled?: boolean
   // 改变
   onChange?: (newProps: IQuestionTitleProps) => void
 }

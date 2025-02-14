@@ -6,7 +6,7 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
   props: IQuestionTitleProps
 ) => {
   const [form] = Form.useForm()
-  const { text, level, isCenter, onChange } = props
+  const { text, level, isCenter, onChange, disabled } = props
 
   useEffect(() => {
     form.setFieldsValue({ text, level, isCenter })
@@ -24,6 +24,7 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
       initialValues={{ text, level, isCenter }}
       form={form}
       onValuesChange={handleValueChange}
+      disabled={disabled}
     >
       <Form.Item
         label="标题内容"

@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import useGetComponentInfo from '../../../hooks/useGetComponentInfo.ts'
 import { QuestionComponentType } from '../../../store/modules/question-component.ts'
 import { changeSelectedId } from '../../../store/modules/question-component.ts'
+import { cn } from '../../../utils'
 
 interface IPopsEditCanvas {
   loading: boolean
@@ -45,15 +46,18 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
       {componentList
         .filter((item: any) => !item.isHidden)
         .map((item: QuestionComponentType) => {
-          const { fe_id, title } = item
+          const { fe_id, title, isLocked } = item
           const isActive = fe_id === selectedId
           return (
             <div
               key={fe_id}
               onClick={(e) => handleClick(e, fe_id)}
-              className={`m-[12px] border p-[12px] rounded-[8px] bg-white 
-                    ${isActive ? 'border-blue-500' : 'border-white hover:border-blue-500'}
-                    cursor-pointer`}
+              className={cn(
+                'm-[12px] border p-[12px] rounded-[8px] bg-white',
+                isActive ? 'border-blue-500' : 'border-white hover:border-blue-500',
+                'cursor-pointer',
+                isLocked ? 'opacity-50 cursor-not-allowed' : ''
+              )}
             >
               <div className="pointer-events-none">{genComponent(item)}</div>
             </div>
