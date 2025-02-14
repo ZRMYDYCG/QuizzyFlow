@@ -60,21 +60,30 @@ export const questionComponentSlice = createSlice({
       }
     },
     // 修改组件属性
-    changeComponentProps(state: QuestionComponentStateType, action: PayloadAction<{fe_id: string, props: ComponentPropsType}>) {
+    changeComponentProps(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ fe_id: string; props: ComponentPropsType }>
+    ) {
       const { fe_id, props } = action.payload
 
-      const curentComponent = state.componentList.find((item) => item.fe_id === fe_id)
+      const curentComponent = state.componentList.find(
+        (item) => item.fe_id === fe_id
+      )
       if (curentComponent) {
         curentComponent.props = {
           ...curentComponent.props,
           ...props,
         }
       }
-    }
+    },
   },
 })
 
-export const { resetComponents, changeSelectedId, addComponent, changeComponentProps } =
-  questionComponentSlice.actions
+export const {
+  resetComponents,
+  changeSelectedId,
+  addComponent,
+  changeComponentProps,
+} = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

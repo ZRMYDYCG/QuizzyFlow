@@ -13,7 +13,7 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
   }, [text, level, isCenter])
 
   function handleValueChange() {
-    if(onChange) {
+    if (onChange) {
       onChange(form.getFieldsValue())
     }
   }

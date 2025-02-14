@@ -19,7 +19,12 @@ const InputProps: React.FC<IQuestionInputProps> = (
   }
 
   return (
-    <Form onChange={handleValueChange} layout="vertical" initialValues={{ title, placeholder }} form={form}>
+    <Form
+      onChange={handleValueChange}
+      layout="vertical"
+      initialValues={{ title, placeholder }}
+      form={form}
+    >
       <Form.Item
         name="title"
         label="标题"
