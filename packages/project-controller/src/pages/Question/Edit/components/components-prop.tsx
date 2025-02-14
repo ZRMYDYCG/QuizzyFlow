@@ -1,7 +1,9 @@
 import React from 'react'
+import { useDispatch } from "react-redux"
+import { changeComponentProps } from "../../../../store/modules/question-component"
 import useGetComponentInfo from "../../../../hooks/useGetComponentInfo"
 import { Empty } from 'antd'
-import { getComponentConfigByType } from "../../../Question/components/index"
+import { getComponentConfigByType, ComponentPropsType } from "../../../Question/components/index"
 
 const NoSelectedComponent: React.FC = () => {
   return (
@@ -10,19 +12,33 @@ const NoSelectedComponent: React.FC = () => {
 }
 
 const ComponentProp: React.FC = () => {
-  const { selectdComponent } = useGetComponentInfo()
-  if(selectdComponent === null) return <NoSelectedComponent />
+  const dispatch = useDispatch()
+  const { selectedComponent } = useGetComponentInfo()
 
-  const { type, props } = selectdComponent
-  const ComponentConfig = getComponentConfigByType(type)
+  console.log(selectedComponent)
 
-  if(ComponentConfig === null) return <NoSelectedComponent />
+  if(selectedComponent === null) return <NoSelectedComponent />
 
-  const { PropComponent } = ComponentConfig
- 
-  return (
-    <PropComponent {...props} />
-  )
+  try {
+    const { props, type } = selectedComponent as any
+    const ComponentConfig = getComponentConfigByType(type)
+
+    if(ComponentConfig === null) return <NoSelectedComponent />
+  
+    function changeProps(newProps: ComponentPropsType) {
+      if(selectedComponent === null) return
+      const { fe_id } = selectedComponent
+      dispatch(changeComponentProps({ fe_id, props: newProps }))
+    }
+  
+    const { PropComponent } = ComponentConfig
+   
+    return (
+      <PropComponent {...props} onChange={changeProps} />
+    )
+  } catch(error) {
+    console.error(error)
+  }
 }
 
 export default ComponentProp

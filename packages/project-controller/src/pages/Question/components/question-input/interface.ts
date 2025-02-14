@@ -6,6 +6,8 @@ export interface IQuestionInputProps {
   title?: string
   // 输入框提示信息
   placeholder?: string
+
+  onChange?: (value: IQuestionInputProps) => void
 }
 
 export const QuestionInputDefaultData: IQuestionInputProps = {

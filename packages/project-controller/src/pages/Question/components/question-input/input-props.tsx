@@ -5,15 +5,21 @@ import { IQuestionInputProps } from './interface'
 const InputProps: React.FC<IQuestionInputProps> = (
   props: IQuestionInputProps
 ) => {
-  const { title, placeholder } = props
+  const { title, placeholder, onChange } = props
   const [form] = Form.useForm()
 
   useEffect(() => {
     form.setFieldsValue({ title, placeholder })
   }, [title, placeholder])
 
+  function handleValueChange() {
+    if (onChange) {
+      onChange(form.getFieldsValue())
+    }
+  }
+
   return (
-    <Form layout="vertical" initialValues={{ title, placeholder }} form={form}>
+    <Form onChange={handleValueChange} layout="vertical" initialValues={{ title, placeholder }} form={form}>
       <Form.Item
         name="title"
         label="标题"

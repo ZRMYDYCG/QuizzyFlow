@@ -8,6 +8,8 @@ export interface IQuestionTitleProps {
   level?: 1 | 2 | 3 | 4 | 5
   // 是否居中
   isCenter?: boolean
+  // 改变
+  onChange?: (newProps: IQuestionTitleProps) => void
 }
 
 export const QuestionTitleDefaultData: IQuestionTitleProps = {
