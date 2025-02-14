@@ -42,21 +42,23 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
 
   return (
     <div>
-      {componentList.map((item: QuestionComponentType) => {
-        const { fe_id, title } = item
-        const isActive = fe_id === selectedId
-        return (
-          <div
-            key={fe_id}
-            onClick={(e) => handleClick(e, fe_id)}
-            className={`m-[12px] border p-[12px] rounded-[8px] bg-white 
+      {componentList
+        .filter((item: any) => !item.isHidden)
+        .map((item: QuestionComponentType) => {
+          const { fe_id, title } = item
+          const isActive = fe_id === selectedId
+          return (
+            <div
+              key={fe_id}
+              onClick={(e) => handleClick(e, fe_id)}
+              className={`m-[12px] border p-[12px] rounded-[8px] bg-white 
                     ${isActive ? 'border-blue-500' : 'border-white hover:border-blue-500'}
                     cursor-pointer`}
-          >
-            <div className="pointer-events-none">{genComponent(item)}</div>
-          </div>
-        )
-      })}
+            >
+              <div className="pointer-events-none">{genComponent(item)}</div>
+            </div>
+          )
+        })}
     </div>
   )
 }

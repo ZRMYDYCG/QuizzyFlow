@@ -22,6 +22,7 @@ module.exports = [
               fe_id: Random.id(),
               type: 'question-title',
               title: '标题',
+              isHidden: false,
               props: {
                 text: '个人信息调研问卷',
                 level: 1,
@@ -32,7 +33,8 @@ module.exports = [
             {
               fe_id: Random.id(),
               type: 'question-input',
-              title: '输入框',
+              title: '输入框1',
+              isHidden: false,
               props: {
                 title: '你的姓名',
                 placeholder: '请输入你的姓名...',
@@ -42,7 +44,8 @@ module.exports = [
             {
               fe_id: Random.id(),
               type: 'question-input',
-              title: '输入框',
+              title: '输入框2',
+              isHidden: false,
               props: {
                 title: '你的电话号码',
                 placeholder: '请输入你的电话号码...',

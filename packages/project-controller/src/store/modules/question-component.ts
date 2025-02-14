@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ComponentPropsType } from '../../pages/Question/components'
+import { getNextSelectedId } from '../../utils'
 
 export interface QuestionComponentType {
   fe_id: string // fe_id 是前端在新增一个控件的时候自动进行生成的, 与数据库的 _id 格式不同, 因此自定义该 id
   type: string
   title: string
+  isHidden?: boolean
   props: ComponentPropsType
 }
 
@@ -80,9 +82,7 @@ export const questionComponentSlice = createSlice({
     extraComponents(state: QuestionComponentStateType) {
       const { componentList, selectedId } = state
       const index = componentList.findIndex((item) => item.fe_id === selectedId)
-
-      // 如果没有选中的控件，直接返回
-      if (index < 0) return
+      if (index < 0) return // 没有选中控件，直接返回
 
       // 创建新的组件列表，不包含要删除的控件
       state.componentList = [
@@ -90,18 +90,38 @@ export const questionComponentSlice = createSlice({
         ...componentList.slice(index + 1),
       ]
 
-      // 重新计算选中的 ID
-      if (state.componentList.length > 0) {
-        // 如果删除的不是最后一个组件，选中下一个，否则选中前一个
-        if (index < state.componentList.length) {
-          state.selectedId = state.componentList[index].fe_id
+      const filterCallback = () => true
+      state.selectedId = getNextSelectedId(
+        selectedId,
+        state.componentList,
+        filterCallback
+      )
+    },
+    // 隐藏/显示控件
+    changeComponentsVisible(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ fe_id: string; isHidden: boolean }>
+    ) {
+      const { fe_id, isHidden } = action.payload
+      const currentComponent = state.componentList.find(
+        (item) => item.fe_id === fe_id
+      )
+      if (currentComponent) {
+        currentComponent.isHidden = isHidden
+
+        if(isHidden) {
+          // 如果要隐藏
+          const filterCallback = (component: QuestionComponentType) =>
+            !component.isHidden
+          state.selectedId = getNextSelectedId(
+            state.selectedId,
+            state.componentList,
+            filterCallback
+          )
         } else {
-          state.selectedId =
-            state.componentList[state.componentList.length - 1].fe_id
+          // 如果要显示
+          state.selectedId = fe_id
         }
-      } else {
-        // 如果组件列表为空，selectedId 置为空字符串
-        state.selectedId = ''
       }
     },
   },
@@ -113,6 +133,7 @@ export const {
   addComponent,
   changeComponentProps,
   extraComponents,
+  changeComponentsVisible,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer
