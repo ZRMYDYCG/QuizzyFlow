@@ -76,6 +76,34 @@ export const questionComponentSlice = createSlice({
         }
       }
     },
+    // 删除控件
+    extraComponents(state: QuestionComponentStateType) {
+      const { componentList, selectedId } = state
+      const index = componentList.findIndex((item) => item.fe_id === selectedId)
+
+      // 如果没有选中的控件，直接返回
+      if (index < 0) return
+
+      // 创建新的组件列表，不包含要删除的控件
+      state.componentList = [
+        ...componentList.slice(0, index),
+        ...componentList.slice(index + 1),
+      ]
+
+      // 重新计算选中的 ID
+      if (state.componentList.length > 0) {
+        // 如果删除的不是最后一个组件，选中下一个，否则选中前一个
+        if (index < state.componentList.length) {
+          state.selectedId = state.componentList[index].fe_id
+        } else {
+          state.selectedId =
+            state.componentList[state.componentList.length - 1].fe_id
+        }
+      } else {
+        // 如果组件列表为空，selectedId 置为空字符串
+        state.selectedId = ''
+      }
+    },
   },
 })
 
@@ -84,6 +112,7 @@ export const {
   changeSelectedId,
   addComponent,
   changeComponentProps,
+  extraComponents,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

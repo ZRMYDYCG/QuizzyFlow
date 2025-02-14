@@ -9,16 +9,14 @@ import {
 } from '../../../Question/components/index'
 
 const NoSelectedComponent: React.FC = () => {
-  return <Empty description="请选择组件" />
+  return <Empty description="还没有选中组件" />
 }
 
 const ComponentProp: React.FC = () => {
   const dispatch = useDispatch()
-  const { selectedComponent } = useGetComponentInfo()
+  const { selectedComponent, selectedId } = useGetComponentInfo()
 
-  console.log(selectedComponent)
-
-  if (selectedComponent === null) return <NoSelectedComponent />
+  if (selectedId === '') return <NoSelectedComponent />
 
   try {
     const { props, type } = selectedComponent as any

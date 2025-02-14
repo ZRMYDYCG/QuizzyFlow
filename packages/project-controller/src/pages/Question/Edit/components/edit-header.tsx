@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Space } from 'antd'
 import { LeftOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import EditToolbar from './edit-toolbar'
 
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
@@ -21,7 +22,9 @@ const EditHeader: React.FC = () => {
             <h2 className="text-lg font-bold">问卷标题</h2>
           </Space>
         </div>
-        <div className="flex-1 text-center">中间区域</div>
+        <div className="flex-1 text-center">
+          <EditToolbar />
+        </div>
         <div className="flex-1 text-right">
           <Space>
             <Button type="default">保存</Button>
