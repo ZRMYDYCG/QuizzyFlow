@@ -6,6 +6,8 @@ import {
   EyeInvisibleOutlined,
   LockOutlined,
   BlockOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
 } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import {
@@ -14,6 +16,8 @@ import {
   changeComponentsLock,
   copySelectedComponent,
   pasteComponent,
+  selectPrevComponent,
+  selectNextComponent,
 } from '../../../../store/modules/question-component'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
 
@@ -48,6 +52,16 @@ const EditToolbar: React.FC = () => {
     dispatch(pasteComponent())
   }
 
+  // 上一个
+  const handlePrevious = () => {
+    dispatch(selectPrevComponent())
+  }
+
+  // 下一个
+  const handleNext = () => {
+    dispatch(selectNextComponent())
+  }
+
   return (
     <Space>
       <Tooltip title="删除">
@@ -71,6 +85,20 @@ const EditToolbar: React.FC = () => {
           onClick={handleLock}
           type={isLocked ? 'primary' : 'default'}
         ></Button>
+      </Tooltip>
+      <Tooltip title="上一个">
+        <Button
+          shape="circle"
+          icon={<ArrowUpOutlined />}
+          onClick={handlePrevious}
+        />
+      </Tooltip>
+      <Tooltip title="下一个">
+        <Button
+          shape="circle"
+          icon={<ArrowDownOutlined />}
+          onClick={handleNext}
+        />
       </Tooltip>
       <Tooltip title="复制">
         <Button

@@ -177,6 +177,22 @@ export const questionComponentSlice = createSlice({
         ...componentList.slice(index + 1),
       ]
     },
+    // 选中上一个
+    selectPrevComponent(state: QuestionComponentStateType) {
+      const { selectedId, componentList = [] } = state
+      const index = componentList.findIndex((item) => item.fe_id === selectedId)
+      if (index === 0) return // 第一个控件，不能选中上一个
+      if (index < 0) return // 没有选中控件，直接返回
+      state.selectedId = componentList[index - 1].fe_id
+    },
+    // 选中下一个
+    selectNextComponent(state: QuestionComponentStateType) {
+      const { selectedId, componentList = [] } = state
+      const index = componentList.findIndex((item) => item.fe_id === selectedId)
+      if (index < 0) return // 没有选中控件，直接返回
+      if (index === componentList.length - 1) return // 最后一个控件，不能选中下一个
+      state.selectedId = componentList[index + 1].fe_id
+    },
   },
 })
 
@@ -190,6 +206,8 @@ export const {
   changeComponentsLock,
   copySelectedComponent,
   pasteComponent,
+  selectPrevComponent,
+  selectNextComponent,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

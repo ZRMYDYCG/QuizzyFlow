@@ -6,6 +6,7 @@ import useGetComponentInfo from '../../../hooks/useGetComponentInfo.ts'
 import { QuestionComponentType } from '../../../store/modules/question-component.ts'
 import { changeSelectedId } from '../../../store/modules/question-component.ts'
 import { cn } from '../../../utils'
+import useCanvasKeyPress from '../../../hooks/useCanvasKeyPress.ts'
 
 interface IPopsEditCanvas {
   loading: boolean
@@ -14,6 +15,7 @@ interface IPopsEditCanvas {
 function genComponent(componentInfo: QuestionComponentType) {
   const { type, props } = componentInfo
   const componentConfig = getComponentConfigByType(type)
+
   if (componentConfig === null) return null
 
   const { component: Component } = componentConfig
@@ -27,6 +29,9 @@ function genComponent(componentInfo: QuestionComponentType) {
 
 const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
   const dispatch = useDispatch()
+
+  // 支持快捷键操作
+  useCanvasKeyPress()
 
   const { componentList = [], selectedId } = useGetComponentInfo()
 
