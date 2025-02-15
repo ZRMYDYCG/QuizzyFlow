@@ -1,10 +1,15 @@
 import { FC, ChangeEvent } from 'react'
-import { message, Input } from 'antd'
+import { message, Input, Button } from 'antd'
 import { useDispatch } from 'react-redux'
+import { EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
 import { changeSelectedId } from '../../../../store/modules/question-component.ts'
-import { changeComponentTitle } from '../../../../store/modules/question-component.ts'
+import {
+  changeComponentTitle,
+  changeComponentsLock,
+  changeComponentsVisible,
+} from '../../../../store/modules/question-component.ts'
 import { cn } from '../../../../utils/index'
 
 const Layers: FC = () => {
@@ -42,6 +47,15 @@ const Layers: FC = () => {
     dispatch(changeComponentTitle({ fe_id: selectedId, title: newTitle }))
   }
 
+  // 切换隐藏与显示状态
+  function handleToggleHidden(fe_id: string, isHidden: boolean) {
+    dispatch(changeComponentsVisible({ fe_id, isHidden }))
+  }
+
+  // 切换锁定与解锁状态
+  function handleToggleLocked(fe_id: string) {
+    dispatch(changeComponentsLock({ fe_id }))
+  }
   return (
     <>
       {componentList.map((component: any) => {
@@ -50,12 +64,11 @@ const Layers: FC = () => {
         return (
           <div
             key={fe_id}
-            onClick={() => handleTitleClick(fe_id)}
             className={cn(
               'flex justify-between items-center w-full py-2 px-4 rounded-md cursor-pointer hover:bg-gray-100 hover:text-blue-600'
             )}
           >
-            <div className="">
+            <div onClick={() => handleTitleClick(fe_id)}>
               {fe_id === changingTitleId && (
                 <Input
                   value={title}
@@ -66,7 +79,22 @@ const Layers: FC = () => {
               )}
               {fe_id !== changingTitleId && title}
             </div>
-            <div>按钮</div>
+            <div className="flex items-center gap-1">
+              <Button
+                size="small"
+                shape="circle"
+                icon={<EyeInvisibleOutlined />}
+                type={isHidden ? 'primary' : 'default'}
+                onClick={() => handleToggleHidden(fe_id, !isHidden)}
+              ></Button>
+              <Button
+                size="small"
+                shape="circle"
+                icon={<LockOutlined />}
+                type={isLocked ? 'primary' : 'default'}
+                onClick={() => handleToggleLocked(fe_id)}
+              ></Button>
+            </div>
           </div>
         )
       })}
