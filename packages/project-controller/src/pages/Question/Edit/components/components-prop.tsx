@@ -19,7 +19,7 @@ const ComponentProp: React.FC = () => {
   if (selectedId === '') return <NoSelectedComponent />
 
   try {
-    const { props, type, isLocked } = selectedComponent || {}  as any
+    const { props, type, isLocked } = selectedComponent || ({} as any)
     const ComponentConfig = getComponentConfigByType(type)
 
     if (ComponentConfig === null) return <NoSelectedComponent />
@@ -32,7 +32,9 @@ const ComponentProp: React.FC = () => {
 
     const { PropComponent } = ComponentConfig
 
-    return <PropComponent {...props} onChange={changeProps} disabled={isLocked} />
+    return (
+      <PropComponent {...props} onChange={changeProps} disabled={isLocked} />
+    )
   } catch (error) {
     console.error(error)
   }

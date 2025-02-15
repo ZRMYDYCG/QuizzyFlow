@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ComponentPropsType } from '../../pages/Question/components'
 import { getNextSelectedId } from '../../utils'
+import { cloneDeep } from 'lodash-es'
+import { nanoid } from 'nanoid'
 
 export interface QuestionComponentType {
   fe_id: string // fe_id 是前端在新增一个控件的时候自动进行生成的, 与数据库的 _id 格式不同, 因此自定义该 id
@@ -14,11 +16,13 @@ export interface QuestionComponentType {
 export interface QuestionComponentStateType {
   componentList: Array<QuestionComponentType>
   selectedId: string
+  copiedComponent: QuestionComponentType | null
 }
 
 export const initialState: QuestionComponentStateType = {
   componentList: [],
   selectedId: '',
+  copiedComponent: null,
 }
 
 export const questionComponentSlice = createSlice({
@@ -30,7 +34,7 @@ export const questionComponentSlice = createSlice({
       state: QuestionComponentStateType,
       action: PayloadAction<QuestionComponentStateType>
     ) {
-      console.log('resetComponents reducer called', action.payload)
+      console.log('resetComponents reducer called', action.payload, state)
       return action.payload
     },
     // 修改当前选中的控件
@@ -137,7 +141,42 @@ export const questionComponentSlice = createSlice({
       if (currentComponent) {
         currentComponent.isLocked = !currentComponent.isLocked
       }
-    }
+    },
+    // 拷贝选中的控件
+    copySelectedComponent(state: QuestionComponentStateType) {
+      const { selectedId, componentList = [] } = state
+
+      // 找到选中的控件
+      const selectedComponent = componentList.find(
+        (item) => item.fe_id === selectedId
+      )
+      if (!selectedComponent) return
+      // 深拷贝选中的控件
+      const copiedComponent = cloneDeep(selectedComponent)
+      state.copiedComponent = copiedComponent
+    },
+    // 粘贴控件
+    pasteComponent(state: QuestionComponentStateType) {
+      const { copiedComponent, componentList = [] } = state
+      if (!copiedComponent) return
+      // 找到选中的控件
+      const selectedComponent = componentList.find(
+        (item) => item.fe_id === state.selectedId
+      )
+      if (!selectedComponent) return
+
+      // 插入控件
+      const index = componentList.findIndex(
+        (item) => item.fe_id === state.selectedId
+      )
+
+      copiedComponent.fe_id = nanoid()
+      state.componentList = [
+        ...componentList.slice(0, index + 1),
+        copiedComponent,
+        ...componentList.slice(index + 1),
+      ]
+    },
   },
 })
 
@@ -149,6 +188,8 @@ export const {
   extraComponents,
   changeComponentsVisible,
   changeComponentsLock,
+  copySelectedComponent,
+  pasteComponent,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

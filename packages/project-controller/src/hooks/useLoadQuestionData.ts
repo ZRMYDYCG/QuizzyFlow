@@ -30,7 +30,13 @@ const useLoadQuestionData = () => {
       selectedId = componentList[0].fe_id
     }
 
-    dispatch(resetComponents({ componentList, selectedId: selectedId }))
+    dispatch(
+      resetComponents({
+        componentList,
+        selectedId: selectedId,
+        copiedComponent: null,
+      })
+    )
   }, [data])
 
   // 判断 id 变化

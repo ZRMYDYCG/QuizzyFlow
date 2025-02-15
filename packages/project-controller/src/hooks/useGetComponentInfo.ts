@@ -6,7 +6,7 @@ function useGetComponentInfo() {
     (state) => state.questionComponent
   ) as any
 
-  const { componentList = [], selectedId } = components
+  const { componentList = [], selectedId, copiedComponent } = components
 
   const selectedComponent: any = componentList.find(
     (c: any) => c.fe_id === selectedId
@@ -16,6 +16,7 @@ function useGetComponentInfo() {
     componentList,
     selectedId,
     selectedComponent,
+    copiedComponent,
   }
 }
 

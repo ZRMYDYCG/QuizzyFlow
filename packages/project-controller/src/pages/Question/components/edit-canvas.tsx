@@ -46,7 +46,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
       {componentList
         .filter((item: any) => !item.isHidden)
         .map((item: QuestionComponentType) => {
-          const { fe_id, title, isLocked } = item
+          const { fe_id, isLocked } = item
           const isActive = fe_id === selectedId
           return (
             <div
@@ -54,7 +54,9 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
               onClick={(e) => handleClick(e, fe_id)}
               className={cn(
                 'm-[12px] border p-[12px] rounded-[8px] bg-white',
-                isActive ? 'border-blue-500' : 'border-white hover:border-blue-500',
+                isActive
+                  ? 'border-blue-500'
+                  : 'border-white hover:border-blue-500',
                 'cursor-pointer',
                 isLocked ? 'opacity-50 cursor-not-allowed' : ''
               )}
