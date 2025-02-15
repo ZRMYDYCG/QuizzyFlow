@@ -1,12 +1,12 @@
 import { FC } from 'react'
 import { Typography } from 'antd'
 import {
-  QuestionParagraphProps,
+  IQuestionParagraphProps,
   QuestionParagraphDefaultProps,
 } from './interface'
 
-const QuestionParagraph: FC<QuestionParagraphProps> = (
-  props: QuestionParagraphProps
+const QuestionParagraph: FC<IQuestionParagraphProps> = (
+  props: IQuestionParagraphProps
 ) => {
   const { text = '', isCenter = false } = {
     ...QuestionParagraphDefaultProps,

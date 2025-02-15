@@ -1,13 +1,13 @@
-import { FC, useEffect } from 'react'
+import React, { FC, useEffect } from 'react'
 import { Form, Input, Checkbox } from 'antd'
-import { QuestionParagraphProps } from './interface.ts'
+import { IQuestionParagraphProps } from './interface.ts'
 
-const ParagraphProps: FC<QuestionParagraphProps> = (
-  props: QuestionParagraphProps
+const ParagraphProps: FC<IQuestionParagraphProps> = (
+  props: IQuestionParagraphProps
 ) => {
-  const { text, isCenter, onChange, disabled } = props
-
   const [form] = Form.useForm()
+
+  const { text, isCenter, onChange, disabled } = props
 
   useEffect(() => {
     form.setFieldsValue({ text, isCenter })
@@ -25,6 +25,7 @@ const ParagraphProps: FC<QuestionParagraphProps> = (
       initialValues={{ text, isCenter }}
       disabled={disabled}
       onValuesChange={handleValuesChange}
+      form={form}
     >
       <Form.Item
         label="段落内容"
@@ -33,8 +34,8 @@ const ParagraphProps: FC<QuestionParagraphProps> = (
       >
         <Input.TextArea />
       </Form.Item>
-      <Form.Item name="isCenter">
-        <Checkbox>居中显示</Checkbox>
+      <Form.Item label="居中显示" name="isCenter" valuePropName="checked">
+        <Checkbox></Checkbox>
       </Form.Item>
     </Form>
   )
