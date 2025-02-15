@@ -37,7 +37,13 @@ const RightPanel: React.FC = () => {
       children: <PageSetting />,
     },
   ]
-  return <Tabs items={tabsItems} activeKey={activeKey}></Tabs>
+  return (
+    <Tabs
+      items={tabsItems}
+      activeKey={activeKey}
+      onChange={setActiveKey}
+    ></Tabs>
+  )
 }
 
 export default RightPanel
