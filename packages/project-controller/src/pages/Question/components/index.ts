@@ -4,18 +4,21 @@ import { IQuestionTitleProps } from './question-title'
 import { IQuestionParagraphProps } from './question-paragraph'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
+import { IQuestionRadioProps } from './question-radio'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
 import QuestionInfoConfig from './question-info'
 import QuestionTextareaConfig from './question-textarea'
+import QuestionRadioConfig from './question-radio'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
   IQuestionTitleProps &
   IQuestionParagraphProps &
   IQuestionInfoProps &
-  IQuestionTextareaProps
+  IQuestionTextareaProps &
+  IQuestionRadioProps
 
 // 组件配置
 export interface ComponentConfigType {
@@ -33,6 +36,7 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionParagraphConfig,
   QuestionInfoConfig,
   QuestionTextareaConfig,
+  QuestionRadioConfig as any,
 ]
 
 // 组件进行分组
@@ -48,6 +52,10 @@ export const componentConfigGroup = [
   {
     groupName: '用户输入',
     components: [QuestionInputConfig, QuestionTextareaConfig],
+  },
+  {
+    groupName: '用户选择',
+    components: [QuestionRadioConfig],
   },
 ]
 
