@@ -193,6 +193,19 @@ export const questionComponentSlice = createSlice({
       if (index === componentList.length - 1) return // 最后一个控件，不能选中下一个
       state.selectedId = componentList[index + 1].fe_id
     },
+    // 修改组件标题
+    changeComponentTitle(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ fe_id: string; title: string }>
+    ) {
+      const { fe_id, title } = action.payload
+      const currentComponent = state.componentList.find(
+        (item) => item.fe_id === fe_id
+      )
+      if (currentComponent) {
+        currentComponent.title = title
+      }
+    },
   },
 })
 
@@ -208,6 +221,7 @@ export const {
   pasteComponent,
   selectPrevComponent,
   selectNextComponent,
+  changeComponentTitle,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

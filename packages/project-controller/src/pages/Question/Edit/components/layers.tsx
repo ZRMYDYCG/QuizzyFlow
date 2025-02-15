@@ -1,9 +1,11 @@
-import { FC } from 'react'
-import { message } from 'antd'
+import { FC, ChangeEvent } from 'react'
+import { message, Input } from 'antd'
 import { useDispatch } from 'react-redux'
 import { useState } from 'react'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
 import { changeSelectedId } from '../../../../store/modules/question-component.ts'
+import { changeComponentTitle } from '../../../../store/modules/question-component.ts'
+import { cn } from '../../../../utils/index'
 
 const Layers: FC = () => {
   const { componentList, selectedId } = useGetComponentInfo()
@@ -25,7 +27,19 @@ const Layers: FC = () => {
     }
     if (fe_id !== selectedId) {
       dispatch(changeSelectedId(fe_id))
+      setChangingTitleId('')
+      return
     }
+    setChangingTitleId(fe_id)
+  }
+
+  // 标题修改
+  function handleTitleChange(e: ChangeEvent<HTMLInputElement>) {
+    const newTitle = e.target.value.trim()
+    if (!newTitle) return
+    if (!selectedId) return
+
+    dispatch(changeComponentTitle({ fe_id: selectedId, title: newTitle }))
   }
 
   return (
@@ -34,8 +48,24 @@ const Layers: FC = () => {
         const { fe_id, title, isHidden, isLocked } = component
 
         return (
-          <div key={fe_id} onClick={() => handleTitleClick(fe_id)}>
-            <div className="">{title}</div>
+          <div
+            key={fe_id}
+            onClick={() => handleTitleClick(fe_id)}
+            className={cn(
+              'flex justify-between items-center w-full py-2 px-4 rounded-md cursor-pointer hover:bg-gray-100 hover:text-blue-600'
+            )}
+          >
+            <div className="">
+              {fe_id === changingTitleId && (
+                <Input
+                  value={title}
+                  onChange={handleTitleChange}
+                  onPressEnter={() => setChangingTitleId('')}
+                  onBlur={() => setChangingTitleId('')}
+                />
+              )}
+              {fe_id !== changingTitleId && title}
+            </div>
             <div>按钮</div>
           </div>
         )
