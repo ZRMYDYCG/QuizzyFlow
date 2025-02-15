@@ -12,11 +12,18 @@ const QuestionParagraph: FC<IQuestionParagraphProps> = (
     ...QuestionParagraphDefaultProps,
     ...props,
   }
+
+  const textList = text.split('\n')
   return (
     <Typography.Paragraph
       style={{ textAlign: isCenter ? 'center' : 'start', marginBottom: 0 }}
     >
-      {text}
+      {textList.map((item, index) => (
+        <span key={index}>
+          {index > 0 && <br />}
+          {item}
+        </span>
+      ))}
     </Typography.Paragraph>
   )
 }
