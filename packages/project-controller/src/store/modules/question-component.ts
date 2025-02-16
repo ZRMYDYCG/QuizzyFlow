@@ -206,6 +206,27 @@ export const questionComponentSlice = createSlice({
         currentComponent.title = title
       }
     },
+    // 组件拖动交换位置
+    swapComponent(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ sourceIndex: number; targetIndex: number }>
+    ) {
+      const { sourceIndex, targetIndex } = action.payload
+      const { componentList } = state
+
+      if (sourceIndex === targetIndex) return
+
+      // 创建新的数组副本
+      const newComponentList = [...componentList]
+
+      // 交换元素
+      ;[newComponentList[sourceIndex], newComponentList[targetIndex]] = [
+        newComponentList[targetIndex],
+        newComponentList[sourceIndex],
+      ]
+
+      state.componentList = newComponentList
+    },
   },
 })
 
@@ -222,6 +243,7 @@ export const {
   selectPrevComponent,
   selectNextComponent,
   changeComponentTitle,
+  swapComponent,
 } = questionComponentSlice.actions
 
 export default questionComponentSlice.reducer

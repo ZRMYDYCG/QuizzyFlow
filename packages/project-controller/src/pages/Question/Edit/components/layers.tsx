@@ -1,6 +1,7 @@
 import { FC, ChangeEvent } from 'react'
 import { message, Input, Button } from 'antd'
 import { useDispatch } from 'react-redux'
+import { swapComponent } from '../../../../store/modules/question-component.ts'
 import { EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
@@ -10,6 +11,8 @@ import {
   changeComponentsLock,
   changeComponentsVisible,
 } from '../../../../store/modules/question-component.ts'
+import SortableContainer from '../../../../components/DragSort/sort-container.tsx'
+import SortableItem from '../../../../components/DragSort/sort-item.tsx'
 import { cn } from '../../../../utils/index'
 
 const Layers: FC = () => {
@@ -56,49 +59,61 @@ const Layers: FC = () => {
   function handleToggleLocked(fe_id: string) {
     dispatch(changeComponentsLock({ fe_id }))
   }
+
+  // 注：SortableContainer组件的item属性必须是数组, 其中的每一个item都需要一个id属性
+  const componentListWithId = componentList.map((component: any) => {
+    return { ...component, id: component.fe_id }
+  })
+
+  // 拖拽排序结束
+  function handleDragEnd(sourceIndex: number, targetIndex: number) {
+    dispatch(swapComponent({ sourceIndex, targetIndex }))
+  }
+
   return (
-    <>
+    <SortableContainer items={componentListWithId} onDragEnd={handleDragEnd}>
       {componentList.map((component: any) => {
         const { fe_id, title, isHidden, isLocked } = component
 
         return (
-          <div
-            key={fe_id}
-            className={cn(
-              'flex justify-between items-center w-full py-2 px-4 rounded-md cursor-pointer hover:bg-gray-100 hover:text-blue-600'
-            )}
-          >
-            <div onClick={() => handleTitleClick(fe_id)}>
-              {fe_id === changingTitleId && (
-                <Input
-                  value={title}
-                  onChange={handleTitleChange}
-                  onPressEnter={() => setChangingTitleId('')}
-                  onBlur={() => setChangingTitleId('')}
-                />
+          <SortableItem key={fe_id} id={fe_id}>
+            <div
+              className={cn(
+                'flex justify-between items-center w-full py-2 px-4 rounded-md cursor-pointer hover:bg-gray-100 hover:text-blue-600'
               )}
-              {fe_id !== changingTitleId && title}
+            >
+              <div onClick={() => handleTitleClick(fe_id)}>
+                {fe_id === changingTitleId && (
+                  <Input
+                    value={title}
+                    onChange={handleTitleChange}
+                    onPressEnter={() => setChangingTitleId('')}
+                    onBlur={() => setChangingTitleId('')}
+                  />
+                )}
+                {fe_id !== changingTitleId && title}
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="small"
+                  shape="circle"
+                  icon={<EyeInvisibleOutlined />}
+                  type={isHidden ? 'primary' : 'default'}
+                  onClick={() => handleToggleHidden(fe_id, !isHidden)}
+                ></Button>
+                <Button
+                  size="small"
+                  shape="circle"
+                  icon={<LockOutlined />}
+                  type={isLocked ? 'primary' : 'default'}
+                  onClick={() => handleToggleLocked(fe_id)}
+                ></Button>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                size="small"
-                shape="circle"
-                icon={<EyeInvisibleOutlined />}
-                type={isHidden ? 'primary' : 'default'}
-                onClick={() => handleToggleHidden(fe_id, !isHidden)}
-              ></Button>
-              <Button
-                size="small"
-                shape="circle"
-                icon={<LockOutlined />}
-                type={isLocked ? 'primary' : 'default'}
-                onClick={() => handleToggleLocked(fe_id)}
-              ></Button>
-            </div>
-          </div>
+          </SortableItem>
         )
       })}
-    </>
+    </SortableContainer>
   )
 }
 
