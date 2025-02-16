@@ -15,6 +15,9 @@ module.exports = [
         data: {
           id: Random.id(),
           title: Random.ctitle(),
+          desc: Random.cparagraph(),
+          js: '',
+          css: '',
           // 该问卷的组件列表
           componentList: [
             // Title
