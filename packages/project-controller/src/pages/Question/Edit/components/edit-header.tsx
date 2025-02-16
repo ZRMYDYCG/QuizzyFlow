@@ -1,11 +1,19 @@
 import React, { FC, useState } from 'react'
 import { Button, Space, Input } from 'antd'
-import { LeftOutlined, EditOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import {
+  LeftOutlined,
+  EditOutlined,
+  SaveOutlined,
+  LoadingOutlined,
+} from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
-import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
 import { setTitle } from '../../../../store/modules/pageinfo-reducer.ts'
 import { useDispatch } from 'react-redux'
+import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
+import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
+import { updateQuestion } from '../../../../api/modules/question.ts'
+import { useRequest, useKeyPress } from 'ahooks'
 
 const TitleElem: FC = () => {
   const { title } = useGetPageInfo()
@@ -40,6 +48,36 @@ const TitleElem: FC = () => {
   )
 }
 
+const SaveButton: FC = () => {
+  const { id } = useParams()
+  const { componentList = [] } = useGetComponentInfo()
+  const pageInfo = useGetPageInfo()
+
+  useKeyPress(['ctrl.s', 'meta.s'], (event) => {
+    event.preventDefault()
+    if (!loading) save()
+  })
+
+  const { loading, run: save } = useRequest(
+    async () => {
+      if (!id) return
+      await updateQuestion(id, { ...pageInfo, componentList })
+    },
+    { manual: true }
+  )
+
+  return (
+    <Button
+      type="default"
+      disabled={loading}
+      onClick={save}
+      icon={loading ? <LoadingOutlined /> : <SaveOutlined />}
+    >
+      保存
+    </Button>
+  )
+}
+
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
 
@@ -63,7 +101,7 @@ const EditHeader: React.FC = () => {
         </div>
         <div className="flex-1 text-right">
           <Space>
-            <Button type="default">保存</Button>
+            <SaveButton />
             <Button type="primary">发布</Button>
           </Space>
         </div>
