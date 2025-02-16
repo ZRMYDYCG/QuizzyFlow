@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react'
-import { Button, Space, Input } from 'antd'
+import { Button, Space, Input, message } from 'antd'
 import {
   LeftOutlined,
   EditOutlined,
@@ -89,6 +89,31 @@ const SaveButton: FC = () => {
   )
 }
 
+const PublishButton: FC = () => {
+  const { id } = useParams()
+  const { componentList = [] } = useGetComponentInfo()
+  const pageInfo = useGetPageInfo()
+  const navigate = useNavigate()
+  const { loading, run: publish } = useRequest(
+    async () => {
+      if (!id) return
+      await updateQuestion(id, { ...pageInfo, componentList, isPublish: true })
+    },
+    {
+      manual: true,
+      onSuccess() {
+        message.success('发布成功')
+        navigate('/question/statistics/' + id)
+      },
+    }
+  )
+  return (
+    <Button type="primary" disabled={loading} onClick={publish}>
+      发布
+    </Button>
+  )
+}
+
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
 
@@ -113,7 +138,7 @@ const EditHeader: React.FC = () => {
         <div className="flex-1 text-right">
           <Space>
             <SaveButton />
-            <Button type="primary">发布</Button>
+            <PublishButton />
           </Space>
         </div>
       </div>
