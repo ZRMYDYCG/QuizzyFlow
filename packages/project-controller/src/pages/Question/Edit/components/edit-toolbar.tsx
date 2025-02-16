@@ -23,9 +23,17 @@ import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
 
 const EditToolbar: React.FC = () => {
   const dispatch = useDispatch()
-  const { selectedId, selectedComponent, copiedComponent } =
+  const { selectedId, selectedComponent, copiedComponent, componentList } =
     useGetComponentInfo()
   const { isLocked } = selectedComponent || {}
+  const length = componentList.length
+  const selectedIndex = componentList.findIndex(
+    (component: any) => component.fe_id === selectedId
+  )
+  const isFirst = selectedIndex <= 0
+  const isLast = selectedIndex + 1 >= length
+
+  // 组件数量为0时，隐藏删除按钮
 
   // 删除组件
   const handleDelete = () => {
@@ -91,6 +99,7 @@ const EditToolbar: React.FC = () => {
           shape="circle"
           icon={<ArrowUpOutlined />}
           onClick={handlePrevious}
+          disabled={isFirst}
         />
       </Tooltip>
       <Tooltip title="下一个">
@@ -98,6 +107,7 @@ const EditToolbar: React.FC = () => {
           shape="circle"
           icon={<ArrowDownOutlined />}
           onClick={handleNext}
+          disabled={isLast}
         />
       </Tooltip>
       <Tooltip title="复制">
