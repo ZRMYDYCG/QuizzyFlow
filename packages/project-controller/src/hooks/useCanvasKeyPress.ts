@@ -1,5 +1,7 @@
 import { useKeyPress } from 'ahooks'
 import { useDispatch } from 'react-redux'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
+
 import {
   extraComponents,
   changeComponentsVisible,
@@ -44,6 +46,28 @@ function useCanvasKeyPress() {
     if (!isActiveElement()) return
     dispatch(selectNextComponent())
   })
+  // 撤销
+  useKeyPress(
+    ['ctrl.z', 'cmd.z'],
+    () => {
+      if (!isActiveElement()) return
+      dispatch(UndoActionCreators.undo())
+    },
+    {
+      exactMatch: true,
+    }
+  )
+  // 重做
+  useKeyPress(
+    ['ctrl.shift'],
+    () => {
+      if (!isActiveElement()) return
+      dispatch(UndoActionCreators.redo())
+    },
+    {
+      exactMatch: true,
+    }
+  )
 }
 
 export default useCanvasKeyPress

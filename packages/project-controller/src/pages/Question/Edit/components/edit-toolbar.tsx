@@ -8,6 +8,9 @@ import {
   BlockOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
+  UnlockOutlined,
+  UndoOutlined,
+  RedoOutlined,
 } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import {
@@ -20,6 +23,7 @@ import {
   selectNextComponent,
 } from '../../../../store/modules/question-component'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
+import { ActionCreators as UndoActionCreators } from 'redux-undo'
 
 const EditToolbar: React.FC = () => {
   const dispatch = useDispatch()
@@ -70,6 +74,15 @@ const EditToolbar: React.FC = () => {
     dispatch(selectNextComponent())
   }
 
+  // 撤销
+  const handleUndo = () => {
+    dispatch(UndoActionCreators.undo())
+  }
+
+  // 重做
+  const handleRedo = () => {
+    dispatch(UndoActionCreators.redo())
+  }
   return (
     <Space>
       <Tooltip title="删除">
@@ -94,6 +107,22 @@ const EditToolbar: React.FC = () => {
           type={isLocked ? 'primary' : 'default'}
         ></Button>
       </Tooltip>
+
+      <Tooltip title="复制">
+        <Button
+          shape="circle"
+          icon={<CopyOutlined />}
+          onClick={handleCopy}
+        ></Button>
+      </Tooltip>
+      <Tooltip title="粘贴">
+        <Button
+          shape="circle"
+          icon={<BlockOutlined />}
+          onClick={handlePasteComponent}
+          disabled={copiedComponent === null}
+        ></Button>
+      </Tooltip>
       <Tooltip title="上一个">
         <Button
           shape="circle"
@@ -110,20 +139,11 @@ const EditToolbar: React.FC = () => {
           disabled={isLast}
         />
       </Tooltip>
-      <Tooltip title="复制">
-        <Button
-          shape="circle"
-          icon={<CopyOutlined />}
-          onClick={handleCopy}
-        ></Button>
+      <Tooltip title="撤销">
+        <Button shape="circle" icon={<UndoOutlined />} onClick={handleUndo} />
       </Tooltip>
-      <Tooltip title="粘贴">
-        <Button
-          shape="circle"
-          icon={<BlockOutlined />}
-          onClick={handlePasteComponent}
-          disabled={copiedComponent === null}
-        ></Button>
+      <Tooltip title="重做">
+        <Button shape="circle" icon={<RedoOutlined />} onClick={handleRedo} />
       </Tooltip>
     </Space>
   )

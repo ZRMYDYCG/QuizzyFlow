@@ -3,7 +3,7 @@ import { stateType } from '../store'
 
 function useGetComponentInfo() {
   const components = useSelector<stateType>(
-    (state) => state.questionComponent
+    (state) => state.questionComponent.present
   ) as any
 
   const { componentList = [], selectedId, copiedComponent } = components
