@@ -12,7 +12,7 @@ const Statistics: React.FC = () => {
   const navigate = useNavigate()
   useTitle('一刻 • 问卷 | 问卷统计')
 
-  if (isPublished) {
+  if (!isPublished) {
     return (
       <div className="h-full w-full flex justify-center items-center -mt-[100px]">
         <Result
