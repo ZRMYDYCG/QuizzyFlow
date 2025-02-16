@@ -21,9 +21,13 @@ const pageInfoSlice = createSlice({
     resetPageInfo: (state, action: PayloadAction<IPageInfo>) => {
       return action.payload
     },
+    // 修改标题
+    setTitle: (state, action: PayloadAction<string>) => {
+      state.title = action.payload
+    },
   },
 })
 
-export const { resetPageInfo } = pageInfoSlice.actions
+export const { resetPageInfo, setTitle } = pageInfoSlice.actions
 
 export default pageInfoSlice.reducer
