@@ -29,6 +29,7 @@ const useLoadQuestionData = () => {
       desc = '',
       css = '',
       js = '',
+      isPublished = false,
     } = data
 
     // 获取默认的 selectedId
@@ -46,7 +47,7 @@ const useLoadQuestionData = () => {
       })
     )
     // pageInfo存储
-    dispatch(resetPageInfo({ title, desc, css, js }))
+    dispatch(resetPageInfo({ title, desc, css, js, isPublished }))
   }, [data])
 
   // 判断 id 变化

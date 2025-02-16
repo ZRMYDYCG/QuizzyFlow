@@ -5,6 +5,7 @@ export interface IPageInfo {
   desc?: string
   css?: string
   js?: string
+  isPublished?: boolean
 }
 
 export const pageInfoDefaultData: IPageInfo = {

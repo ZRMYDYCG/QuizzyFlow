@@ -18,6 +18,7 @@ module.exports = [
           desc: Random.cparagraph(),
           js: '',
           css: '',
+          isPublish: true,
           // 该问卷的组件列表
           componentList: [
             // Title
