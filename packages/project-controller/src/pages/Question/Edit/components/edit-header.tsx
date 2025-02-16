@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux'
 import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
 import { updateQuestion } from '../../../../api/modules/question.ts'
-import { useRequest, useKeyPress } from 'ahooks'
+import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
 
 const TitleElem: FC = () => {
   const { title } = useGetPageInfo()
@@ -53,11 +53,22 @@ const SaveButton: FC = () => {
   const { componentList = [] } = useGetComponentInfo()
   const pageInfo = useGetPageInfo()
 
+  // 快捷键保存
   useKeyPress(['ctrl.s', 'meta.s'], (event) => {
     event.preventDefault()
     if (!loading) save()
   })
 
+  // 自动保存(防抖处理)
+  useDebounceEffect(
+    () => {
+      save()
+    },
+    [componentList, pageInfo],
+    { wait: 1000 }
+  )
+
+  // 手动保存
   const { loading, run: save } = useRequest(
     async () => {
       if (!id) return
