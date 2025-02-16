@@ -20,7 +20,7 @@ const EditQuestionPage: React.FC = () => {
       <EditHeader />
       <div className="flex-auto py-5">
         <div className="flex mx-[24px] h-full">
-          <div className="w-[325px] bg-white px-[12px]">
+          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto">
             <LeftPanel />
           </div>
           <div
@@ -33,7 +33,7 @@ const EditQuestionPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="w-[325px] bg-white px-[12px]">
+          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto">
             <RightPanel />
           </div>
         </div>
