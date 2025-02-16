@@ -7,7 +7,7 @@ export interface OptionType {
 export interface IQuestionCheckboxProps {
   title?: string
   isVertical?: boolean
-  list: OptionType[]
+  list?: OptionType[]
 
   disabled?: boolean
   onChange?: (newProps: IQuestionCheckboxProps) => void

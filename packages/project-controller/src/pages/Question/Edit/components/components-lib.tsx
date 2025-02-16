@@ -44,7 +44,8 @@ const ComponentsLib: React.FC = () => {
         return (
           <div key={index} className={cn(index > 0 && 'mt-[20px]')}>
             <Typography.Title level={3}>{groupName}</Typography.Title>
-            {components.map(generateComponent)}
+            {/*TODO: 处理类型问题*/}
+            {components.map(generateComponent as any)}
           </div>
         )
       })}
