@@ -3,11 +3,13 @@ import { Spin, Result, Button } from 'antd'
 import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
 import useGetPageInfo from '../../../hooks/useGetPageInfo.ts'
 import { useNavigate } from 'react-router-dom'
+import { useTitle } from 'ahooks'
 
 const Statistics: React.FC = () => {
   const { loading } = useLoadQuestionData()
   const { isPublished } = useGetPageInfo()
   const navigate = useNavigate()
+  useTitle('一刻 • 问卷 | 问卷统计')
 
   if (isPublished) {
     return (

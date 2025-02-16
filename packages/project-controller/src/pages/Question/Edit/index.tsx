@@ -6,10 +6,15 @@ import { changeSelectedId } from '../../../store/modules/question-component.ts'
 import LeftPanel from './components/left-panel.tsx'
 import RightPanel from './components/right-panel.tsx'
 import EditHeader from './components/edit-header.tsx'
+import { useTitle } from 'ahooks'
+import useGetPageInfo from '../../../hooks/useGetPageInfo.ts'
 
 const EditQuestionPage: React.FC = () => {
   const dispatch = useDispatch()
   const { loading } = useLoadQuestionData()
+  const { title } = useGetPageInfo()
+
+  useTitle(`问卷编辑 - ${title}`)
 
   const removeSelectedId = () => {
     dispatch(changeSelectedId(''))

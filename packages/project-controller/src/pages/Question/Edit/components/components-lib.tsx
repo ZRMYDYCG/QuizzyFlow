@@ -18,7 +18,7 @@ function generateComponent(c: ComponentConfigType) {
         title: title,
         type: type,
         props: defaultProps,
-      })
+      } as any)
     )
   }
 
