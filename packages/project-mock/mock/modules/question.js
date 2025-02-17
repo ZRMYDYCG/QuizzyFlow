@@ -1,6 +1,7 @@
 const Mock = require('mockjs')
 const Random = Mock.Random
 const getQuestionList = require('./data/getQuestionList')
+const getComponentsListData = require('./data/getComponentsListData')
 
 module.exports = [
   {
@@ -20,45 +21,7 @@ module.exports = [
           css: '',
           isPublished: true,
           // 该问卷的组件列表
-          componentList: [
-            // Title
-            {
-              fe_id: Random.id(),
-              type: 'question-title',
-              title: '标题',
-              isHidden: false,
-              isLocked: false,
-              props: {
-                text: '个人信息调研问卷',
-                level: 1,
-                isCenter: false,
-              },
-            },
-            // Input
-            {
-              fe_id: Random.id(),
-              type: 'question-input',
-              title: '输入框1',
-              isHidden: false,
-              isLocked: false,
-              props: {
-                title: '你的姓名',
-                placeholder: '请输入你的姓名...',
-              },
-            },
-            // Input
-            {
-              fe_id: Random.id(),
-              type: 'question-input',
-              title: '输入框2',
-              isHidden: false,
-              isLocked: false,
-              props: {
-                title: '你的电话号码',
-                placeholder: '请输入你的电话号码...',
-              },
-            },
-          ],
+          componentList: getComponentsListData(),
         },
       }
     },

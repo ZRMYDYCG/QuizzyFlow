@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTitle } from 'ahooks'
 import StatisticsHeader from './components/statistics-header.tsx'
 import ComponentsList from './components/components-list.tsx'
+import StatisticsTable from './components/statistics-table.tsx'
 
 const Statistics: React.FC = () => {
   const { loading } = useLoadQuestionData()
@@ -46,7 +47,13 @@ const Statistics: React.FC = () => {
               setSelectedComponentType={setSelectedComponentType}
             ></ComponentsList>
           </div>
-          <div className="flex-auto bg-white py-[12px] px-[18px]">中间</div>
+          <div className="flex-auto bg-white py-[12px] px-[18px]">
+            <StatisticsTable
+              selectedComponentId={selectedComponentId}
+              setSelectedComponentId={setSelectedComponentId}
+              setSelectedComponentType={setSelectedComponentType}
+            />
+          </div>
           <div className="w-[400px] ml-[24px] bg-white py-[12px] px-[18px]">
             右侧
           </div>
