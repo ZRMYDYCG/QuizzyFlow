@@ -8,6 +8,7 @@ import { useTitle } from 'ahooks'
 import StatisticsHeader from './components/statistics-header.tsx'
 import ComponentsList from './components/components-list.tsx'
 import StatisticsTable from './components/statistics-table.tsx'
+import StatisticsCharts from './components/statistics-charts.tsx'
 
 const Statistics: React.FC = () => {
   const { loading } = useLoadQuestionData()
@@ -55,7 +56,10 @@ const Statistics: React.FC = () => {
             />
           </div>
           <div className="w-[400px] ml-[24px] bg-white py-[12px] px-[18px]">
-            右侧
+            <StatisticsCharts
+              selectedComponentId={selectedComponentId}
+              selectedComponentType={selectedComponentType}
+            />
           </div>
         </div>
       </div>

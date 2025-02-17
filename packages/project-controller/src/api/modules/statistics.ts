@@ -10,3 +10,10 @@ export const getQuestionsStatistics = async (
 ): Promise<ResDataType> => {
   return await instance.get(`/api/statistics/${questionId}`)
 }
+
+export const getAnswerStatistics = async (
+  questionId: string,
+  componentId: string
+) => {
+  return await instance.get(`/api/${questionId}/${componentId}`)
+}

@@ -28,3 +28,7 @@ export const QuestionRadioDefaultProps = {
   ],
   value: '',
 }
+
+export interface IComponentsStatisticsProps {
+  stat: Array<{ name: string; count: number }>
+}

@@ -4,7 +4,10 @@ import { IQuestionTitleProps } from './question-title'
 import { IQuestionParagraphProps } from './question-paragraph'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
-import { IQuestionRadioProps } from './question-radio'
+import {
+  IQuestionRadioProps,
+  IComponentsStatisticsProps,
+} from './question-radio'
 import { IQuestionCheckboxProps } from './question-checkbox'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
@@ -23,6 +26,9 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionRadioProps &
   IQuestionCheckboxProps
 
+// 各个组件的统计属性类型
+export type ComponentsStatisticsType = IComponentsStatisticsProps
+
 // 组件配置
 export interface ComponentConfigType {
   title: string
@@ -30,6 +36,7 @@ export interface ComponentConfigType {
   component: FC<ComponentPropsType>
   PropComponent: FC<ComponentPropsType>
   defaultProps: ComponentPropsType
+  StatisticsComponent?: FC<IComponentsStatisticsProps>
 }
 
 // 全部组件配置列表
