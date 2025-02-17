@@ -1,16 +1,22 @@
 import React from 'react'
+import { useState } from 'react'
 import { Spin, Result, Button } from 'antd'
 import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
 import useGetPageInfo from '../../../hooks/useGetPageInfo.ts'
 import { useNavigate } from 'react-router-dom'
 import { useTitle } from 'ahooks'
 import StatisticsHeader from './components/statistics-header.tsx'
+import ComponentsList from './components/components-list.tsx'
 
 const Statistics: React.FC = () => {
   const { loading } = useLoadQuestionData()
   const { isPublished } = useGetPageInfo()
   const navigate = useNavigate()
   useTitle('一刻 • 问卷 | 问卷统计')
+
+  // 状态提升
+  const [selectedComponentId, setSelectedComponentId] = useState('')
+  const [selectedComponentType, setSelectedComponentType] = useState('')
 
   if (!isPublished) {
     return (
@@ -33,7 +39,13 @@ const Statistics: React.FC = () => {
       <StatisticsHeader />
       <div className="flex-auto py-[12px]">
         <div className="flex mx-[24px]">
-          <div className="w-[350px] mr-[24px]">左侧</div>
+          <div className="w-[350px] mr-[24px] h-[calc(100vh-77px)] overflow-auto]">
+            <ComponentsList
+              selectedComponentId={selectedComponentId}
+              setSelectedComponentId={setSelectedComponentId}
+              setSelectedComponentType={setSelectedComponentType}
+            ></ComponentsList>
+          </div>
           <div className="flex-auto bg-white py-[12px] px-[18px]">中间</div>
           <div className="w-[400px] ml-[24px] bg-white py-[12px] px-[18px]">
             右侧
