@@ -8,7 +8,10 @@ import {
   IQuestionRadioProps,
   IComponentsStatisticsProps,
 } from './question-radio'
-import { IQuestionCheckboxProps } from './question-checkbox'
+import {
+  IQuestionCheckboxProps,
+  ICheckboxStatisticsProps,
+} from './question-checkbox'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -27,7 +30,8 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionCheckboxProps
 
 // 各个组件的统计属性类型
-export type ComponentsStatisticsType = IComponentsStatisticsProps
+export type ComponentsStatisticsType = IComponentsStatisticsProps &
+  ICheckboxStatisticsProps
 
 // 组件配置
 export interface ComponentConfigType {

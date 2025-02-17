@@ -35,3 +35,7 @@ export const QuestionCheckboxDefaultProps: IQuestionCheckboxProps = {
   ],
   disabled: false,
 }
+
+export interface ICheckboxStatisticsProps {
+  stat: Array<{ name: string; count: number }>
+}
