@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import { Typography, Spin, Table } from 'antd'
+import { Typography, Spin, Table, Pagination } from 'antd'
 import { getQuestionsStatistics } from '../../../../api/modules/statistics.ts'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
 import { cn } from '../../../../utils/index.ts'
@@ -23,6 +23,8 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
 
   const [total, setTotal] = useState()
   const [list, setList] = useState([])
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const { componentList } = useGetComponentInfo()
 
@@ -36,6 +38,7 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
       })
     },
     {
+      refreshDeps: [id, page, pageSize],
       onSuccess(res: any) {
         const { total, list = [] } = res
         setTotal(total)
@@ -43,6 +46,8 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
       },
     }
   )
+
+  useEffect(() => {}, [id])
 
   const columns = componentList.map((c: any) => {
     const { fe_id, title, props = {} } = c
@@ -68,8 +73,26 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
     }
   })
 
+  const dataSource = list.map((item: any) => ({ ...item, key: item._id }))
+
   const TableElem = (
-    <Table columns={columns} dataSource={list} pagination={false}></Table>
+    <>
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        pagination={false}
+      ></Table>
+      <Pagination
+        total={total}
+        current={page}
+        pageSize={pageSize}
+        onChange={(page) => setPage(page)}
+        onShowSizeChange={(current, size) => {
+          setPage(1)
+          setPageSize(size)
+        }}
+      ></Pagination>
+    </>
   )
 
   return (
