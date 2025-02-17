@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import { Typography, Spin } from 'antd'
+import { Typography, Spin, Table } from 'antd'
 import { getQuestionsStatistics } from '../../../../api/modules/statistics.ts'
+import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
+import { cn } from '../../../../utils/index.ts'
 
 interface IStatisticsTableProps {
   selectedComponentId: string
@@ -22,6 +24,8 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
   const [total, setTotal] = useState()
   const [list, setList] = useState([])
 
+  const { componentList } = useGetComponentInfo()
+
   const { id = '' } = useParams()
 
   const { loading } = useRequest(
@@ -39,6 +43,35 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
       },
     }
   )
+
+  const columns = componentList.map((c: any) => {
+    const { fe_id, title, props = {} } = c
+
+    const columnTitle = props.title || title
+
+    return {
+      title: (
+        <div
+          className="cursor-pointer"
+          onClick={() => {
+            setSelectedComponentId(fe_id)
+          }}
+        >
+          <span
+            className={cn({ 'text-blue-500': fe_id === selectedComponentId })}
+          >
+            {columnTitle}
+          </span>
+        </div>
+      ),
+      dataIndex: fe_id,
+    }
+  })
+
+  const TableElem = (
+    <Table columns={columns} dataSource={list} pagination={false}></Table>
+  )
+
   return (
     <div>
       <Typography.Title level={3}>
@@ -49,6 +82,7 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
           <Spin />
         </div>
       )}
+      {!loading && TableElem}
     </div>
   )
 }
