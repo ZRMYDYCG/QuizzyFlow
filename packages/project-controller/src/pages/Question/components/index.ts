@@ -40,7 +40,7 @@ export interface ComponentConfigType {
   component: FC<ComponentPropsType>
   PropComponent: FC<ComponentPropsType>
   defaultProps: ComponentPropsType
-  statisticsComponent?: FC<IComponentsStatisticsProps>
+  statisticsComponent?: FC<ComponentsStatisticsType>
 }
 
 // 全部组件配置列表

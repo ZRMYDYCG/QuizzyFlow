@@ -50,7 +50,7 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
   useEffect(() => {}, [id])
 
   const columns = componentList.map((c: any) => {
-    const { fe_id, title, props = {} } = c
+    const { fe_id, title, props = {}, type } = c
 
     const columnTitle = props.title || title
 
@@ -60,6 +60,7 @@ const StatisticsTable: React.FC<IStatisticsTableProps> = (
           className="cursor-pointer"
           onClick={() => {
             setSelectedComponentId(fe_id)
+            setSelectedComponentType(type)
           }}
         >
           <span

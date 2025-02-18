@@ -40,9 +40,12 @@ const StatisticsCharts: React.FC<IStatisticsChartsProps> = (
   function renderChart() {
     if (!selectedComponentId) return <Result title="未选中组件"></Result>
 
-    const componentConfig = getComponentConfigByType(selectedComponentType)
+    const componentConfig =
+      getComponentConfigByType(selectedComponentType) || {}
 
-    const { statisticsComponent: StatisticsComponent } = componentConfig
+    console.log('测试', componentConfig)
+
+    const { StatisticsComponent } = componentConfig
 
     if (!StatisticsComponent)
       return <Result title="该项不支持统计分析"></Result>
