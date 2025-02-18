@@ -19,12 +19,13 @@ const QuestionRadio: React.FC<PropsType> = ({ fe_id, props }) => {
   return (
     <>
       <p>{title}</p>
-      <ul>
-        {options.map((options) => {
-          const { value: val, text } = options
+
+      <ul className={isVertical ? 'mb-2' : 'mr-2 flex gap-2'}>
+        {options.map((option) => {
+          const { value: val, text } = option
 
           return (
-            <li key={value}>
+            <li key={val}>
               <label>
                 <input
                   type="radio"
