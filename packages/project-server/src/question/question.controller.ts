@@ -6,11 +6,17 @@ import {
   Post,
   Patch,
   Body,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common'
 import { QuestionDto } from './dto/question.dto'
 
 @Controller('question')
 export class QuestionController {
+  @Get('test')
+  test() {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN)
+  }
   @Get()
   findAll(
     @Query('keyword') keyword: string,
