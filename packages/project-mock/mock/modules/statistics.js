@@ -20,7 +20,7 @@ module.exports = [
   },
   // 获取单个组件的统计数据
   {
-    url: 'api/statistics/:questionId/:componentId',
+    url: '/api/statistics/:questionId/:componentId',
     method: 'get',
     response() {
       return {

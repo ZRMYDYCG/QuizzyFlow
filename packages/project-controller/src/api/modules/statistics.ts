@@ -15,5 +15,5 @@ export const getAnswerStatistics = async (
   questionId: string,
   componentId: string
 ) => {
-  return await instance.get(`/api/${questionId}/${componentId}`)
+  return await instance.get(`/api/statistics/${questionId}/${componentId}`)
 }

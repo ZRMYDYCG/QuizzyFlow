@@ -3,7 +3,7 @@ import { Result, Typography } from 'antd'
 import { getAnswerStatistics } from '../../../../api/modules/statistics.ts'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import StatisticsComponents from '../../components/question-radio/stat-component.tsx'
+import { getComponentConfigByType } from '../../components'
 
 const { Title } = Typography
 
@@ -15,7 +15,7 @@ interface IStatisticsChartsProps {
 const StatisticsCharts: React.FC<IStatisticsChartsProps> = (
   props: IStatisticsChartsProps
 ) => {
-  const { selectedComponentId } = props
+  const { selectedComponentId, selectedComponentType } = props
   const { id = '' } = useParams()
 
   const [stat, setStat] = useState()
@@ -39,6 +39,15 @@ const StatisticsCharts: React.FC<IStatisticsChartsProps> = (
 
   function renderChart() {
     if (!selectedComponentId) return <Result title="未选中组件"></Result>
+
+    const componentConfig = getComponentConfigByType(selectedComponentType)
+
+    const { statisticsComponent: StatisticsComponent } = componentConfig
+
+    if (!StatisticsComponent)
+      return <Result title="该项不支持统计分析"></Result>
+
+    return <StatisticsComponent stat={stat as any} />
   }
 
   return (
