@@ -74,4 +74,10 @@ export class QuestionController {
     const { username } = req.user
     return this.questionService.delete(id, username)
   }
+  @Delete()
+  deleteMany(@Body() body, @Request() req) {
+    const { username } = req.user
+    const { ids = [] } = body
+    return this.questionService.deleteMany(ids, username)
+  }
 }

@@ -36,6 +36,12 @@ export class QuestionService {
       author,
     })
   }
+  async deleteMany(ids: string[], author: string) {
+    return await this.questionModel.deleteMany({
+      _id: { $in: ids },
+      author,
+    })
+  }
   async update(id: string, author: string, data) {
     return await this.questionModel.findByIdAndUpdate({ _id: id, author }, data)
   }
