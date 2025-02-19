@@ -8,28 +8,57 @@ export class QuestionService {
     // 注入 Question 模型
     @InjectModel(Question.name) private readonly questionModel
   ) {}
-  async create() {
+  async create(username: string) {
     const question = new this.questionModel({
-      title: 'title',
-      desc: 'desc',
+      title: '问卷标题' + Date.now(),
+      desc: '问卷描述',
+      author: username,
+      componentList: [
+        {
+          fe_id: 'asdf1234',
+          type: 'question-info',
+          title: '问卷信息',
+          props: {
+            title: '问卷标题',
+            desc: '问卷描述',
+          },
+        },
+      ],
     })
     return await question.save()
   }
   async findOne(id: string) {
     return await this.questionModel.findById(id)
   }
-  async delete(id: string) {
-    return await this.questionModel.findByIdAndRemove(id)
+  async delete(id: string, author: string) {
+    return await this.questionModel.findOneAndDelete({
+      _id: id,
+      author,
+    })
   }
-  async update(id: string, data) {
-    return await this.questionModel.findByIdAndUpdate({ _id: id }, data)
+  async update(id: string, author: string, data) {
+    return await this.questionModel.findByIdAndUpdate({ _id: id, author }, data)
   }
-  async findAllList({ keyword = '', page = 1, pageSize = 10 }) {
-    const options: any = {}
+  async findAllList({
+    keyword = '',
+    page = 1,
+    pageSize = 10,
+    isDeleted,
+    isStar,
+    author = '',
+  }) {
+    const options: any = {
+      author,
+      isDeleted,
+      isStar,
+    }
+
     if (keyword) {
       const reg = new RegExp(keyword, 'i')
       options.title = { $regex: reg } // 模糊搜索标题
     }
+
+    console.log(options)
 
     return await this.questionModel
       .find(options)
@@ -39,8 +68,12 @@ export class QuestionService {
       .limit(pageSize) // 限制返回多少条
   }
 
-  async count({ keyword = '' }) {
-    const options: any = {}
+  async count({ keyword = '', isDeleted = false, isStar, author = '' }) {
+    const options: any = {
+      author,
+      isDeleted,
+      isStar,
+    }
     if (keyword) {
       const reg = new RegExp(keyword, 'i')
       options.title = { $regex: reg } // 模糊搜索标题
