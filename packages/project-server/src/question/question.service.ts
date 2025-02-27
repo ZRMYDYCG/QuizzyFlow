@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Question } from './schemas/question.schema'
+import mongoose from 'mongoose'
+import { nanoid } from 'nanoid'
 
 @Injectable()
 export class QuestionService {
@@ -15,12 +17,12 @@ export class QuestionService {
       author: username,
       componentList: [
         {
-          fe_id: 'asdf1234',
+          fe_id: nanoid(),
           type: 'question-info',
           title: '问卷信息',
           props: {
             title: '问卷标题',
-            desc: '问卷描述',
+            desc: '问卷描述...',
           },
         },
       ],
@@ -64,8 +66,6 @@ export class QuestionService {
       options.title = { $regex: reg } // 模糊搜索标题
     }
 
-    console.log(options)
-
     return await this.questionModel
       .find(options)
       .sort({ id: -1 }) // 倒序排列
@@ -86,5 +86,22 @@ export class QuestionService {
     }
 
     return await this.questionModel.countDocuments(options)
+  }
+
+  async duplicate(id: string, author: string) {
+    const question = await this.questionModel.findById(id)
+    const newQuestion = new this.questionModel({
+      ...question.toObject(),
+      _id: new mongoose.Types.ObjectId(),
+      title: question.title + '副本',
+      author,
+      isPublish: false,
+      isStar: false,
+      componentList: question.componentList.map((component: any) => ({
+        ...component,
+        fe_id: nanoid(),
+      })),
+    })
+    return newQuestion.save()
   }
 }
