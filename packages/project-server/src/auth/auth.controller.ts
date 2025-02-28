@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, Request, UseGuards, Get } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { CreateUserDto } from '../user/dto/create-user.dto'
 import { Public } from './decorators/public.decorator'
@@ -15,7 +15,7 @@ export class AuthController {
     return await this.authService.signIn(username, password)
   }
 
-  @Post('profile')
+  @Get('profile')
   async getProfile(@Request() req) {
     return req.user
   }
