@@ -11,6 +11,7 @@ import { QuestionSchema, Question } from './schemas/question.schema'
     ]),
   ],
   controllers: [QuestionController],
+  exports: [QuestionService],
   providers: [QuestionService],
 })
 export class QuestionModule {}

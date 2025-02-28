@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Answer } from './schemas/answer.schema'
-import { HttpException, HttpStatus } from '@nestjs/common'
 
 @Injectable()
 export class AnswerService {
@@ -14,5 +13,23 @@ export class AnswerService {
 
     const answer = new this.answerModel(answerInfo)
     return await answer.save()
+  }
+  // 获取某问卷的答卷的数量
+  async count(questionId: string) {
+    if (!questionId) return 0
+    return await this.answerModel.count({ questionId })
+  }
+  // 获取某问卷的所有答卷列表
+  async findAll(questionId: string, opt: { page: number; pageSize: number }) {
+    if (!questionId) return []
+
+    const { page = 1, pageSize = 10 } = opt
+    return await this.answerModel
+      .find({
+        questionId,
+      })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createAt: -1 })
   }
 }
