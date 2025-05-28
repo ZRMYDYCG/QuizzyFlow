@@ -7,6 +7,9 @@ export interface IPageInfo {
   js?: string
   isPublished?: boolean
   padding?: string
+  layout?: 'left' | 'center' | 'right' // 页面方向
+  maxWidth?: string // 页面最大宽度
+  bgImage?: string // 背景图片URL
 }
 
 export const pageInfoDefaultData: IPageInfo = {
@@ -14,7 +17,10 @@ export const pageInfoDefaultData: IPageInfo = {
   desc: '',
   css: '',
   js: '',
-  padding: '16px', // 默认内边距
+  padding: '16px',
+  layout: 'center', // 默认居中
+  maxWidth: '100%', // 默认100%宽度
+  bgImage: '', // 默认无背景图
 }
 
 const pageInfoSlice = createSlice({
@@ -30,9 +36,29 @@ const pageInfoSlice = createSlice({
     setPagePadding: (state, action: PayloadAction<string>) => {
       state.padding = action.payload
     },
+    // 新增reducer
+    setPageLayout: (
+      state,
+      action: PayloadAction<'left' | 'center' | 'right'>
+    ) => {
+      state.layout = action.payload
+    },
+    setMaxWidth: (state, action: PayloadAction<string>) => {
+      state.maxWidth = action.payload
+    },
+    setBgImage: (state, action: PayloadAction<string>) => {
+      state.bgImage = action.payload
+    },
   },
 })
 
-export const { resetPageInfo, setTitle, setPagePadding } = pageInfoSlice.actions
+export const {
+  resetPageInfo,
+  setTitle,
+  setPagePadding,
+  setPageLayout,
+  setMaxWidth,
+  setBgImage,
+} = pageInfoSlice.actions
 
 export default pageInfoSlice.reducer

@@ -36,7 +36,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
   const { componentList = [], selectedId } = useGetComponentInfo()
   const pageInfo = useSelector(
     (state: { pageInfo: IPageInfo }) => state.pageInfo
-  ) // 新增：获取全局配置
+  )
 
   useCanvasKeyPress()
 
@@ -59,38 +59,68 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
     )
   }
 
+  // 计算布局方向对应的margin
+  const getLayoutMargin = () => {
+    switch (pageInfo.layout) {
+      case 'left':
+        return '0 auto 0 0'
+      case 'right':
+        return '0 0 0 auto'
+      case 'center':
+      default:
+        return '0 auto'
+    }
+  }
+
   return (
-    // 应用全局padding和主题色
-    <div style={{ padding: pageInfo.padding }}>
-      <SortableContainer items={componentListWithId} onDragEnd={handleDragEnd}>
-        <div>
-          {componentList
-            .filter((item: any) => !item.isHidden)
-            .map((item: QuestionComponentType) => {
-              const { fe_id, isLocked } = item
-              const isActive = fe_id === selectedId
-              return (
-                <SortableItem key={fe_id} id={fe_id}>
-                  <div
-                    onClick={(e) => handleClick(e, fe_id)}
-                    className={cn(
-                      'm-[12px] border p-[12px] rounded-[8px] bg-white',
-                      isActive
-                        ? `border border-[#ccc] border-2`
-                        : 'border-white hover:border-blue-500',
-                      'cursor-pointer',
-                      isLocked ? 'opacity-50 cursor-not-allowed' : ''
-                    )}
-                  >
-                    <div className="pointer-events-none">
-                      {genComponent(item)}
+    <div
+      style={{
+        padding: pageInfo.padding,
+        backgroundImage: pageInfo.bgImage ? `url(${pageInfo.bgImage})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: pageInfo.maxWidth || '100%',
+          margin: getLayoutMargin(),
+        }}
+      >
+        <SortableContainer
+          items={componentListWithId}
+          onDragEnd={handleDragEnd}
+        >
+          <div>
+            {componentList
+              .filter((item: any) => !item.isHidden)
+              .map((item: QuestionComponentType) => {
+                const { fe_id, isLocked } = item
+                const isActive = fe_id === selectedId
+                return (
+                  <SortableItem key={fe_id} id={fe_id}>
+                    <div
+                      onClick={(e) => handleClick(e, fe_id)}
+                      className={cn(
+                        'm-[12px] border p-[12px] rounded-[8px] bg-white',
+                        isActive
+                          ? `border border-[#ccc] border-2`
+                          : 'border-white hover:border-blue-500',
+                        'cursor-pointer',
+                        isLocked ? 'opacity-50 cursor-not-allowed' : ''
+                      )}
+                    >
+                      <div className="pointer-events-none">
+                        {genComponent(item)}
+                      </div>
                     </div>
-                  </div>
-                </SortableItem>
-              )
-            })}
-        </div>
-      </SortableContainer>
+                  </SortableItem>
+                )
+              })}
+          </div>
+        </SortableContainer>
+      </div>
     </div>
   )
 }
