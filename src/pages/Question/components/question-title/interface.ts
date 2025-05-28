@@ -2,18 +2,15 @@
  * @description 标题组件
  * */
 export interface IQuestionTitleProps {
-  // 标题内容
+  // 基础属性
   text?: string
-  // 标题级别
   level?: 1 | 2 | 3 | 4 | 5
-  // 是否居中
   isCenter?: boolean
-  // 是否禁用
   disabled?: boolean
-  // 改变
   onChange?: (newProps: IQuestionTitleProps) => void
-  // 自定义颜色
   color?: string
+  /** 动画（| 'shake' | 'float' | 'none'） */
+  animateType?: string
 }
 
 export const QuestionTitleDefaultData: IQuestionTitleProps = {
@@ -21,4 +18,5 @@ export const QuestionTitleDefaultData: IQuestionTitleProps = {
   level: 1,
   isCenter: false,
   color: '#000000',
+  animateType: 'none',
 }

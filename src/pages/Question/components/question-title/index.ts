@@ -13,10 +13,5 @@ export default {
   component: QuestionTitle,
   defaultProps: {
     ...QuestionTitleDefaultData,
-    color: '#000000',
   },
-  // 新增描述信息
-  description: '可自定义颜色和层级的标题组件',
-  // 新增图标
-  icon: 'icon-title',
 }

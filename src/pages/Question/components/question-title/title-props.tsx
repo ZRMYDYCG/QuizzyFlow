@@ -6,11 +6,11 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
   props: IQuestionTitleProps
 ) => {
   const [form] = Form.useForm()
-  const { text, level, isCenter, onChange, disabled } = props
+  const { text, level, isCenter, animateType, onChange, disabled } = props
 
   useEffect(() => {
-    form.setFieldsValue({ text, level, isCenter })
-  }, [text, level, isCenter])
+    form.setFieldsValue({ text, level, isCenter, animateType })
+  }, [text, level, isCenter, animateType])
 
   function handleValueChange() {
     if (onChange) {
@@ -26,7 +26,7 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
   return (
     <Form
       layout="vertical"
-      initialValues={{ text, level, isCenter }}
+      initialValues={{ text, level, isCenter, animateType }}
       form={form}
       onValuesChange={handleValueChange}
       disabled={disabled}
@@ -56,7 +56,16 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
         <Checkbox></Checkbox>
       </Form.Item>
       <Form.Item label="自定义颜色" name="color">
-        <Input type="color" />
+        <Input className="w-16 h-8 border rounded" type="color" />
+      </Form.Item>
+      <Form.Item label="动画类型" name="animateType">
+        <Select
+          options={[
+            { label: '无动画', value: 'none' },
+            { label: '抖动效果', value: 'shake' },
+            { label: '浮动效果', value: 'float' },
+          ]}
+        />
       </Form.Item>
     </Form>
   )

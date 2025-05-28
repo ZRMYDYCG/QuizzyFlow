@@ -17,6 +17,7 @@ function getComponentsListData() {
         text: '个人信息调研问卷',
         level: 1,
         isCenter: false,
+        animateType: 'none',
       },
     },
     // Input
