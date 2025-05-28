@@ -12,10 +12,13 @@ export interface IQuestionTitleProps {
   disabled?: boolean
   // 改变
   onChange?: (newProps: IQuestionTitleProps) => void
+  // 自定义颜色
+  color?: string
 }
 
 export const QuestionTitleDefaultData: IQuestionTitleProps = {
   text: '定义标题',
   level: 1,
   isCenter: false,
+  color: '#000000',
 }

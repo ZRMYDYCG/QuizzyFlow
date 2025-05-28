@@ -7,7 +7,16 @@ export * from './interface.ts'
 export default {
   title: '标题',
   type: 'question-title',
-  PropComponent: TitleProps, // 编辑器组件
-  component: QuestionTitle, // 画布显示的组件
-  defaultProps: QuestionTitleDefaultData,
+  // 编辑器组件
+  PropComponent: TitleProps,
+  // 画布显示的组件
+  component: QuestionTitle,
+  defaultProps: {
+    ...QuestionTitleDefaultData,
+    color: '#000000',
+  },
+  // 新增描述信息
+  description: '可自定义颜色和层级的标题组件',
+  // 新增图标
+  icon: 'icon-title',
 }

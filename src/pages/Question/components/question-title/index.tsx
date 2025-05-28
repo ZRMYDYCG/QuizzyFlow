@@ -6,7 +6,10 @@ import { Typography } from 'antd'
 const QuestionTitle: React.FC<IQuestionTitleProps> = (
   props: IQuestionTitleProps
 ) => {
-  const { text, level, isCenter } = { ...QuestionTitleDefaultData, ...props }
+  const { text, level, isCenter, color } = {
+    ...QuestionTitleDefaultData,
+    ...props,
+  }
   const { Title } = Typography
 
   const genFontSize = (level: number) => {
@@ -32,6 +35,7 @@ const QuestionTitle: React.FC<IQuestionTitleProps> = (
       style={{
         textAlign: isCenter ? 'center' : 'left',
         fontSize: genFontSize(level as number),
+        color: color || 'inherit',
       }}
     >
       {text}

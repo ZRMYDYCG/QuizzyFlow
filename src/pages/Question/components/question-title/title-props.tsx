@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Form, Input, Checkbox, Select } from 'antd'
+import { Form, Input, Checkbox, Select, message } from 'antd'
 import { IQuestionTitleProps } from './interface'
 
 const TitleProps: React.FC<IQuestionTitleProps> = (
@@ -14,7 +14,12 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
 
   function handleValueChange() {
     if (onChange) {
-      onChange(form.getFieldsValue())
+      const values = form.getFieldsValue()
+      if (values.text && values.text.length > 50) {
+        message.warning('标题内容过长，请控制在50字以内')
+        return
+      }
+      onChange(values)
     }
   }
 
@@ -29,9 +34,12 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
       <Form.Item
         label="标题内容"
         name="text"
-        rules={[{ required: true, message: '请输入标题内容！' }]}
+        rules={[
+          { required: true, message: '请输入标题内容！' },
+          { max: 50, message: '标题内容过长，请控制在50字以内' },
+        ]}
       >
-        <Input />
+        <Input.TextArea />
       </Form.Item>
       <Form.Item label="层级" name="level">
         <Select
@@ -39,11 +47,16 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
             { label: 1, value: 1 },
             { label: 2, value: 2 },
             { label: 3, value: 3 },
+            { label: 4, value: 4 },
+            { label: 5, value: 5 },
           ]}
         ></Select>
       </Form.Item>
       <Form.Item label="居中显示" name="isCenter" valuePropName="checked">
         <Checkbox></Checkbox>
+      </Form.Item>
+      <Form.Item label="自定义颜色" name="color">
+        <Input type="color" />
       </Form.Item>
     </Form>
   )
