@@ -19,20 +19,20 @@ const RightPanel: React.FC = () => {
     {
       key: 'prop',
       label: (
-        <span>
+        <div>
           <FileTextOutlined />
-          属性
-        </span>
+          <span>物料属性</span>
+        </div>
       ),
       children: <ComponentProp />,
     },
     {
       key: 'setting',
       label: (
-        <span>
+        <div>
           <SettingOutlined />
-          页面设置
-        </span>
+          <span>页面设置</span>
+        </div>
       ),
       children: <PageSetting />,
     },

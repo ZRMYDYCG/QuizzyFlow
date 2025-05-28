@@ -27,7 +27,7 @@ function generateComponent(c: ComponentConfigType) {
     <div
       onClick={handleClick}
       className={cn(
-        'mb-[12px] cursor-pointer bg-[#fff] border-[1px] border-[#fff] hover:border-[#e5e5e5] rounded-[4px] p-[12px]'
+        'mb-[12px] cursor-pointer bg-[#fff] border-[1px] border-[#e5e5e5] border-dotted hover:border-blue-500 rounded-[4px] p-[12px]'
       )}
     >
       <div className="pointer-events-none">

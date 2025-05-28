@@ -106,7 +106,7 @@ const TitleProps: React.FC<IQuestionTitleProps> = (
       </Form.Item>
 
       {typewriter?.isOpen && (
-        <div className="pl-4 mt-2 border-l-2 border-gray-100">
+        <div className="pl-4 ml-8 mt-2 border-l-2 border-gray-100">
           <Form.Item
             label="打字速度(ms/字符)"
             name={['typewriter', 'config', 'speed']}
