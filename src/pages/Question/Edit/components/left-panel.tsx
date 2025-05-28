@@ -2,7 +2,12 @@ import React from 'react'
 import { Tabs } from 'antd'
 import ComponentsLib from './components-lib'
 import Layers from './layers'
-import { AppstoreAddOutlined, BarChartOutlined } from '@ant-design/icons'
+import TemplateLib from './template-lib'
+import {
+  AppstoreAddOutlined,
+  BarChartOutlined,
+  RadarChartOutlined,
+} from '@ant-design/icons'
 
 const LeftPanel: React.FC = () => {
   const tabsItems = [
@@ -15,6 +20,16 @@ const LeftPanel: React.FC = () => {
         </span>
       ),
       children: <ComponentsLib />,
+    },
+    {
+      key: 'template',
+      label: (
+        <span>
+          <RadarChartOutlined />
+          <span>模板库</span>
+        </span>
+      ),
+      children: <TemplateLib />,
     },
     {
       key: 'layers',
