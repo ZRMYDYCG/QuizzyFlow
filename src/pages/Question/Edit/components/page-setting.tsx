@@ -1,24 +1,30 @@
 import React from 'react'
 import { useEffect } from 'react'
-import { Form, Input } from 'antd'
+import { Form, Input, InputNumber, Button } from 'antd'
 import { useDispatch } from 'react-redux'
 import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
-import { resetPageInfo } from '../../../../store/modules/pageinfo-reducer.ts'
+import {
+  resetPageInfo,
+  setPagePadding,
+} from '../../../../store/modules/pageinfo-reducer.ts'
 
 const PageSetting: React.FC = () => {
   const pageInfo = useGetPageInfo()
   const dispatch = useDispatch()
   const [form] = Form.useForm()
 
-  // 更新表单内容
   useEffect(() => {
     form.setFieldsValue(pageInfo)
   }, [pageInfo])
 
-  const handleValuesChange = () => {
+  const handleValuesChange = (changedValues: any) => {
     const values = form.getFieldsValue()
+    if (changedValues.padding !== undefined) {
+      dispatch(setPagePadding(changedValues.padding))
+    }
     dispatch(resetPageInfo(values))
   }
+
   return (
     <Form
       layout="vertical"
@@ -36,14 +42,19 @@ const PageSetting: React.FC = () => {
       <Form.Item label="问卷描述" name="desc">
         <Input.TextArea size="large" placeholder="请输入问卷描述" />
       </Form.Item>
+      <Form.Item
+        label="页面内边距"
+        name="padding"
+        rules={[{ required: true, message: '请输入内边距（如：16px）' }]}
+      >
+        <Input placeholder="示例：16px 24px" />
+      </Form.Item>
       <Form.Item label="样式代码" name="css">
         <Input.TextArea size="large" placeholder="请输入样式代码" />
       </Form.Item>
       <Form.Item label="脚本代码" name="js">
         <Input.TextArea size="large" placeholder="请输入脚本代码" />
       </Form.Item>
-      <Form.Item label="封面" name="cover"></Form.Item>
-      <Form.Item label="背景图" name="background"></Form.Item>
     </Form>
   )
 }

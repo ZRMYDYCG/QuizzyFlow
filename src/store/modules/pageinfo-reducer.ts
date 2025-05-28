@@ -6,6 +6,7 @@ export interface IPageInfo {
   css?: string
   js?: string
   isPublished?: boolean
+  padding?: string
 }
 
 export const pageInfoDefaultData: IPageInfo = {
@@ -13,6 +14,7 @@ export const pageInfoDefaultData: IPageInfo = {
   desc: '',
   css: '',
   js: '',
+  padding: '16px', // 默认内边距
 }
 
 const pageInfoSlice = createSlice({
@@ -22,13 +24,15 @@ const pageInfoSlice = createSlice({
     resetPageInfo: (state, action: PayloadAction<IPageInfo>) => {
       return action.payload
     },
-    // 修改标题
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload
+    },
+    setPagePadding: (state, action: PayloadAction<string>) => {
+      state.padding = action.payload
     },
   },
 })
 
-export const { resetPageInfo, setTitle } = pageInfoSlice.actions
+export const { resetPageInfo, setTitle, setPagePadding } = pageInfoSlice.actions
 
 export default pageInfoSlice.reducer
