@@ -1,5 +1,5 @@
 import React from 'react'
-import EditCanvas from '../components/edit-canvas.tsx'
+import EditCanvas from '../../../components/lib/edit-canvas.tsx'
 import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
 import { useDispatch } from 'react-redux'
 import { changeSelectedId } from '../../../store/modules/question-component.ts'

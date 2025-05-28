@@ -16,7 +16,7 @@ const LeftPanel: React.FC = () => {
       label: (
         <span>
           <AppstoreAddOutlined />
-          <span>物料库</span>
+          <span>物料基础</span>
         </span>
       ),
       children: <ComponentsLib />,
@@ -26,7 +26,7 @@ const LeftPanel: React.FC = () => {
       label: (
         <span>
           <RadarChartOutlined />
-          <span>模板库</span>
+          <span>物料组合</span>
         </span>
       ),
       children: <TemplateLib />,
@@ -36,7 +36,7 @@ const LeftPanel: React.FC = () => {
       label: (
         <span>
           <BarChartOutlined />
-          <span>图层</span>
+          <span>画布图层</span>
         </span>
       ),
       children: <Layers />,

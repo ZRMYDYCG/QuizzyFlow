@@ -3,7 +3,7 @@ import { Typography } from 'antd'
 import {
   IQuestionParagraphProps,
   QuestionParagraphDefaultProps,
-} from './interface'
+} from './interface.ts'
 
 const QuestionParagraph: FC<IQuestionParagraphProps> = (
   props: IQuestionParagraphProps

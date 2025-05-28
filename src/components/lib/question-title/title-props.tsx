@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Form, Input, InputNumber, Checkbox, Select, message } from 'antd'
-import { IQuestionTitleProps, QuestionTitleDefaultData } from './interface'
+import { IQuestionTitleProps, QuestionTitleDefaultData } from './interface.ts'
 
 const TitleProps: React.FC<IQuestionTitleProps> = (
   props: IQuestionTitleProps

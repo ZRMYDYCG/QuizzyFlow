@@ -1,24 +1,24 @@
 import type { FC } from 'react'
-import { IQuestionInputProps } from './question-input'
-import { IQuestionTitleProps } from './question-title'
-import { IQuestionParagraphProps } from './question-paragraph'
-import { IQuestionInfoProps } from './question-info'
-import { IQuestionTextareaProps } from './question-textarea'
+import { IQuestionInputProps } from './question-input/index.ts'
+import { IQuestionTitleProps } from './question-title/index.ts'
+import { IQuestionParagraphProps } from './question-paragraph/index.ts'
+import { IQuestionInfoProps } from './question-info/index.ts'
+import { IQuestionTextareaProps } from './question-textarea/index.ts'
 import {
   IQuestionRadioProps,
   IComponentsStatisticsProps,
-} from './question-radio'
+} from './question-radio/index.ts'
 import {
   IQuestionCheckboxProps,
   ICheckboxStatisticsProps,
-} from './question-checkbox'
-import QuestionInputConfig from './question-input'
-import QuestionTitleConfig from './question-title'
-import QuestionParagraphConfig from './question-paragraph'
-import QuestionInfoConfig from './question-info'
-import QuestionTextareaConfig from './question-textarea'
-import QuestionRadioConfig from './question-radio'
-import QuestionCheckboxConfig from './question-checkbox'
+} from './question-checkbox/index.ts'
+import QuestionInputConfig from './question-input/index.ts'
+import QuestionTitleConfig from './question-title/index.ts'
+import QuestionParagraphConfig from './question-paragraph/index.ts'
+import QuestionInfoConfig from './question-info/index.ts'
+import QuestionTextareaConfig from './question-textarea/index.ts'
+import QuestionRadioConfig from './question-radio/index.ts'
+import QuestionCheckboxConfig from './question-checkbox/index.ts'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &

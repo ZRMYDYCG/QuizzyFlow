@@ -2,7 +2,7 @@ import { FC } from 'react'
 import {
   IQuestionCheckboxProps,
   QuestionCheckboxDefaultProps,
-} from './interface'
+} from './interface.ts'
 import { Typography, Space, Checkbox } from 'antd'
 
 const QuestionCheckbox: FC<IQuestionCheckboxProps> = (props) => {

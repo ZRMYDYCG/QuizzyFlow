@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Typography, Radio, Space } from 'antd'
-import { IQuestionRadioProps, QuestionRadioDefaultProps } from './interface'
+import { IQuestionRadioProps, QuestionRadioDefaultProps } from './interface.ts'
 
 const QuestionRadio: FC<IQuestionRadioProps> = (props: IQuestionRadioProps) => {
   const { title, options, value, isVertical } = {

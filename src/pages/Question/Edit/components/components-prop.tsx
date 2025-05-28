@@ -6,7 +6,7 @@ import { Empty } from 'antd'
 import {
   getComponentConfigByType,
   ComponentPropsType,
-} from '../../../Question/components/index'
+} from '../../../../components/lib'
 
 const NoSelectedComponent: React.FC = () => {
   return <Empty description="还没有选中组件" />

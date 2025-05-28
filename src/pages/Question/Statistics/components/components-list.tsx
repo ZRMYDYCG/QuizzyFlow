@@ -1,5 +1,5 @@
 import React, { ComponentType, useState } from 'react'
-import { getComponentConfigByType } from '../../components/index.ts'
+import { getComponentConfigByType } from '../../../../components/lib'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
 import { cn } from '../../../../utils'
 

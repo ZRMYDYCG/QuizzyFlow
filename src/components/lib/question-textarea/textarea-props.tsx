@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import { Form, Input } from 'antd'
-import { IQuestionInputProps } from './interface'
+import { IQuestionTextareaProps } from './interface.ts'
 
-const InputProps: React.FC<IQuestionInputProps> = (
-  props: IQuestionInputProps
+const { TextArea } = Input
+
+const InputProps: React.FC<IQuestionTextareaProps> = (
+  props: IQuestionTextareaProps
 ) => {
   const { title, placeholder, onChange, disabled } = props
   const [form] = Form.useForm()
@@ -31,10 +33,10 @@ const InputProps: React.FC<IQuestionInputProps> = (
         label="标题"
         rules={[{ required: true, message: '请输入标题' }]}
       >
-        <Input />
+        <TextArea />
       </Form.Item>
       <Form.Item label="Placeholder" name="placeholder">
-        <Input />
+        <TextArea />
       </Form.Item>
     </Form>
   )

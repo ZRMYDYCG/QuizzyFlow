@@ -3,7 +3,7 @@ import { Result, Typography } from 'antd'
 import { getAnswerStatistics } from '../../../../api/modules/statistics.ts'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import { getComponentConfigByType } from '../../components'
+import { getComponentConfigByType } from '../../../../components/lib'
 
 const { Title } = Typography
 
