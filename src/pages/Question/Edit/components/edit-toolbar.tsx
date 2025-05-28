@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Button, Space, Tooltip } from 'antd'
 import {
   CopyOutlined,
@@ -11,6 +11,8 @@ import {
   UnlockOutlined,
   UndoOutlined,
   RedoOutlined,
+  DownloadOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import {
@@ -21,6 +23,7 @@ import {
   pasteComponent,
   selectPrevComponent,
   selectNextComponent,
+  resetComponents,
 } from '../../../../store/modules/question-component'
 import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
@@ -37,7 +40,55 @@ const EditToolbar: React.FC = () => {
   const isFirst = selectedIndex <= 0
   const isLast = selectedIndex + 1 >= length
 
-  // 组件数量为0时，隐藏删除按钮
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 导出JSON
+  const handleExport = () => {
+    // 构造要导出的状态对象
+    const exportData = {
+      componentList,
+      selectedId,
+      copiedComponent,
+    }
+    // 生成JSON文件并下载
+    const jsonStr = JSON.stringify(exportData, null, 2)
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '问卷组件列表.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // 处理文件导入
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target?.result as string)
+        // 验证数据格式
+        if (
+          !importedData?.componentList ||
+          !Array.isArray(importedData.componentList)
+        ) {
+          throw new Error('无效的组件列表数据')
+        }
+        // 重置组件状态
+        dispatch(resetComponents(importedData))
+      } catch (error) {
+        console.error(
+          `导入失败：${error instanceof Error ? error.message : '未知错误'}`
+        )
+      }
+      // 清空输入防止重复触发
+      e.target.value = ''
+    }
+    reader.readAsText(file)
+  }
 
   // 删除组件
   const handleDelete = () => {
@@ -145,6 +196,28 @@ const EditToolbar: React.FC = () => {
       <Tooltip title="重做">
         <Button shape="circle" icon={<RedoOutlined />} onClick={handleRedo} />
       </Tooltip>
+      <Tooltip title="导出JSON">
+        <Button
+          shape="circle"
+          icon={<DownloadOutlined />}
+          onClick={handleExport}
+        ></Button>
+      </Tooltip>
+      <Tooltip title="导入JSON">
+        <Button
+          shape="circle"
+          icon={<UploadOutlined />}
+          onClick={() => fileInputRef.current?.click()}
+        ></Button>
+      </Tooltip>
+      {/* 隐藏的文件选择输入 */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="application/json"
+        onChange={handleFileImport}
+        style={{ display: 'none' }}
+      />
     </Space>
   )
 }
