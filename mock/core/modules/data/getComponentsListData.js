@@ -18,6 +18,13 @@ function getComponentsListData() {
         level: 1,
         isCenter: false,
         animateType: 'none',
+        typewriter: {
+          isOpen: true,
+          config: {
+            speed: 50,
+            cursor: '⎟',
+          },
+        },
       },
     },
     // Input
