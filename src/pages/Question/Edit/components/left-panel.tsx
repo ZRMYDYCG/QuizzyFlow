@@ -11,7 +11,7 @@ const LeftPanel: React.FC = () => {
       label: (
         <span>
           <AppstoreAddOutlined />
-          <span>组件库</span>
+          <span>物料库</span>
         </span>
       ),
       children: <ComponentsLib />,

@@ -6,6 +6,7 @@ import { ComponentConfigType } from '../../components/index'
 import { cn } from '../../../../utils/index'
 import { addComponent } from '../../../../store/modules/question-component'
 import { useDispatch } from 'react-redux'
+import ClassifyTitle from './classify-title'
 
 function generateComponent(c: ComponentConfigType) {
   const { title, type, component: Component, defaultProps } = c
@@ -43,7 +44,7 @@ const ComponentsLib: React.FC = () => {
         const { groupName, components } = group
         return (
           <div key={index} className={cn(index > 0 && 'mt-[20px]')}>
-            <Typography.Title level={3}>{groupName}</Typography.Title>
+            <ClassifyTitle groupName={groupName} />
             {/*TODO: 处理类型问题*/}
             {components.map(generateComponent as any)}
           </div>

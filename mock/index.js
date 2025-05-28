@@ -32,5 +32,4 @@ app.use(router.routes())
 
 app.listen(3000, () => {
   console.log('Server is running at http://localhost:3000')
-  console.log('Swagger UI is available at http://localhost:3000/swagger')
 })
