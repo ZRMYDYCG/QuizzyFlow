@@ -72,13 +72,23 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
     }
   }
 
+  // 视差滚动效果
+  const parallaxStyle = pageInfo.parallaxEffect
+    ? {
+        backgroundAttachment: 'fixed',
+        backgroundPosition: `${pageInfo.bgPosition || 'center'} center`,
+      }
+    : {}
+
   return (
     <div
       style={{
         padding: pageInfo.padding,
         backgroundImage: pageInfo.bgImage ? `url(${pageInfo.bgImage})` : 'none',
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundRepeat: pageInfo.bgRepeat || 'no-repeat',
+        backgroundPosition: pageInfo.bgPosition || 'center',
+        ...parallaxStyle,
         minHeight: '100vh',
       }}
     >
@@ -86,6 +96,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
         style={{
           maxWidth: pageInfo.maxWidth || '100%',
           margin: getLayoutMargin(),
+          transition: 'all 0.3s ease',
         }}
       >
         <SortableContainer
@@ -102,12 +113,13 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
                   <SortableItem key={fe_id} id={fe_id}>
                     <div
                       onClick={(e) => handleClick(e, fe_id)}
+                      style={{ borderRadius: pageInfo.borderRadius }}
                       className={cn(
-                        'm-[12px] border p-[12px] rounded-[8px] bg-white',
+                        'm-[12px] border p-[12px]',
                         isActive
-                          ? `border border-[#ccc] border-2`
-                          : 'border-white hover:border-blue-500',
-                        'cursor-pointer',
+                          ? `border border-[#1890ff] border-2 shadow-md`
+                          : 'border-white hover:border-blue-500 hover:shadow',
+                        'cursor-pointer transition-all duration-200',
                         isLocked ? 'opacity-50 cursor-not-allowed' : ''
                       )}
                     >
