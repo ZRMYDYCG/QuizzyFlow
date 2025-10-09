@@ -1,8 +1,6 @@
 import { Layout } from 'antd'
 import { Outlet } from 'react-router-dom'
 import React from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useNavPage from '../../hooks/useNavPage.ts'
 
@@ -14,11 +12,9 @@ const HomeLayout: React.FC = () => {
 
   return (
     <Layout>
-      <Header />
       <Content>
         <Outlet />
       </Content>
-      <Footer />
     </Layout>
   )
 }
