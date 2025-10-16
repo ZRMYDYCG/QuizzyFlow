@@ -1,13 +1,13 @@
 import React from 'react'
-import EditCanvas from '../../../components/lib/edit-canvas.tsx'
-import useLoadQuestionData from '../../../hooks/useLoadQuestionData.ts'
+import EditCanvas from '@/components/lib/edit-canvas.tsx'
+import useLoadQuestionData from '@/hooks/useLoadQuestionData.ts'
 import { useDispatch } from 'react-redux'
-import { changeSelectedId } from '../../../store/modules/question-component.ts'
+import { changeSelectedId } from '@/store/modules/question-component.ts'
 import LeftPanel from './components/left-panel.tsx'
 import RightPanel from './components/right-panel.tsx'
 import EditHeader from './components/edit-header.tsx'
 import { useTitle } from 'ahooks'
-import useGetPageInfo from '../../../hooks/useGetPageInfo.ts'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
 
 const EditQuestionPage: React.FC = () => {
   const dispatch = useDispatch()
