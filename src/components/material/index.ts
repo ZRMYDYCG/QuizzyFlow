@@ -24,6 +24,16 @@ import { IQuestionProgressProps } from './question-progress'
 import { IQuestionStepsProps } from './question-steps'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
+import { IQuestionStatCardProps } from './question-statcard'
+import { IQuestionTimelineProps } from './question-timeline'
+import { IQuestionTreeProps } from './question-tree'
+import { IQuestionTabsProps } from './question-tabs'
+import { IQuestionCardGridProps } from './question-cardgrid'
+import { IQuestionDescriptionsProps } from './question-descriptions'
+import { IQuestionEmptyProps } from './question-empty'
+import { IQuestionSkeletonProps } from './question-skeleton'
+import { IQuestionResultProps } from './question-result'
+import { IQuestionStatisticProps } from './question-statistic'
 import {
   IQuestionRadioProps,
   IComponentsStatisticsProps,
@@ -59,6 +69,16 @@ import QuestionInfoConfig from './question-info'
 import QuestionTextareaConfig from './question-textarea'
 import QuestionRadioConfig from './question-radio'
 import QuestionCheckboxConfig from './question-checkbox'
+import QuestionStatCardConfig from './question-statcard'
+import QuestionTimelineConfig from './question-timeline'
+import QuestionTreeConfig from './question-tree'
+import QuestionTabsConfig from './question-tabs'
+import QuestionCardGridConfig from './question-cardgrid'
+import QuestionDescriptionsConfig from './question-descriptions'
+import QuestionEmptyConfig from './question-empty'
+import QuestionSkeletonConfig from './question-skeleton'
+import QuestionResultConfig from './question-result'
+import QuestionStatisticConfig from './question-statistic'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -87,7 +107,17 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionInfoProps &
   IQuestionTextareaProps &
   IQuestionRadioProps &
-  IQuestionCheckboxProps
+  IQuestionCheckboxProps &
+  IQuestionStatCardProps &
+  IQuestionTimelineProps &
+  IQuestionTreeProps &
+  IQuestionTabsProps &
+  IQuestionCardGridProps &
+  IQuestionDescriptionsProps &
+  IQuestionEmptyProps &
+  IQuestionSkeletonProps &
+  IQuestionResultProps &
+  IQuestionStatisticProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -132,6 +162,16 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionTextareaConfig,
   QuestionRadioConfig as any,
   QuestionCheckboxConfig,
+  QuestionStatCardConfig,
+  QuestionTimelineConfig,
+  QuestionTreeConfig,
+  QuestionTabsConfig,
+  QuestionCardGridConfig,
+  QuestionDescriptionsConfig,
+  QuestionEmptyConfig,
+  QuestionSkeletonConfig,
+  QuestionResultConfig,
+  QuestionStatisticConfig,
 ]
 
 // 组件进行分组
@@ -155,14 +195,26 @@ export const componentConfigGroup = [
     ],
   },
   {
+    groupName: '数据展示',
+    components: [
+      QuestionStatCardConfig,
+      QuestionStatisticConfig,
+      QuestionTimelineConfig,
+      QuestionTreeConfig,
+      QuestionDescriptionsConfig,
+      QuestionCardGridConfig,
+      QuestionTabsConfig,
+      QuestionTableConfig,
+      QuestionProgressConfig,
+      QuestionStepsConfig,
+    ],
+  },
+  {
     groupName: '媒体展示',
     components: [
       QuestionImageConfig,
       QuestionVideoConfig,
       QuestionAudioConfig,
-      QuestionTableConfig,
-      QuestionProgressConfig,
-      QuestionStepsConfig,
     ],
   },
   {
@@ -179,6 +231,14 @@ export const componentConfigGroup = [
   {
     groupName: '用户选择',
     components: [QuestionRadioConfig, QuestionCheckboxConfig],
+  },
+  {
+    groupName: '反馈提示',
+    components: [
+      QuestionEmptyConfig,
+      QuestionSkeletonConfig,
+      QuestionResultConfig,
+    ],
   },
 ]
 
