@@ -1,0 +1,49 @@
+.marquee-container {
+  overflow: hidden;
+  padding: 12px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.marquee-container.marquee-vertical {
+  flex-direction: column;
+  max-height: 200px;
+}
+
+.marquee-content {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.marquee-horizontal .marquee-content {
+  animation: scroll-horizontal linear;
+}
+
+.marquee-vertical .marquee-content {
+  animation: scroll-vertical linear;
+}
+
+.marquee-content.paused {
+  animation-play-state: paused !important;
+}
+
+@keyframes scroll-horizontal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-vertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+

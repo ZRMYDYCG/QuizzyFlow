@@ -9,6 +9,9 @@ import { IQuestionListProps } from './question-list'
 import { IQuestionDividerProps } from './question-divider'
 import { IQuestionBadgeProps } from './question-badge'
 import { IQuestionTimerProps } from './question-timer'
+import { IQuestionMarqueeProps } from './question-marquee'
+import { IQuestionCollapseProps } from './question-collapse'
+import { IQuestionHighlightProps } from './question-highlight'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
 import {
@@ -29,6 +32,9 @@ import QuestionListConfig from './question-list'
 import QuestionDividerConfig from './question-divider'
 import QuestionBadgeConfig from './question-badge'
 import QuestionTimerConfig from './question-timer'
+import QuestionMarqueeConfig from './question-marquee'
+import QuestionCollapseConfig from './question-collapse'
+import QuestionHighlightConfig from './question-highlight'
 import QuestionInfoConfig from './question-info'
 import QuestionTextareaConfig from './question-textarea'
 import QuestionRadioConfig from './question-radio'
@@ -45,6 +51,9 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionDividerProps &
   IQuestionBadgeProps &
   IQuestionTimerProps &
+  IQuestionMarqueeProps &
+  IQuestionCollapseProps &
+  IQuestionHighlightProps &
   IQuestionInfoProps &
   IQuestionTextareaProps &
   IQuestionRadioProps &
@@ -76,6 +85,9 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionDividerConfig,
   QuestionBadgeConfig,
   QuestionTimerConfig,
+  QuestionMarqueeConfig,
+  QuestionCollapseConfig,
+  QuestionHighlightConfig,
   QuestionInfoConfig,
   QuestionTextareaConfig,
   QuestionRadioConfig as any,
@@ -96,6 +108,9 @@ export const componentConfigGroup = [
       QuestionDividerConfig,
       QuestionBadgeConfig,
       QuestionTimerConfig,
+      QuestionMarqueeConfig,
+      QuestionCollapseConfig,
+      QuestionHighlightConfig,
       QuestionInfoConfig,
     ],
   },
