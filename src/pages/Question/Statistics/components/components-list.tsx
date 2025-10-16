@@ -1,5 +1,5 @@
 import React, { ComponentType, useState } from 'react'
-import { getComponentConfigByType } from '@/components/lib'
+import { getComponentConfigByType } from '@/components/material'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { cn } from '@/utils'
 

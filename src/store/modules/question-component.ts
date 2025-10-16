@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ComponentPropsType } from '@/components/lib'
+import { ComponentPropsType } from '@/components/material'
 import { getNextSelectedId } from '@/utils'
 import { cloneDeep } from 'lodash-es'
 import { nanoid } from 'nanoid'

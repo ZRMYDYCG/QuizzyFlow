@@ -11,8 +11,8 @@ import {
   changeComponentsLock,
   changeComponentsVisible,
 } from '@/store/modules/question-component'
-import SortableContainer from '@/components/DragSort/sort-container'
-import SortableItem from '@/components/DragSort/sort-item'
+import SortableContainer from '@/components/drag-sort/sort-container'
+import SortableItem from '@/components/drag-sort/sort-item'
 import { cn } from '@/utils'
 
 const Layers: FC = () => {
