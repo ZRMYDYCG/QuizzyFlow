@@ -84,36 +84,42 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   }
 
   return (
-    <div className="mb-4 p-3 rounded-sm bg-white border border-gray-200 hover:shadow-sm transition duration-300 ease-in-out">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <div className="mb-4 p-5 rounded-lg bg-white border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-300 ease-in-out">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3 flex-1">
           <Link
             to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            className="text-base font-medium text-gray-800 hover:text-blue-600 transition-colors"
           >
             {title}
           </Link>
-          <div className="text-red-400 text-sm bg-red-300/20 rounded-sm px-1">
+          <div className="text-xs font-medium text-red-500 bg-red-50 rounded-md px-2 py-1 border border-red-200">
             考试
           </div>
         </div>
-        <div className="flex items-center gap-3 text-sm text-gray-400">
-          <div>ID: {_id}</div>
-          {isPublish ? <Tag color="success">已发布</Tag> : <Tag>未发布</Tag>}
-          <div>
-            答卷: <span className="text-blue-500">{answerCount}</span>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="text-gray-400 text-xs">ID: {_id.slice(-6)}</div>
+          {isPublish ? (
+            <Tag color="success" className="!m-0">已发布</Tag>
+          ) : (
+            <Tag color="default" className="!m-0">未发布</Tag>
+          )}
+          <div className="text-gray-500">
+            答卷: <span className="text-blue-600 font-medium">{answerCount}</span>
           </div>
-          <div>{createdAt}</div>
+          <div className="text-gray-400">{createdAt}</div>
         </div>
       </div>
-      <Divider />
+      <Divider className="!my-3" />
       <div className="flex items-center justify-between">
         <div>
-          <Space>
+          <Space size="small">
             <Button
               type="text"
               icon={<EditOutlined />}
-              size="small"
+              size="middle"
               onClick={() => navigate(`/question/edit/${_id}`)}
+              className="hover:bg-blue-50 hover:text-blue-600"
             >
               编辑问卷
             </Button>
@@ -121,21 +127,23 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               type="text"
               disabled={!isPublish}
               icon={<LineChartOutlined />}
-              size="small"
+              size="middle"
               onClick={() => navigate(`/question/star/${_id}`)}
+              className="hover:bg-green-50 hover:text-green-600"
             >
               数据统计
             </Button>
           </Space>
         </div>
         <div>
-          <Space>
+          <Space size="small">
             <Button
               type="text"
+              icon={<StarOutlined style={{ color: isStarState ? '#fadb14' : undefined }} />}
               onClick={changeStar}
               disabled={changeStarLoading}
+              className="hover:bg-yellow-50"
             >
-              <StarOutlined />
               {isStarState ? '取消星标' : '标星'}
             </Button>
             <Popconfirm
@@ -145,17 +153,18 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               onConfirm={duplicate}
               disabled={duplicateLoading}
             >
-              <Button type="text">
-                <CopyOutlined />
+              <Button type="text" icon={<CopyOutlined />} className="hover:bg-gray-50">
                 复制
               </Button>
             </Popconfirm>
             <Button
               type="text"
+              icon={<DeleteOutlined />}
               onClick={deleteConfirm}
               disabled={deleteLoading}
+              danger
+              className="hover:bg-red-50"
             >
-              <DeleteOutlined />
               删除
             </Button>
           </Space>

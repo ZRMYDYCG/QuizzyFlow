@@ -110,12 +110,23 @@ const Trash: React.FC = () => {
           type="primary"
           onClick={restore}
           disabled={selectedIds.length === 0}
+          className="!rounded-lg"
         >
-          恢复
+          恢复选中
         </Button>
-        <Button disabled={selectedIds.length === 0} danger onClick={del}>
+        <Button 
+          disabled={selectedIds.length === 0} 
+          danger 
+          onClick={del}
+          className="!rounded-lg"
+        >
           彻底删除
         </Button>
+        {selectedIds.length > 0 && (
+          <span className="text-sm text-gray-500 ml-2">
+            已选择 <span className="font-medium text-blue-600">{selectedIds.length}</span> 项
+          </span>
+        )}
       </Space>
       <Table
         dataSource={list}
@@ -128,34 +139,40 @@ const Trash: React.FC = () => {
             setSelectedIds(selectedRowKeys as string[])
           },
         }}
+        className="rounded-lg overflow-hidden border border-gray-200"
       />
     </>
   )
 
   return (
-    <>
-      <div className="flex justify-between items-center">
-        <div className="">
-          <Title level={3}>回收站</Title>
+    <div className="bg-white rounded-lg shadow-sm min-h-full">
+      <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div>
+          <Title level={3} className="!mb-0">回收站</Title>
+          <p className="text-gray-500 text-sm mt-1">已删除的问卷，可恢复或彻底删除</p>
         </div>
-        <div className="mb-5">
+        <div>
           {/*搜索框*/}
           <ListSearch />
         </div>
       </div>
-      <div>
+      <div className="p-6 min-h-[400px]">
         {loading && (
-          <div className="flex justify-center">
+          <div className="flex justify-center py-20">
             <Spin />
           </div>
         )}
-        {!loading && list.length === 0 && <Empty />}
+        {!loading && list.length === 0 && (
+          <div className="py-20">
+            <Empty description="回收站为空" />
+          </div>
+        )}
         {list.length > 0 && TableElement}
       </div>
-      <div className="flex justify-center mt-5">
+      <div className="flex justify-center pb-6">
         <ListPage total={total} />
       </div>
-    </>
+    </div>
   )
 }
 

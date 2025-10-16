@@ -14,25 +14,30 @@ const Star = () => {
   const { list = [], total = 0 } = data
 
   return (
-    <>
+    <div className="bg-white rounded-lg shadow-sm min-h-full">
       {/*问卷列表头部*/}
-      <div className="flex justify-between items-center">
-        <div className="">
-          <Title level={3}>星标问卷</Title>
+      <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div>
+          <Title level={3} className="!mb-0">星标问卷</Title>
+          <p className="text-gray-500 text-sm mt-1">您标记为星标的重要问卷</p>
         </div>
-        <div className="mb-5">
+        <div>
           {/*搜索框*/}
           <ListSearch />
         </div>
       </div>
       {/*问卷列表主体*/}
-      <div>
+      <div className="p-6 min-h-[400px]">
         {loading && (
-          <div className="flex justify-center">
+          <div className="flex justify-center py-20">
             <Spin />
           </div>
         )}
-        {!loading && list.length === 0 && <Empty description="暂无数据" />}
+        {!loading && list.length === 0 && (
+          <div className="py-20">
+            <Empty description="暂无星标问卷" />
+          </div>
+        )}
         {list.length > 0 &&
           list.map((question: any) => {
             const { _id } = question
@@ -40,10 +45,10 @@ const Star = () => {
           })}
       </div>
       {/*问卷列表底部*/}
-      <div className="flex justify-center mt-5">
+      <div className="flex justify-center pb-6">
         <ListPage total={total} />
       </div>
-    </>
+    </div>
   )
 }
 

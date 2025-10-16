@@ -85,19 +85,20 @@ const List = () => {
   }, [started, loading, haveMoreData])
 
   return (
-    <>
+    <div className="bg-white rounded-lg shadow-sm min-h-full">
       {/*问卷列表头部*/}
-      <div className="flex justify-between items-center">
-        <div className="">
-          <Title level={3}>问卷列表</Title>
+      <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div>
+          <Title level={3} className="!mb-0">问卷列表</Title>
+          <p className="text-gray-500 text-sm mt-1">管理您的所有问卷</p>
         </div>
-        <div className="mb-5">
+        <div>
           {/*搜索框*/}
           <ListSearch />
         </div>
       </div>
       {/*问卷列表主体*/}
-      <div>
+      <div className="p-6">
         {list.length > 0 &&
           list.map((question: any) => {
             const { _id } = question
@@ -105,10 +106,10 @@ const List = () => {
           })}
       </div>
       {/*问卷列表底部*/}
-      <div className="text-center">
+      <div className="text-center pb-6">
         <div ref={containerRef}>{LoadingMoreContentElement}</div>
       </div>
-    </>
+    </div>
   )
 }
 
