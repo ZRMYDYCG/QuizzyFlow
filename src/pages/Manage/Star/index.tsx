@@ -1,7 +1,7 @@
 import { useTitle } from 'ahooks'
 import { Empty, Spin, Typography } from 'antd'
 import ListSearch from '@/components/list-search'
-import QuestionsCard from '@/Manage/List/components/QuestionsCard'
+import QuestionsCard from '../List/components/QuestionsCard'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
 import ListPage from '@/components/list-page'
 

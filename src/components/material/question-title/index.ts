@@ -1,5 +1,5 @@
 import QuestionTitle from './index.tsx'
-import TitleProps from './title-props.tsx'
+import TitleProps from './title-props'
 import { QuestionTitleDefaultData } from './interface.ts'
 
 export * from './interface.ts'
