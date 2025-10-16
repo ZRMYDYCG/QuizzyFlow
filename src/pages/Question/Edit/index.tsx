@@ -21,24 +21,24 @@ const EditQuestionPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#f0f2f5]">
+    <div className="flex flex-col h-screen">
       <EditHeader />
-      <div className="flex-auto py-5">
-        <div className="flex mx-[24px] h-full">
-          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto">
+      <div className="flex-auto">
+        <div className="flex h-full">
+          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto rounded-lg shadow-sm">
             <LeftPanel />
           </div>
           <div
             className="flex-1 flex justify-center items-center"
             onClick={removeSelectedId}
           >
-            <div className="w-[400px] h-[712px] bg-white overflow-auto shadow-md">
+            <div className="w-[400px] h-[712px] relative bg-white overflow-auto shadow-md rounded-lg">
               <div className="h-[800px]">
                 <EditCanvas loading={loading} />
               </div>
             </div>
           </div>
-          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto">
+          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto rounded-lg shadow-sm">
             <RightPanel />
           </div>
         </div>

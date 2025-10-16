@@ -118,7 +118,7 @@ const EditHeader: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="bg-white border-b border-gray-200 py-[12px]">
+    <div className="py-[12px] bg-white">
       <div className="flex mx-[24px]">
         <div className="flex-1">
           <Space className="items-center">

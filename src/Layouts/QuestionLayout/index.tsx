@@ -7,11 +7,19 @@ const QuestionLayout = () => {
   const { waitingUserData } = useLoadUserData()
   useNavPage(waitingUserData)
   return (
-    <div className="h-screen">
+    <div 
+      className="h-screen"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '20px 20px',
+        backgroundPosition: 'center center',
+      }}
+    >
       {waitingUserData ? (
-        <div style={{ textAlign: 'center', marginTop: '60px' }}>
-          <Spin />
-        </div>
+        <Spin className="flex justify-center items-center h-full" />
       ) : (
         <Outlet />
       )}
