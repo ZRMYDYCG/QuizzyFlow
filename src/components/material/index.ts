@@ -2,6 +2,8 @@ import type { FC } from 'react'
 import { IQuestionInputProps } from './question-input'
 import { IQuestionTitleProps } from './question-title'
 import { IQuestionParagraphProps } from './question-paragraph'
+import { IQuestionQuoteProps } from './question-quote'
+import { IQuestionCodeProps } from './question-code'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
 import {
@@ -15,6 +17,8 @@ import {
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
+import QuestionQuoteConfig from './question-quote'
+import QuestionCodeConfig from './question-code'
 import QuestionInfoConfig from './question-info'
 import QuestionTextareaConfig from './question-textarea'
 import QuestionRadioConfig from './question-radio'
@@ -24,6 +28,8 @@ import QuestionCheckboxConfig from './question-checkbox'
 export type ComponentPropsType = IQuestionInputProps &
   IQuestionTitleProps &
   IQuestionParagraphProps &
+  IQuestionQuoteProps &
+  IQuestionCodeProps &
   IQuestionInfoProps &
   IQuestionTextareaProps &
   IQuestionRadioProps &
@@ -48,6 +54,8 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionInputConfig,
   QuestionTitleConfig,
   QuestionParagraphConfig,
+  QuestionQuoteConfig,
+  QuestionCodeConfig,
   QuestionInfoConfig,
   QuestionTextareaConfig,
   QuestionRadioConfig as any,
@@ -61,6 +69,8 @@ export const componentConfigGroup = [
     components: [
       QuestionTitleConfig,
       QuestionParagraphConfig,
+      QuestionQuoteConfig,
+      QuestionCodeConfig,
       QuestionInfoConfig,
     ],
   },
