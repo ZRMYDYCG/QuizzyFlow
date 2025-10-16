@@ -34,28 +34,30 @@ const QuestionBadge: FC<IQuestionBadgeProps> = (
   const displayBadges = getBadges()
 
   return (
-    <Space size={8} wrap>
-      {displayBadges.map((badge, index) => (
-        <Tag
-          key={index}
-          color={badge.color}
-          style={{
-            borderRadius: shape === 'round' ? '16px' : '4px',
-            fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
-            padding:
-              size === 'small'
-                ? '2px 8px'
-                : size === 'large'
-                ? '6px 16px'
-                : '4px 12px',
-            margin: 0,
-          }}
-        >
-          {showIcon && badge.icon && <span style={{ marginRight: '4px' }}>{badge.icon}</span>}
-          {badge.text}
-        </Tag>
-      ))}
-    </Space>
+    <div style={{ width: '100%', maxWidth: 600 }}>
+      <Space size={8} wrap>
+        {displayBadges.map((badge, index) => (
+          <Tag
+            key={index}
+            color={badge.color}
+            style={{
+              borderRadius: shape === 'round' ? '16px' : '4px',
+              fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+              padding:
+                size === 'small'
+                  ? '2px 8px'
+                  : size === 'large'
+                  ? '6px 16px'
+                  : '4px 12px',
+              margin: 0,
+            }}
+          >
+            {showIcon && badge.icon && <span style={{ marginRight: '4px' }}>{badge.icon}</span>}
+            {badge.text}
+          </Tag>
+        ))}
+      </Space>
+    </div>
   )
 }
 

@@ -25,7 +25,7 @@ const EditQuestionPage: React.FC = () => {
       <EditHeader />
       <div className="flex-auto">
         <div className="flex h-full">
-          <div className="w-[325px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto rounded-lg shadow-sm">
+          <div className="w-[355px] bg-white px-[12px] h-[calc(100vh-77px)] overflow-auto rounded-lg shadow-sm">
             <LeftPanel />
           </div>
           <div

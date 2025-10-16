@@ -35,21 +35,24 @@ const QuestionHighlight: FC<IQuestionHighlightProps> = (
   const animationClass = animation !== 'none' ? `highlight-${animation}` : ''
 
   return (
-    <Text
-      className={animationClass}
-      style={{
-        backgroundColor,
-        color: textColor,
-        fontWeight: bold ? 'bold' : 'normal',
-        fontStyle: italic ? 'italic' : 'normal',
-        textDecoration: getTextDecoration(),
-        padding: '2px 6px',
-        borderRadius: '3px',
-        display: 'inline-block',
-      }}
-    >
-      {text}
-    </Text>
+    <div style={{ width: '100%', maxWidth: 500 }}>
+      <Text
+        className={animationClass}
+        style={{
+          backgroundColor,
+          color: textColor,
+          fontWeight: bold ? 'bold' : 'normal',
+          fontStyle: italic ? 'italic' : 'normal',
+          textDecoration: getTextDecoration(),
+          padding: '2px 6px',
+          borderRadius: '3px',
+          display: 'inline-block',
+          wordBreak: 'break-word',
+        }}
+      >
+        {text}
+      </Text>
+    </div>
   )
 }
 

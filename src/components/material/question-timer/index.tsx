@@ -101,55 +101,58 @@ const QuestionTimer: FC<IQuestionTimerProps> = (
     : '#000'
 
   return (
-    <Card
-      size="small"
-      style={{
-        textAlign: 'center',
-        background: '#fafafa',
-      }}
-    >
-      <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Space>
-          <ClockCircleOutlined style={{ fontSize: '16px' }} />
-          <Text strong>{title}</Text>
-        </Space>
+    <div style={{ width: '100%', maxWidth: 400 }}>
+      <Card
+        size="small"
+        style={{
+          textAlign: 'center',
+          background: '#fafafa',
+          width: '100%',
+        }}
+      >
+        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Space>
+            <ClockCircleOutlined style={{ fontSize: '16px' }} />
+            <Text strong>{title}</Text>
+          </Space>
 
-        <Title
-          level={2}
-          style={{
-            margin: 0,
-            color: timeColor,
-            fontFamily: 'monospace',
-            fontSize: '32px',
-          }}
-        >
-          {formatTime(timeLeft)}
-        </Title>
-
-        {showProgress && mode === 'countdown' && (
-          <Progress
-            percent={getProgressPercent()}
-            status={getProgressStatus()}
-            showInfo={false}
-            strokeWidth={8}
-          />
-        )}
-
-        <Space>
-          <Button
-            type="primary"
-            icon={isRunning ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-            onClick={handlePlayPause}
-            size="small"
+          <Title
+            level={2}
+            style={{
+              margin: 0,
+              color: timeColor,
+              fontFamily: 'monospace',
+              fontSize: '32px',
+            }}
           >
-            {isRunning ? '暂停' : '开始'}
-          </Button>
-          <Button icon={<RedoOutlined />} onClick={handleReset} size="small">
-            重置
-          </Button>
+            {formatTime(timeLeft)}
+          </Title>
+
+          {showProgress && mode === 'countdown' && (
+            <Progress
+              percent={getProgressPercent()}
+              status={getProgressStatus()}
+              showInfo={false}
+              strokeWidth={8}
+            />
+          )}
+
+          <Space>
+            <Button
+              type="primary"
+              icon={isRunning ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+              onClick={handlePlayPause}
+              size="small"
+            >
+              {isRunning ? '暂停' : '开始'}
+            </Button>
+            <Button icon={<RedoOutlined />} onClick={handleReset} size="small">
+              重置
+            </Button>
+          </Space>
         </Space>
-      </Space>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

@@ -31,66 +31,69 @@ const QuestionCollapse: FC<IQuestionCollapseProps> = (
   }
 
   return (
-    <Card
-      size="small"
-      bordered={bordered}
-      style={{
-        borderRadius: '4px',
-        backgroundColor: '#fafafa',
-      }}
-    >
-      <Space direction="vertical" style={{ width: '100%' }} size={12}>
-        <div
-          onClick={toggleExpand}
-          style={{
-            cursor: 'pointer',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Text strong style={{ fontSize: '14px' }}>
-            {title}
-          </Text>
-          <Button
-            type="text"
-            size="small"
-            icon={
-              showIcon && (isExpanded ? <UpOutlined /> : <DownOutlined />)
-            }
-          >
-            {isExpanded ? collapseText : expandText}
-          </Button>
-        </div>
-
-        {isExpanded && (
+    <div style={{ width: '100%', maxWidth: 600 }}>
+      <Card
+        size="small"
+        bordered={bordered}
+        style={{
+          borderRadius: '4px',
+          backgroundColor: '#fafafa',
+          width: '100%',
+        }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={12}>
           <div
+            onClick={toggleExpand}
             style={{
-              animation: 'fadeIn 0.3s ease-in',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-              {content}
-            </Paragraph>
+            <Text strong style={{ fontSize: '14px' }}>
+              {title}
+            </Text>
+            <Button
+              type="text"
+              size="small"
+              icon={
+                showIcon && (isExpanded ? <UpOutlined /> : <DownOutlined />)
+              }
+            >
+              {isExpanded ? collapseText : expandText}
+            </Button>
           </div>
-        )}
-      </Space>
 
-      <style>
-        {`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: translateY(-10px);
+          {isExpanded && (
+            <div
+              style={{
+                animation: 'fadeIn 0.3s ease-in',
+              }}
+            >
+              <Paragraph style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {content}
+              </Paragraph>
+            </div>
+          )}
+        </Space>
+
+        <style>
+          {`
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
             }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
-    </Card>
+          `}
+        </style>
+      </Card>
+    </div>
   )
 }
 

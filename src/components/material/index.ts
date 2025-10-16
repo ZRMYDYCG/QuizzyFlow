@@ -12,6 +12,16 @@ import { IQuestionTimerProps } from './question-timer'
 import { IQuestionMarqueeProps } from './question-marquee'
 import { IQuestionCollapseProps } from './question-collapse'
 import { IQuestionHighlightProps } from './question-highlight'
+import { IQuestionImageProps } from './question-image'
+import { IQuestionVideoProps } from './question-video'
+import { IQuestionAudioProps } from './question-audio'
+import { IQuestionRateProps } from './question-rate'
+import { IQuestionSliderProps } from './question-slider'
+import { IQuestionDateProps } from './question-date'
+import { IQuestionUploadProps } from './question-upload'
+import { IQuestionTableProps } from './question-table'
+import { IQuestionProgressProps } from './question-progress'
+import { IQuestionStepsProps } from './question-steps'
 import { IQuestionInfoProps } from './question-info'
 import { IQuestionTextareaProps } from './question-textarea'
 import {
@@ -35,6 +45,16 @@ import QuestionTimerConfig from './question-timer'
 import QuestionMarqueeConfig from './question-marquee'
 import QuestionCollapseConfig from './question-collapse'
 import QuestionHighlightConfig from './question-highlight'
+import QuestionImageConfig from './question-image'
+import QuestionVideoConfig from './question-video'
+import QuestionAudioConfig from './question-audio'
+import QuestionRateConfig from './question-rate'
+import QuestionSliderConfig from './question-slider'
+import QuestionDateConfig from './question-date'
+import QuestionUploadConfig from './question-upload'
+import QuestionTableConfig from './question-table'
+import QuestionProgressConfig from './question-progress'
+import QuestionStepsConfig from './question-steps'
 import QuestionInfoConfig from './question-info'
 import QuestionTextareaConfig from './question-textarea'
 import QuestionRadioConfig from './question-radio'
@@ -54,6 +74,16 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionMarqueeProps &
   IQuestionCollapseProps &
   IQuestionHighlightProps &
+  IQuestionImageProps &
+  IQuestionVideoProps &
+  IQuestionAudioProps &
+  IQuestionRateProps &
+  IQuestionSliderProps &
+  IQuestionDateProps &
+  IQuestionUploadProps &
+  IQuestionTableProps &
+  IQuestionProgressProps &
+  IQuestionStepsProps &
   IQuestionInfoProps &
   IQuestionTextareaProps &
   IQuestionRadioProps &
@@ -88,6 +118,16 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionMarqueeConfig,
   QuestionCollapseConfig,
   QuestionHighlightConfig,
+  QuestionImageConfig,
+  QuestionVideoConfig,
+  QuestionAudioConfig,
+  QuestionRateConfig,
+  QuestionSliderConfig,
+  QuestionDateConfig,
+  QuestionUploadConfig,
+  QuestionTableConfig,
+  QuestionProgressConfig,
+  QuestionStepsConfig,
   QuestionInfoConfig,
   QuestionTextareaConfig,
   QuestionRadioConfig as any,
@@ -115,8 +155,26 @@ export const componentConfigGroup = [
     ],
   },
   {
+    groupName: '媒体展示',
+    components: [
+      QuestionImageConfig,
+      QuestionVideoConfig,
+      QuestionAudioConfig,
+      QuestionTableConfig,
+      QuestionProgressConfig,
+      QuestionStepsConfig,
+    ],
+  },
+  {
     groupName: '用户输入',
-    components: [QuestionInputConfig, QuestionTextareaConfig],
+    components: [
+      QuestionInputConfig,
+      QuestionTextareaConfig,
+      QuestionRateConfig,
+      QuestionSliderConfig,
+      QuestionDateConfig,
+      QuestionUploadConfig,
+    ],
   },
   {
     groupName: '用户选择',

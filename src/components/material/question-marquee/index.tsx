@@ -44,50 +44,53 @@ const QuestionMarquee: FC<IQuestionMarqueeProps> = (
   }
 
   return (
-    <div
-      className={`marquee-container marquee-${direction}`}
-      style={{
-        backgroundColor,
-        color: textColor,
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {showIcon && (
-        <SoundOutlined
-          style={{
-            fontSize: '16px',
-            marginRight: direction === 'horizontal' ? '8px' : '0',
-            marginBottom: direction === 'vertical' ? '8px' : '0',
-          }}
-        />
-      )}
+    <div style={{ width: '100%', maxWidth: 600 }}>
       <div
-        className={`marquee-content ${isPaused ? 'paused' : ''}`}
+        className={`marquee-container marquee-${direction}`}
         style={{
-          animationDuration: `${duration}s`,
-          animationIterationCount: loop ? 'infinite' : '1',
+          backgroundColor,
+          color: textColor,
+          width: '100%',
         }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
-        {direction === 'horizontal' ? (
-          <>
-            <span>{allMessages}</span>
-            {loop && <span style={{ marginLeft: '100px' }}>{allMessages}</span>}
-          </>
-        ) : (
-          <div>
-            {messages.map((msg) => (
-              <div key={msg.id} style={{ padding: '8px 0' }}>
-                {msg.text}
-              </div>
-            ))}
-            {loop && messages.map((msg) => (
-              <div key={`${msg.id}-loop`} style={{ padding: '8px 0' }}>
-                {msg.text}
-              </div>
-            ))}
-          </div>
+        {showIcon && (
+          <SoundOutlined
+            style={{
+              fontSize: '16px',
+              marginRight: direction === 'horizontal' ? '8px' : '0',
+              marginBottom: direction === 'vertical' ? '8px' : '0',
+            }}
+          />
         )}
+        <div
+          className={`marquee-content ${isPaused ? 'paused' : ''}`}
+          style={{
+            animationDuration: `${duration}s`,
+            animationIterationCount: loop ? 'infinite' : '1',
+          }}
+        >
+          {direction === 'horizontal' ? (
+            <>
+              <span>{allMessages}</span>
+              {loop && <span style={{ marginLeft: '100px' }}>{allMessages}</span>}
+            </>
+          ) : (
+            <div>
+              {messages.map((msg) => (
+                <div key={msg.id} style={{ padding: '8px 0' }}>
+                  {msg.text}
+                </div>
+              ))}
+              {loop && messages.map((msg) => (
+                <div key={`${msg.id}-loop`} style={{ padding: '8px 0' }}>
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
