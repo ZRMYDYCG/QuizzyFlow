@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
 import { Typography, Spin, Table, Pagination } from 'antd'
-import { getQuestionsStatistics } from '../../../../api/modules/statistics.ts'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
-import { cn } from '../../../../utils/index.ts'
+import { getQuestionsStatistics } from '@/api/modules/statistics'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import { cn } from '@/utils/index'
 
 interface IStatisticsTableProps {
   selectedComponentId: string

@@ -24,8 +24,8 @@ import {
   selectPrevComponent,
   selectNextComponent,
   resetComponents,
-} from '../../../../store/modules/question-component'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
+} from '@/store/modules/question-component'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 
 const EditToolbar: React.FC = () => {

@@ -1,12 +1,12 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
-import { changeComponentProps } from '../../../../store/modules/question-component'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
+import { changeComponentProps } from '@/store/modules/question-component'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { Empty } from 'antd'
 import {
   getComponentConfigByType,
   ComponentPropsType,
-} from '../../../../components/lib'
+} from '@/components/lib'
 
 const NoSelectedComponent: React.FC = () => {
   return <Empty description="还没有选中组件" />

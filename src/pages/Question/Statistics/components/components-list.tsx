@@ -1,7 +1,7 @@
 import React, { ComponentType, useState } from 'react'
-import { getComponentConfigByType } from '../../../../components/lib'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
-import { cn } from '../../../../utils'
+import { getComponentConfigByType } from '@/components/lib'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import { cn } from '@/utils'
 
 interface PropsType {
   selectedComponentId: string

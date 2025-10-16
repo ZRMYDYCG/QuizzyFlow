@@ -4,7 +4,7 @@ import { Tabs } from 'antd'
 import { FileTextOutlined, SettingOutlined } from '@ant-design/icons'
 import ComponentProp from './components-prop'
 import PageSetting from './page-setting'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 
 const RightPanel: React.FC = () => {
   const [activeKey, setActiveKey] = useState('prop')

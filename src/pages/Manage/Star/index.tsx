@@ -1,14 +1,14 @@
 import { useTitle } from 'ahooks'
 import { Empty, Spin, Typography } from 'antd'
-import ListSearch from '../../../components/list-search.tsx'
-import QuestionsCard from '../../Manage/List/components/QuestionsCard.tsx'
-import useLoadQuestionListData from '../../../hooks/useLoadQuestionListData.ts'
-import ListPage from '../../../components/list-page.tsx'
+import ListSearch from '@/components/list-search'
+import QuestionsCard from '@/Manage/List/components/QuestionsCard'
+import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
+import ListPage from '@/components/list-page'
 
 const { Title } = Typography
 
 const Star = () => {
-  useTitle('一刻 • 问卷 | 星标问卷')
+  useTitle('星标问卷')
 
   const { data = {}, loading } = useLoadQuestionListData({ isStar: true })
   const { list = [], total = 0 } = data

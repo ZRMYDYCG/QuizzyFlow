@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Space, Button, Input, Tooltip, InputRef, message, Popover } from 'antd'
 import { LeftOutlined, CopyOutlined, QrcodeOutlined } from '@ant-design/icons'
-import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
 import { QRCodeSVG } from 'qrcode.react'
 
 const StatisticsHeader: React.FC = () => {

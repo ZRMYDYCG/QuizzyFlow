@@ -1,6 +1,6 @@
 import { Form, Typography, Input, Space, Button, message } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerUser } from '../../api/modules/user.ts'
+import { registerUser } from '@/api/modules/user'
 import { useRequest } from 'ahooks'
 
 const { Title } = Typography

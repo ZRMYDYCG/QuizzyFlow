@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Result, Typography } from 'antd'
-import { getAnswerStatistics } from '../../../../api/modules/statistics.ts'
+import { getAnswerStatistics } from '@/api/modules/statistics'
 import { useRequest } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import { getComponentConfigByType } from '../../../../components/lib'
+import { getComponentConfigByType } from '@/components/lib'
 
 const { Title } = Typography
 

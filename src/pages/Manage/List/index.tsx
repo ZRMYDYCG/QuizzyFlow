@@ -1,15 +1,15 @@
-import QuestionsCard from './components/QuestionsCard.tsx'
+import QuestionsCard from './components/QuestionsCard'
 import { useDebounceFn, useRequest, useTitle } from 'ahooks'
-import { getQuestionList } from '../../../api/modules/question.ts'
+import { getQuestionList } from '@/api/modules/question'
 import { Empty, Spin, Typography } from 'antd'
-import ListSearch from '../../../components/list-search.tsx'
+import ListSearch from '@/components/list-search'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 const { Title } = Typography
 
 const List = () => {
-  useTitle('一刻 • 问卷 | 问卷列表')
+  useTitle('问卷列表')
   const [searchParams] = useSearchParams()
   const keyword = searchParams.get('keyword') || ''
 

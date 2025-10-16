@@ -8,11 +8,11 @@ import {
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
-import { setTitle } from '../../../../store/modules/pageinfo-reducer.ts'
+import { setTitle } from '@/store/modules/pageinfo-reducer'
 import { useDispatch } from 'react-redux'
-import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
-import { updateQuestion } from '../../../../api/modules/question.ts'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import { updateQuestion } from '@/api/modules/question'
 import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
 
 const TitleElem: FC = () => {

@@ -1,19 +1,19 @@
 import { FC, ChangeEvent } from 'react'
 import { message, Input, Button } from 'antd'
 import { useDispatch } from 'react-redux'
-import { swapComponent } from '../../../../store/modules/question-component.ts'
+import { swapComponent } from '@/store/modules/question-component'
 import { EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
-import useGetComponentInfo from '../../../../hooks/useGetComponentInfo.ts'
-import { changeSelectedId } from '../../../../store/modules/question-component.ts'
+import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import { changeSelectedId } from '@/store/modules/question-component'
 import {
   changeComponentTitle,
   changeComponentsLock,
   changeComponentsVisible,
-} from '../../../../store/modules/question-component.ts'
-import SortableContainer from '../../../../components/DragSort/sort-container.tsx'
-import SortableItem from '../../../../components/DragSort/sort-item.tsx'
-import { cn } from '../../../../utils/index'
+} from '@/store/modules/question-component'
+import SortableContainer from '@/components/DragSort/sort-container'
+import SortableItem from '@/components/DragSort/sort-item'
+import { cn } from '@/utils'
 
 const Layers: FC = () => {
   const { componentList, selectedId } = useGetComponentInfo()

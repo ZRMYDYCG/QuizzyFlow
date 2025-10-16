@@ -2,7 +2,7 @@ import React from 'react'
 import { useEffect } from 'react'
 import { Form, Input, Button, Radio, Switch, Select, Slider } from 'antd'
 import { useDispatch } from 'react-redux'
-import useGetPageInfo from '../../../../hooks/useGetPageInfo.ts'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
 import {
   resetPageInfo,
   setPagePadding,
@@ -13,7 +13,7 @@ import {
   setBgPosition,
   setParallaxEffect,
   setBorderRadius,
-} from '../../../../store/modules/pageinfo-reducer.ts'
+} from '@/store/modules/pageinfo-reducer'
 
 const { Option } = Select
 

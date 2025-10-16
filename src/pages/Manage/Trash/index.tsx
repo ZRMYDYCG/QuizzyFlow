@@ -12,18 +12,18 @@ import {
 } from 'antd'
 import { useTitle } from 'ahooks'
 import { useState } from 'react'
-import ListSearch from '../../../components/list-search.tsx'
-import useLoadQuestionListData from '../../../hooks/useLoadQuestionListData.ts'
-import ListPage from '../../../components/list-page.tsx'
-import { updateQuestion } from '../../../api/modules/question.ts'
+import ListSearch from '@/components/list-search'
+import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
+import ListPage from '@/components/list-page.tsx'
+import { updateQuestion } from '@/api/modules/question'
 import { useRequest } from 'ahooks'
-import { deleteQuestion } from '../../../api/modules/question.ts'
+import { deleteQuestion } from '@/api/modules/question'
 
 const { Title } = Typography
 const { confirm } = Modal
 
 const Trash: React.FC = () => {
-  useTitle('一刻 • 问卷 | 回收站')
+  useTitle('回收站')
 
   const {
     data = {},
