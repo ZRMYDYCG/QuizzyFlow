@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
-import Sidebar from './components/Sidebar'
-import ContentHeader from './components/ContentHeader'
+import Sidebar from './components/Sidebar/index.tsx'
+import ContentHeader from './components/ContentHeader/index.tsx'
 import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 
