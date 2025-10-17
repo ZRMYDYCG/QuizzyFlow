@@ -6,6 +6,16 @@ import path from 'path'
  * 配置文档: https://vite.dev/config/
 */
 export default defineConfig({
+  plugins: [react()],
+  /**
+   * 路径别名配置
+   * @ -> src 目录
+   */
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+      }
+  },
   build: {
     // 输出目录
     outDir: 'dist',
@@ -57,15 +67,27 @@ export default defineConfig({
   esbuild: {
     drop: ['console', 'debugger'],
   },
-  plugins: [react()],
-  /**
-   * 路径别名配置
-   * @ -> src 目录
-   */
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-      }
+  // 依赖优化
+  optimizeDeps: {
+    // 明确需要预构建的依赖
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'antd',
+      '@ant-design/icons',
+      'axios',
+      'lodash-es',
+      'recharts',
+      '@reduxjs/toolkit',
+      'react-redux',
+    ],
+    
+    // 排除预构建的依赖
+    exclude: [],
+    
+    // 强制预构建链接的包
+    force: false,
   },
   /**
    * Vite 开发服务器配置
