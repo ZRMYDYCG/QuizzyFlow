@@ -112,6 +112,21 @@ export default defineConfig({
   server: {
     port: 8000,
     open: true,
+
+    // 预热常用文件（加快首次访问）
+    warmup: {
+      clientFiles: [
+        './src/main.tsx',
+        './src/App.tsx',
+        './src/router/index.tsx',
+      ],
+    },
+
+    // HMR 配置
+    hmr: {
+      overlay: true, // 显示错误覆盖层
+    },
+
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
