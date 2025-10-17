@@ -89,6 +89,21 @@ export default defineConfig({
     // 强制预构建链接的包
     force: false,
   },
+  // CSS 优化
+  css: {
+    // CSS 模块配置
+    modules: {
+      localsConvention: 'camelCase',
+    },
+    // PostCSS 配置
+    postcss: './postcss.config.ts',
+    // 开发环境下的 CSS sourcemap
+    devSourcemap: false,
+    // CSS 预处理器配置（使用 到了 SCSS/LESS 再配置）
+    preprocessorOptions: {
+
+    },
+  },
   /**
    * Vite 开发服务器配置
    * 端口: 8000
