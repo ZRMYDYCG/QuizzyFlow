@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import viteImagemin from 'vite-plugin-imagemin'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 /**
  * 配置文档: https://vite.dev/config/
@@ -20,6 +21,11 @@ export default defineConfig({
           { name: 'removeEmptyAttrs', active: false },
         ],
       },
+    }),
+    visualizer({
+      open: true, // 构建后自动打开分析报告
+      gzipSize: true,
+      brotliSize: true,
     }),
   ],
   /**
