@@ -1,24 +1,35 @@
-import React from 'react'
-import { useState } from 'react'
 import { Spin, Result, Button } from 'antd'
-import useLoadQuestionData from '@/hooks/useLoadQuestionData.ts'
-import useGetPageInfo from '@/hooks/useGetPageInfo.ts'
 import { useNavigate } from 'react-router-dom'
 import { useTitle } from 'ahooks'
-import StatisticsHeader from './components/statistics-header.tsx'
-import ComponentsList from './components/components-list.tsx'
-import StatisticsTable from './components/statistics-table.tsx'
+import useLoadQuestionData from '@/hooks/useLoadQuestionData'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
+import StatisticsHeader from './components/statistics-header'
+import ComponentsList from './components/components-list'
+import StatisticsTable from './components/statistics-table'
+import { useStatisticsState } from './hooks/useStatisticsState'
 
-const Statistics: React.FC = () => {
+const Statistics = () => {
   const { loading } = useLoadQuestionData()
   const { isPublished } = useGetPageInfo()
   const navigate = useNavigate()
+  const {
+    selectedComponentId,
+    selectedComponentType,
+    setSelectedComponent,
+  } = useStatisticsState()
+
   useTitle('问卷统计')
 
-  // 状态提升
-  const [selectedComponentId, setSelectedComponentId] = useState('')
-  const [selectedComponentType, setSelectedComponentType] = useState('')
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="h-full w-full flex justify-center items-center">
+        <Spin size="large" tip="加载中..." />
+      </div>
+    )
+  }
 
+  // Show unpublished state
   if (!isPublished) {
     return (
       <div className="h-full w-full flex justify-center items-center -mt-[100px]">
@@ -31,29 +42,33 @@ const Statistics: React.FC = () => {
               返回上一页
             </Button>
           }
-        ></Result>
+        />
       </div>
     )
   }
+
   return (
-    <div className="h-full w-full flex flex-col min-h-screen bg-gray-500/40">
+    <div className="h-screen w-full flex flex-col bg-gray-500/40">
       <StatisticsHeader />
-      <div className="flex-auto py-[12px]">
-        <div className="flex mx-[24px]">
-          <div className="w-[350px] mr-[24px] h-[calc(100vh-77px)] overflow-auto]">
+      <div className="flex-1 py-[12px] overflow-hidden">
+        <div className="flex h-full mx-[24px] gap-6">
+          {/* Components sidebar */}
+          <aside className="w-[350px] flex-shrink-0 h-full overflow-y-auto">
             <ComponentsList
               selectedComponentId={selectedComponentId}
-              setSelectedComponentId={setSelectedComponentId}
-              setSelectedComponentType={setSelectedComponentType}
-            ></ComponentsList>
-          </div>
-          <div className="flex-auto bg-white py-[12px] px-[18px]">
+              selectedComponentType={selectedComponentType}
+              setSelectedComponent={setSelectedComponent}
+            />
+          </aside>
+
+          {/* Main content area */}
+          <main className="flex-1 min-w-0 h-full bg-white py-[12px] px-[18px] rounded-lg shadow-sm">
             <StatisticsTable
               selectedComponentId={selectedComponentId}
-              setSelectedComponentId={setSelectedComponentId}
-              setSelectedComponentType={setSelectedComponentType}
+              selectedComponentType={selectedComponentType}
+              setSelectedComponent={setSelectedComponent}
             />
-          </div>
+          </main>
         </div>
       </div>
     </div>
