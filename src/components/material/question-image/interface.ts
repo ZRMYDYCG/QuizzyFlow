@@ -23,4 +23,3 @@ export const QuestionImageDefaultProps: IQuestionImageProps = {
   fit: 'cover',
   preview: true,
 }
-
