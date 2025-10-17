@@ -34,6 +34,17 @@ import { IQuestionEmptyProps } from './question-empty'
 import { IQuestionSkeletonProps } from './question-skeleton'
 import { IQuestionResultProps } from './question-result'
 import { IQuestionStatisticProps } from './question-statistic'
+import { IQuestionButtonProps } from './question-button'
+import { IQuestionLinkProps } from './question-link'
+import { IQuestionDropdownProps } from './question-dropdown'
+import { IQuestionMenuProps } from './question-menu'
+import { IQuestionSelectProps } from './question-select'
+import { IQuestionCascaderProps } from './question-cascader'
+import { IQuestionAutocompleteProps } from './question-autocomplete'
+import { IQuestionTransferProps } from './question-transfer'
+import { IQuestionTooltipProps } from './question-tooltip'
+import { IQuestionPopoverProps } from './question-popover'
+import { IQuestionSpinProps } from './question-spin'
 import {
   IQuestionRadioProps,
   IComponentsStatisticsProps,
@@ -42,6 +53,7 @@ import {
   IQuestionCheckboxProps,
   ICheckboxStatisticsProps,
 } from './question-checkbox'
+import { IQuestionAnchorProps } from './question-anchor'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -79,6 +91,20 @@ import QuestionEmptyConfig from './question-empty'
 import QuestionSkeletonConfig from './question-skeleton'
 import QuestionResultConfig from './question-result'
 import QuestionStatisticConfig from './question-statistic'
+import QuestionButtonConfig from './question-button'
+import QuestionLinkConfig from './question-link'
+import QuestionAnchorConfig from './question-anchor'
+import QuestionDropdownConfig from './question-dropdown'
+import QuestionMenuConfig from './question-menu'
+import QuestionSelectConfig from './question-select'
+import QuestionCascaderConfig from './question-cascader'
+import QuestionAutocompleteConfig from './question-autocomplete'
+import QuestionTransferConfig from './question-transfer'
+import QuestionTooltipConfig from './question-tooltip'
+import QuestionPopoverConfig from './question-popover'
+import QuestionSpinConfig from './question-spin'
+import QuestionModalConfig from './question-modal'
+import QuestionDrawerConfig from './question-drawer'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -117,7 +143,19 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionEmptyProps &
   IQuestionSkeletonProps &
   IQuestionResultProps &
-  IQuestionStatisticProps
+  IQuestionStatisticProps &
+  IQuestionButtonProps &
+  IQuestionLinkProps &
+  IQuestionAnchorProps &
+  IQuestionDropdownProps &
+  IQuestionMenuProps &
+  IQuestionSelectProps &
+  IQuestionCascaderProps &
+  IQuestionAutocompleteProps &
+  IQuestionTransferProps &
+  IQuestionTooltipProps &
+  IQuestionPopoverProps &
+  IQuestionSpinProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -172,6 +210,20 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionSkeletonConfig,
   QuestionResultConfig,
   QuestionStatisticConfig,
+  QuestionButtonConfig,
+  QuestionLinkConfig,
+  QuestionAnchorConfig,
+  QuestionDropdownConfig,
+  QuestionMenuConfig,
+  QuestionSelectConfig,
+  QuestionCascaderConfig,
+  QuestionAutocompleteConfig,
+  QuestionTransferConfig,
+  QuestionTooltipConfig,
+  QuestionPopoverConfig,
+  QuestionSpinConfig,
+  QuestionModalConfig,
+  QuestionDrawerConfig,
 ]
 
 // 组件进行分组
@@ -192,6 +244,7 @@ export const componentConfigGroup = [
       QuestionCollapseConfig,
       QuestionHighlightConfig,
       QuestionInfoConfig,
+      QuestionLinkConfig,
     ],
   },
   {
@@ -226,11 +279,23 @@ export const componentConfigGroup = [
       QuestionSliderConfig,
       QuestionDateConfig,
       QuestionUploadConfig,
+      QuestionButtonConfig,
     ],
   },
   {
+    groupName: '导航组件',
+    components: [QuestionAnchorConfig, QuestionDropdownConfig, QuestionMenuConfig],
+  },
+  {
     groupName: '用户选择',
-    components: [QuestionRadioConfig, QuestionCheckboxConfig],
+    components: [
+      QuestionRadioConfig,
+      QuestionCheckboxConfig,
+      QuestionSelectConfig,
+      QuestionCascaderConfig,
+      QuestionAutocompleteConfig,
+      QuestionTransferConfig,
+    ],
   },
   {
     groupName: '反馈提示',
@@ -238,6 +303,11 @@ export const componentConfigGroup = [
       QuestionEmptyConfig,
       QuestionSkeletonConfig,
       QuestionResultConfig,
+      QuestionTooltipConfig,
+      QuestionPopoverConfig,
+      QuestionSpinConfig,
+      QuestionModalConfig,
+      QuestionDrawerConfig,
     ],
   },
 ]
