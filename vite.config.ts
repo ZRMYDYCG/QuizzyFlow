@@ -6,6 +6,57 @@ import path from 'path'
  * 配置文档: https://vite.dev/config/
 */
 export default defineConfig({
+  build: {
+    // 输出目录
+    outDir: 'dist',
+    // 静态资源目录
+    assetsDir: 'assets',
+    // chunk 大小警告限制（kb）
+    chunkSizeWarningLimit: 1000,
+    // 启用/禁用 CSS 代码拆分
+    cssCodeSplit: true,
+    // 代码分割策略
+    rollupOptions: {
+      output: {
+        // 手动分割代码块
+        manualChunks: {
+          // React 核心库
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          
+          // Redux 相关
+          'redux-vendor': ['react-redux', '@reduxjs/toolkit', 'redux-undo'],
+          
+          // Ant Design UI 库
+          'antd-vendor': ['antd', '@ant-design/icons'],
+          
+          // 图表库
+          'chart-vendor': ['recharts'],
+          
+          // 工具库
+          'utils-vendor': ['axios', 'lodash-es', 'nanoid', 'ahooks'],
+          
+          // 拖拽相关
+          'dnd-vendor': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+          
+          // 动画库
+          'animation-vendor': ['framer-motion'],
+        },
+        
+        // 静态资源文件命名
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: '[ext]/[name]-[hash].[ext]',
+      },
+    },
+    // 压缩配置
+    minify: 'esbuild',
+    // 生成 sourcemap
+    sourcemap: false, // 生产环境关闭以减小体积
+  },
+  // Esbuild 配置（移除 console）
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   plugins: [react()],
   /**
    * 路径别名配置
@@ -23,6 +74,7 @@ export default defineConfig({
    */
   server: {
     port: 8000,
+    open: true,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
