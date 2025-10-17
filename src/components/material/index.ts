@@ -54,6 +54,7 @@ import {
   ICheckboxStatisticsProps,
 } from './question-checkbox'
 import { IQuestionAnchorProps } from './question-anchor'
+import { IQuestionQRCodeProps } from './question-qrcode'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -105,6 +106,7 @@ import QuestionPopoverConfig from './question-popover'
 import QuestionSpinConfig from './question-spin'
 import QuestionModalConfig from './question-modal'
 import QuestionDrawerConfig from './question-drawer'
+import QuestionQRCodeConfig from './question-qrcode'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -155,7 +157,8 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionTransferProps &
   IQuestionTooltipProps &
   IQuestionPopoverProps &
-  IQuestionSpinProps
+  IQuestionSpinProps &
+  IQuestionQRCodeProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -224,6 +227,7 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionSpinConfig,
   QuestionModalConfig,
   QuestionDrawerConfig,
+  QuestionQRCodeConfig,
 ]
 
 // 组件进行分组
@@ -260,6 +264,7 @@ export const componentConfigGroup = [
       QuestionTableConfig,
       QuestionProgressConfig,
       QuestionStepsConfig,
+      QuestionQRCodeConfig,
     ],
   },
   {
