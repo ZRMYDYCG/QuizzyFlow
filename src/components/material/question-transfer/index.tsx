@@ -36,19 +36,21 @@ const QuestionTransfer: React.FC<IQuestionTransferProps> = (
   }
 
   return (
-    <Transfer
-      dataSource={dataSource}
-      targetKeys={currentTargetKeys}
-      selectedKeys={selectedKeys}
-      onChange={handleChange}
-      onSelectChange={handleSelectChange}
-      render={(item) => item.title}
-      showSearch={showSearch}
-      titles={titles}
-      operations={operations}
-      disabled={disabled}
-      style={{ marginBottom: 16 }}
-    />
+    <div style={{ width: '100%', overflow: 'auto' }}>
+      <Transfer
+        dataSource={dataSource}
+        targetKeys={currentTargetKeys}
+        selectedKeys={selectedKeys}
+        onChange={handleChange}
+        onSelectChange={handleSelectChange}
+        render={(item) => item.title}
+        showSearch={showSearch}
+        titles={titles}
+        operations={operations}
+        disabled={disabled}
+        style={{ marginBottom: 16 }}
+      />
+    </div>
   )
 }
 

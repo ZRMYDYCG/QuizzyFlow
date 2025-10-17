@@ -5,6 +5,7 @@ import {
   EditOutlined,
   SaveOutlined,
   LoadingOutlined,
+  EyeOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
@@ -14,6 +15,7 @@ import useGetPageInfo from '@/hooks/useGetPageInfo'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { updateQuestion } from '@/api/modules/question'
 import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
+import PreviewModal from './preview-modal'
 
 const TitleElem: FC = () => {
   const { title } = useGetPageInfo()
@@ -114,6 +116,31 @@ const PublishButton: FC = () => {
   )
 }
 
+const PreviewButton: FC = () => {
+  const { componentList = [] } = useGetComponentInfo()
+  const pageInfo = useGetPageInfo()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleClose = () => {
+    setIsModalOpen(false)
+  }
+
+  return (
+    <>
+      <Button type="default" icon={<EyeOutlined />} onClick={() => setIsModalOpen(true)}>
+        预览
+      </Button>
+      <PreviewModal
+        isOpen={isModalOpen}
+        onOk={handleClose}
+        onCancel={handleClose}
+        componentList={componentList}
+        pageInfo={pageInfo}
+      />
+    </>
+  )
+}
+
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
 
@@ -139,6 +166,7 @@ const EditHeader: React.FC = () => {
           <Space>
             <SaveButton />
             <PublishButton />
+            <PreviewButton />
           </Space>
         </div>
       </div>
