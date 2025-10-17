@@ -8,13 +8,12 @@ import { useTitle } from 'ahooks'
 import StatisticsHeader from './components/statistics-header.tsx'
 import ComponentsList from './components/components-list.tsx'
 import StatisticsTable from './components/statistics-table.tsx'
-import StatisticsCharts from './components/statistics-charts.tsx'
 
 const Statistics: React.FC = () => {
   const { loading } = useLoadQuestionData()
   const { isPublished } = useGetPageInfo()
   const navigate = useNavigate()
-  useTitle('一刻 • 问卷 | 问卷统计')
+  useTitle('问卷统计')
 
   // 状态提升
   const [selectedComponentId, setSelectedComponentId] = useState('')
@@ -53,12 +52,6 @@ const Statistics: React.FC = () => {
               selectedComponentId={selectedComponentId}
               setSelectedComponentId={setSelectedComponentId}
               setSelectedComponentType={setSelectedComponentType}
-            />
-          </div>
-          <div className="w-[400px] ml-[24px] bg-white py-[12px] px-[18px]">
-            <StatisticsCharts
-              selectedComponentId={selectedComponentId}
-              selectedComponentType={selectedComponentType}
             />
           </div>
         </div>
