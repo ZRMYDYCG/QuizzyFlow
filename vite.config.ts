@@ -1,12 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import viteImagemin from 'vite-plugin-imagemin'
 
 /**
  * 配置文档: https://vite.dev/config/
 */
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    viteImagemin({
+      gifsicle: { optimizationLevel: 7 },
+      optipng: { optimizationLevel: 7 },
+      mozjpeg: { quality: 80 },
+      pngquant: { quality: [0.8, 0.9], speed: 4 },
+      svgo: {
+        plugins: [
+          { name: 'removeViewBox', active: false },
+          { name: 'removeEmptyAttrs', active: false },
+        ],
+      },
+    }),
+  ],
   /**
    * 路径别名配置
    * @ -> src 目录
@@ -16,6 +31,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
       }
   },
+  /**
+   * 
+  */
   build: {
     // 输出目录
     outDir: 'dist',
@@ -70,15 +88,21 @@ export default defineConfig({
     watch: null,
     // 构建后清空输出目录
     emptyOutDir: true,
+    // 静态资源处理
+    assetsInlineLimit: 4096, // 小于 4kb 的资源内联为 base64
   },
-  // Esbuild 配置
+  /**
+   * Esbuild 配置
+  */
   esbuild: {
     // 移除 console 和 debugger
     drop: ['console', 'debugger'],
     // 生产环境移除所有注释
     legalComments: 'none',
   },
-  // 依赖优化
+  /**
+   * 依赖优化
+  */
   optimizeDeps: {
     // 明确需要预构建的依赖
     include: [
@@ -100,7 +124,9 @@ export default defineConfig({
     // 强制预构建链接的包
     force: false,
   },
-  // CSS 优化
+  /**
+   * CSS 优化
+  */
   css: {
     // CSS 模块配置
     modules: {
