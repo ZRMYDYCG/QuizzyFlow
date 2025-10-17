@@ -62,10 +62,21 @@ export default defineConfig({
     minify: 'esbuild',
     // 生成 sourcemap
     sourcemap: false, // 生产环境关闭以减小体积
+    // 启用 gzip 压缩大小报告
+    reportCompressedSize: true,
+    // 启用/禁用 CSS 压缩
+    cssMinify: true,
+    // Rollup 监听配置
+    watch: null,
+    // 构建后清空输出目录
+    emptyOutDir: true,
   },
-  // Esbuild 配置（移除 console）
+  // Esbuild 配置
   esbuild: {
+    // 移除 console 和 debugger
     drop: ['console', 'debugger'],
+    // 生产环境移除所有注释
+    legalComments: 'none',
   },
   // 依赖优化
   optimizeDeps: {
