@@ -2,23 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar styles */
+/* 自定义深色主题滚动条 */
+
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #e5e5e5 #f8f8f8;
+  scrollbar-color: #3a3a3f #1e1e23;
 }
 
 /* Chrome, Safari, and Edge */
 *::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
-  background: #f8f8f8;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #e5e5e5;
-  border-radius: 4px;
+  background-color: #3a3a3f;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #4a4a4f;
+}
+
+/* 为特定容器设置更细的滚动条 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #2a2a2f;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #3a3a3f;
 }
