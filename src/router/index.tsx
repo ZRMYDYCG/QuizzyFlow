@@ -11,6 +11,7 @@ import Trash from '@/pages/Manage/Trash'
 import Star from '@/pages/Manage/Star'
 import Edit from '@/pages/Question/Edit'
 import Statistics from '@/pages/Question/Statistics'
+import Publish from '@/pages/Question/Publish'
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: 'statistics/:id',
         element: <Statistics />,
+      },
+      {
+        path: 'publish/:id',
+        element: <Publish />,
       },
     ],
   },

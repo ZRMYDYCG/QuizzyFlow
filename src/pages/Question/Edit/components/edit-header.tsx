@@ -1,11 +1,14 @@
 import React, { FC, useState } from 'react'
-import { Button, Space, Input, message } from 'antd'
+import { Button, Space, Input, message, Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
 import {
   LeftOutlined,
   EditOutlined,
   SaveOutlined,
   LoadingOutlined,
   EyeOutlined,
+  FullscreenOutlined,
+  DownOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
@@ -117,19 +120,43 @@ const PublishButton: FC = () => {
 }
 
 const PreviewButton: FC = () => {
+  const { id } = useParams()
   const { componentList = [] } = useGetComponentInfo()
   const pageInfo = useGetPageInfo()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   const handleClose = () => {
     setIsModalOpen(false)
   }
 
+  const handleFullPreview = () => {
+    // 在新标签页打开完整预览
+    window.open(`/question/publish/${id}`, '_blank')
+  }
+
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'quick',
+      label: '快速预览',
+      icon: <EyeOutlined />,
+      onClick: () => setIsModalOpen(true),
+    },
+    {
+      key: 'full',
+      label: '完整预览',
+      icon: <FullscreenOutlined />,
+      onClick: handleFullPreview,
+    },
+  ]
+
   return (
     <>
-      <Button type="default" icon={<EyeOutlined />} onClick={() => setIsModalOpen(true)}>
-        预览
-      </Button>
+      <Dropdown menu={{ items: menuItems }} placement="bottomRight">
+        <Button type="default" icon={<EyeOutlined />}>
+          预览 <DownOutlined />
+        </Button>
+      </Dropdown>
       <PreviewModal
         isOpen={isModalOpen}
         onOk={handleClose}
