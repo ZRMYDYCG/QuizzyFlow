@@ -6,12 +6,8 @@ import {
   Home,
   FileText, 
   Star, 
-  Trash2, 
-  Calendar,
-  Plus,
-  Loader2
+  Trash2,
 } from 'lucide-react'
-import useLoadQuestionListData from '../../../../hooks/useLoadQuestionListData'
 
 const Sidebar = () => {
   const navigate = useNavigate()
@@ -27,11 +23,6 @@ const Sidebar = () => {
       }
     },
   })
-
-  // 获取统计数据
-  const { data: allData = {} } = useLoadQuestionListData({})
-  const { data: starData = {} } = useLoadQuestionListData({ isStar: true })
-  const { data: trashData = {} } = useLoadQuestionListData({ isDeleted: true })
 
   const getSelectedKey = () => {
     if (pathname.startsWith('/manage/list')) return 'list'
@@ -67,30 +58,6 @@ const Sidebar = () => {
     }
   ]
 
-  const modules = [
-    {
-      emoji: '🎨',
-      label: '问卷模板',
-      count: 0,
-      color: 'text-pink-400',
-      onClick: () => {},
-    },
-    {
-      emoji: '⚙️',
-      label: '问卷设置',
-      count: 0,
-      color: 'text-gray-400',
-      onClick: () => {},
-    },
-    {
-      emoji: '🗄️',
-      label: '数据统计',
-      count: 0,
-      color: 'text-emerald-400',
-      onClick: () => {},
-    },
-  ]
-
   return (
     <div className="h-screen bg-[#1a1a1f] flex flex-col py-6">
       {/* Logo */}
@@ -124,44 +91,6 @@ const Sidebar = () => {
           )
         })}
       </nav>
-
-      {/* Modules 部分 */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="px-4">
-          <div className="flex items-center justify-between px-3 mb-3">
-            <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Modules</h3>
-            <button
-              onClick={handleCreate}
-              disabled={loading}
-              className="w-5 h-5 rounded flex items-center justify-center text-slate-600 hover:text-slate-400 hover:bg-white/5 transition-colors disabled:opacity-50"
-            >
-              {loading ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-              )}
-            </button>
-          </div>
-
-          <div className="space-y-0.5">
-            {modules.map((module, index) => (
-              <button
-                key={index}
-                onClick={module.onClick}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors group"
-              >
-                <span className="text-base">{module.emoji}</span>
-                <span className="flex-1 text-left">{module.label}</span>
-                {module.count > 0 && (
-                  <span className="text-xs text-slate-600 group-hover:text-slate-500">
-                    {module.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

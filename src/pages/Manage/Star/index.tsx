@@ -1,63 +1,169 @@
 import { useTitle } from 'ahooks'
-import ListSearch from '@/components/list-search'
-import QuestionsCard from '../List/components/QuestionsCard'
+import { useState, useMemo } from 'react'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
-import ListPage from '@/components/list-page'
-import { Loader2, Star as StarIcon } from 'lucide-react'
+import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { Loader2, Star as StarIcon, TrendingUp, FileText, AlertCircle, Sparkles } from 'lucide-react'
+
+// 组件导入
+import StatCard from './components/StatCard'
+import RecentStarred from './components/RecentStarred'
+import PopularRanking from './components/PopularRanking'
+import AttentionNeeded from './components/AttentionNeeded'
+import StarViewSwitcher, { StarViewMode } from './components/StarViewSwitcher'
+
+// 复用其他视图组件
+import QuestionsCard from '../List/components/QuestionsCard'
+import QuestionListView from '../List/components/QuestionListView'
+import QuestionTableView from '../List/components/QuestionTableView'
 
 const Star = () => {
   useTitle('星标问卷')
+  const { username, nickname } = useGetUserInfo()
 
   const { data = {}, loading } = useLoadQuestionListData({ isStar: true })
   const { list = [], total = 0 } = data
 
+  // 视图模式状态
+  const [viewMode, setViewMode] = useState<StarViewMode>(() => {
+    const saved = localStorage.getItem('starViewMode')
+    return (saved as StarViewMode) || 'dashboard'
+  })
+
+  const handleViewChange = (mode: StarViewMode) => {
+    setViewMode(mode)
+    localStorage.setItem('starViewMode', mode)
+  }
+
+  // 计算统计数据
+  const stats = useMemo(() => {
+    const published = list.filter((q: any) => q.isPublish).length
+    const active = list.filter((q: any) => q.isPublish && q.answerCount > 10).length
+    const needAttention = list.filter((q: any) => !q.isPublish || q.answerCount < 10).length
+    
+    return {
+      total,
+      published,
+      active,
+      needAttention,
+    }
+  }, [list, total])
+
+  // 问候语
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }, [])
+
   return (
     <div className="min-h-full">
-      {/* 头部 */}
-      <div className="mb-6 p-6 rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
-        <div className="flex justify-between items-center">
+      {/* 顶部标题区域 */}
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-slate-200">星标问卷</h2>
-              <StarIcon className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-            </div>
-            <p className="text-slate-400 text-sm">
-              您标记为星标的重要问卷 · 共 {total} 个
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-2">
+              <StarIcon className="w-7 h-7 md:w-8 md:h-8 text-yellow-400 fill-yellow-400" />
+              {greeting}, {nickname || username}!
+            </h1>
+            <p className="text-slate-500 text-sm flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              您的星标收藏 · 共 {total} 个问卷
             </p>
           </div>
-          <div>
-            <ListSearch />
-          </div>
+          
+          {/* 视图切换器 */}
+          {list.length > 0 && (
+            <StarViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />
+          )}
         </div>
       </div>
 
-      {/* 问卷列表 */}
-      <div className="min-h-[400px]">
-        {loading && (
-          <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
-            <Loader2 className="w-6 h-6 animate-spin" />
-            <span>加载中...</span>
-          </div>
-        )}
-        {!loading && list.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-            <StarIcon className="w-20 h-20 mb-4 text-slate-600" />
-            <p className="text-lg font-medium">暂无星标问卷</p>
-            <p className="text-sm text-slate-600 mt-1">为重要问卷添加星标以便快速访问</p>
-          </div>
-        )}
-        {list.length > 0 &&
-          list.map((question: any) => {
-            const { _id } = question
-            return <QuestionsCard key={_id} {...question} />
-          })}
-      </div>
-
-      {/* 分页 */}
-      {list.length > 0 && (
-        <div className="flex justify-center py-6">
-          <ListPage total={total} />
+      {/* 加载状态 */}
+      {loading && (
+        <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>加载中...</span>
         </div>
+      )}
+
+      {/* 空状态 */}
+      {!loading && list.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+          <StarIcon className="w-20 h-20 mb-4 text-slate-600" />
+          <p className="text-lg font-medium">暂无星标问卷</p>
+          <p className="text-sm text-slate-600 mt-1">为重要问卷添加星标以便快速访问</p>
+        </div>
+      )}
+
+      {/* 内容区域 */}
+      {!loading && list.length > 0 && (
+        <>
+          {/* 仪表盘视图 */}
+          {viewMode === 'dashboard' && (
+            <div className="space-y-6">
+              {/* 数据统计卡片 */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <StatCard
+                  title="总星标"
+                  value={stats.total}
+                  icon={StarIcon}
+                  color="text-yellow-400"
+                  subtitle="全部收藏"
+                />
+                <StatCard
+                  title="已发布"
+                  value={stats.published}
+                  icon={FileText}
+                  color="text-blue-400"
+                  subtitle="正在运行"
+                />
+                <StatCard
+                  title="活跃问卷"
+                  value={stats.active}
+                  icon={TrendingUp}
+                  color="text-emerald-400"
+                  subtitle="答卷 > 10"
+                />
+                <StatCard
+                  title="需关注"
+                  value={stats.needAttention}
+                  icon={AlertCircle}
+                  color="text-orange-400"
+                  subtitle="待处理"
+                />
+              </div>
+
+              {/* 最近标星 */}
+              <RecentStarred questions={list} />
+
+              {/* 热门收藏 + 需要关注 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                <PopularRanking questions={list} />
+                <AttentionNeeded questions={list} />
+              </div>
+            </div>
+          )}
+
+          {/* 网格视图 */}
+          {viewMode === 'grid' && (
+            <div className="space-y-3 md:space-y-4">
+              {list.map((question: any) => (
+                <QuestionsCard key={question._id} {...question} />
+              ))}
+            </div>
+          )}
+
+          {/* 列表视图 */}
+          {viewMode === 'list' && (
+            <QuestionListView questions={list} />
+          )}
+
+          {/* 时间线视图（使用表格视图代替） */}
+          {viewMode === 'timeline' && (
+            <QuestionTableView questions={list} />
+          )}
+        </>
       )}
     </div>
   )
