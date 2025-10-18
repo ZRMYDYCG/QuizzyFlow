@@ -4,11 +4,18 @@ import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import { useTheme } from '@/contexts/ThemeContext'
 import EditCanvas from '@/components/material/edit-canvas.tsx'
 import useLoadQuestionData from '@/hooks/useLoadQuestionData.ts'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { changeSelectedId } from '@/store/modules/question-component.ts'
+import {
+  setLeftPanelWidth,
+  setRightPanelWidth,
+} from '@/store/modules/editor-layout.ts'
+import { stateType } from '@/store'
 import LeftPanel from './components/left-panel.tsx'
 import RightPanel from './components/right-panel.tsx'
 import EditHeader from './components/edit-header.tsx'
+import LayoutToolbar from './components/layout-toolbar.tsx'
+import ResizablePanel from './components/resizable-panel.tsx'
 import { useTitle } from 'ahooks'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
 
@@ -18,10 +25,27 @@ const EditQuestionPage: React.FC = () => {
   const { title } = useGetPageInfo()
   const { theme } = useTheme()
 
+  // 获取布局配置
+  const {
+    showLeftPanel,
+    showRightPanel,
+    leftPanelWidth,
+    rightPanelWidth,
+    canvasScale,
+  } = useSelector((state: stateType) => state.editorLayout)
+
   useTitle(`问卷编辑 - ${title}`)
 
   const removeSelectedId = () => {
     dispatch(changeSelectedId(''))
+  }
+
+  const handleLeftPanelResize = (width: number) => {
+    dispatch(setLeftPanelWidth(width))
+  }
+
+  const handleRightPanelResize = (width: number) => {
+    dispatch(setRightPanelWidth(width))
   }
 
   // 根据主题选择配置
@@ -33,41 +57,61 @@ const EditQuestionPage: React.FC = () => {
         <EditHeader />
         <div className="flex-auto overflow-hidden">
           <div className="flex h-full">
-            {/* 左侧物料面板 */}
-            <div className={`w-[355px] h-full overflow-hidden flex flex-col ${
-              theme === 'dark' 
-                ? 'bg-[#1e1e23] border-r border-white/5' 
-                : 'bg-white border-r border-gray-200'
-            }`}>
-              <LeftPanel />
-            </div>
+            {/* 左侧物料面板 - 可调整宽度 */}
+            {showLeftPanel && (
+              <ResizablePanel
+                position="left"
+                width={leftPanelWidth}
+                onWidthChange={handleLeftPanelResize}
+              >
+                <LeftPanel />
+              </ResizablePanel>
+            )}
             
             {/* 中间画布区域 */}
             <div
-              className={`flex-1 flex justify-center items-center p-6 ${
+              className={`flex-1 flex justify-center items-center p-6 relative ${
                 theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-100'
               }`}
               onClick={removeSelectedId}
             >
-              <div className={`w-[400px] h-[712px] relative overflow-auto shadow-2xl rounded-xl ${
-                theme === 'dark' 
-                  ? 'bg-white border border-white/10' 
-                  : 'bg-white border border-gray-200'
-              }`}>
-                <div className="h-[800px]">
+              <div 
+                className={`relative overflow-auto shadow-2xl rounded-xl transition-all duration-300 ${
+                  theme === 'dark' 
+                    ? 'bg-white border border-white/10' 
+                    : 'bg-white border border-gray-200'
+                }`}
+                style={{
+                  width: `${400 * (canvasScale / 100)}px`,
+                  height: `${712 * (canvasScale / 100)}px`,
+                }}
+              >
+                <div 
+                  className="origin-top-left"
+                  style={{
+                    width: '400px',
+                    height: '800px',
+                    transform: `scale(${canvasScale / 100})`,
+                  }}
+                >
                   <EditCanvas loading={loading} />
                 </div>
               </div>
+
+              {/* 浮动工具栏 */}
+              <LayoutToolbar />
             </div>
             
-            {/* 右侧属性面板 */}
-            <div className={`w-[325px] h-full overflow-hidden flex flex-col ${
-              theme === 'dark' 
-                ? 'bg-[#1e1e23] border-l border-white/5' 
-                : 'bg-white border-l border-gray-200'
-            }`}>
-              <RightPanel />
-            </div>
+            {/* 右侧属性面板 - 可调整宽度 */}
+            {showRightPanel && (
+              <ResizablePanel
+                position="right"
+                width={rightPanelWidth}
+                onWidthChange={handleRightPanelResize}
+              >
+                <RightPanel />
+              </ResizablePanel>
+            )}
           </div>
         </div>
       </div>

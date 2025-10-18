@@ -5,12 +5,15 @@ import questionReducer from './modules/question-component.ts'
 import { QuestionComponentStateType } from './modules/question-component.ts'
 import pageInfoReducer from './modules/pageinfo-reducer.ts'
 import { IPageInfo } from './modules/pageinfo-reducer.ts'
+import editorLayoutReducer from './modules/editor-layout.ts'
+import { EditorLayoutState } from './modules/editor-layout.ts'
 import undoable, { excludeAction, StateWithHistory } from 'redux-undo'
 
 export interface stateType {
   user: IUserState
   questionComponent: StateWithHistory<QuestionComponentStateType>
   pageInfo: IPageInfo
+  editorLayout: EditorLayoutState
 }
 
 export default configureStore({
@@ -30,5 +33,7 @@ export default configureStore({
     }),
     // 问卷信息模块
     pageInfo: pageInfoReducer,
+    // 编辑器布局模块
+    editorLayout: editorLayoutReducer,
   },
 })
