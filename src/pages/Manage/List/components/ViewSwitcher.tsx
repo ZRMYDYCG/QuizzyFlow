@@ -1,5 +1,6 @@
 import { FC } from 'react'
 import { LayoutGrid, List, Table2 } from 'lucide-react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 export type ViewMode = 'card' | 'list' | 'table'
 
@@ -9,6 +10,8 @@ interface ViewSwitcherProps {
 }
 
 const ViewSwitcher: FC<ViewSwitcherProps> = ({ currentView, onViewChange }) => {
+  const t = useManageTheme()
+  
   const views: Array<{ mode: ViewMode; icon: any; label: string }> = [
     { mode: 'card', icon: LayoutGrid, label: '卡片视图' },
     { mode: 'list', icon: List, label: '列表视图' },
@@ -16,7 +19,7 @@ const ViewSwitcher: FC<ViewSwitcherProps> = ({ currentView, onViewChange }) => {
   ]
 
   return (
-    <div className="flex items-center gap-0.5 md:gap-1 p-0.5 md:p-1 bg-slate-800/30 rounded-lg border border-slate-700/50">
+    <div className={`flex items-center gap-0.5 md:gap-1 p-0.5 md:p-1 rounded-lg border ${t.isDark ? 'bg-slate-800/30 border-slate-700/50' : 'bg-gray-100 border-gray-200'}`}>
       {views.map(({ mode, icon: Icon, label }) => {
         const isActive = currentView === mode
         return (
@@ -29,7 +32,9 @@ const ViewSwitcher: FC<ViewSwitcherProps> = ({ currentView, onViewChange }) => {
               ${
                 isActive
                   ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
+                  : t.isDark
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/30'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
               }
             `}
           >

@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { createQuestion } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import { message } from 'antd'
+import { useManageTheme } from '../../../../hooks/useManageTheme'
 import { 
   Home,
   FileText, 
@@ -12,6 +13,7 @@ import {
 const Sidebar = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const t = useManageTheme()
 
   const { loading, run: handleCreate } = useRequest(createQuestion, {
     manual: true,
@@ -59,7 +61,9 @@ const Sidebar = () => {
   ]
 
   return (
-    <div className="h-screen bg-[#1a1a1f] flex flex-col py-6">
+    <div className={`h-screen flex flex-col py-6 ${
+      t.isDark ? 'bg-[#1a1a1f]' : 'bg-white'
+    }`}>
       {/* Logo */}
       <div className="px-6 mb-8">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center p-1">
@@ -80,8 +84,12 @@ const Sidebar = () => {
                 w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
                 ${
                   isActive
-                    ? 'text-white bg-white/5'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? t.isDark
+                      ? 'text-white bg-white/5'
+                      : 'text-gray-900 bg-gray-100'
+                    : t.isDark
+                      ? 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }
               `}
             >

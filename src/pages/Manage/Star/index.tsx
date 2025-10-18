@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
 import useGetUserInfo from '@/hooks/useGetUserInfo'
 import { Loader2, Star as StarIcon, TrendingUp, FileText, AlertCircle, Sparkles } from 'lucide-react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 // 组件导入
 import StatCard from './components/StatCard'
@@ -19,6 +20,7 @@ import QuestionTableView from '../List/components/QuestionTableView'
 const Star = () => {
   useTitle('星标问卷')
   const { username, nickname } = useGetUserInfo()
+  const t = useManageTheme()
 
   const { data = {}, loading } = useLoadQuestionListData({ isStar: true })
   const { list = [], total = 0 } = data
@@ -62,11 +64,10 @@ const Star = () => {
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-2">
-              <StarIcon className="w-7 h-7 md:w-8 md:h-8 text-yellow-400 fill-yellow-400" />
+            <h1 className={`text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 ${t.text.primary}`}>
               {greeting}, {nickname || username}!
             </h1>
-            <p className="text-slate-500 text-sm flex items-center gap-2">
+            <p className={`text-sm flex items-center gap-2 ${t.text.secondary}`}>
               <Sparkles className="w-4 h-4" />
               您的星标收藏 · 共 {total} 个问卷
             </p>
@@ -81,7 +82,7 @@ const Star = () => {
 
       {/* 加载状态 */}
       {loading && (
-        <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+        <div className={`flex items-center justify-center gap-2 py-20 ${t.text.secondary}`}>
           <Loader2 className="w-6 h-6 animate-spin" />
           <span>加载中...</span>
         </div>
@@ -89,10 +90,10 @@ const Star = () => {
 
       {/* 空状态 */}
       {!loading && list.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-          <StarIcon className="w-20 h-20 mb-4 text-slate-600" />
+        <div className={`flex flex-col items-center justify-center py-20 ${t.text.secondary}`}>
+          <StarIcon className={`w-20 h-20 mb-4 ${t.text.tertiary}`} />
           <p className="text-lg font-medium">暂无星标问卷</p>
-          <p className="text-sm text-slate-600 mt-1">为重要问卷添加星标以便快速访问</p>
+          <p className={`text-sm mt-1 ${t.text.tertiary}`}>为重要问卷添加星标以便快速访问</p>
         </div>
       )}
 

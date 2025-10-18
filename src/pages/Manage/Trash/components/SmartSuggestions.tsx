@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react'
 import { Lightbulb, Download, Trash2, RefreshCw, AlertCircle } from 'lucide-react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface SmartSuggestionsProps {
   questions: any[]
@@ -7,6 +8,7 @@ interface SmartSuggestionsProps {
 }
 
 const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) => {
+  const t = useManageTheme()
   // 分析并生成建议
   const suggestions = useMemo(() => {
     const result = []
@@ -84,10 +86,14 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
 
   if (suggestions.length === 0) {
     return (
-      <div className="p-5 rounded-xl bg-slate-800/30 border border-slate-700/50 text-center">
-        <Lightbulb className="w-12 h-12 mx-auto mb-2 text-slate-600" />
-        <p className="text-sm text-slate-500">暂无智能建议</p>
-        <p className="text-xs text-slate-600 mt-1">回收站数据正常 ✨</p>
+      <div className={`p-5 rounded-xl border text-center ${
+        t.isDark 
+          ? 'bg-slate-800/30 border-slate-700/50' 
+          : 'bg-white border-gray-200 shadow-sm'
+      }`}>
+        <Lightbulb className={`w-12 h-12 mx-auto mb-2 ${t.text.tertiary}`} />
+        <p className={`text-sm ${t.text.secondary}`}>暂无智能建议</p>
+        <p className={`text-xs mt-1 ${t.text.tertiary}`}>回收站数据正常 ✨</p>
       </div>
     )
   }
@@ -96,7 +102,7 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="w-5 h-5 text-yellow-400" />
-        <h3 className="text-lg font-semibold text-slate-200">智能建议</h3>
+        <h3 className={`text-lg font-semibold ${t.text.primary}`}>智能建议</h3>
       </div>
 
       {suggestions.map((suggestion, index) => {
@@ -107,8 +113,12 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
             className={`
               p-4 rounded-xl border transition-all
               ${suggestion.isUrgent 
-                ? 'bg-red-900/10 border-red-500/30' 
-                : 'bg-slate-800/30 border-slate-700/50'
+                ? t.isDark 
+                  ? 'bg-red-900/10 border-red-500/30' 
+                  : 'bg-red-50 border-red-300'
+                : t.isDark
+                  ? 'bg-slate-800/30 border-slate-700/50'
+                  : 'bg-white border-gray-200 shadow-sm'
               }
             `}
           >
@@ -120,10 +130,10 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
 
               {/* 内容 */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-slate-200 mb-1">
+                <h4 className={`text-sm font-semibold mb-1 ${t.text.primary}`}>
                   {suggestion.title}
                 </h4>
-                <p className="text-xs text-slate-400 mb-3">
+                <p className={`text-xs mb-3 ${t.text.secondary}`}>
                   {suggestion.description}
                 </p>
 

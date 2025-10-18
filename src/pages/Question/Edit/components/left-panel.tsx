@@ -14,7 +14,7 @@ const LeftPanel: React.FC = () => {
     {
       key: 'componentLib',
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <AppstoreAddOutlined />
           <span>基础物料</span>
         </span>
@@ -24,7 +24,7 @@ const LeftPanel: React.FC = () => {
     {
       key: 'template',
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <RadarChartOutlined />
           <span>物料组合</span>
         </span>
@@ -34,7 +34,7 @@ const LeftPanel: React.FC = () => {
     {
       key: 'layers',
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <BarChartOutlined />
           <span>画布图层</span>
         </span>
@@ -44,9 +44,19 @@ const LeftPanel: React.FC = () => {
   ]
 
   return (
-    <>
-      <Tabs defaultActiveKey="componentLib" items={tabsItems}></Tabs>
-    </>
+    <div className="flex flex-col h-full">
+      <Tabs 
+        defaultActiveKey="componentLib" 
+        items={tabsItems}
+        className="flex-1 overflow-hidden [&_.ant-tabs-content]:h-full [&_.ant-tabs-tabpane]:h-full"
+        tabBarStyle={{ 
+          marginBottom: 0, 
+          paddingLeft: 12, 
+          paddingRight: 12,
+          paddingTop: 8
+        }}
+      />
+    </div>
   )
 }
 

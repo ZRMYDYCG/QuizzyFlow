@@ -8,6 +8,7 @@ import {
 } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 const { confirm } = Modal
 
@@ -23,6 +24,7 @@ interface QuestionCardProps {
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   const { _id, answerCount, isPublish, isStar, createdAt, title } = props
   const navigate = useNavigate()
+  const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { loading: duplicateLoading, run: duplicate } = useRequest(
@@ -68,9 +70,15 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   return (
     <div className="relative group">
       {/* 主卡片 */}
-      <div className="relative p-4 md:p-5 rounded-xl md:rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-800/40 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 backdrop-blur-sm overflow-hidden">
-        {/* 背景装饰 */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-all duration-500" />
+      <div className={`relative p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all duration-300 overflow-hidden ${
+        t.isDark 
+          ? 'bg-gradient-to-br from-slate-800/80 to-slate-800/40 border-slate-700/50 hover:border-blue-500/50 backdrop-blur-sm' 
+          : 'bg-white border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md'
+      }`}>
+        {/* 背景装饰 - 仅深色模式 */}
+        {t.isDark && (
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-all duration-500" />
+        )}
         
         {/* 顶部：标题和标签 */}
         <div className="relative mb-3 md:mb-4">
@@ -94,15 +102,15 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               <div className="flex-1 min-w-0">
                 <Link
                   to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
-                  className="text-base md:text-lg font-semibold text-slate-100 hover:text-blue-400 transition-colors line-clamp-2 block mb-2"
+                  className={`text-base md:text-lg font-semibold hover:text-blue-400 transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
                 >
                   {title}
                 </Link>
                 
                 {/* 元信息 */}
-                <div className="flex items-center gap-2 md:gap-3 text-xs text-slate-500 flex-wrap">
+                <div className={`flex items-center gap-2 md:gap-3 text-xs flex-wrap ${t.text.tertiary}`}>
                   <span className="hidden sm:inline">ID: {_id.slice(-6)}</span>
-                  <span className="hidden sm:inline w-1 h-1 rounded-full bg-slate-600" />
+                  <span className={`hidden sm:inline w-1 h-1 rounded-full ${t.isDark ? 'bg-slate-600' : 'bg-gray-300'}`} />
                   <span>{createdAt}</span>
                 </div>
               </div>
@@ -127,7 +135,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
         </div>
 
         {/* 底部：统计和操作 */}
-        <div className="relative flex items-center justify-between pt-3 md:pt-4 border-t border-slate-700/30">
+        <div className={`relative flex items-center justify-between pt-3 md:pt-4 border-t ${t.divider}`}>
           {/* 答卷数统计 */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
@@ -184,16 +192,16 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in-0" />
-                <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl">
-                  <AlertDialog.Title className="text-lg font-semibold text-slate-200 mb-2">
+                <AlertDialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${t.dialog.bg} border ${t.dialog.border} rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl`}>
+                  <AlertDialog.Title className={`text-lg font-semibold ${t.dialog.title} mb-2`}>
                     确认删除该问卷？
                   </AlertDialog.Title>
-                  <AlertDialog.Description className="text-sm text-slate-400 mb-6">
+                  <AlertDialog.Description className={`text-sm ${t.dialog.description} mb-6`}>
                     删除后将移至回收站，您可以在回收站中恢复或彻底删除。
                   </AlertDialog.Description>
                   <div className="flex gap-3 justify-end">
                     <AlertDialog.Cancel asChild>
-                      <button className="px-4 py-2 text-sm text-slate-300 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                      <button className={`px-4 py-2 text-sm ${t.button.default} rounded-lg transition-colors`}>
                         取消
                       </button>
                     </AlertDialog.Cancel>

@@ -16,6 +16,7 @@ import {
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 // 组件导入
 import TrashStatCard from './components/TrashStatCard'
@@ -28,6 +29,7 @@ const AUTO_DELETE_DAYS = 30
 
 const Trash: React.FC = () => {
   useTitle('回收站')
+  const t = useManageTheme()
 
   const {
     data = {},
@@ -184,11 +186,11 @@ const Trash: React.FC = () => {
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-2">
+            <h1 className={`text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 ${t.text.primary}`}>
               <Trash2 className="w-7 h-7 md:w-8 md:h-8 text-red-400" />
               回收站智能管理
             </h1>
-            <p className="text-slate-500 text-sm">
+            <p className={`text-sm ${t.text.secondary}`}>
               已删除 {total} 个问卷 · 自动清理周期 {AUTO_DELETE_DAYS} 天
             </p>
           </div>
@@ -197,7 +199,7 @@ const Trash: React.FC = () => {
 
       {/* 加载状态 */}
       {loading && (
-        <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+        <div className={`flex items-center justify-center gap-2 py-20 ${t.text.secondary}`}>
           <Loader2 className="w-6 h-6 animate-spin" />
           <span>加载中...</span>
         </div>
@@ -205,10 +207,10 @@ const Trash: React.FC = () => {
 
       {/* 空状态 */}
       {!loading && list.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-          <Trash2 className="w-20 h-20 mb-4 text-slate-600" />
+        <div className={`flex flex-col items-center justify-center py-20 ${t.text.secondary}`}>
+          <Trash2 className={`w-20 h-20 mb-4 ${t.text.tertiary}`} />
           <p className="text-lg font-medium">回收站为空</p>
-          <p className="text-sm text-slate-600 mt-1">删除的问卷会暂存在这里</p>
+          <p className={`text-sm mt-1 ${t.text.tertiary}`}>删除的问卷会暂存在这里</p>
         </div>
       )}
 
@@ -282,11 +284,17 @@ const Trash: React.FC = () => {
             {/* 左侧：列表区域 */}
             <div className="lg:col-span-2 space-y-4">
               {/* 批量操作栏 */}
-              <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
+              <div className={`flex flex-wrap items-center gap-3 p-4 rounded-xl border ${
+                t.isDark 
+                  ? 'bg-slate-800/30 border-slate-700/50' 
+                  : 'bg-white border-gray-200 shadow-sm'
+              }`}>
                 <Checkbox.Root
                   checked={selectedIds.length === filteredList.length && filteredList.length > 0}
                   onCheckedChange={toggleSelectAll}
-                  className="w-5 h-5 rounded bg-slate-700/50 border border-slate-600 hover:border-blue-500 transition-colors data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                  className={`w-5 h-5 rounded border hover:border-blue-500 transition-colors data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 ${
+                    t.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-300'
+                  }`}
                 >
                   <Checkbox.Indicator>
                     <Check className="w-4 h-4 text-white" />
@@ -314,16 +322,16 @@ const Trash: React.FC = () => {
                   </AlertDialog.Trigger>
                   <AlertDialog.Portal>
                     <AlertDialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in-0" />
-                    <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl">
-                      <AlertDialog.Title className="text-lg font-semibold text-slate-200 mb-2">
+                    <AlertDialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${t.dialog.bg} border ${t.dialog.border} rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl`}>
+                      <AlertDialog.Title className={`text-lg font-semibold ${t.dialog.title} mb-2`}>
                         确认彻底删除？
                       </AlertDialog.Title>
-                      <AlertDialog.Description className="text-sm text-slate-400 mb-6">
+                      <AlertDialog.Description className={`text-sm ${t.dialog.description} mb-6`}>
                         删除后将无法恢复，请谨慎操作！您将删除 {selectedIds.length} 个问卷。
                       </AlertDialog.Description>
                       <div className="flex gap-3 justify-end">
                         <AlertDialog.Cancel asChild>
-                          <button className="px-4 py-2 text-sm text-slate-300 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                          <button className={`px-4 py-2 text-sm ${t.button.default} rounded-lg transition-colors`}>
                             取消
                           </button>
                         </AlertDialog.Cancel>
@@ -342,7 +350,7 @@ const Trash: React.FC = () => {
                 </AlertDialog.Root>
 
                 {selectedIds.length > 0 && (
-                  <span className="text-sm text-slate-400">
+                  <span className={`text-sm ${t.text.secondary}`}>
                     已选择 <span className="font-medium text-blue-400">{selectedIds.length}</span> 项
                   </span>
                 )}
@@ -364,7 +372,7 @@ const Trash: React.FC = () => {
               </div>
 
               {filteredList.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
+                <div className={`text-center py-12 ${t.text.secondary}`}>
                   <p className="text-sm">没有符合条件的问卷</p>
                 </div>
               )}

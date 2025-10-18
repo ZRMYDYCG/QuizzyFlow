@@ -8,12 +8,14 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Loader2, Inbox } from 'lucide-react'
 import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const List = () => {
   useTitle('问卷列表')
   const [searchParams] = useSearchParams()
   const keyword = searchParams.get('keyword') || ''
   const { username, nickname } = useGetUserInfo()
+  const { theme } = useTheme()
 
   const [started, setStarted] = useState(false)
   const [list, setList] = useState([])
@@ -88,7 +90,9 @@ const List = () => {
   const LoadingMoreContentElement = useMemo(() => {
     if (!started || loading) {
       return (
-        <div className="flex items-center justify-center gap-2 text-slate-400 py-8">
+        <div className={`flex items-center justify-center gap-2 py-8 ${
+          theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+        }`}>
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>加载中...</span>
         </div>
@@ -96,21 +100,29 @@ const List = () => {
     }
     if (total === 0) {
       return (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-          <Inbox className="w-16 h-16 mb-4 text-slate-600" />
+        <div className={`flex flex-col items-center justify-center py-16 ${
+          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+        }`}>
+          <Inbox className={`w-16 h-16 mb-4 ${
+            theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+          }`} />
           <p className="text-lg font-medium">暂无数据</p>
-          <p className="text-sm text-slate-600 mt-1">创建您的第一个问卷吧</p>
+          <p className={`text-sm mt-1 ${
+            theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+          }`}>创建您的第一个问卷吧</p>
         </div>
       )
     }
     if (!haveMoreData) {
       return (
-        <div className="text-center text-slate-600 py-4 text-sm">
+        <div className={`text-center py-4 text-sm ${
+          theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+        }`}>
           - 已加载全部 {total} 个问卷 -
         </div>
       )
     }
-  }, [started, loading, haveMoreData, total])
+  }, [started, loading, haveMoreData, total, theme])
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -125,10 +137,14 @@ const List = () => {
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            <h1 className={`text-2xl sm:text-3xl font-bold mb-2 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
               {greeting}, {nickname || username}!
             </h1>
-            <p className="text-slate-500 text-xs sm:text-sm italic hidden sm:block">
+            <p className={`text-xs sm:text-sm italic hidden sm:block ${
+              theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+            }`}>
               "The final wisdom of life requires not the annulment of incongruity but the achievement of serenity within and above it." - Reinhold Niebuhr
             </p>
           </div>

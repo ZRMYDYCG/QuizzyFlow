@@ -1,12 +1,15 @@
 import { FC } from 'react'
 import { TrendingUp, BarChart3, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface PopularRankingProps {
   questions: any[]
 }
 
 const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
+  const t = useManageTheme()
+  
   // 按答卷数排序，取前5名
   const topQuestions = [...questions]
     .sort((a, b) => (b.answerCount || 0) - (a.answerCount || 0))
@@ -35,13 +38,17 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
   }
 
   return (
-    <div className="p-5 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-800/40 border border-slate-700/50 backdrop-blur-sm">
+    <div className={`p-5 rounded-xl border ${
+      t.isDark 
+        ? 'bg-gradient-to-br from-slate-800/80 to-slate-800/40 border-slate-700/50 backdrop-blur-sm' 
+        : 'bg-white border-gray-200 shadow-sm'
+    }`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+        <h2 className={`text-lg font-semibold flex items-center gap-2 ${t.text.primary}`}>
           <TrendingUp className="w-5 h-5 text-blue-400" />
           热门收藏
         </h2>
-        <span className="text-xs text-slate-500">按答卷数排序</span>
+        <span className={`text-xs ${t.text.tertiary}`}>按答卷数排序</span>
       </div>
 
       <div className="space-y-3">
@@ -55,7 +62,9 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
               to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
               className="group block"
             >
-              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-700/30 transition-all">
+              <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                t.isDark ? 'hover:bg-slate-700/30' : 'hover:bg-gray-50'
+              }`}>
                 {/* 排名 */}
                 <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border ${getRankColor(index)}`}>
                   {getRankIcon(index)}
@@ -64,7 +73,7 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
                 {/* 内容 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-medium text-slate-200 truncate group-hover:text-blue-400 transition-colors">
+                    <p className={`text-sm font-medium truncate group-hover:text-blue-400 transition-colors ${t.text.primary}`}>
                       {title}
                     </p>
                     <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 flex-shrink-0" />
@@ -72,13 +81,15 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
                   
                   {/* 进度条 */}
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${
+                      t.isDark ? 'bg-slate-700/50' : 'bg-gray-200'
+                    }`}>
                       <div 
                         className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <div className={`flex items-center gap-1 text-xs ${t.text.secondary}`}>
                       <BarChart3 className="w-3 h-3" />
                       <span className="font-semibold text-blue-400">{answerCount}</span>
                     </div>
@@ -91,7 +102,7 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
       </div>
 
       {topQuestions.length === 0 && (
-        <div className="text-center py-8 text-slate-500">
+        <div className={`text-center py-8 ${t.text.secondary}`}>
           <p className="text-sm">暂无数据</p>
         </div>
       )}

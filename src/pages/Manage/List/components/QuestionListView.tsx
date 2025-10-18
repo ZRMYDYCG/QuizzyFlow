@@ -6,6 +6,7 @@ import { useRequest } from 'ahooks'
 import { message, Modal } from 'antd'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useState } from 'react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 const { confirm } = Modal
 
@@ -16,6 +17,7 @@ interface QuestionListViewProps {
 const QuestionListItem: FC<any> = (props) => {
   const { _id, answerCount, isPublish, isStar, createdAt, title } = props
   const navigate = useNavigate()
+  const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { loading: duplicateLoading, run: duplicate } = useRequest(
@@ -59,7 +61,11 @@ const QuestionListItem: FC<any> = (props) => {
   )
 
   return (
-    <div className="group flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 md:p-4 rounded-lg bg-slate-800/20 hover:bg-slate-800/40 border border-slate-700/30 hover:border-blue-500/30 transition-all gap-3 sm:gap-0">
+    <div className={`group flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 md:p-4 rounded-lg border transition-all gap-3 sm:gap-0 ${
+      t.isDark 
+        ? 'bg-slate-800/20 hover:bg-slate-800/40 border-slate-700/30 hover:border-blue-500/30' 
+        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-blue-400 shadow-sm'
+    }`}>
       {/* 左侧：标题和元信息 */}
       <div className="flex-1 min-w-0 sm:mr-4">
         <div className="flex items-center gap-2 md:gap-3 mb-2">
@@ -77,7 +83,7 @@ const QuestionListItem: FC<any> = (props) => {
           
           <Link
             to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
-            className="text-sm md:text-base font-medium text-slate-200 hover:text-blue-400 transition-colors truncate flex-1"
+            className={`text-sm md:text-base font-medium hover:text-blue-400 transition-colors truncate flex-1 ${t.text.primary}`}
           >
             {title}
           </Link>
@@ -97,7 +103,7 @@ const QuestionListItem: FC<any> = (props) => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 text-xs text-slate-500 flex-wrap">
+        <div className={`flex items-center gap-2 md:gap-4 text-xs flex-wrap ${t.text.tertiary}`}>
           <span className="flex items-center gap-1 hidden sm:flex">
             <FileText className="w-3 h-3" />
             ID: {_id.slice(-6)}
@@ -158,16 +164,16 @@ const QuestionListItem: FC<any> = (props) => {
           </AlertDialog.Trigger>
           <AlertDialog.Portal>
             <AlertDialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in-0" />
-            <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl">
-              <AlertDialog.Title className="text-lg font-semibold text-slate-200 mb-2">
+            <AlertDialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${t.dialog.bg} border ${t.dialog.border} rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl`}>
+              <AlertDialog.Title className={`text-lg font-semibold ${t.dialog.title} mb-2`}>
                 确认删除该问卷？
               </AlertDialog.Title>
-              <AlertDialog.Description className="text-sm text-slate-400 mb-6">
+              <AlertDialog.Description className={`text-sm ${t.dialog.description} mb-6`}>
                 删除后将移至回收站，您可以在回收站中恢复或彻底删除。
               </AlertDialog.Description>
               <div className="flex gap-3 justify-end">
                 <AlertDialog.Cancel asChild>
-                  <button className="px-4 py-2 text-sm text-slate-300 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                  <button className={`px-4 py-2 text-sm ${t.button.default} rounded-lg transition-colors`}>
                     取消
                   </button>
                 </AlertDialog.Cancel>

@@ -1,6 +1,7 @@
 import { FC, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Star, BarChart3, Calendar } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface RecentStarredProps {
   questions: any[]
@@ -8,20 +9,25 @@ interface RecentStarredProps {
 
 const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
   const { _id, title, answerCount, createdAt, isPublish } = question
+  const t = useManageTheme()
 
   return (
     <Link
       to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
       className="group relative flex-shrink-0 w-[280px] md:w-[320px]"
     >
-      <div className="p-4 rounded-xl bg-gradient-to-br from-slate-800/60 to-slate-800/30 border border-slate-700/50 hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300 h-full">
+      <div className={`p-4 rounded-xl border hover:border-yellow-500/50 hover:shadow-lg transition-all duration-300 h-full ${
+        t.isDark 
+          ? 'bg-gradient-to-br from-slate-800/60 to-slate-800/30 border-slate-700/50 hover:shadow-yellow-500/10' 
+          : 'bg-white border-gray-200 shadow-sm'
+      }`}>
         {/* 星标图标 */}
         <div className="absolute top-3 right-3">
           <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
         </div>
 
         {/* 标题 */}
-        <h3 className="text-base font-semibold text-slate-100 mb-3 pr-8 line-clamp-2 group-hover:text-yellow-400 transition-colors">
+        <h3 className={`text-base font-semibold mb-3 pr-8 line-clamp-2 group-hover:text-yellow-400 transition-colors ${t.text.primary}`}>
           {title}
         </h3>
 
@@ -39,7 +45,7 @@ const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
         </div>
 
         {/* 统计信息 */}
-        <div className="flex items-center gap-4 text-xs text-slate-500">
+        <div className={`flex items-center gap-4 text-xs ${t.text.tertiary}`}>
           <span className="flex items-center gap-1">
             <BarChart3 className="w-3.5 h-3.5" />
             {answerCount} 答卷
@@ -59,6 +65,7 @@ const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
 
 const RecentStarred: FC<RecentStarredProps> = ({ questions }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const t = useManageTheme()
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
@@ -75,20 +82,27 @@ const RecentStarred: FC<RecentStarredProps> = ({ questions }) => {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
-          <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+        <h2 className={`text-lg font-semibold flex items-center gap-2 ${t.text.primary}`}>
           最近标星
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => scroll('left')}
-            className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-all border border-slate-700/50"
+            className={`p-2 rounded-lg border transition-all ${
+              t.isDark 
+                ? 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 border-slate-700/50' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 border-gray-200'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-all border border-slate-700/50"
+            className={`p-2 rounded-lg border transition-all ${
+              t.isDark 
+                ? 'bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 border-slate-700/50' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 border-gray-200'
+            }`}
           >
             <ChevronRight className="w-4 h-4" />
           </button>

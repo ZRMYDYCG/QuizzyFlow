@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react'
 import { AlertTriangle, Clock, Database, RefreshCw } from 'lucide-react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface UrgentAlertProps {
   questions: any[]
@@ -8,6 +9,7 @@ interface UrgentAlertProps {
 }
 
 const UrgentAlert: FC<UrgentAlertProps> = ({ questions, onRestoreAll, autoDeleteDays = 30 }) => {
+  const t = useManageTheme()
   // 计算即将清理的问卷（删除后27天及以上）
   const urgentQuestions = useMemo(() => {
     const now = new Date().getTime()
@@ -27,7 +29,11 @@ const UrgentAlert: FC<UrgentAlertProps> = ({ questions, onRestoreAll, autoDelete
   if (urgentQuestions.length === 0) return null
 
   return (
-    <div className="p-5 rounded-xl bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-500/50 backdrop-blur-sm">
+    <div className={`p-5 rounded-xl border border-red-500/50 ${
+      t.isDark 
+        ? 'bg-gradient-to-br from-red-900/20 to-red-800/10 backdrop-blur-sm' 
+        : 'bg-red-50 border-red-300'
+    }`}>
       <div className="flex items-start gap-4">
         {/* 警告图标 */}
         <div className="flex-shrink-0 p-3 rounded-lg bg-red-500/20 animate-pulse">
@@ -41,14 +47,14 @@ const UrgentAlert: FC<UrgentAlertProps> = ({ questions, onRestoreAll, autoDelete
           </h3>
           
           <div className="space-y-2 mb-4">
-            <p className="text-sm text-slate-300">
+            <p className={`text-sm ${t.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
               <Clock className="w-4 h-4 inline mr-1" />
               <span className="font-semibold text-red-400">{urgentQuestions.length}</span> 个问卷将在 
               <span className="font-semibold text-red-400"> 3 天内</span> 自动清理
             </p>
             
             {highValueCount > 0 && (
-              <p className="text-sm text-slate-300">
+              <p className={`text-sm ${t.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
                 <Database className="w-4 h-4 inline mr-1" />
                 包含重要数据：<span className="font-semibold text-yellow-400">{highValueCount}</span> 答卷
               </p>
@@ -65,7 +71,11 @@ const UrgentAlert: FC<UrgentAlertProps> = ({ questions, onRestoreAll, autoDelete
               立即恢复全部
             </button>
             
-            <button className="px-4 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-lg transition-all text-sm">
+            <button className={`px-4 py-2 rounded-lg transition-all text-sm ${
+              t.isDark 
+                ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' 
+                : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+            }`}>
               查看详情
             </button>
           </div>
@@ -74,17 +84,17 @@ const UrgentAlert: FC<UrgentAlertProps> = ({ questions, onRestoreAll, autoDelete
 
       {/* 问卷列表预览 */}
       <div className="mt-4 pt-4 border-t border-red-500/20">
-        <p className="text-xs text-slate-500 mb-2">即将清理的问卷：</p>
+        <p className={`text-xs mb-2 ${t.text.tertiary}`}>即将清理的问卷：</p>
         <div className="space-y-1">
           {urgentQuestions.slice(0, 3).map((q: any) => (
-            <div key={q._id} className="text-sm text-slate-400 flex items-center gap-2">
+            <div key={q._id} className={`text-sm flex items-center gap-2 ${t.text.secondary}`}>
               <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
               <span className="truncate flex-1">{q.title}</span>
               <span className="text-xs text-red-400">{q.answerCount || 0} 答卷</span>
             </div>
           ))}
           {urgentQuestions.length > 3 && (
-            <p className="text-xs text-slate-500">还有 {urgentQuestions.length - 3} 个...</p>
+            <p className={`text-xs ${t.text.tertiary}`}>还有 {urgentQuestions.length - 3} 个...</p>
           )}
         </div>
       </div>

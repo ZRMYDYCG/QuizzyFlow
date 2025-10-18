@@ -4,6 +4,7 @@ import * as Checkbox from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useState } from 'react'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface EnhancedTrashItemProps {
   question: any
@@ -22,6 +23,7 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
   onDelete,
   autoDeleteDays = 30,
 }) => {
+  const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const { _id, title, isPublish, answerCount = 0, createdAt, deletedAt } = question
 
@@ -52,8 +54,12 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
     <div className={`
       group p-4 rounded-lg border transition-all
       ${isUrgent 
-        ? 'bg-red-900/10 border-red-500/30 hover:border-red-500/50' 
-        : 'bg-slate-800/20 border-slate-700/30 hover:border-blue-500/30'
+        ? t.isDark 
+          ? 'bg-red-900/10 border-red-500/30 hover:border-red-500/50' 
+          : 'bg-red-50 border-red-300 hover:border-red-400'
+        : t.isDark
+          ? 'bg-slate-800/20 border-slate-700/30 hover:border-blue-500/30'
+          : 'bg-white border-gray-200 hover:border-blue-400 shadow-sm'
       }
     `}>
       <div className="flex items-start gap-3">
@@ -62,7 +68,9 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
           <Checkbox.Root
             checked={isSelected}
             onCheckedChange={onSelect}
-            className="w-5 h-5 rounded bg-slate-700/50 border border-slate-600 hover:border-blue-500 transition-colors data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+            className={`w-5 h-5 rounded border hover:border-blue-500 transition-colors data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 ${
+              t.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-300'
+            }`}
           >
             <Checkbox.Indicator>
               <Check className="w-4 h-4 text-white" />
@@ -75,7 +83,7 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
           {/* 标题和标签 */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-medium text-slate-200 truncate mb-2">
+              <h3 className={`text-base font-medium truncate mb-2 ${t.text.primary}`}>
                 {title}
               </h3>
               
@@ -126,7 +134,7 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
                 )}
 
                 {/* 答卷数 */}
-                <span className="text-xs text-slate-500">
+                <span className={`text-xs ${t.text.tertiary}`}>
                   {answerCount} 答卷
                 </span>
               </div>
@@ -150,7 +158,11 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
               恢复
             </button>
 
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-lg transition-all text-xs">
+            <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs ${
+              t.isDark 
+                ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+            }`}>
               <Eye className="w-3.5 h-3.5" />
               预览
             </button>
@@ -164,16 +176,16 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
               </AlertDialog.Trigger>
               <AlertDialog.Portal>
                 <AlertDialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in-0" />
-                <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl">
-                  <AlertDialog.Title className="text-lg font-semibold text-slate-200 mb-2">
+                <AlertDialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${t.dialog.bg} border ${t.dialog.border} rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl`}>
+                  <AlertDialog.Title className={`text-lg font-semibold ${t.dialog.title} mb-2`}>
                     确认彻底删除？
                   </AlertDialog.Title>
-                  <AlertDialog.Description className="text-sm text-slate-400 mb-6">
+                  <AlertDialog.Description className={`text-sm ${t.dialog.description} mb-6`}>
                     删除后将无法恢复，{isHighValue && '此问卷包含大量数据，'}请谨慎操作！
                   </AlertDialog.Description>
                   <div className="flex gap-3 justify-end">
                     <AlertDialog.Cancel asChild>
-                      <button className="px-4 py-2 text-sm text-slate-300 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                      <button className={`px-4 py-2 text-sm ${t.button.default} rounded-lg transition-colors`}>
                         取消
                       </button>
                     </AlertDialog.Cancel>

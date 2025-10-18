@@ -19,30 +19,40 @@ const RightPanel: React.FC = () => {
     {
       key: 'prop',
       label: (
-        <div>
+        <span className="flex items-center gap-2">
           <FileTextOutlined />
           <span>物料属性</span>
-        </div>
+        </span>
       ),
       children: <ComponentProp />,
     },
     {
       key: 'setting',
       label: (
-        <div>
+        <span className="flex items-center gap-2">
           <SettingOutlined />
           <span>页面设置</span>
-        </div>
+        </span>
       ),
       children: <PageSetting />,
     },
   ]
+  
   return (
-    <Tabs
-      items={tabsItems}
-      activeKey={activeKey}
-      onChange={setActiveKey}
-    ></Tabs>
+    <div className="flex flex-col h-full">
+      <Tabs
+        items={tabsItems}
+        activeKey={activeKey}
+        onChange={setActiveKey}
+        className="flex-1 overflow-hidden [&_.ant-tabs-content]:h-full [&_.ant-tabs-tabpane]:h-full"
+        tabBarStyle={{ 
+          marginBottom: 0, 
+          paddingLeft: 12, 
+          paddingRight: 12,
+          paddingTop: 8
+        }}
+      />
+    </div>
   )
 }
 

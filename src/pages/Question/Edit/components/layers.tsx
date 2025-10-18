@@ -14,9 +14,11 @@ import {
 import SortableContainer from '@/components/drag-sort/sort-container'
 import SortableItem from '@/components/drag-sort/sort-item'
 import { cn } from '@/utils'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const Layers: FC = () => {
   const { componentList, selectedId } = useGetComponentInfo()
+  const { theme } = useTheme()
 
   console.log(componentList)
   const dispatch = useDispatch()
@@ -71,49 +73,76 @@ const Layers: FC = () => {
   }
 
   return (
-    <SortableContainer items={componentListWithId} onDragEnd={handleDragEnd}>
-      {componentList.map((component: any) => {
-        const { fe_id, title, isHidden, isLocked } = component
+    <div className="h-full overflow-y-auto px-3 py-4 custom-scrollbar">
+      <SortableContainer items={componentListWithId} onDragEnd={handleDragEnd}>
+        {componentList.map((component: any) => {
+          const { fe_id, title, isHidden, isLocked } = component
+          const isSelected = fe_id === selectedId
 
-        return (
-          <SortableItem key={fe_id} id={fe_id}>
-            <div
-              className={cn(
-                'flex justify-between items-center w-full py-2 px-4 rounded-md cursor-pointer hover:bg-gray-100 hover:text-blue-600'
-              )}
-            >
-              <div onClick={() => handleTitleClick(fe_id)}>
-                {fe_id === changingTitleId && (
-                  <Input
-                    value={title}
-                    onChange={handleTitleChange}
-                    onPressEnter={() => setChangingTitleId('')}
-                    onBlur={() => setChangingTitleId('')}
-                  />
+          return (
+            <SortableItem key={fe_id} id={fe_id}>
+              <div
+                className={cn(
+                  'flex justify-between items-center w-full py-2.5 px-3 mb-2 rounded-lg cursor-pointer transition-all border',
+                  isSelected 
+                    ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' 
+                    : theme === 'dark'
+                      ? 'bg-[#2a2a2f] border-white/5 text-slate-300 hover:bg-[#35353a] hover:border-white/10'
+                      : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-gray-300',
+                  isHidden && 'opacity-50'
                 )}
-                {fe_id !== changingTitleId && title}
+              >
+                <div 
+                  onClick={() => handleTitleClick(fe_id)}
+                  className="flex-1 min-w-0"
+                >
+                  {fe_id === changingTitleId ? (
+                    <Input
+                      value={title}
+                      onChange={handleTitleChange}
+                      onPressEnter={() => setChangingTitleId('')}
+                      onBlur={() => setChangingTitleId('')}
+                      size="small"
+                      autoFocus
+                    />
+                  ) : (
+                    <span className="text-sm truncate">{title}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 ml-2">
+                  <button
+                    onClick={() => handleToggleHidden(fe_id, !isHidden)}
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded-md transition-all',
+                      isHidden 
+                        ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                        : theme === 'dark'
+                          ? 'bg-[#35353a] text-slate-400 hover:text-white hover:bg-[#404045]'
+                          : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                    )}
+                  >
+                    <EyeInvisibleOutlined className="text-xs" />
+                  </button>
+                  <button
+                    onClick={() => handleToggleLocked(fe_id)}
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded-md transition-all',
+                      isLocked 
+                        ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                        : theme === 'dark'
+                          ? 'bg-[#35353a] text-slate-400 hover:text-white hover:bg-[#404045]'
+                          : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                    )}
+                  >
+                    <LockOutlined className="text-xs" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  size="small"
-                  shape="circle"
-                  icon={<EyeInvisibleOutlined />}
-                  type={isHidden ? 'primary' : 'default'}
-                  onClick={() => handleToggleHidden(fe_id, !isHidden)}
-                ></Button>
-                <Button
-                  size="small"
-                  shape="circle"
-                  icon={<LockOutlined />}
-                  type={isLocked ? 'primary' : 'default'}
-                  onClick={() => handleToggleLocked(fe_id)}
-                ></Button>
-              </div>
-            </div>
-          </SortableItem>
-        )
-      })}
-    </SortableContainer>
+            </SortableItem>
+          )
+        })}
+      </SortableContainer>
+    </div>
   )
 }
 

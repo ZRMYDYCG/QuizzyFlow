@@ -1,12 +1,15 @@
 import { FC } from 'react'
 import { AlertCircle, TrendingDown, Clock, Eye } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface AttentionNeededProps {
   questions: any[]
 }
 
 const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
+  const t = useManageTheme()
+  
   // 筛选需要关注的问卷：已发布但答卷数低的，或者未发布的
   const needAttention = questions.filter(q => {
     if (!q.isPublish) return true // 未发布的草稿
@@ -45,9 +48,13 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
   }
 
   return (
-    <div className="p-5 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-800/40 border border-slate-700/50 backdrop-blur-sm">
+    <div className={`p-5 rounded-xl border ${
+      t.isDark 
+        ? 'bg-gradient-to-br from-slate-800/80 to-slate-800/40 border-slate-700/50 backdrop-blur-sm' 
+        : 'bg-white border-gray-200 shadow-sm'
+    }`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+        <h2 className={`text-lg font-semibold flex items-center gap-2 ${t.text.primary}`}>
           <AlertCircle className="w-5 h-5 text-orange-400" />
           需要关注
         </h2>
@@ -70,7 +77,11 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
               to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
               className="block group"
             >
-              <div className="p-4 rounded-lg border border-slate-700/50 hover:border-orange-500/50 bg-slate-800/30 hover:bg-slate-800/50 transition-all">
+              <div className={`p-4 rounded-lg border hover:border-orange-500/50 transition-all ${
+                t.isDark 
+                  ? 'border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50' 
+                  : 'border-gray-200 bg-white hover:bg-orange-50/50'
+              }`}>
                 <div className="flex items-start gap-3">
                   {/* 警告图标 */}
                   <div className={`flex-shrink-0 p-2 rounded-lg ${alert.color}`}>
@@ -79,7 +90,7 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
 
                   {/* 内容 */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-200 mb-1 truncate group-hover:text-orange-400 transition-colors">
+                    <p className={`text-sm font-medium mb-1 truncate group-hover:text-orange-400 transition-colors ${t.text.primary}`}>
                       {title}
                     </p>
                     <div className="flex items-center gap-2 mb-2">
@@ -87,12 +98,12 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
                         {alert.label}
                       </span>
                       {isPublish && (
-                        <span className="text-xs text-slate-500">
+                        <span className={`text-xs ${t.text.tertiary}`}>
                           {answerCount} 答卷
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500">
+                    <p className={`text-xs ${t.text.tertiary}`}>
                       {alert.message}
                     </p>
                   </div>
@@ -104,10 +115,10 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
       </div>
 
       {needAttention.length === 0 && (
-        <div className="text-center py-8 text-slate-500">
+        <div className={`text-center py-8 ${t.text.secondary}`}>
           <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
           <p className="text-sm">暂无需要关注的问卷</p>
-          <p className="text-xs mt-1">所有星标问卷状态良好 ✨</p>
+          <p className={`text-xs mt-1 ${t.text.tertiary}`}>所有星标问卷状态良好 ✨</p>
         </div>
       )}
     </div>
