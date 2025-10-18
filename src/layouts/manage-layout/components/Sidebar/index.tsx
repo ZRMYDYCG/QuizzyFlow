@@ -1,21 +1,19 @@
-import { Menu, Button } from 'antd'
-import {
-  PlusOutlined,
-  BranchesOutlined,
-  StarOutlined,
-  DeleteOutlined,
-} from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { createQuestion } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
-import type { MenuProps } from 'antd'
 import { message } from 'antd'
-
-type MenuItem = Required<MenuProps>['items'][number]
+import { useManageTheme } from '../../../../hooks/useManageTheme'
+import { 
+  Home,
+  FileText, 
+  Star, 
+  Trash2,
+} from 'lucide-react'
 
 const Sidebar = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const t = useManageTheme()
 
   const { loading, run: handleCreate } = useRequest(createQuestion, {
     manual: true,
@@ -28,7 +26,6 @@ const Sidebar = () => {
     },
   })
 
-  // 根据当前路径确定选中的菜单项
   const getSelectedKey = () => {
     if (pathname.startsWith('/manage/list')) return 'list'
     if (pathname.startsWith('/manage/star')) return 'star'
@@ -36,71 +33,72 @@ const Sidebar = () => {
     return 'list'
   }
 
-  const menuItems: MenuItem[] = [
+  const navItems = [
+    {
+      key: 'home',
+      icon: Home,
+      label: '首页',
+      onClick: () => navigate('/manage/list'),
+    },
     {
       key: 'list',
-      icon: <BranchesOutlined />,
-      label: '我的问卷',
+      icon: FileText,
+      label: '问卷列表',
       onClick: () => navigate('/manage/list'),
     },
     {
       key: 'star',
-      icon: <StarOutlined />,
+      icon: Star,
       label: '星标问卷',
       onClick: () => navigate('/manage/star'),
     },
     {
       key: 'trash',
-      icon: <DeleteOutlined />,
+      icon: Trash2,
       label: '回收站',
       onClick: () => navigate('/manage/trash'),
-    },
+    }
   ]
 
   return (
-    <div className="h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 flex flex-col shadow-sm">
-      {/* Logo 区域 */}
-      <div className="h-[64px] flex items-center px-6 border-b border-gray-200 bg-white">
-        <img src="/public/vite.svg" alt="logo" className="h-8" />
-        <span className="ml-2 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          QuizzyFlow
-        </span>
+    <div className={`h-screen flex flex-col py-6 ${
+      t.isDark ? 'bg-[#1a1a1f]' : 'bg-white'
+    }`}>
+      {/* Logo */}
+      <div className="px-6 mb-8">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center p-1">
+          <img src="/vite.svg" alt="logo" />
+        </div>
       </div>
 
-      {/* 新建按钮 */}
-      <div className="p-4">
-        <Button
-          type="primary"
-          size="large"
-          icon={<PlusOutlined />}
-          onClick={handleCreate}
-          disabled={loading}
-          className="w-full !h-11 !rounded-lg !bg-gradient-to-r !from-blue-500 !to-blue-600 hover:!from-blue-600 hover:!to-blue-700 !shadow-md hover:!shadow-lg !transition-all"
-          block
-        >
-          新建问卷
-        </Button>
-      </div>
-
-      {/* 菜单 */}
-      <div className="flex-1 overflow-y-auto px-2">
-        <Menu
-          mode="inline"
-          selectedKeys={[getSelectedKey()]}
-          items={menuItems}
-          className="border-0 !bg-transparent"
-          style={{
-            '--antd-menu-item-selected-bg': '#eff6ff',
-            '--antd-menu-item-selected-color': '#2563eb',
-          } as any}
-        />
-      </div>
-
-      {/* 底部信息 */}
-      <div className="p-4 border-t border-gray-200 text-center text-xs text-gray-400 bg-white">
-        <div>© 2025 QuizzyFlow</div>
-        <div className="mt-1 text-[10px]">v1.0.0</div>
-      </div>
+      {/* 导航菜单 */}
+      <nav className="px-4 mb-8">
+        {navItems.map((item) => {
+          const Icon = item.icon
+          const isActive = getSelectedKey() === item.key
+          return (
+            <button
+              key={item.key}
+              onClick={item.onClick}
+              className={`
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                ${
+                  isActive
+                    ? t.isDark
+                      ? 'text-white bg-white/5'
+                      : 'text-gray-900 bg-gray-100'
+                    : t.isDark
+                      ? 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }
+              `}
+            >
+              <Icon className="w-5 h-5" strokeWidth={1.5} />
+              <span>{item.label}</span>
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }

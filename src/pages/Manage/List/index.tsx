@@ -1,27 +1,42 @@
 import QuestionsCard from './components/QuestionsCard'
+import QuestionListView from './components/QuestionListView'
+import QuestionTableView from './components/QuestionTableView'
+import ViewSwitcher, { ViewMode } from './components/ViewSwitcher'
 import { useDebounceFn, useRequest, useTitle } from 'ahooks'
 import { getQuestionList } from '@/api/modules/question'
-import { Empty, Spin, Typography } from 'antd'
-import ListSearch from '@/components/list-search'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-
-const { Title } = Typography
+import { Loader2, Inbox } from 'lucide-react'
+import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const List = () => {
   useTitle('问卷列表')
   const [searchParams] = useSearchParams()
   const keyword = searchParams.get('keyword') || ''
+  const { username, nickname } = useGetUserInfo()
+  const { theme } = useTheme()
 
-  const [started, setStarted] = useState(false) // 是否已经开始加载（处理防抖的延迟时间）
-  const [list, setList] = useState([]) // 全部的列表数据
+  const [started, setStarted] = useState(false)
+  const [list, setList] = useState([])
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const haveMoreData = total > list.length
 
+  // 视图模式状态 - 从 localStorage 读取，默认列表视图
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('questionListViewMode')
+    return (saved as ViewMode) || 'list'
+  })
+
+  // 保存视图偏好到 localStorage
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode)
+    localStorage.setItem('questionListViewMode', mode)
+  }
+
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // 真正加载
   const { run: load, loading } = useRequest(
     async () => {
       return await getQuestionList({ page, pageSize: 10, keyword })
@@ -37,7 +52,6 @@ const List = () => {
     }
   )
 
-  // 尝试加载
   const { run: tryLoadMore } = useDebounceFn(
     () => {
       const container = containerRef.current
@@ -53,24 +67,19 @@ const List = () => {
     { wait: 500 }
   )
 
-  // 页面加载或searchParams变化时, 获取问卷列表数据
   useEffect(() => {
     tryLoadMore()
   }, [searchParams])
 
-  // 页面滚动时, 尝试加载更多数据
   useEffect(() => {
     if (!haveMoreData) {
       window.addEventListener('scroll', tryLoadMore)
     }
-
-    // 组件销毁及searchParams变化之前解绑事件
     return () => {
       window.removeEventListener('scroll', tryLoadMore)
     }
   }, [searchParams])
 
-  // 重置
   useEffect(() => {
     setStarted(false)
     setPage(1)
@@ -79,34 +88,93 @@ const List = () => {
   }, [keyword])
 
   const LoadingMoreContentElement = useMemo(() => {
-    if (!started || loading) return <Spin />
-    if (total === 0) return <Empty description="暂无数据" />
-    if (!haveMoreData) return <>--没有更多了--</>
-  }, [started, loading, haveMoreData])
+    if (!started || loading) {
+      return (
+        <div className={`flex items-center justify-center gap-2 py-8 ${
+          theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+        }`}>
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span>加载中...</span>
+        </div>
+      )
+    }
+    if (total === 0) {
+      return (
+        <div className={`flex flex-col items-center justify-center py-16 ${
+          theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+        }`}>
+          <Inbox className={`w-16 h-16 mb-4 ${
+            theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+          }`} />
+          <p className="text-lg font-medium">暂无数据</p>
+          <p className={`text-sm mt-1 ${
+            theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+          }`}>创建您的第一个问卷吧</p>
+        </div>
+      )
+    }
+    if (!haveMoreData) {
+      return (
+        <div className={`text-center py-4 text-sm ${
+          theme === 'dark' ? 'text-slate-600' : 'text-gray-400'
+        }`}>
+          - 已加载全部 {total} 个问卷 -
+        </div>
+      )
+    }
+  }, [started, loading, haveMoreData, total, theme])
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 18) return 'Good afternoon'
+    return 'Good evening'
+  }, [])
 
   return (
-    <div className="bg-white rounded-lg shadow-sm min-h-full">
-      {/*问卷列表头部*/}
-      <div className="flex justify-between items-center p-6 border-b border-gray-200">
-        <div>
-          <Title level={3} className="!mb-0">问卷列表</Title>
-          <p className="text-gray-500 text-sm mt-1">管理您的所有问卷</p>
-        </div>
-        <div>
-          {/*搜索框*/}
-          <ListSearch />
+    <div className="min-h-full">
+      {/* 问候语区域 */}
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div className="flex-1 min-w-0">
+            <h1 className={`text-2xl sm:text-3xl font-bold mb-2 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              {greeting}, {nickname || username}!
+            </h1>
+            <p className={`text-xs sm:text-sm italic hidden sm:block ${
+              theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+            }`}>
+              "The final wisdom of life requires not the annulment of incongruity but the achievement of serenity within and above it." - Reinhold Niebuhr
+            </p>
+          </div>
+          {/* 视图切换器 */}
+          <div className="flex-shrink-0">
+            <ViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />
+          </div>
         </div>
       </div>
-      {/*问卷列表主体*/}
-      <div className="p-6">
-        {list.length > 0 &&
-          list.map((question: any) => {
-            const { _id } = question
-            return <QuestionsCard key={_id} {...question} />
-          })}
+
+      {/* 问卷列表 - 根据视图模式渲染不同的组件 */}
+      <div>
+        {list.length > 0 && (
+          <>
+            {viewMode === 'card' && (
+              <div className="space-y-3 md:space-y-4">
+                {list.map((question: any) => {
+                  const { _id } = question
+                  return <QuestionsCard key={_id} {...question} />
+                })}
+              </div>
+            )}
+            {viewMode === 'list' && <QuestionListView questions={list} />}
+            {viewMode === 'table' && <QuestionTableView questions={list} />}
+          </>
+        )}
       </div>
-      {/*问卷列表底部*/}
-      <div className="text-center pb-6">
+
+      {/* 加载更多 */}
+      <div className="text-center">
         <div ref={containerRef}>{LoadingMoreContentElement}</div>
       </div>
     </div>

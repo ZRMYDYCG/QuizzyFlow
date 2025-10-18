@@ -19,8 +19,10 @@ import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { updateQuestion } from '@/api/modules/question'
 import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
 import PreviewModal from './preview-modal'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const TitleElem: FC = () => {
+  const { theme } = useTheme()
   const { title } = useGetPageInfo()
   const [editState, setEditState] = useState<boolean>(false)
   const dispatch = useDispatch()
@@ -36,13 +38,15 @@ const TitleElem: FC = () => {
         onChange={handleChange}
         onPressEnter={(e) => setEditState(false)}
         onBlur={() => setEditState(false)}
-      ></Input>
+        className="w-64"
+        autoFocus
+      />
     )
   }
 
   return (
     <Space>
-      <h2 className="text-lg font-bold">{title}</h2>
+      <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-gray-900'}`}>{title}</h2>
       <Button
         type="text"
         size="small"
@@ -170,14 +174,19 @@ const PreviewButton: FC = () => {
 
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
+  const { theme } = useTheme()
 
   return (
-    <div className="py-[12px] bg-white">
-      <div className="flex mx-[24px]">
+    <div className={`h-16 border-b flex-shrink-0 ${
+      theme === 'dark' 
+        ? 'bg-[#1e1e23] border-white/5' 
+        : 'bg-white border-gray-200'
+    }`}>
+      <div className="flex items-center h-full px-6">
         <div className="flex-1">
           <Space className="items-center">
             <Button
-              type="link"
+              type="text"
               icon={<LeftOutlined />}
               onClick={() => navigate(-1)}
             >
@@ -186,10 +195,10 @@ const EditHeader: React.FC = () => {
             <TitleElem />
           </Space>
         </div>
-        <div className="flex-1 text-center">
+        <div className="flex-1 flex justify-center">
           <EditToolbar />
         </div>
-        <div className="flex-1 text-right">
+        <div className="flex-1 flex justify-end">
           <Space>
             <SaveButton />
             <PublishButton />

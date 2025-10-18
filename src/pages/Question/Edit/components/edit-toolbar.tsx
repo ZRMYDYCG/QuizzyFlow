@@ -27,9 +27,11 @@ import {
 } from '@/store/modules/question-component'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const EditToolbar: React.FC = () => {
   const dispatch = useDispatch()
+  const { theme } = useTheme()
   const { selectedId, selectedComponent, copiedComponent, componentList } =
     useGetComponentInfo()
   const { isLocked } = selectedComponent || {}
@@ -134,82 +136,140 @@ const EditToolbar: React.FC = () => {
   const handleRedo = () => {
     dispatch(UndoActionCreators.redo())
   }
+
+  // 按钮样式
+  const buttonBaseClass = `w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+    theme === 'dark'
+      ? 'bg-[#2a2a2f] hover:bg-[#35353a] text-slate-400 hover:text-white'
+      : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900'
+  }`
+
+  const disabledClass = theme === 'dark'
+    ? 'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-[#2a2a2f] disabled:hover:text-slate-400'
+    : 'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-600'
+
+  const dividerClass = theme === 'dark' ? 'w-px h-5 bg-white/10 mx-1' : 'w-px h-5 bg-gray-300 mx-1'
+
   return (
-    <Space>
+    <div className="flex items-center gap-1">
       <Tooltip title="删除">
-        <Button
-          shape="circle"
-          icon={<DeleteOutlined />}
+        <button
           onClick={handleDelete}
-        ></Button>
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+            theme === 'dark'
+              ? 'bg-[#2a2a2f] hover:bg-red-500/10 text-slate-400 hover:text-red-400'
+              : 'bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-500'
+          }`}
+        >
+          <DeleteOutlined />
+        </button>
       </Tooltip>
+      
       <Tooltip title="隐藏">
-        <Button
-          shape="circle"
-          icon={<EyeInvisibleOutlined />}
+        <button
           onClick={handleHide}
-        ></Button>
+          className={buttonBaseClass}
+        >
+          <EyeInvisibleOutlined />
+        </button>
       </Tooltip>
-      <Tooltip title="锁定">
-        <Button
-          shape="circle"
-          icon={<LockOutlined />}
+      
+      <Tooltip title={isLocked ? "已锁定" : "锁定"}>
+        <button
           onClick={handleLock}
-          type={isLocked ? 'primary' : 'default'}
-        ></Button>
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+            isLocked 
+              ? 'bg-blue-500 text-white hover:bg-blue-600' 
+              : buttonBaseClass.replace('w-8 h-8 flex items-center justify-center rounded-lg transition-all ', '')
+          }`}
+        >
+          <LockOutlined />
+        </button>
       </Tooltip>
 
+      <div className={dividerClass} />
+
       <Tooltip title="复制">
-        <Button
-          shape="circle"
-          icon={<CopyOutlined />}
+        <button
           onClick={handleCopy}
-        ></Button>
+          className={buttonBaseClass}
+        >
+          <CopyOutlined />
+        </button>
       </Tooltip>
+      
       <Tooltip title="粘贴">
-        <Button
-          shape="circle"
-          icon={<BlockOutlined />}
+        <button
           onClick={handlePasteComponent}
           disabled={copiedComponent === null}
-        ></Button>
+          className={`${buttonBaseClass} ${disabledClass}`}
+        >
+          <BlockOutlined />
+        </button>
       </Tooltip>
+
+      <div className={dividerClass} />
+      
       <Tooltip title="上一个">
-        <Button
-          shape="circle"
-          icon={<ArrowUpOutlined />}
+        <button
           onClick={handlePrevious}
           disabled={isFirst}
-        />
+          className={`${buttonBaseClass} ${disabledClass}`}
+        >
+          <ArrowUpOutlined />
+        </button>
       </Tooltip>
+      
       <Tooltip title="下一个">
-        <Button
-          shape="circle"
-          icon={<ArrowDownOutlined />}
+        <button
           onClick={handleNext}
           disabled={isLast}
-        />
+          className={`${buttonBaseClass} ${disabledClass}`}
+        >
+          <ArrowDownOutlined />
+        </button>
       </Tooltip>
+
+      <div className={dividerClass} />
+      
       <Tooltip title="撤销">
-        <Button shape="circle" icon={<UndoOutlined />} onClick={handleUndo} />
+        <button
+          onClick={handleUndo}
+          className={buttonBaseClass}
+        >
+          <UndoOutlined />
+        </button>
       </Tooltip>
+      
       <Tooltip title="重做">
-        <Button shape="circle" icon={<RedoOutlined />} onClick={handleRedo} />
+        <button
+          onClick={handleRedo}
+          className={buttonBaseClass}
+        >
+          <RedoOutlined />
+        </button>
       </Tooltip>
+
+      <div className={dividerClass} />
+      
       <Tooltip title="导出JSON">
-        <Button
-          shape="circle"
-          icon={<DownloadOutlined />}
+        <button
           onClick={handleExport}
-        ></Button>
+          className={buttonBaseClass}
+        >
+          <DownloadOutlined />
+        </button>
       </Tooltip>
+      
       <Tooltip title="导入JSON">
-        <Button
-          shape="circle"
-          icon={<UploadOutlined />}
+        <button
           onClick={() => fileInputRef.current?.click()}
-        ></Button>
+          className={buttonBaseClass}
+        >
+          <UploadOutlined />
+        </button>
       </Tooltip>
+      
       {/* 隐藏的文件选择输入 */}
       <input
         type="file"
@@ -218,7 +278,7 @@ const EditToolbar: React.FC = () => {
         onChange={handleFileImport}
         style={{ display: 'none' }}
       />
-    </Space>
+    </div>
   )
 }
 
