@@ -44,57 +44,30 @@ const Sidebar = () => {
     {
       key: 'home',
       icon: Home,
-      label: 'Home',
+      label: '首页',
       onClick: () => navigate('/manage/list'),
     },
     {
       key: 'list',
       icon: FileText,
-      label: 'Notebooks',
+      label: '问卷列表',
       onClick: () => navigate('/manage/list'),
     },
     {
       key: 'star',
       icon: Star,
-      label: 'Assignments',
+      label: '星标问卷',
       onClick: () => navigate('/manage/star'),
     },
     {
       key: 'trash',
       icon: Trash2,
-      label: 'Tasks',
+      label: '回收站',
       onClick: () => navigate('/manage/trash'),
-    },
-    {
-      key: 'calendar',
-      icon: Calendar,
-      label: 'Calendar',
-      onClick: () => {},
-    },
+    }
   ]
 
   const modules = [
-    {
-      emoji: '🔒',
-      label: '我的问卷',
-      count: allData.total || 0,
-      color: 'text-yellow-400',
-      onClick: () => navigate('/manage/list'),
-    },
-    {
-      emoji: '🖥️',
-      label: '星标问卷',
-      count: starData.total || 0,
-      color: 'text-blue-400',
-      onClick: () => navigate('/manage/star'),
-    },
-    {
-      emoji: '🔐',
-      label: '回收站',
-      count: trashData.total || 0,
-      color: 'text-purple-400',
-      onClick: () => navigate('/manage/trash'),
-    },
     {
       emoji: '🎨',
       label: '问卷模板',
@@ -123,7 +96,6 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="px-6 mb-8">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center p-1">
-          {/* <FileText className="w-6 h-6 text-white" strokeWidth={2.5} /> */}
           <img src="/vite.svg" alt="logo" />
         </div>
       </div>

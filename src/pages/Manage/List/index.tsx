@@ -1,4 +1,7 @@
 import QuestionsCard from './components/QuestionsCard'
+import QuestionListView from './components/QuestionListView'
+import QuestionTableView from './components/QuestionTableView'
+import ViewSwitcher, { ViewMode } from './components/ViewSwitcher'
 import { useDebounceFn, useRequest, useTitle } from 'ahooks'
 import { getQuestionList } from '@/api/modules/question'
 import { useEffect, useRef, useState, useMemo } from 'react'
@@ -17,6 +20,18 @@ const List = () => {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const haveMoreData = total > list.length
+
+  // 视图模式状态 - 从 localStorage 读取，默认列表视图
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('questionListViewMode')
+    return (saved as ViewMode) || 'list'
+  })
+
+  // 保存视图偏好到 localStorage
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode)
+    localStorage.setItem('questionListViewMode', mode)
+  }
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -107,22 +122,39 @@ const List = () => {
   return (
     <div className="min-h-full">
       {/* 问候语区域 */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          {greeting}, {nickname || username}!
-        </h1>
-        <p className="text-slate-500 text-sm italic">
-          "The final wisdom of life requires not the annulment of incongruity but the achievement of serenity within and above it." - Reinhold Niebuhr
-        </p>
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              {greeting}, {nickname || username}!
+            </h1>
+            <p className="text-slate-500 text-xs sm:text-sm italic hidden sm:block">
+              "The final wisdom of life requires not the annulment of incongruity but the achievement of serenity within and above it." - Reinhold Niebuhr
+            </p>
+          </div>
+          {/* 视图切换器 */}
+          <div className="flex-shrink-0">
+            <ViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />
+          </div>
+        </div>
       </div>
 
-      {/* 问卷列表 */}
+      {/* 问卷列表 - 根据视图模式渲染不同的组件 */}
       <div>
-        {list.length > 0 &&
-          list.map((question: any) => {
-            const { _id } = question
-            return <QuestionsCard key={_id} {...question} />
-          })}
+        {list.length > 0 && (
+          <>
+            {viewMode === 'card' && (
+              <div className="space-y-3 md:space-y-4">
+                {list.map((question: any) => {
+                  const { _id } = question
+                  return <QuestionsCard key={_id} {...question} />
+                })}
+              </div>
+            )}
+            {viewMode === 'list' && <QuestionListView questions={list} />}
+            {viewMode === 'table' && <QuestionTableView questions={list} />}
+          </>
+        )}
       </div>
 
       {/* 加载更多 */}

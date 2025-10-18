@@ -12,46 +12,72 @@ const ManageLayout = () => {
   const { username, nickname } = useGetUserInfo()
   useNavPage(waitingUserData)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+  // 切换侧边栏状态
+  const toggleSidebar = () => {
+    // 在移动端控制 mobileSidebarOpen，在桌面端控制 sidebarCollapsed
+    if (window.innerWidth < 768) {
+      setMobileSidebarOpen(!mobileSidebarOpen)
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed)
+    }
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#1a1a1f]">
-      {/* 左侧侧边栏 */}
+      {/* 移动端遮罩层 */}
+      {mobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden animate-in fade-in-0 duration-300"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* 左侧侧边栏 - 桌面端固定，移动端浮动 */}
       <div 
-        className={`flex-shrink-0 transition-all duration-300 ${
-          sidebarCollapsed ? 'w-0' : 'w-[200px]'
-        }`}
+        className={`
+          md:flex-shrink-0 md:transition-all md:duration-300
+          ${sidebarCollapsed ? 'md:w-0' : 'md:w-[200px]'}
+          fixed md:relative z-50 md:z-auto h-full
+          transition-transform duration-300 ease-in-out
+          ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          shadow-2xl md:shadow-none
+        `}
       >
-        <div className={`h-full ${sidebarCollapsed ? 'invisible' : 'visible'}`}>
+        <div className={`h-full w-full ${sidebarCollapsed ? 'md:invisible' : 'md:visible'}`}>
           <Sidebar />
         </div>
       </div>
 
       {/* 右侧内容区 - 外层容器 */}
       <div 
-        className={`flex-1 overflow-hidden transition-all duration-300 ${
-          sidebarCollapsed ? 'p-3' : 'p-[80px]'
-        }`}
+        className={`
+          flex-1 overflow-hidden transition-all duration-300
+          p-3
+          ${sidebarCollapsed ? 'md:p-3' : 'md:p-[60px]'}
+        `}
       >
         {/* 内层圆角边框容器 */}
-        <div className="h-full bg-[#1e1e23] rounded-2xl border border-white/5 flex flex-col overflow-hidden transition-all duration-300">
+        <div className="h-full bg-[#1e1e23] rounded-xl md:rounded-2xl border border-white/5 flex flex-col overflow-hidden transition-all duration-300">
           {/* 顶部工具栏 */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
-            <div className="flex items-center gap-3">
+          <div className="h-14 md:h-16 flex items-center justify-between px-3 md:px-6 border-b border-white/5">
+            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
               {/* 收起/展开按钮 */}
               <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] flex items-center justify-center text-slate-400 hover:text-white transition-colors"
-                title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+                onClick={toggleSidebar}
+                className="w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] flex items-center justify-center text-slate-400 hover:text-white transition-colors flex-shrink-0"
+                title={sidebarCollapsed || !mobileSidebarOpen ? '展开侧边栏' : '收起侧边栏'}
               >
-                {sidebarCollapsed ? (
+                {(sidebarCollapsed && window.innerWidth >= 768) || (!mobileSidebarOpen && window.innerWidth < 768) ? (
                   <PanelLeft className="w-4 h-4" strokeWidth={2} />
                 ) : (
                   <PanelLeftClose className="w-4 h-4" strokeWidth={2} />
                 )}
               </button>
 
-              {/* 后退/前进按钮 */}
-              <div className="flex items-center gap-1">
+              {/* 后退/前进按钮 - 移动端隐藏 */}
+              <div className="hidden md:flex items-center gap-1">
                 <button className="w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] flex items-center justify-center text-slate-500 hover:text-slate-300 transition-colors">
                   <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -60,31 +86,31 @@ const ManageLayout = () => {
                 </button>
               </div>
 
-              {/* 搜索框 */}
-              <div className="relative ml-2">
+              {/* 搜索框 - 移动端隐藏文字 */}
+              <div className="relative ml-1 md:ml-2 flex-1 max-w-xs md:max-w-none">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
                   type="text"
-                  placeholder="Modules, notebooks, tasks..."
-                  className="w-64 h-9 pl-10 pr-4 bg-[#2a2a2f] border-none rounded-lg text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:bg-[#35353a] transition-colors"
+                  placeholder="Search..."
+                  className="w-full md:w-64 h-8 md:h-9 pl-10 pr-4 bg-[#2a2a2f] border-none rounded-lg text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:bg-[#35353a] transition-colors"
                 />
               </div>
             </div>
 
             {/* 右侧操作区 */}
-            <div className="flex items-center gap-3">
-              {/* 新建按钮 */}
-              <button className="flex items-center gap-2 px-3 h-9 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] text-slate-300 hover:text-white text-sm transition-colors">
+            <div className="flex items-center gap-1.5 md:gap-3">
+              {/* 新建按钮 - 移动端只显示图标 */}
+              <button className="flex items-center justify-center gap-0 md:gap-2 px-2 md:px-3 h-8 md:h-9 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] text-slate-300 hover:text-white text-sm transition-colors">
                 <Plus className="w-4 h-4" strokeWidth={2} />
               </button>
 
-              {/* 下拉菜单按钮 */}
-              <button className="w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              {/* 下拉菜单按钮 - 移动端隐藏 */}
+              <button className="hidden md:flex w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] items-center justify-center text-slate-400 hover:text-white transition-colors">
                 <ChevronDown className="w-4 h-4" strokeWidth={2} />
               </button>
 
-              {/* 通知按钮 */}
-              <button className="relative w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              {/* 通知按钮 - 移动端隐藏 */}
+              <button className="hidden md:flex relative w-8 h-8 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] items-center justify-center text-slate-400 hover:text-white transition-colors">
                 <Bell className="w-4 h-4" strokeWidth={2} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
               </button>
@@ -92,11 +118,11 @@ const ManageLayout = () => {
               {/* 用户菜单 */}
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
-                  <button className="flex items-center gap-2 pl-2 pr-3 h-9 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] transition-colors">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                  <button className="flex items-center gap-1 md:gap-2 pl-1 md:pl-2 pr-2 md:pr-3 h-8 md:h-9 rounded-lg bg-[#2a2a2f] hover:bg-[#35353a] transition-colors">
+                    <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
                       {(nickname || username || 'U').charAt(0).toUpperCase()}
                     </div>
-                    <ChevronDown className="w-3 h-3 text-slate-500" strokeWidth={2} />
+                    <ChevronDown className="w-3 h-3 text-slate-500 hidden md:block" strokeWidth={2} />
                   </button>
                 </DropdownMenu.Trigger>
 
@@ -124,7 +150,7 @@ const ManageLayout = () => {
 
           {/* 主内容区域 */}
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="p-8">
+            <div className="p-4 md:p-8">
               <Outlet />
             </div>
           </div>
