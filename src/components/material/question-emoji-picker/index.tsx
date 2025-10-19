@@ -1,14 +1,24 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Typography } from 'antd'
 import { IQuestionEmojiPickerProps, QuestionEmojiPickerDefaultProps } from './interface'
 
 const QuestionEmojiPicker: FC<IQuestionEmojiPickerProps> = (
   props: IQuestionEmojiPickerProps
 ) => {
-  const { title, options, value, values, size, allowMultiple } = {
+  const {
+    title,
+    options,
+    value: initialValue,
+    values: initialValues,
+    size,
+    allowMultiple,
+  } = {
     ...QuestionEmojiPickerDefaultProps,
     ...props,
   }
+
+  const [value, setValue] = useState<string>(initialValue || '')
+  const [values, setValues] = useState<string[]>(initialValues || [])
 
   const sizeMap = {
     small: 'text-3xl w-16 h-16',
@@ -20,9 +30,23 @@ const QuestionEmojiPicker: FC<IQuestionEmojiPickerProps> = (
 
   const isSelected = (optionValue: string) => {
     if (allowMultiple) {
-      return values?.includes(optionValue)
+      return values.includes(optionValue)
     }
     return value === optionValue
+  }
+
+  const handleClick = (optionValue: string) => {
+    if (allowMultiple) {
+      // 多选模式
+      if (values.includes(optionValue)) {
+        setValues(values.filter((v) => v !== optionValue))
+      } else {
+        setValues([...values, optionValue])
+      }
+    } else {
+      // 单选模式
+      setValue(optionValue)
+    }
   }
 
   return (
@@ -35,6 +59,7 @@ const QuestionEmojiPicker: FC<IQuestionEmojiPickerProps> = (
         {options?.map((option) => (
           <div
             key={option.value}
+            onClick={() => handleClick(option.value)}
             className="flex flex-col items-center gap-2 group cursor-pointer"
           >
             <div

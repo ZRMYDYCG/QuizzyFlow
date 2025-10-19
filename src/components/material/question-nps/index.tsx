@@ -1,13 +1,14 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Typography } from 'antd'
 import { IQuestionNPSProps, QuestionNPSDefaultProps } from './interface'
 
 const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
-  const { title, value, minLabel, maxLabel, showDescription } = {
+  const { title, value: initialValue, minLabel, maxLabel, showDescription } = {
     ...QuestionNPSDefaultProps,
     ...props,
   }
 
+  const [value, setValue] = useState<number | undefined>(initialValue)
   const scores = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
   const getScoreColor = (score: number) => {
@@ -22,6 +23,10 @@ const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
     return 'bg-green-500 border-green-600 text-white'
   }
 
+  const handleScoreClick = (score: number) => {
+    setValue(score)
+  }
+
   return (
     <div className="w-full">
       <Typography.Paragraph strong className="mb-4">
@@ -34,6 +39,7 @@ const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
           {scores.map((score) => (
             <button
               key={score}
+              onClick={() => handleScoreClick(score)}
               className={`
                 w-12 h-12 rounded-lg border-2 font-bold text-lg
                 transition-all duration-200 cursor-pointer

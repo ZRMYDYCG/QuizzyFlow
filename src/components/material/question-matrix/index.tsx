@@ -1,11 +1,41 @@
-import { FC } from 'react'
-import { Typography, Radio, Checkbox, Space } from 'antd'
+import { FC, useState } from 'react'
+import { Typography, Radio, Checkbox } from 'antd'
 import { IQuestionMatrixProps, QuestionMatrixDefaultProps } from './interface'
 
 const QuestionMatrix: FC<IQuestionMatrixProps> = (props: IQuestionMatrixProps) => {
-  const { title, rows, columns, isMultiple, values } = {
+  const { title, rows, columns, isMultiple, values: initialValues } = {
     ...QuestionMatrixDefaultProps,
     ...props,
+  }
+
+  const [values, setValues] = useState<Record<string, string | string[]>>(
+    initialValues || {}
+  )
+
+  // 处理单选
+  const handleRadioChange = (rowValue: string, colValue: string) => {
+    setValues((prev) => ({
+      ...prev,
+      [rowValue]: colValue,
+    }))
+  }
+
+  // 处理多选
+  const handleCheckboxChange = (rowValue: string, colValue: string, checked: boolean) => {
+    setValues((prev) => {
+      const currentValues = Array.isArray(prev[rowValue]) ? prev[rowValue] : []
+      if (checked) {
+        return {
+          ...prev,
+          [rowValue]: [...(currentValues as string[]), colValue],
+        }
+      } else {
+        return {
+          ...prev,
+          [rowValue]: (currentValues as string[]).filter((v) => v !== colValue),
+        }
+      }
+    })
   }
 
   return (
@@ -42,12 +72,18 @@ const QuestionMatrix: FC<IQuestionMatrixProps> = (props: IQuestionMatrixProps) =
                     {isMultiple ? (
                       <Checkbox
                         checked={
-                          Array.isArray(values?.[row.value]) &&
-                          values?.[row.value]?.includes(col.value)
+                          Array.isArray(values[row.value]) &&
+                          (values[row.value] as string[]).includes(col.value)
+                        }
+                        onChange={(e) =>
+                          handleCheckboxChange(row.value, col.value, e.target.checked)
                         }
                       />
                     ) : (
-                      <Radio checked={values?.[row.value] === col.value} />
+                      <Radio
+                        checked={values[row.value] === col.value}
+                        onChange={() => handleRadioChange(row.value, col.value)}
+                      />
                     )}
                   </td>
                 ))}

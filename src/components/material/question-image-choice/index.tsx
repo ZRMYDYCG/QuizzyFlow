@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Typography, Image, Checkbox, Radio } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
 import { IQuestionImageChoiceProps, QuestionImageChoiceDefaultProps } from './interface'
@@ -6,16 +6,41 @@ import { IQuestionImageChoiceProps, QuestionImageChoiceDefaultProps } from './in
 const QuestionImageChoice: FC<IQuestionImageChoiceProps> = (
   props: IQuestionImageChoiceProps
 ) => {
-  const { title, options, isMultiple, value, values, columns, showLabel } = {
+  const {
+    title,
+    options,
+    isMultiple,
+    value: initialValue,
+    values: initialValues,
+    columns,
+    showLabel,
+  } = {
     ...QuestionImageChoiceDefaultProps,
     ...props,
   }
 
+  const [value, setValue] = useState<string>(initialValue || '')
+  const [values, setValues] = useState<string[]>(initialValues || [])
+
   const isSelected = (optionValue: string) => {
     if (isMultiple) {
-      return values?.includes(optionValue)
+      return values.includes(optionValue)
     }
     return value === optionValue
+  }
+
+  const handleClick = (optionValue: string) => {
+    if (isMultiple) {
+      // 多选模式
+      if (values.includes(optionValue)) {
+        setValues(values.filter((v) => v !== optionValue))
+      } else {
+        setValues([...values, optionValue])
+      }
+    } else {
+      // 单选模式
+      setValue(optionValue)
+    }
   }
 
   const gridColsClass = {
@@ -36,6 +61,7 @@ const QuestionImageChoice: FC<IQuestionImageChoiceProps> = (
         {options?.map((option) => (
           <div
             key={option.value}
+            onClick={() => handleClick(option.value)}
             className={`
               relative rounded-lg overflow-hidden cursor-pointer
               border-3 transition-all duration-300
