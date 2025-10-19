@@ -55,6 +55,12 @@ import {
 } from './question-checkbox'
 import { IQuestionAnchorProps } from './question-anchor'
 import { IQuestionQRCodeProps } from './question-qrcode'
+import { IQuestionMatrixProps } from './question-matrix'
+import { IQuestionNPSProps } from './question-nps'
+import { IQuestionRankingProps } from './question-ranking'
+import { IQuestionEmojiPickerProps } from './question-emoji-picker'
+import { IQuestionImageChoiceProps } from './question-image-choice'
+import { IQuestionMultipageProgressProps } from './question-multipage-progress'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -107,6 +113,12 @@ import QuestionSpinConfig from './question-spin'
 import QuestionModalConfig from './question-modal'
 import QuestionDrawerConfig from './question-drawer'
 import QuestionQRCodeConfig from './question-qrcode'
+import QuestionMatrixConfig from './question-matrix'
+import QuestionNPSConfig from './question-nps'
+import QuestionRankingConfig from './question-ranking'
+import QuestionEmojiPickerConfig from './question-emoji-picker'
+import QuestionImageChoiceConfig from './question-image-choice'
+import QuestionMultipageProgressConfig from './question-multipage-progress'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -158,7 +170,13 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionTooltipProps &
   IQuestionPopoverProps &
   IQuestionSpinProps &
-  IQuestionQRCodeProps
+  IQuestionQRCodeProps &
+  IQuestionMatrixProps &
+  IQuestionNPSProps &
+  IQuestionRankingProps &
+  IQuestionEmojiPickerProps &
+  IQuestionImageChoiceProps &
+  IQuestionMultipageProgressProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -228,6 +246,12 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionModalConfig,
   QuestionDrawerConfig,
   QuestionQRCodeConfig,
+  QuestionMatrixConfig,
+  QuestionNPSConfig,
+  QuestionRankingConfig,
+  QuestionEmojiPickerConfig,
+  QuestionImageChoiceConfig,
+  QuestionMultipageProgressConfig,
 ]
 
 // 组件进行分组
@@ -300,6 +324,11 @@ export const componentConfigGroup = [
       QuestionCascaderConfig,
       QuestionAutocompleteConfig,
       QuestionTransferConfig,
+      QuestionMatrixConfig,
+      QuestionNPSConfig,
+      QuestionRankingConfig,
+      QuestionEmojiPickerConfig,
+      QuestionImageChoiceConfig,
     ],
   },
   {
@@ -313,6 +342,7 @@ export const componentConfigGroup = [
       QuestionSpinConfig,
       QuestionModalConfig,
       QuestionDrawerConfig,
+      QuestionMultipageProgressConfig,
     ],
   },
 ]
