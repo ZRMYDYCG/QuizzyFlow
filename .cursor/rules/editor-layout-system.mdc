@@ -1,0 +1,94 @@
+---
+description: 编辑器布局系统架构和使用指南
+globs: src/pages/Question/Edit/**,src/store/modules/editor-layout.ts
+---
+
+# 编辑器布局系统
+
+编辑器页面实现了灵活的布局配置系统，允许用户自定义工作空间。
+
+## 核心组件
+
+### 1. Redux Store: [editor-layout.ts](mdc:src/store/modules/editor-layout.ts)
+
+管理布局状态：
+- **视图模式**: `standard`(标准) | `focus`(专注) | `preview`(预览)
+- **面板状态**: 左右面板显示/隐藏
+- **面板宽度**: 可调整的左右面板宽度 (200-600px)
+- **画布缩放**: 25%-200% 缩放比例
+- **持久化**: 自动保存到 localStorage
+
+### 2. 布局工具栏: [layout-toolbar.tsx](mdc:src/pages/Question/Edit/components/layout-toolbar.tsx)
+
+浮动在画布底部中央的工具栏，提供：
+- 三种视图模式快速切换
+- 左右面板独立开关
+- 画布缩放控制 (25%-200%)
+- 布局重置功能
+
+### 3. 可调整面板: [resizable-panel.tsx](mdc:src/pages/Question/Edit/components/resizable-panel.tsx)
+
+支持拖拽调整宽度的面板容器：
+- 鼠标悬停显示拖拽提示
+- 拖拽时显示圆形手柄
+- 宽度限制: 200-600px
+- 自动保存宽度配置
+
+### 4. 编辑器主页面: [index.tsx](mdc:src/pages/Question/Edit/index.tsx)
+
+集成所有布局组件：
+```tsx
+- 左侧: ResizablePanel + LeftPanel (物料/图层)
+- 中间: 画布区域 + LayoutToolbar
+- 右侧: ResizablePanel + RightPanel (属性/设置)
+```
+
+## Redux Actions
+
+```typescript
+// 视图模式
+setViewMode(mode: 'standard' | 'focus' | 'preview')
+
+// 面板控制
+toggleLeftPanel()
+toggleRightPanel()
+setLeftPanelWidth(width: number)
+setRightPanelWidth(width: number)
+
+// 画布控制
+setCanvasScale(scale: number)
+
+// 重置
+resetLayout()
+```
+
+## 使用示例
+
+```tsx
+import { useDispatch, useSelector } from 'react-redux'
+import { setViewMode, toggleLeftPanel } from '@/store/modules/editor-layout'
+
+const MyComponent = () => {
+  const dispatch = useDispatch()
+  const { viewMode, showLeftPanel } = useSelector(
+    (state: stateType) => state.editorLayout
+  )
+
+  // 切换专注模式
+  const handleFocusMode = () => {
+    dispatch(setViewMode('focus'))
+  }
+
+  // 切换左侧面板
+  const handleToggleLeft = () => {
+    dispatch(toggleLeftPanel())
+  }
+}
+```
+
+## 注意事项
+
+1. 所有布局配置会自动保存到 localStorage
+2. 画布缩放使用 CSS transform，保持内容质量
+3. 面板宽度拖拽时禁用文本选择，提升体验
+4. 工具栏使用 `stopPropagation` 防止误触画布点击事件

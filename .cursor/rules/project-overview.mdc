@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+description: QuizzyFlow 项目概览和技术栈
+---
+
+# QuizzyFlow 项目概览
+
+QuizzyFlow 是一个现代化的在线问卷调查平台，提供问卷设计、数据收集和分析功能。
+
+## 技术栈
+
+### 前端
+- **框架**: React 18 + TypeScript
+- **构建工具**: Vite
+- **路由**: React Router v6
+- **状态管理**: Redux Toolkit + redux-undo
+- **UI组件库**: Ant Design (antd)
+- **样式**: Tailwind CSS
+- **HTTP客户端**: Axios
+- **工具库**: ahooks, lodash-es, nanoid
+
+### 后端
+- **框架**: NestJS
+- **数据库**: MongoDB (Mongoose)
+- **认证**: JWT
+
+## 项目结构
+
+```
+src/
+├── api/              # API 接口定义
+├── components/       # 公共组件
+├── contexts/         # React Context
+├── hooks/            # 自定义 Hooks
+├── layouts/          # 布局组件
+├── pages/            # 页面组件
+│   ├── Home/         # 首页
+│   ├── Login/        # 登录页
+│   ├── Register/     # 注册页
+│   ├── ForgotPassword/  # 忘记密码
+│   ├── Terms/        # 服务条款
+│   ├── Privacy/      # 隐私政策
+│   ├── Manage/       # 问卷管理
+│   └── Question/     # 问卷相关
+│       ├── Edit/     # 编辑器
+│       ├── Statistics/  # 统计
+│       └── Publish/  # 发布
+├── router/           # 路由配置
+├── store/            # Redux store
+└── utils/            # 工具函数
+```
+
+## 开发规范
+
+1. **组件**: 使用函数式组件 + TypeScript
+2. **样式**: 优先使用 Tailwind CSS，复杂组件使用 Ant Design
+3. **状态**: 全局状态用 Redux，局部状态用 useState/useReducer
+4. **API**: 统一在 `src/api/modules/` 中定义
+5. **类型**: 为所有组件和函数添加 TypeScript 类型
