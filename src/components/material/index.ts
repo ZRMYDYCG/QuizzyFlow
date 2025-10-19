@@ -55,6 +55,20 @@ import {
 } from './question-checkbox'
 import { IQuestionAnchorProps } from './question-anchor'
 import { IQuestionQRCodeProps } from './question-qrcode'
+import { IQuestionMatrixProps } from './question-matrix'
+import { IQuestionNPSProps } from './question-nps'
+import { IQuestionRankingProps } from './question-ranking'
+import { IQuestionEmojiPickerProps } from './question-emoji-picker'
+import { IQuestionImageChoiceProps } from './question-image-choice'
+import { IQuestionMultipageProgressProps } from './question-multipage-progress'
+import { IQuestionSignatureProps } from './question-signature'
+import { IQuestionStarRatingProps } from './question-star-rating'
+import { IQuestionIconSelectProps } from './question-icon-select'
+import { IQuestionConsentProps } from './question-consent'
+import { IQuestionComparisonProps } from './question-comparison'
+import { IQuestionColorPickerProps } from './question-color-picker'
+import { IQuestionPainScaleProps } from './question-pain-scale'
+import { IQuestionWordCloudProps } from './question-word-cloud'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -107,6 +121,20 @@ import QuestionSpinConfig from './question-spin'
 import QuestionModalConfig from './question-modal'
 import QuestionDrawerConfig from './question-drawer'
 import QuestionQRCodeConfig from './question-qrcode'
+import QuestionMatrixConfig from './question-matrix'
+import QuestionNPSConfig from './question-nps'
+import QuestionRankingConfig from './question-ranking'
+import QuestionEmojiPickerConfig from './question-emoji-picker'
+import QuestionImageChoiceConfig from './question-image-choice'
+import QuestionMultipageProgressConfig from './question-multipage-progress'
+import QuestionSignatureConfig from './question-signature'
+import QuestionStarRatingConfig from './question-star-rating'
+import QuestionIconSelectConfig from './question-icon-select'
+import QuestionConsentConfig from './question-consent'
+import QuestionComparisonConfig from './question-comparison'
+import QuestionColorPickerConfig from './question-color-picker'
+import QuestionPainScaleConfig from './question-pain-scale'
+import QuestionWordCloudConfig from './question-word-cloud'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -158,7 +186,21 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionTooltipProps &
   IQuestionPopoverProps &
   IQuestionSpinProps &
-  IQuestionQRCodeProps
+  IQuestionQRCodeProps &
+  IQuestionMatrixProps &
+  IQuestionNPSProps &
+  IQuestionRankingProps &
+  IQuestionEmojiPickerProps &
+  IQuestionImageChoiceProps &
+  IQuestionMultipageProgressProps &
+  IQuestionSignatureProps &
+  IQuestionStarRatingProps &
+  IQuestionIconSelectProps &
+  IQuestionConsentProps &
+  IQuestionComparisonProps &
+  IQuestionColorPickerProps &
+  IQuestionPainScaleProps &
+  IQuestionWordCloudProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -228,6 +270,20 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionModalConfig,
   QuestionDrawerConfig,
   QuestionQRCodeConfig,
+  QuestionMatrixConfig,
+  QuestionNPSConfig,
+  QuestionRankingConfig,
+  QuestionEmojiPickerConfig,
+  QuestionImageChoiceConfig,
+  QuestionMultipageProgressConfig,
+  QuestionSignatureConfig,
+  QuestionStarRatingConfig,
+  QuestionIconSelectConfig,
+  QuestionConsentConfig,
+  QuestionComparisonConfig,
+  QuestionColorPickerConfig,
+  QuestionPainScaleConfig,
+  QuestionWordCloudConfig,
 ]
 
 // 组件进行分组
@@ -285,6 +341,10 @@ export const componentConfigGroup = [
       QuestionDateConfig,
       QuestionUploadConfig,
       QuestionButtonConfig,
+      QuestionSignatureConfig,
+      QuestionStarRatingConfig,
+      QuestionColorPickerConfig,
+      QuestionPainScaleConfig,
     ],
   },
   {
@@ -300,6 +360,14 @@ export const componentConfigGroup = [
       QuestionCascaderConfig,
       QuestionAutocompleteConfig,
       QuestionTransferConfig,
+      QuestionMatrixConfig,
+      QuestionNPSConfig,
+      QuestionRankingConfig,
+      QuestionEmojiPickerConfig,
+      QuestionImageChoiceConfig,
+      QuestionIconSelectConfig,
+      QuestionComparisonConfig,
+      QuestionWordCloudConfig,
     ],
   },
   {
@@ -313,6 +381,8 @@ export const componentConfigGroup = [
       QuestionSpinConfig,
       QuestionModalConfig,
       QuestionDrawerConfig,
+      QuestionMultipageProgressConfig,
+      QuestionConsentConfig,
     ],
   },
 ]

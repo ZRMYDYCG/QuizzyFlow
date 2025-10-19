@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { ConfigProvider, message } from 'antd'
-import Sidebar from './components/Sidebar/index.tsx'
+import Sidebar from './components/sidebar/index.tsx'
 import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useGetUserInfo from '../../hooks/useGetUserInfo.ts'

@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { createQuestion } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import { message } from 'antd'
-import { useManageTheme } from '../../../../hooks/useManageTheme'
+import { useManageTheme } from '../../../../hooks/useManageTheme.ts'
 import { 
   Home,
   FileText, 
