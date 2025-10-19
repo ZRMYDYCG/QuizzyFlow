@@ -2,7 +2,7 @@ import React from 'react'
 import { ConfigProvider } from 'antd'
 import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import { useTheme } from '@/contexts/ThemeContext'
-import EditCanvas from '@/components/material/edit-canvas.tsx'
+import EnhancedCanvasWrapper from '@/components/canvas/EnhancedCanvasWrapper.tsx'
 import useLoadQuestionData from '@/hooks/useLoadQuestionData.ts'
 import { useDispatch, useSelector } from 'react-redux'
 import { changeSelectedId } from '@/store/modules/question-component.ts'
@@ -68,37 +68,14 @@ const EditQuestionPage: React.FC = () => {
               </ResizablePanel>
             )}
             
-            {/* 中间画布区域 */}
+            {/* 中间画布区域 - 增强版画布 */}
             <div
-              className={`flex-1 flex justify-center items-center p-6 relative ${
-                theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-100'
-              }`}
+              className="flex-1 relative"
               onClick={removeSelectedId}
             >
-              <div 
-                className={`relative overflow-auto shadow-2xl rounded-xl transition-all duration-300 ${
-                  theme === 'dark' 
-                    ? 'bg-white border border-white/10' 
-                    : 'bg-white border border-gray-200'
-                }`}
-                style={{
-                  width: `${400 * (canvasScale / 100)}px`,
-                  height: `${712 * (canvasScale / 100)}px`,
-                }}
-              >
-                <div 
-                  className="origin-top-left"
-                  style={{
-                    width: '400px',
-                    height: '800px',
-                    transform: `scale(${canvasScale / 100})`,
-                  }}
-                >
-                  <EditCanvas loading={loading} />
-                </div>
-              </div>
-
-              {/* 浮动工具栏 */}
+              <EnhancedCanvasWrapper loading={loading} />
+              
+              {/* 布局工具栏 */}
               <LayoutToolbar />
             </div>
             

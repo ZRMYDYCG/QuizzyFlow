@@ -7,6 +7,8 @@ import pageInfoReducer from './modules/pageinfo-reducer.ts'
 import { IPageInfo } from './modules/pageinfo-reducer.ts'
 import editorLayoutReducer from './modules/editor-layout.ts'
 import { EditorLayoutState } from './modules/editor-layout.ts'
+import canvasConfigReducer from './modules/canvas-config.ts'
+import { CanvasConfigState } from './modules/canvas-config.ts'
 import undoable, { excludeAction, StateWithHistory } from 'redux-undo'
 
 export interface stateType {
@@ -14,6 +16,7 @@ export interface stateType {
   questionComponent: StateWithHistory<QuestionComponentStateType>
   pageInfo: IPageInfo
   editorLayout: EditorLayoutState
+  canvasConfig: CanvasConfigState
 }
 
 export default configureStore({
@@ -35,5 +38,7 @@ export default configureStore({
     pageInfo: pageInfoReducer,
     // 编辑器布局模块
     editorLayout: editorLayoutReducer,
+    // 画布配置模块
+    canvasConfig: canvasConfigReducer,
   },
 })
