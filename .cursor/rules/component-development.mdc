@@ -1,0 +1,258 @@
+---
+description: 组件开发规范和最佳实践
+globs: src/components/**,src/pages/**/*.tsx
+---
+
+# 组件开发规范
+
+## 组件结构
+
+### 函数式组件模板
+
+```typescript
+import React, { useState, useEffect } from 'react'
+import { Button } from 'antd'
+import { useDispatch, useSelector } from 'react-redux'
+
+interface MyComponentProps {
+  title: string
+  onSave?: (data: any) => void
+  className?: string
+}
+
+const MyComponent: React.FC<MyComponentProps> = ({ 
+  title, 
+  onSave,
+  className = '' 
+}) => {
+  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
+  
+  useEffect(() => {
+    // 副作用逻辑
+  }, [])
+  
+  const handleClick = () => {
+    // 事件处理
+  }
+  
+  return (
+    <div className={`container ${className}`}>
+      <h1>{title}</h1>
+      <Button onClick={handleClick}>
+        点击
+      </Button>
+    </div>
+  )
+}
+
+export default MyComponent
+```
+
+## 样式规范
+
+### 1. Tailwind CSS 优先
+
+```tsx
+// ✅ 推荐: 使用 Tailwind
+<div className="flex items-center gap-4 p-6 bg-white rounded-lg shadow-md">
+  <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+    按钮
+  </button>
+</div>
+
+// ❌ 避免: 内联样式
+<div style={{ display: 'flex', padding: '24px' }}>
+```
+
+### 2. 主题适配
+
+使用 ThemeContext 支持深色/浅色主题：
+
+```typescript
+import { useTheme } from '@/contexts/ThemeContext'
+
+const MyComponent = () => {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  
+  return (
+    <div className={`${
+      isDark ? 'bg-[#1a1a1f] text-white' : 'bg-white text-gray-900'
+    }`}>
+      内容
+    </div>
+  )
+}
+```
+
+### 3. 响应式设计
+
+使用 Tailwind 的响应式前缀：
+
+```tsx
+<div className="
+  w-full              // 移动端全宽
+  lg:w-[45%]          // 大屏幕 45%
+  px-6                // 水平内边距
+  lg:px-12            // 大屏幕更大内边距
+">
+```
+
+## 常用 Hooks
+
+### 1. 自定义 Hooks
+
+- `useLoadQuestionData` - 加载问卷数据
+- `useGetPageInfo` - 获取页面信息
+- `useGetComponentInfo` - 获取组件信息
+- `useNavPage` - 路由权限控制
+- `useLoadUserData` - 加载用户数据
+
+### 2. ahooks
+
+项目使用 ahooks 提供的 hooks：
+
+```typescript
+import { useRequest, useTitle } from 'ahooks'
+
+// API 请求
+const { run: fetchData, loading } = useRequest(
+  async () => await apiCall(),
+  {
+    manual: true,
+    onSuccess: (data) => {
+      // 成功回调
+    },
+    onError: (error) => {
+      // 错误处理
+    }
+  }
+)
+
+// 设置页面标题
+useTitle(`问卷编辑 - ${title}`)
+```
+
+## 表单开发
+
+### Ant Design Form
+
+```typescript
+import { Form, Input, Button, message } from 'antd'
+
+const MyForm = () => {
+  const [form] = Form.useForm()
+  
+  const onFinish = (values: any) => {
+    console.log('表单值:', values)
+  }
+  
+  return (
+    <Form
+      form={form}
+      name="myForm"
+      onFinish={onFinish}
+      layout="vertical"
+      requiredMark={false}
+    >
+      <Form.Item
+        name="username"
+        rules={[
+          { required: true, message: '请输入用户名' },
+          { min: 5, message: '至少5个字符' }
+        ]}
+      >
+        <Input placeholder="用户名" size="large" />
+      </Form.Item>
+      
+      <Form.Item>
+        <Button type="primary" htmlType="submit" block>
+          提交
+        </Button>
+      </Form.Item>
+    </Form>
+  )
+}
+```
+
+## 性能优化
+
+### 1. 避免不必要的重渲染
+
+```typescript
+import { memo, useCallback, useMemo } from 'react'
+
+// 使用 memo
+const MyComponent = memo(({ data }) => {
+  return <div>{data}</div>
+})
+
+// 使用 useCallback
+const handleClick = useCallback(() => {
+  doSomething()
+}, [dependency])
+
+// 使用 useMemo
+const expensiveValue = useMemo(() => {
+  return computeExpensiveValue(a, b)
+}, [a, b])
+```
+
+### 2. 条件渲染
+
+```typescript
+// ✅ 推荐
+{showPanel && <Panel />}
+{loading ? <Spinner /> : <Content />}
+
+// ❌ 避免
+{showPanel ? <Panel /> : null}
+```
+
+## 错误处理
+
+```typescript
+const MyComponent = () => {
+  const [error, setError] = useState<string | null>(null)
+  
+  const fetchData = async () => {
+    try {
+      const data = await apiCall()
+      // 处理数据
+    } catch (err) {
+      setError('加载失败，请重试')
+      message.error('加载失败')
+    }
+  }
+  
+  if (error) {
+    return <ErrorDisplay message={error} />
+  }
+  
+  return <div>正常内容</div>
+}
+```
+
+## 命名规范
+
+- **组件**: PascalCase - `MyComponent.tsx`
+- **函数**: camelCase - `handleClick`, `fetchData`
+- **常量**: UPPER_SNAKE_CASE - `API_BASE_URL`
+- **接口**: PascalCase + Interface 后缀 - `UserInfoInterface`
+- **类型**: PascalCase + Type 后缀 - `ComponentPropsType`
+- **CSS类**: kebab-case - `my-class-name`
+
+## 文件组织
+
+```
+ComponentName/
+├── index.tsx           # 主组件
+├── components/         # 子组件
+│   ├── SubComponent1.tsx
+│   └── SubComponent2.tsx
+├── hooks/              # 自定义 hooks
+│   └── useCustomHook.ts
+└── types/              # 类型定义
+    └── index.ts
+```

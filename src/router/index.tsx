@@ -5,6 +5,9 @@ import QuestionLayout from '@/layouts/question-layout'
 import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
+import ForgotPassword from '@/pages/ForgotPassword'
+import Terms from '@/pages/Terms'
+import Privacy from '@/pages/Privacy'
 import NotFound from '@/pages/NotFound'
 import List from '@/pages/Manage/List'
 import Trash from '@/pages/Manage/Trash'
@@ -29,6 +32,18 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
+      },
+      {
+        path: 'forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: 'terms',
+        element: <Terms />,
+      },
+      {
+        path: 'privacy',
+        element: <Privacy />,
       },
     ],
   },

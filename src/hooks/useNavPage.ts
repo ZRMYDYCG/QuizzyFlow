@@ -6,7 +6,7 @@ const useNavPage = (waitingUserData: boolean) => {
   const { username } = useGetUserInfo()
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const isNoAuthPath = ['/', '/login', '/register']
+  const isNoAuthPath = ['/', '/login', '/register', '/forgot-password', '/terms', '/privacy']
 
   useEffect(() => {
     if (waitingUserData) return

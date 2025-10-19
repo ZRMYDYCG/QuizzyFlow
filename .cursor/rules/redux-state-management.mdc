@@ -1,0 +1,155 @@
+---
+description: Redux 状态管理架构和使用规范
+globs: src/store/**
+---
+
+# Redux 状态管理
+
+## Store 结构
+
+Store 配置位于 [store/index.ts](mdc:src/store/index.ts)
+
+```typescript
+{
+  user: IUserState,                              // 用户信息
+  questionComponent: StateWithHistory<...>,      // 问卷组件 (支持撤销/重做)
+  pageInfo: IPageInfo,                           // 页面信息
+  editorLayout: EditorLayoutState                // 编辑器布局
+}
+```
+
+## State Modules
+
+### 1. user ([modules/user.ts](mdc:src/store/modules/user.ts))
+用户信息管理
+
+### 2. questionComponent ([modules/question-component.ts](mdc:src/store/modules/question-component.ts))
+问卷组件管理，使用 redux-undo 包装：
+
+**数据结构**:
+```typescript
+{
+  componentList: QuestionComponentType[],  // 组件列表
+  selectedId: string,                      // 当前选中的组件ID
+  copiedComponent: QuestionComponentType | null  // 复制的组件
+}
+```
+
+**Actions**:
+- `resetComponents` - 重置组件列表
+- `changeSelectedId` - 修改选中ID
+- `addComponent` - 添加组件
+- `changeComponentProps` - 修改组件属性
+- `extraComponents` - 删除组件
+- `changeComponentsVisible` - 显示/隐藏组件
+- `changeComponentsLock` - 锁定/解锁组件
+- `copySelectedComponent` - 复制组件
+- `pasteComponent` - 粘贴组件
+- `selectPrevComponent` - 选中上一个
+- `selectNextComponent` - 选中下一个
+- `changeComponentTitle` - 修改标题
+- `swapComponent` - 交换位置
+
+**撤销/重做**:
+```typescript
+// 访问当前状态
+state.questionComponent.present
+
+// 撤销/重做
+import { ActionCreators } from 'redux-undo'
+dispatch(ActionCreators.undo())
+dispatch(ActionCreators.redo())
+```
+
+**排除的动作** (不记录历史):
+- `resetComponents`
+- `changeSelectedId`
+- `selectPrevComponent`
+- `selectNextComponent`
+
+### 3. pageInfo ([modules/pageinfo-reducer.ts](mdc:src/store/modules/pageinfo-reducer.ts))
+页面信息（标题、描述等）
+
+### 4. editorLayout ([modules/editor-layout.ts](mdc:src/store/modules/editor-layout.ts))
+编辑器布局配置（详见 editor-layout-system.mdc）
+
+## 使用规范
+
+### 1. 组件中使用 Redux
+
+```typescript
+import { useDispatch, useSelector } from 'react-redux'
+import { stateType } from '@/store'
+import { addComponent } from '@/store/modules/question-component'
+
+const MyComponent = () => {
+  const dispatch = useDispatch()
+  
+  // 选择状态 (注意 questionComponent 有 present)
+  const { componentList, selectedId } = useSelector(
+    (state: stateType) => state.questionComponent.present
+  )
+  
+  // 其他模块直接访问
+  const { viewMode } = useSelector(
+    (state: stateType) => state.editorLayout
+  )
+  
+  // 派发 action
+  const handleAdd = () => {
+    dispatch(addComponent({
+      fe_id: nanoid(),
+      type: 'QuestionInput',
+      title: '输入框',
+      isLocked: false,
+      props: { /* ... */ }
+    }))
+  }
+}
+```
+
+### 2. TypeScript 类型
+
+所有 state 和 action 都应该有明确的类型定义：
+
+```typescript
+// State 类型
+export interface EditorLayoutState {
+  viewMode: ViewMode
+  showLeftPanel: boolean
+  // ...
+}
+
+// Action Payload 类型
+changeComponentProps(
+  state: QuestionComponentStateType,
+  action: PayloadAction<{ fe_id: string; props: ComponentPropsType }>
+)
+```
+
+### 3. localStorage 持久化
+
+某些 state (如 editorLayout) 会自动同步到 localStorage：
+- 在 slice 中实现 `saveToLocalStorage` 函数
+- 在 `initialState` 中从 localStorage 加载
+- 在每个 reducer 中调用保存函数
+
+```typescript
+const saveToLocalStorage = (state: EditorLayoutState) => {
+  try {
+    localStorage.setItem('editor-layout-config', JSON.stringify(state))
+  } catch (error) {
+    console.error('Failed to save:', error)
+  }
+}
+```
+
+## 添加新的 State Module
+
+1. 在 `src/store/modules/` 创建新的 slice 文件
+2. 定义 State 接口和 initialState
+3. 使用 `createSlice` 创建 slice
+4. 导出 actions 和 reducer
+5. 在 `src/store/index.ts` 中导入并添加到 store
+6. 更新 `stateType` 接口
+7. 如需持久化，实现 localStorage 逻辑
