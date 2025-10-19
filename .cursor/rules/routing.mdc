@@ -1,0 +1,628 @@
+---
+globs: src/router/**/*.tsx,src/pages/**/*.tsx,src/layouts/**/*.tsx
+description: React Router patterns and navigation conventions
+---
+
+# Routing and Navigation Guide
+
+## Router Configuration
+
+The router is configured in [src/router/index.tsx](mdc:src/router/index.tsx) using React Router v7.
+
+## Route Structure
+
+### Three Main Layouts
+
+```typescript
+// 1. HomeLayout - Public pages
+{
+  path: '/',
+  element: <HomeLayout />,
+  children: [
+    { path: '/', element: <Home /> },
+    { path: 'login', element: <Login /> },
+    { path: 'register', element: <Register /> },
+    { path: 'forgot-password', element: <ForgotPassword /> },
+    { path: 'terms', element: <Terms /> },
+    { path: 'privacy', element: <Privacy /> },
+  ]
+}
+
+// 2. ManageLayout - Question management (requires auth)
+{
+  path: 'manage',
+  element: <ManageLayout />,
+  children: [
+    { path: 'list', element: <List /> },
+    { path: 'star', element: <Star /> },
+    { path: 'trash', element: <Trash /> },
+  ]
+}
+
+// 3. QuestionLayout - Question editing (requires auth)
+{
+  path: '/question',
+  element: <QuestionLayout />,
+  children: [
+    { path: 'edit/:id', element: <Edit /> },
+    { path: 'statistics/:id', element: <Statistics /> },
+    { path: 'publish/:id', element: <Publish /> },
+  ]
+}
+
+// 404 catch-all
+{
+  path: '*',
+  element: <NotFound />
+}
+```
+
+## Layout Components
+
+### Layout Pattern
+
+Each layout should:
+1. Render an `<Outlet />` for child routes
+2. Provide consistent UI chrome (header, sidebar, footer)
+3. Handle authentication checks if needed
+
+```typescript
+// layouts/manage-layout/index.tsx
+import { Outlet, Navigate } from 'react-router-dom'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
+
+const ManageLayout: FC = () => {
+  const { token } = useGetUserInfo()
+  
+  // Redirect to login if not authenticated
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+  
+  return (
+    <div className="manage-layout">
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1">
+          <Outlet />  {/* Child routes render here */}
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default ManageLayout
+```
+
+## Navigation Hooks
+
+### useNavigate Hook
+
+```typescript
+import { useNavigate } from 'react-router-dom'
+
+const MyComponent: FC = () => {
+  const navigate = useNavigate()
+  
+  const handleGoToEdit = () => {
+    navigate('/question/edit/123')
+  }
+  
+  const handleGoBack = () => {
+    navigate(-1)  // Go back one page
+  }
+  
+  const handleReplace = () => {
+    navigate('/manage/list', { replace: true })  // Replace history
+  }
+  
+  return (
+    <button onClick={handleGoToEdit}>Edit</button>
+  )
+}
+```
+
+### Custom Navigation Hook
+
+Use [src/hooks/useNavPage.ts](mdc:src/hooks/useNavPage.ts) for common navigation:
+
+```typescript
+import { useNavPage } from '@/hooks/useNavPage'
+
+const QuestionCard: FC<{ id: string }> = ({ id }) => {
+  const { navToEdit, navToStatistics, navToPublish } = useNavPage()
+  
+  return (
+    <div>
+      <button onClick={() => navToEdit(id)}>Edit</button>
+      <button onClick={() => navToStatistics(id)}>Statistics</button>
+      <button onClick={() => navToPublish(id)}>Publish</button>
+    </div>
+  )
+}
+```
+
+## Route Parameters
+
+### useParams Hook
+
+```typescript
+import { useParams } from 'react-router-dom'
+
+const EditPage: FC = () => {
+  const { id } = useParams<{ id: string }>()
+  
+  // Load question data using the id
+  const { data, loading } = useLoadQuestionData(id)
+  
+  return <div>Editing question {id}</div>
+}
+```
+
+### Multiple Parameters
+
+```typescript
+const { userId, questionId } = useParams<{
+  userId: string
+  questionId: string
+}>()
+```
+
+## Query Parameters
+
+### useSearchParams Hook
+
+```typescript
+import { useSearchParams } from 'react-router-dom'
+
+const ListPage: FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  
+  // Read query params
+  const page = searchParams.get('page') || '1'
+  const keyword = searchParams.get('keyword') || ''
+  
+  // Update query params
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({
+      page: String(newPage),
+      keyword,
+    })
+  }
+  
+  const handleSearch = (newKeyword: string) => {
+    setSearchParams({
+      page: '1',
+      keyword: newKeyword,
+    })
+  }
+  
+  return (
+    <div>
+      <input 
+        value={keyword}
+        onChange={(e) => handleSearch(e.target.value)}
+      />
+      <Pagination 
+        current={Number(page)}
+        onChange={handlePageChange}
+      />
+    </div>
+  )
+}
+```
+
+### URL Structure for Lists
+
+Common pattern for list pages:
+```
+/manage/list?page=1&pageSize=10&keyword=quiz&sort=createdAt
+/manage/star?page=1
+/manage/trash?page=1
+```
+
+## Link Component
+
+### Using Link for Navigation
+
+```typescript
+import { Link } from 'react-router-dom'
+
+// ✅ Good - Use Link for internal navigation
+<Link to="/manage/list" className="nav-link">
+  My Questions
+</Link>
+
+// ✅ Good - Link with state
+<Link 
+  to="/question/edit/123"
+  state={{ from: '/manage/list' }}
+>
+  Edit
+</Link>
+
+// ❌ Bad - Don't use <a> for internal navigation
+<a href="/manage/list">My Questions</a>
+```
+
+### NavLink for Active States
+
+```typescript
+import { NavLink } from 'react-router-dom'
+
+<NavLink
+  to="/manage/list"
+  className={({ isActive }) =>
+    isActive ? 'nav-link active' : 'nav-link'
+  }
+>
+  List
+</NavLink>
+
+// Or with function children
+<NavLink to="/manage/star">
+  {({ isActive }) => (
+    <span className={isActive ? 'text-blue-500' : ''}>
+      Starred
+    </span>
+  )}
+</NavLink>
+```
+
+## Route Guards / Protected Routes
+
+### Authentication Guard Pattern
+
+```typescript
+// components/ProtectedRoute.tsx
+import { Navigate } from 'react-router-dom'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
+
+interface ProtectedRouteProps {
+  children: React.ReactNode
+  redirectTo?: string
+}
+
+const ProtectedRoute: FC<ProtectedRouteProps> = ({ 
+  children, 
+  redirectTo = '/login' 
+}) => {
+  const { token } = useGetUserInfo()
+  
+  if (!token) {
+    return <Navigate to={redirectTo} replace />
+  }
+  
+  return <>{children}</>
+}
+
+export default ProtectedRoute
+```
+
+### Using in Router
+
+```typescript
+{
+  path: 'manage',
+  element: (
+    <ProtectedRoute>
+      <ManageLayout />
+    </ProtectedRoute>
+  ),
+  children: [
+    // ...routes
+  ]
+}
+```
+
+## Programmatic Navigation
+
+### After Form Submission
+
+```typescript
+const LoginPage: FC = () => {
+  const navigate = useNavigate()
+  
+  const handleLogin = async (values: LoginForm) => {
+    try {
+      const { token } = await loginApi(values)
+      localStorage.setItem('token', token)
+      
+      // Navigate after successful login
+      navigate('/manage/list', { replace: true })
+    } catch (error) {
+      message.error('Login failed')
+    }
+  }
+  
+  return <LoginForm onSubmit={handleLogin} />
+}
+```
+
+### Conditional Navigation
+
+```typescript
+const CreateQuestion: FC = () => {
+  const navigate = useNavigate()
+  
+  const handleCreate = async () => {
+    const question = await createQuestion({ title: 'New Question' })
+    
+    // Navigate based on condition
+    if (question.isPublished) {
+      navigate(`/question/publish/${question._id}`)
+    } else {
+      navigate(`/question/edit/${question._id}`)
+    }
+  }
+}
+```
+
+## Location State
+
+### Passing State Between Routes
+
+```typescript
+// From page
+const navigate = useNavigate()
+navigate('/question/edit/123', {
+  state: { from: '/manage/list', returnUrl: '/manage/star' }
+})
+
+// To page
+import { useLocation } from 'react-router-dom'
+
+const EditPage: FC = () => {
+  const location = useLocation()
+  const state = location.state as { from?: string; returnUrl?: string }
+  
+  const handleBack = () => {
+    navigate(state?.returnUrl || '/manage/list')
+  }
+  
+  return <button onClick={handleBack}>Back</button>
+}
+```
+
+## Scroll Restoration
+
+### Auto Scroll to Top
+
+```typescript
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+const ScrollToTop: FC = () => {
+  const { pathname } = useLocation()
+  
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  
+  return null
+}
+
+// Add to router
+<RouterProvider router={router}>
+  <ScrollToTop />
+  {/* App content */}
+</RouterProvider>
+```
+
+### Preserve Scroll Position
+
+```typescript
+import { useLocation } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+
+const useScrollRestoration = () => {
+  const location = useLocation()
+  const scrollPositions = useRef<Map<string, number>>(new Map())
+  
+  useEffect(() => {
+    // Save scroll position when leaving
+    return () => {
+      scrollPositions.current.set(location.pathname, window.scrollY)
+    }
+  }, [location.pathname])
+  
+  useEffect(() => {
+    // Restore scroll position when entering
+    const savedPosition = scrollPositions.current.get(location.pathname)
+    if (savedPosition !== undefined) {
+      window.scrollTo(0, savedPosition)
+    }
+  }, [location.pathname])
+}
+```
+
+## Lazy Loading Routes
+
+### Code Splitting
+
+```typescript
+import { lazy, Suspense } from 'react'
+import { Spin } from 'antd'
+
+// Lazy load components
+const Edit = lazy(() => import('@/pages/question/edit'))
+const Statistics = lazy(() => import('@/pages/question/statistics'))
+const Publish = lazy(() => import('@/pages/question/publish'))
+
+// Wrap in Suspense
+const router = createBrowserRouter([
+  {
+    path: '/question',
+    element: <QuestionLayout />,
+    children: [
+      {
+        path: 'edit/:id',
+        element: (
+          <Suspense fallback={<Spin size="large" />}>
+            <Edit />
+          </Suspense>
+        ),
+      },
+      // ...
+    ],
+  },
+])
+```
+
+## Route Matching
+
+### Exact Matching
+
+```typescript
+// Matches exactly "/manage"
+{ path: 'manage', element: <ManageLayout /> }
+
+// Matches "/manage" and all children
+{ path: 'manage/*', element: <ManageLayout /> }
+
+// Index route (matches parent path exactly)
+{ index: true, element: <Dashboard /> }
+```
+
+### Wildcard Routes
+
+```typescript
+// Catch all unmatched routes
+{ path: '*', element: <NotFound /> }
+
+// Catch routes under a specific path
+{ path: 'admin/*', element: <AdminNotFound /> }
+```
+
+## Redirects
+
+### Navigate Component
+
+```typescript
+import { Navigate } from 'react-router-dom'
+
+// Simple redirect
+{ path: '/', element: <Navigate to="/manage/list" replace /> }
+
+// Conditional redirect
+const Root: FC = () => {
+  const { token } = useGetUserInfo()
+  
+  if (token) {
+    return <Navigate to="/manage/list" replace />
+  }
+  
+  return <Navigate to="/login" replace />
+}
+```
+
+## Breadcrumbs
+
+### Creating Breadcrumbs
+
+```typescript
+import { useLocation, Link } from 'react-router-dom'
+import { Breadcrumb } from 'antd'
+
+const breadcrumbNameMap: Record<string, string> = {
+  '/manage': 'Management',
+  '/manage/list': 'Question List',
+  '/manage/star': 'Starred',
+  '/manage/trash': 'Trash',
+  '/question': 'Question',
+  '/question/edit': 'Edit',
+  '/question/statistics': 'Statistics',
+  '/question/publish': 'Publish',
+}
+
+const Breadcrumbs: FC = () => {
+  const location = useLocation()
+  const pathSnippets = location.pathname.split('/').filter((i) => i)
+  
+  const breadcrumbItems = pathSnippets.map((_, index) => {
+    const url = `/${pathSnippets.slice(0, index + 1).join('/')}`
+    const name = breadcrumbNameMap[url] || url
+    
+    return (
+      <Breadcrumb.Item key={url}>
+        <Link to={url}>{name}</Link>
+      </Breadcrumb.Item>
+    )
+  })
+  
+  return (
+    <Breadcrumb>
+      <Breadcrumb.Item>
+        <Link to="/">Home</Link>
+      </Breadcrumb.Item>
+      {breadcrumbItems}
+    </Breadcrumb>
+  )
+}
+```
+
+## Best Practices
+
+1. **Use Link, not <a>**: Always use `<Link>` or `<NavLink>` for internal navigation
+2. **Protected Routes**: Implement auth guards for protected routes
+3. **Loading States**: Show loading indicators during route transitions
+4. **404 Pages**: Always have a catch-all 404 route
+5. **Query Params for Filters**: Use query params for list filters, not route params
+6. **Route Params for IDs**: Use route params for resource identifiers
+7. **Replace for Redirects**: Use `replace: true` for auth redirects
+8. **Custom Hooks**: Create custom hooks for common navigation patterns
+9. **Lazy Loading**: Code-split routes for better performance
+10. **Type Safety**: Type your route params and location state
+
+## Common Patterns
+
+### List -> Detail -> Edit Flow
+```
+/manage/list           → List all questions
+  → /question/edit/:id     → Edit specific question
+  → /question/statistics/:id → View statistics
+  → /question/publish/:id    → Publish question
+```
+
+### Authentication Flow
+```
+/login → (success) → /manage/list
+/register → (success) → /manage/list
+/forgot-password → (success) → /login
+```
+
+### Navigation with Confirmation
+```typescript
+const EditPage: FC = () => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const navigate = useNavigate()
+  
+  const handleNavigateAway = () => {
+    if (hasUnsavedChanges) {
+      Modal.confirm({
+        title: 'Unsaved changes',
+        content: 'Are you sure you want to leave?',
+        onOk: () => navigate('/manage/list'),
+      })
+    } else {
+      navigate('/manage/list')
+    }
+  }
+  
+  return <button onClick={handleNavigateAway}>Back</button>
+}
+```
+
+## Route Organization Checklist
+
+- [ ] All routes are defined in router config
+- [ ] Layouts properly use `<Outlet />`
+- [ ] Protected routes have auth guards
+- [ ] 404 catch-all route exists
+- [ ] Loading states for lazy routes
+- [ ] Query params for filters/pagination
+- [ ] Route params for resource IDs
+- [ ] Custom navigation hooks for common paths
+- [ ] Breadcrumbs for complex navigation
+- [ ] Scroll restoration if needed

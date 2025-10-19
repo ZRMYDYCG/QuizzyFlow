@@ -1,0 +1,419 @@
+---
+globs: src/store/**/*.ts
+description: Redux state management patterns and conventions
+---
+
+# Redux State Management Guide
+
+## Store Structure
+
+The Redux store is configured in [src/store/index.ts](mdc:src/store/index.ts) with the following modules:
+
+```typescript
+{
+  user: IUserState,
+  questionComponent: StateWithHistory<QuestionComponentStateType>,
+  pageInfo: IPageInfo,
+  editorLayout: EditorLayoutState,
+  canvasConfig: CanvasConfigState
+}
+```
+
+## State Modules
+
+### 1. User Module (user)
+**Location**: [src/store/modules/user.ts](mdc:src/store/modules/user.ts)
+
+Manages user authentication and profile data:
+```typescript
+interface IUserState {
+  username: string
+  nickname: string
+  token: string
+}
+```
+
+**Key Actions**:
+- `loginReducer` - Store user login data
+- `logoutReducer` - Clear user data
+
+**Usage**:
+```typescript
+import { useSelector, useDispatch } from 'react-redux'
+import { loginReducer, logoutReducer } from '@/store/modules/user'
+import type { stateType } from '@/store'
+
+const user = useSelector((state: stateType) => state.user)
+const dispatch = useDispatch()
+
+// Login
+dispatch(loginReducer({ username, nickname, token }))
+
+// Logout
+dispatch(logoutReducer())
+```
+
+### 2. Question Component Module (questionComponent)
+**Location**: [src/store/modules/question-component.ts](mdc:src/store/modules/question-component.ts)
+
+Manages the list of components in the question editor with **undo/redo support**.
+
+```typescript
+interface QuestionComponentStateType {
+  componentList: ComponentInfoType[]
+  selectedId: string
+  copiedComponent: ComponentInfoType | null
+}
+```
+
+**Important**: This module uses `redux-undo`, so access state via `.present`:
+```typescript
+const { componentList, selectedId } = useSelector(
+  (state: stateType) => state.questionComponent.present
+)
+```
+
+**Key Actions**:
+- `resetComponents` - Reset all components (excluded from undo)
+- `changeComponentProps` - Update component properties
+- `addComponent` - Add new component
+- `changeSelectedId` - Change selected component (excluded from undo)
+- `changeComponentTitle` - Update component title
+- `moveComponent` - Reorder components
+- `copySelectedComponent` - Copy selected component
+- `pasteCopiedComponent` - Paste copied component
+- `deleteSelectedComponent` - Delete selected component
+- `selectPrevComponent` - Select previous (excluded from undo)
+- `selectNextComponent` - Select next (excluded from undo)
+
+**Undo/Redo Configuration**:
+```typescript
+undoable(questionReducer, {
+  limit: 20,  // Max 20 undo steps
+  filter: excludeAction([
+    'questionComponent/resetComponents',
+    'questionComponent/changeSelectedId',
+    'questionComponent/selectPrevComponent',
+    'questionComponent/selectNextComponent',
+  ])
+})
+```
+
+**Usage with Undo/Redo**:
+```typescript
+import { ActionCreators } from 'redux-undo'
+
+// Access state
+const { componentList } = useSelector(
+  (state: stateType) => state.questionComponent.present
+)
+
+// Check undo/redo availability
+const { past, future } = useSelector(
+  (state: stateType) => state.questionComponent
+)
+const canUndo = past.length > 0
+const canRedo = future.length > 0
+
+// Perform undo/redo
+dispatch(ActionCreators.undo())
+dispatch(ActionCreators.redo())
+```
+
+### 3. Page Info Module (pageInfo)
+**Location**: [src/store/modules/pageinfo-reducer.ts](mdc:src/store/modules/pageinfo-reducer.ts)
+
+Manages question/survey metadata:
+```typescript
+interface IPageInfo {
+  title: string
+  desc: string
+  js: string
+  css: string
+  isPublished: boolean
+}
+```
+
+**Key Actions**:
+- `resetPageInfo` - Reset to defaults
+- `updatePageInfo` - Update page metadata
+
+**Usage**:
+```typescript
+import { updatePageInfo } from '@/store/modules/pageinfo-reducer'
+
+dispatch(updatePageInfo({ 
+  title: 'My Survey',
+  desc: 'Survey description' 
+}))
+```
+
+### 4. Editor Layout Module (editorLayout)
+**Location**: [src/store/modules/editor-layout.ts](mdc:src/store/modules/editor-layout.ts)
+
+Manages editor UI layout state:
+```typescript
+interface EditorLayoutState {
+  showLeftPanel: boolean
+  showRightPanel: boolean
+  leftPanelWidth: number
+  rightPanelWidth: number
+}
+```
+
+**Key Actions**:
+- `toggleLeftPanel` - Show/hide left panel
+- `toggleRightPanel` - Show/hide right panel
+- `setLeftPanelWidth` - Set left panel width
+- `setRightPanelWidth` - Set right panel width
+
+### 5. Canvas Config Module (canvasConfig)
+**Location**: [src/store/modules/canvas-config.ts](mdc:src/store/modules/canvas-config.ts)
+
+Manages canvas viewport and zoom settings:
+```typescript
+interface CanvasConfigState {
+  scale: number
+  positionX: number
+  positionY: number
+  showGrid: boolean
+  showRulers: boolean
+}
+```
+
+**Key Actions**:
+- `setScale` - Set zoom level
+- `setPosition` - Set canvas position
+- `toggleGrid` - Show/hide grid
+- `toggleRulers` - Show/hide rulers
+- `resetCanvas` - Reset to defaults
+
+## Redux Toolkit Patterns
+
+### Creating a Slice
+
+```typescript
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
+interface MyState {
+  value: string
+}
+
+const initialState: MyState = {
+  value: ''
+}
+
+const mySlice = createSlice({
+  name: 'myModule',
+  initialState,
+  reducers: {
+    setValue: (state, action: PayloadAction<string>) => {
+      state.value = action.payload
+    },
+    reset: (state) => {
+      state.value = ''
+    }
+  }
+})
+
+export const { setValue, reset } = mySlice.actions
+export default mySlice.reducer
+```
+
+### Typing State Access
+
+Always use the global `stateType`:
+```typescript
+import type { stateType } from '@/store'
+
+const value = useSelector((state: stateType) => state.myModule.value)
+```
+
+### Immer and Immutability
+
+Redux Toolkit uses Immer, allowing "mutative" code:
+```typescript
+reducers: {
+  addItem: (state, action: PayloadAction<Item>) => {
+    // This looks like mutation but is safe with Immer
+    state.items.push(action.payload)
+  },
+  updateItem: (state, action: PayloadAction<{ id: string, data: any }>) => {
+    const item = state.items.find(i => i.id === action.payload.id)
+    if (item) {
+      item.data = action.payload.data
+    }
+  }
+}
+```
+
+## Custom Hooks for State
+
+### Pattern: Create Selector Hooks
+
+```typescript
+// hooks/useGetComponentInfo.ts
+import { useSelector } from 'react-redux'
+import type { stateType } from '@/store'
+
+export const useGetComponentInfo = () => {
+  const { componentList, selectedId, copiedComponent } = useSelector(
+    (state: stateType) => state.questionComponent.present
+  )
+  
+  const selectedComponent = componentList.find(c => c.fe_id === selectedId)
+  
+  return {
+    componentList,
+    selectedId,
+    selectedComponent,
+    copiedComponent
+  }
+}
+```
+
+### Pattern: Create Action Hooks
+
+```typescript
+// hooks/useBindCanvasKeyPress.ts
+import { useDispatch } from 'react-redux'
+import { useEffect } from 'react'
+import { ActionCreators } from 'redux-undo'
+import { 
+  deleteSelectedComponent,
+  copySelectedComponent,
+  pasteCopiedComponent 
+} from '@/store/modules/question-component'
+
+export const useBindCanvasKeyPress = () => {
+  const dispatch = useDispatch()
+  
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 'z') {
+          e.preventDefault()
+          dispatch(ActionCreators.undo())
+        }
+        if (e.key === 'y') {
+          e.preventDefault()
+          dispatch(ActionCreators.redo())
+        }
+        if (e.key === 'c') {
+          e.preventDefault()
+          dispatch(copySelectedComponent())
+        }
+        if (e.key === 'v') {
+          e.preventDefault()
+          dispatch(pasteCopiedComponent())
+        }
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        dispatch(deleteSelectedComponent())
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyPress)
+    return () => document.removeEventListener('keydown', handleKeyPress)
+  }, [dispatch])
+}
+```
+
+## Performance Optimization
+
+### Selector Optimization
+
+Use selective subscriptions to avoid unnecessary re-renders:
+```typescript
+// ❌ Bad - subscribes to entire state
+const state = useSelector((state: stateType) => state.questionComponent.present)
+
+// ✅ Good - only subscribes to what you need
+const componentList = useSelector(
+  (state: stateType) => state.questionComponent.present.componentList
+)
+```
+
+### Memoized Selectors
+
+For expensive computations, create memoized selectors:
+```typescript
+import { createSelector } from '@reduxjs/toolkit'
+
+const selectComponentList = (state: stateType) => 
+  state.questionComponent.present.componentList
+
+const selectVisibleComponents = createSelector(
+  [selectComponentList],
+  (componentList) => componentList.filter(c => !c.isHidden)
+)
+```
+
+## Best Practices
+
+1. **Always type your state**: Use TypeScript interfaces for all state
+2. **Use redux-undo carefully**: Exclude UI-only actions from undo history
+3. **Keep state normalized**: Avoid deeply nested structures
+4. **Use custom hooks**: Create reusable hooks for common state access patterns
+5. **Batch related actions**: Dispatch multiple actions together when needed
+6. **Handle async with thunks**: Use `createAsyncThunk` for async operations
+7. **Document excluded actions**: Comment why actions are excluded from undo
+8. **Test state changes**: Write tests for reducers
+
+## Common Patterns
+
+### Loading State Pattern
+```typescript
+interface DataState {
+  data: any[]
+  loading: boolean
+  error: string | null
+}
+
+const slice = createSlice({
+  name: 'data',
+  initialState: { data: [], loading: false, error: null },
+  reducers: {
+    fetchStart: (state) => {
+      state.loading = true
+      state.error = null
+    },
+    fetchSuccess: (state, action) => {
+      state.loading = false
+      state.data = action.payload
+    },
+    fetchError: (state, action) => {
+      state.loading = false
+      state.error = action.payload
+    }
+  }
+})
+```
+
+### Entity Management Pattern
+```typescript
+interface EntityState {
+  byId: Record<string, Entity>
+  allIds: string[]
+}
+
+const slice = createSlice({
+  name: 'entities',
+  initialState: { byId: {}, allIds: [] },
+  reducers: {
+    addEntity: (state, action: PayloadAction<Entity>) => {
+      const entity = action.payload
+      state.byId[entity.id] = entity
+      state.allIds.push(entity.id)
+    },
+    updateEntity: (state, action: PayloadAction<Entity>) => {
+      const entity = action.payload
+      state.byId[entity.id] = entity
+    },
+    removeEntity: (state, action: PayloadAction<string>) => {
+      delete state.byId[action.payload]
+      state.allIds = state.allIds.filter(id => id !== action.payload)
+    }
+  }
+})
+```

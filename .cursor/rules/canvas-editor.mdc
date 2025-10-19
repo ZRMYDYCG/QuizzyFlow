@@ -1,0 +1,421 @@
+---
+globs: src/pages/question/edit/**/*.tsx,src/components/canvas/**/*.tsx
+description: Canvas editor implementation patterns
+---
+
+# Canvas Editor Development Guide
+
+## Overview
+
+The canvas editor is the core feature of QuizzyFlow, providing a drag-and-drop interface for building questions/surveys. It's located in [src/pages/question/edit](mdc:src/pages/question/edit).
+
+## Canvas Architecture
+
+### Main Components
+
+1. **EditCanvas** - [src/components/material/edit-canvas.tsx](mdc:src/components/material/edit-canvas.tsx)
+   - Main canvas rendering component
+   - Handles component display and selection
+
+2. **EnhancedCanvasWrapper** - [src/components/canvas/EnhancedCanvasWrapper.tsx](mdc:src/components/canvas/EnhancedCanvasWrapper.tsx)
+   - Wraps canvas with zoom/pan functionality
+   - Integrates react-zoom-pan-pinch
+
+3. **CanvasRulers** - [src/components/canvas/CanvasRulers.tsx](mdc:src/components/canvas/CanvasRulers.tsx)
+   - Displays horizontal and vertical rulers
+   - Shows measurements in pixels
+
+4. **GridBackground** - [src/components/canvas/GridBackground.tsx](mdc:src/components/canvas/GridBackground.tsx)
+   - Renders grid pattern on canvas
+   - Helps with alignment
+
+5. **ZoomControls** - [src/components/canvas/ZoomControls.tsx](mdc:src/components/canvas/ZoomControls.tsx)
+   - Zoom in/out/reset controls
+   - Displays current zoom level
+
+## Canvas State Management
+
+### Canvas Config State
+
+Located in [src/store/modules/canvas-config.ts](mdc:src/store/modules/canvas-config.ts):
+
+```typescript
+interface CanvasConfigState {
+  scale: number          // Zoom level (0.1 to 3.0)
+  positionX: number      // Horizontal pan position
+  positionY: number      // Vertical pan position
+  showGrid: boolean      // Show/hide grid
+  showRulers: boolean    // Show/hide rulers
+}
+```
+
+**Usage**:
+```typescript
+import { useSelector, useDispatch } from 'react-redux'
+import { setScale, toggleGrid, toggleRulers } from '@/store/modules/canvas-config'
+import type { stateType } from '@/store'
+
+const { scale, showGrid, showRulers } = useSelector(
+  (state: stateType) => state.canvasConfig
+)
+
+// Update zoom
+dispatch(setScale(1.5))
+
+// Toggle grid
+dispatch(toggleGrid())
+```
+
+## Drag & Drop System
+
+### Using @dnd-kit
+
+The project uses `@dnd-kit` for drag-and-drop functionality:
+
+```typescript
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+```
+
+### Drag Container Component
+
+Use the custom `SortContainer` from [src/components/drag-sort/sort-container.tsx](mdc:src/components/drag-sort/sort-container.tsx):
+
+```typescript
+import SortContainer from '@/components/drag-sort/sort-container'
+
+<SortContainer items={componentList} onDragEnd={handleDragEnd}>
+  {componentList.map(component => (
+    <SortItem key={component.fe_id} id={component.fe_id}>
+      <ComponentRenderer {...component} />
+    </SortItem>
+  ))}
+</SortContainer>
+```
+
+### Drag Item Component
+
+Use `SortItem` from [src/components/drag-sort/sort-item.tsx](mdc:src/components/drag-sort/sort-item.tsx):
+
+```typescript
+import SortItem from '@/components/drag-sort/sort-item'
+
+<SortItem id={component.fe_id}>
+  <div className="component-wrapper">
+    {/* Component content */}
+  </div>
+</SortItem>
+```
+
+### Handle Drag End
+
+```typescript
+const handleDragEnd = (event: any) => {
+  const { active, over } = event
+  
+  if (!over || active.id === over.id) return
+  
+  const oldIndex = componentList.findIndex(c => c.fe_id === active.id)
+  const newIndex = componentList.findIndex(c => c.fe_id === over.id)
+  
+  dispatch(moveComponent({
+    oldIndex,
+    newIndex
+  }))
+}
+```
+
+## Component Selection
+
+### Selection State
+
+```typescript
+import { useSelector, useDispatch } from 'react-redux'
+import { changeSelectedId } from '@/store/modules/question-component'
+
+const { selectedId } = useSelector(
+  (state: stateType) => state.questionComponent.present
+)
+
+// Select component
+const handleSelect = (componentId: string) => {
+  dispatch(changeSelectedId(componentId))
+}
+```
+
+### Visual Selection Feedback
+
+```typescript
+<div
+  className={clsx(
+    'component-item p-4 border rounded cursor-pointer',
+    'transition-all duration-200',
+    selectedId === component.fe_id && [
+      'border-blue-500 border-2',
+      'shadow-lg',
+      'bg-blue-50'
+    ],
+    selectedId !== component.fe_id && [
+      'border-gray-200',
+      'hover:border-blue-300',
+      'hover:shadow-md'
+    ]
+  )}
+  onClick={() => handleSelect(component.fe_id)}
+>
+  {/* Component content */}
+</div>
+```
+
+## Keyboard Shortcuts
+
+### Canvas Keyboard Bindings
+
+Implement using [src/hooks/useCanvasKeyPress.ts](mdc:src/hooks/useCanvasKeyPress.ts):
+
+```typescript
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { ActionCreators } from 'redux-undo'
+import {
+  deleteSelectedComponent,
+  copySelectedComponent,
+  pasteCopiedComponent,
+  selectPrevComponent,
+  selectNextComponent
+} from '@/store/modules/question-component'
+
+export const useCanvasKeyPress = () => {
+  const dispatch = useDispatch()
+  
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const { key, metaKey, ctrlKey, shiftKey } = e
+      
+      // Prevent shortcuts when typing in inputs
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
+        return
+      }
+      
+      // Undo: Ctrl/Cmd + Z
+      if ((metaKey || ctrlKey) && key === 'z' && !shiftKey) {
+        e.preventDefault()
+        dispatch(ActionCreators.undo())
+      }
+      
+      // Redo: Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y
+      if (
+        ((metaKey || ctrlKey) && key === 'z' && shiftKey) ||
+        ((metaKey || ctrlKey) && key === 'y')
+      ) {
+        e.preventDefault()
+        dispatch(ActionCreators.redo())
+      }
+      
+      // Copy: Ctrl/Cmd + C
+      if ((metaKey || ctrlKey) && key === 'c') {
+        e.preventDefault()
+        dispatch(copySelectedComponent())
+      }
+      
+      // Paste: Ctrl/Cmd + V
+      if ((metaKey || ctrlKey) && key === 'v') {
+        e.preventDefault()
+        dispatch(pasteCopiedComponent())
+      }
+      
+      // Delete: Delete or Backspace
+      if (key === 'Delete' || key === 'Backspace') {
+        e.preventDefault()
+        dispatch(deleteSelectedComponent())
+      }
+      
+      // Navigate up: ArrowUp
+      if (key === 'ArrowUp') {
+        e.preventDefault()
+        dispatch(selectPrevComponent())
+      }
+      
+      // Navigate down: ArrowDown
+      if (key === 'ArrowDown') {
+        e.preventDefault()
+        dispatch(selectNextComponent())
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [dispatch])
+}
+```
+
+### Keyboard Shortcut Reference
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/Cmd + Z` | Undo |
+| `Ctrl/Cmd + Shift + Z` | Redo |
+| `Ctrl/Cmd + Y` | Redo |
+| `Ctrl/Cmd + C` | Copy selected component |
+| `Ctrl/Cmd + V` | Paste copied component |
+| `Delete` or `Backspace` | Delete selected component |
+| `ArrowUp` | Select previous component |
+| `ArrowDown` | Select next component |
+
+## Zoom & Pan
+
+### Zoom Controls
+
+```typescript
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
+
+<TransformWrapper
+  initialScale={1}
+  minScale={0.1}
+  maxScale={3}
+  limitToBounds={false}
+  centerOnInit={true}
+>
+  {({ zoomIn, zoomOut, resetTransform }) => (
+    <>
+      <div className="zoom-controls">
+        <button onClick={() => zoomIn()}>Zoom In</button>
+        <button onClick={() => zoomOut()}>Zoom Out</button>
+        <button onClick={() => resetTransform()}>Reset</button>
+      </div>
+      
+      <TransformComponent>
+        <div className="canvas-content">
+          {/* Canvas content */}
+        </div>
+      </TransformComponent>
+    </>
+  )}
+</TransformWrapper>
+```
+
+### Programmatic Zoom
+
+```typescript
+const handleZoomToFit = () => {
+  const canvasWidth = canvasRef.current?.offsetWidth || 0
+  const contentWidth = contentRef.current?.offsetWidth || 0
+  const scale = canvasWidth / contentWidth
+  
+  dispatch(setScale(Math.min(scale, 1)))
+}
+```
+
+## Property Panel Integration
+
+### Right Panel for Selected Component
+
+```typescript
+import { useGetComponentInfo } from '@/hooks/useGetComponentInfo'
+import { changeComponentProps } from '@/store/modules/question-component'
+
+const PropertyPanel: FC = () => {
+  const { selectedComponent } = useGetComponentInfo()
+  const dispatch = useDispatch()
+  
+  if (!selectedComponent) {
+    return <div>No component selected</div>
+  }
+  
+  const handlePropsChange = (newProps: any) => {
+    dispatch(changeComponentProps({
+      fe_id: selectedComponent.fe_id,
+      newProps
+    }))
+  }
+  
+  // Dynamically render the appropriate PropsComponent
+  const PropsComponent = getPropsComponent(selectedComponent.type)
+  
+  return (
+    <div className="property-panel p-4">
+      <h3 className="text-lg font-semibold mb-4">
+        {selectedComponent.title || 'Properties'}
+      </h3>
+      
+      <PropsComponent
+        props={selectedComponent.props}
+        onChange={handlePropsChange}
+      />
+    </div>
+  )
+}
+```
+
+## Component Library Panel
+
+### Left Panel for Available Components
+
+```typescript
+import { componentConfigs } from '@/components/material'
+import { addComponent } from '@/store/modules/question-component'
+import { nanoid } from 'nanoid'
+
+const ComponentLibrary: FC = () => {
+  const dispatch = useDispatch()
+  
+  const handleAddComponent = (config: any) => {
+    const newComponent = {
+      fe_id: nanoid(),
+      type: config.type,
+      title: config.title,
+      props: config.defaultProps,
+      isHidden: false,
+      isLocked: false
+    }
+    
+    dispatch(addComponent(newComponent))
+  }
+  
+  return (
+    <div className="component-library p-4">
+      <h3 className="text-lg font-semibold mb-4">Components</h3>
+      
+      <div className="grid grid-cols-2 gap-2">
+        {componentConfigs.map(config => (
+          <button
+            key={config.type}
+            onClick={() => handleAddComponent(config)}
+            className="p-3 border rounded hover:bg-gray-50"
+          >
+            {config.title}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+## Best Practices
+
+1. **Performance**: Use React.memo for canvas components to prevent unnecessary re-renders
+2. **IDs**: Always use `nanoid()` for generating unique component IDs
+3. **Selection**: Clear selection when clicking canvas background
+4. **Keyboard**: Implement keyboard shortcuts for better UX
+5. **Undo/Redo**: Test that all canvas operations work with undo/redo
+6. **Visual Feedback**: Provide clear visual feedback for all interactions
+7. **Mobile**: Consider touch gestures for mobile canvas interaction
+8. **Accessibility**: Ensure keyboard navigation works properly
+9. **Performance**: Virtualize long component lists if needed
+10. **State**: Keep canvas state in Redux for persistence

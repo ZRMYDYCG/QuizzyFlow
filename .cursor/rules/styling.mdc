@@ -1,0 +1,393 @@
+---
+globs: src/**/*.tsx,src/**/*.css,tailwind.config.ts
+description: Styling conventions using TailwindCSS and Ant Design
+---
+
+# Styling Conventions
+
+## Technology Stack
+
+QuizzyFlow uses a combination of styling solutions:
+1. **TailwindCSS** - Utility-first CSS framework (primary)
+2. **Ant Design 5** - Component library with built-in styles
+3. **Radix UI** - Unstyled primitive components
+4. **Custom CSS** - Minimal custom styles when needed
+
+## TailwindCSS Configuration
+
+Configuration is in [tailwind.config.ts](mdc:tailwind.config.ts):
+```typescript
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+## Styling Approach
+
+### 1. Prefer TailwindCSS Utilities
+
+Use Tailwind utility classes as the primary styling method:
+
+```typescript
+// ✅ Good - Tailwind utilities
+<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+  <h2 className="text-xl font-bold text-gray-800">Title</h2>
+  <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+    Click Me
+  </button>
+</div>
+
+// ❌ Bad - Inline styles
+<div style={{ 
+  display: 'flex', 
+  alignItems: 'center',
+  padding: '16px'
+}}>
+```
+
+### 2. Conditional Classes with clsx
+
+Use `clsx` for conditional styling:
+
+```typescript
+import { clsx } from 'clsx'
+
+<button
+  className={clsx(
+    'px-4 py-2 rounded font-medium transition-colors',
+    'focus:outline-none focus:ring-2 focus:ring-offset-2',
+    variant === 'primary' && 'bg-blue-500 text-white hover:bg-blue-600',
+    variant === 'secondary' && 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+    disabled && 'opacity-50 cursor-not-allowed',
+    className // Allow additional classes from props
+  )}
+  disabled={disabled}
+>
+  {children}
+</button>
+```
+
+### 3. Responsive Design
+
+Use Tailwind's responsive prefixes:
+
+```typescript
+<div className={clsx(
+  'grid gap-4',
+  'grid-cols-1',           // Mobile: 1 column
+  'md:grid-cols-2',        // Tablet: 2 columns
+  'lg:grid-cols-3',        // Desktop: 3 columns
+  'xl:grid-cols-4'         // Large desktop: 4 columns
+)}>
+  {items.map(item => <Card key={item.id} {...item} />)}
+</div>
+```
+
+### 4. Common Layout Patterns
+
+#### Flex Container
+```typescript
+<div className="flex items-center justify-between">
+  <span>Left</span>
+  <span>Right</span>
+</div>
+```
+
+#### Centered Content
+```typescript
+<div className="flex items-center justify-center min-h-screen">
+  <div className="max-w-md w-full">
+    {/* Content */}
+  </div>
+</div>
+```
+
+#### Card Layout
+```typescript
+<div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+  <h3 className="text-lg font-semibold mb-2">Title</h3>
+  <p className="text-gray-600">Description</p>
+</div>
+```
+
+#### Grid Layout
+```typescript
+<div className="grid grid-cols-3 gap-4">
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+</div>
+```
+
+## Ant Design Integration
+
+### Using Ant Design Components
+
+Import and use Ant Design components with their built-in styling:
+
+```typescript
+import { Button, Input, Form, Modal, Table } from 'antd'
+
+const MyComponent: FC = () => {
+  return (
+    <Form layout="vertical">
+      <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+        <Input placeholder="Enter name" />
+      </Form.Item>
+      
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
+  )
+}
+```
+
+### Customizing Ant Design Components
+
+Use Ant Design's configuration props:
+
+```typescript
+<Button 
+  type="primary"           // primary | default | dashed | text | link
+  size="large"             // small | middle | large
+  shape="round"            // default | circle | round
+  danger                   // Boolean for danger style
+  loading={isLoading}      // Show loading state
+  icon={<SaveOutlined />}  // Add icon
+>
+  Save
+</Button>
+```
+
+### Combining Ant Design with Tailwind
+
+```typescript
+<Button 
+  type="primary"
+  className="shadow-lg hover:shadow-xl transition-shadow"
+>
+  Enhanced Button
+</Button>
+```
+
+## Theme System
+
+### Theme Context
+
+The app uses a custom theme context at [src/contexts/ThemeContext.tsx](mdc:src/contexts/ThemeContext.tsx):
+
+```typescript
+import { useTheme } from '@/contexts/ThemeContext'
+
+const MyComponent: FC = () => {
+  const { theme, toggleTheme } = useTheme()
+  
+  return (
+    <div className={clsx(
+      'p-4 rounded',
+      theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+    )}>
+      <button onClick={toggleTheme}>
+        Toggle to {theme === 'dark' ? 'light' : 'dark'} mode
+      </button>
+    </div>
+  )
+}
+```
+
+### Dark Mode with Tailwind
+
+Use Tailwind's dark mode utilities:
+
+```typescript
+<div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+  <h1 className="text-2xl font-bold">
+    This text adapts to theme
+  </h1>
+</div>
+```
+
+## Icons
+
+### Ant Design Icons
+
+```typescript
+import { 
+  UserOutlined, 
+  DeleteOutlined, 
+  EditOutlined,
+  SaveOutlined,
+  PlusOutlined 
+} from '@ant-design/icons'
+
+<Button icon={<PlusOutlined />}>Add New</Button>
+<EditOutlined className="text-blue-500 cursor-pointer" />
+```
+
+### Lucide React Icons
+
+```typescript
+import { 
+  Save, 
+  Trash2, 
+  Edit, 
+  Plus, 
+  ChevronRight 
+} from 'lucide-react'
+
+<button className="flex items-center gap-2">
+  <Save size={16} />
+  Save Changes
+</button>
+```
+
+## Animations & Transitions
+
+### Tailwind Transitions
+
+```typescript
+<button className="bg-blue-500 hover:bg-blue-600 transition-colors duration-200">
+  Smooth Color Change
+</button>
+
+<div className="opacity-0 hover:opacity-100 transition-opacity duration-300">
+  Fade In
+</div>
+
+<div className="transform hover:scale-105 transition-transform duration-200">
+  Scale on Hover
+</div>
+```
+
+### Framer Motion
+
+For complex animations, use Framer Motion:
+
+```typescript
+import { motion } from 'framer-motion'
+
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -20 }}
+  transition={{ duration: 0.3 }}
+>
+  Animated Content
+</motion.div>
+```
+
+## Custom Styles
+
+### When to Use Custom CSS
+
+Only use custom CSS files for:
+1. Complex animations that Tailwind can't handle
+2. Component-specific styles that are reused
+3. Third-party library overrides
+
+### Custom CSS Pattern
+
+```css
+/* question-highlight.css */
+.highlight-container {
+  position: relative;
+}
+
+.highlight-text {
+  background: linear-gradient(
+    120deg,
+    rgba(255, 214, 0, 0.3) 0%,
+    rgba(255, 214, 0, 0.3) 100%
+  );
+  background-size: 100% 0.4em;
+  background-position: 0 88%;
+  background-repeat: no-repeat;
+}
+```
+
+Import in component:
+```typescript
+import './highlight.css'
+```
+
+## Spacing & Sizing
+
+### Consistent Spacing Scale
+
+Use Tailwind's spacing scale:
+```typescript
+// Padding/Margin: p-{size}, m-{size}
+// Sizes: 0, 0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64
+
+<div className="p-4">         // 1rem (16px)
+<div className="p-8">         // 2rem (32px)
+<div className="px-4 py-2">   // Horizontal: 1rem, Vertical: 0.5rem
+```
+
+### Width & Height
+```typescript
+<div className="w-full">      // 100%
+<div className="w-1/2">       // 50%
+<div className="w-64">        // 16rem (256px)
+<div className="max-w-4xl">   // Max width constraint
+<div className="min-h-screen"> // At least viewport height
+```
+
+## Typography
+
+### Text Styles
+```typescript
+// Sizes
+<h1 className="text-4xl">     // 2.25rem (36px)
+<h2 className="text-3xl">     // 1.875rem (30px)
+<h3 className="text-2xl">     // 1.5rem (24px)
+<p className="text-base">     // 1rem (16px)
+<span className="text-sm">    // 0.875rem (14px)
+
+// Weight
+<p className="font-light">    // 300
+<p className="font-normal">   // 400
+<p className="font-medium">   // 500
+<p className="font-semibold"> // 600
+<p className="font-bold">     // 700
+
+// Color
+<p className="text-gray-900"> // Almost black
+<p className="text-gray-600"> // Medium gray
+<p className="text-gray-400"> // Light gray
+<p className="text-blue-500"> // Primary blue
+```
+
+## Best Practices
+
+1. **Mobile-First**: Design for mobile first, then add responsive classes
+2. **Consistent Spacing**: Use the spacing scale consistently
+3. **Color Palette**: Stick to a limited color palette (gray, blue, red, green, yellow)
+4. **Hover States**: Always provide hover feedback for interactive elements
+5. **Focus States**: Include focus styles for accessibility
+6. **Loading States**: Show loading indicators for async operations
+7. **Empty States**: Design empty states with helpful messages
+8. **Error States**: Style error messages clearly in red
+9. **Transitions**: Add smooth transitions for state changes
+10. **Z-Index**: Use a consistent z-index scale
+
+## Component Styling Checklist
+
+When styling a component:
+- [ ] Mobile responsive (tested on small screens)
+- [ ] Dark mode support (if theme-aware)
+- [ ] Hover states for interactive elements
+- [ ] Focus states for keyboard navigation
+- [ ] Loading state (if async)
+- [ ] Error state (if can fail)
+- [ ] Empty state (if shows lists)
+- [ ] Disabled state (if can be disabled)
+- [ ] Smooth transitions
+- [ ] Accessible contrast ratios

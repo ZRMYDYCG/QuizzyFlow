@@ -1,0 +1,620 @@
+---
+globs: **/*.ts,**/*.tsx
+description: TypeScript best practices and conventions
+---
+
+# TypeScript Best Practices
+
+## Type Definitions
+
+### Interface vs Type
+
+**Prefer interfaces for object shapes**:
+```typescript
+// ✅ Good - Use interface for objects
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+// ✅ Good - Use type for unions/intersections
+type Status = 'pending' | 'active' | 'inactive'
+type UserWithRole = User & { role: string }
+
+// ❌ Bad - Don't use type for simple objects when interface works
+type User = {
+  id: string
+  name: string
+}
+```
+
+### Naming Conventions
+
+```typescript
+// Interfaces: PascalCase with descriptive names
+interface UserProfile { }
+interface QuestionComponentProps { }
+
+// Types: PascalCase, often ending in Type
+type ComponentType = 'input' | 'radio' | 'checkbox'
+type QuestionStateType = { }
+
+// Enums: PascalCase
+enum UserRole {
+  Admin = 'admin',
+  User = 'user',
+}
+
+// Generic type parameters: Single uppercase letter or descriptive
+function map<T>(array: T[]): T[] { }
+function transform<TInput, TOutput>(input: TInput): TOutput { }
+```
+
+## Function Types
+
+### Function Declarations
+
+```typescript
+// ✅ Good - Explicit return types
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0)
+}
+
+// ✅ Good - Arrow function with types
+const formatName = (first: string, last: string): string => {
+  return `${first} ${last}`
+}
+
+// ✅ Good - Async function
+async function fetchUser(id: string): Promise<User> {
+  const response = await api.get(`/users/${id}`)
+  return response.data
+}
+
+// ❌ Bad - No return type (inference is OK for simple cases, but explicit is better)
+function calculateTotal(items: Item[]) {
+  return items.reduce((sum, item) => sum + item.price, 0)
+}
+```
+
+### React Component Types
+
+```typescript
+import type { FC, ReactNode, MouseEvent } from 'react'
+
+// ✅ Good - Use FC type
+interface ButtonProps {
+  children: ReactNode
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void
+  disabled?: boolean
+  variant?: 'primary' | 'secondary'
+}
+
+const Button: FC<ButtonProps> = ({ 
+  children, 
+  onClick, 
+  disabled = false,
+  variant = 'primary' 
+}) => {
+  return (
+    <button 
+      onClick={onClick} 
+      disabled={disabled}
+      className={variant}
+    >
+      {children}
+    </button>
+  )
+}
+
+export default Button
+```
+
+### Event Handlers
+
+```typescript
+import type { 
+  ChangeEvent, 
+  MouseEvent, 
+  KeyboardEvent,
+  FormEvent 
+} from 'react'
+
+// Input change
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  console.log(e.target.value)
+}
+
+// Button click
+const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault()
+  console.log('clicked')
+}
+
+// Keyboard press
+const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'Enter') {
+    handleSubmit()
+  }
+}
+
+// Form submit
+const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
+  // Handle form
+}
+```
+
+## Generics
+
+### Generic Functions
+
+```typescript
+// ✅ Good - Generic array function
+function first<T>(array: T[]): T | undefined {
+  return array[0]
+}
+
+// ✅ Good - Multiple type parameters
+function map<TInput, TOutput>(
+  array: TInput[],
+  fn: (item: TInput) => TOutput
+): TOutput[] {
+  return array.map(fn)
+}
+
+// ✅ Good - Constrained generics
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key]
+}
+```
+
+### Generic Components
+
+```typescript
+interface SelectProps<T> {
+  options: T[]
+  value: T
+  onChange: (value: T) => void
+  renderOption: (option: T) => ReactNode
+}
+
+function Select<T>({ 
+  options, 
+  value, 
+  onChange, 
+  renderOption 
+}: SelectProps<T>): JSX.Element {
+  return (
+    <select value={String(value)} onChange={(e) => {
+      const selected = options[Number(e.target.value)]
+      onChange(selected)
+    }}>
+      {options.map((option, index) => (
+        <option key={index} value={index}>
+          {renderOption(option)}
+        </option>
+      ))}
+    </select>
+  )
+}
+```
+
+## Utility Types
+
+### Built-in Utility Types
+
+```typescript
+interface User {
+  id: string
+  name: string
+  email: string
+  password: string
+}
+
+// Partial - Make all properties optional
+type PartialUser = Partial<User>
+// { id?: string; name?: string; email?: string; password?: string }
+
+// Required - Make all properties required
+type RequiredUser = Required<PartialUser>
+
+// Pick - Select specific properties
+type UserCredentials = Pick<User, 'email' | 'password'>
+// { email: string; password: string }
+
+// Omit - Exclude specific properties
+type PublicUser = Omit<User, 'password'>
+// { id: string; name: string; email: string }
+
+// Record - Create object type with specific keys
+type UserRoles = Record<string, 'admin' | 'user'>
+// { [key: string]: 'admin' | 'user' }
+
+// ReturnType - Extract return type of function
+type FetchUserReturn = ReturnType<typeof fetchUser>
+
+// Parameters - Extract parameter types
+type FetchUserParams = Parameters<typeof fetchUser>
+```
+
+### Custom Utility Types
+
+```typescript
+// Deep Partial
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
+// Nullable
+type Nullable<T> = T | null
+
+// Optional
+type Optional<T> = T | undefined
+
+// ValueOf - Get all value types
+type ValueOf<T> = T[keyof T]
+```
+
+## Type Guards
+
+### Type Narrowing
+
+```typescript
+// typeof guard
+function processValue(value: string | number) {
+  if (typeof value === 'string') {
+    return value.toUpperCase() // TypeScript knows it's string
+  }
+  return value.toFixed(2) // TypeScript knows it's number
+}
+
+// instanceof guard
+class Dog {
+  bark() { }
+}
+class Cat {
+  meow() { }
+}
+
+function makeSound(animal: Dog | Cat) {
+  if (animal instanceof Dog) {
+    animal.bark()
+  } else {
+    animal.meow()
+  }
+}
+
+// in operator
+interface Car {
+  drive: () => void
+}
+interface Boat {
+  sail: () => void
+}
+
+function move(vehicle: Car | Boat) {
+  if ('drive' in vehicle) {
+    vehicle.drive()
+  } else {
+    vehicle.sail()
+  }
+}
+```
+
+### Custom Type Guards
+
+```typescript
+interface User {
+  type: 'user'
+  name: string
+}
+
+interface Admin {
+  type: 'admin'
+  name: string
+  permissions: string[]
+}
+
+// Type predicate
+function isAdmin(user: User | Admin): user is Admin {
+  return user.type === 'admin'
+}
+
+// Usage
+function greet(user: User | Admin) {
+  if (isAdmin(user)) {
+    console.log(`Admin ${user.name} with ${user.permissions.length} permissions`)
+  } else {
+    console.log(`User ${user.name}`)
+  }
+}
+```
+
+## Discriminated Unions
+
+### Pattern for Type Safety
+
+```typescript
+// ✅ Good - Discriminated union with type field
+type LoadingState = {
+  status: 'loading'
+}
+
+type SuccessState = {
+  status: 'success'
+  data: any
+}
+
+type ErrorState = {
+  status: 'error'
+  error: string
+}
+
+type State = LoadingState | SuccessState | ErrorState
+
+// Usage with exhaustive checking
+function renderState(state: State) {
+  switch (state.status) {
+    case 'loading':
+      return <Spinner />
+    case 'success':
+      return <Data data={state.data} />
+    case 'error':
+      return <Error message={state.error} />
+    default:
+      // TypeScript ensures all cases are handled
+      const _exhaustive: never = state
+      return _exhaustive
+  }
+}
+```
+
+## Redux Typing
+
+### Typed Selectors
+
+```typescript
+import type { stateType } from '@/store'
+import { useSelector, useDispatch } from 'react-redux'
+
+// ✅ Good - Typed selector
+const user = useSelector((state: stateType) => state.user)
+
+// ✅ Good - Create typed hooks
+export const useAppSelector = <T>(selector: (state: stateType) => T): T => {
+  return useSelector(selector)
+}
+
+export const useAppDispatch = () => useDispatch()
+```
+
+### Action Types
+
+```typescript
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
+interface Todo {
+  id: string
+  text: string
+  completed: boolean
+}
+
+interface TodoState {
+  todos: Todo[]
+  filter: 'all' | 'active' | 'completed'
+}
+
+const todoSlice = createSlice({
+  name: 'todos',
+  initialState: { todos: [], filter: 'all' } as TodoState,
+  reducers: {
+    // ✅ Good - Typed payload
+    addTodo: (state, action: PayloadAction<string>) => {
+      state.todos.push({
+        id: nanoid(),
+        text: action.payload,
+        completed: false
+      })
+    },
+    // ✅ Good - Object payload
+    toggleTodo: (state, action: PayloadAction<{ id: string }>) => {
+      const todo = state.todos.find(t => t.id === action.payload.id)
+      if (todo) {
+        todo.completed = !todo.completed
+      }
+    },
+    // ✅ Good - No payload
+    clearCompleted: (state) => {
+      state.todos = state.todos.filter(t => !t.completed)
+    }
+  }
+})
+```
+
+## Async/Promise Types
+
+### Promise Handling
+
+```typescript
+// ✅ Good - Explicit Promise type
+async function fetchUser(id: string): Promise<User> {
+  const response = await fetch(`/api/users/${id}`)
+  const data = await response.json()
+  return data as User
+}
+
+// ✅ Good - Error handling
+async function fetchUserSafe(id: string): Promise<User | null> {
+  try {
+    return await fetchUser(id)
+  } catch (error) {
+    console.error('Failed to fetch user:', error)
+    return null
+  }
+}
+
+// ✅ Good - Multiple async operations
+async function loadUserData(id: string): Promise<{
+  user: User
+  posts: Post[]
+  comments: Comment[]
+}> {
+  const [user, posts, comments] = await Promise.all([
+    fetchUser(id),
+    fetchUserPosts(id),
+    fetchUserComments(id)
+  ])
+  
+  return { user, posts, comments }
+}
+```
+
+## Strict Null Checks
+
+### Handling null/undefined
+
+```typescript
+// ✅ Good - Use optional chaining
+const userName = user?.profile?.name
+
+// ✅ Good - Use nullish coalescing
+const displayName = user?.name ?? 'Anonymous'
+
+// ✅ Good - Type guard
+function processUser(user: User | null) {
+  if (!user) {
+    return 'No user'
+  }
+  return user.name // TypeScript knows user is not null
+}
+
+// ✅ Good - Non-null assertion (use sparingly)
+const element = document.getElementById('root')!
+```
+
+## Common Patterns
+
+### API Response Type
+
+```typescript
+interface ApiResponse<T> {
+  code: number
+  data: T
+  message: string
+}
+
+interface ApiError {
+  code: number
+  message: string
+  errors?: Record<string, string[]>
+}
+
+// Usage
+async function fetchQuestions(): Promise<ApiResponse<Question[]>> {
+  const response = await axios.get('/api/questions')
+  return response.data
+}
+```
+
+### Component Props with Children
+
+```typescript
+import type { FC, ReactNode, PropsWithChildren } from 'react'
+
+// Option 1: Explicit children
+interface ContainerProps {
+  children: ReactNode
+  className?: string
+}
+
+// Option 2: PropsWithChildren utility
+interface ContainerProps {
+  className?: string
+}
+
+const Container: FC<PropsWithChildren<ContainerProps>> = ({ 
+  children, 
+  className 
+}) => {
+  return <div className={className}>{children}</div>
+}
+```
+
+### Form State
+
+```typescript
+interface FormData {
+  username: string
+  email: string
+  password: string
+}
+
+interface FormErrors {
+  username?: string
+  email?: string
+  password?: string
+}
+
+interface FormState {
+  data: FormData
+  errors: FormErrors
+  isSubmitting: boolean
+  isValid: boolean
+}
+```
+
+## Best Practices
+
+1. **Enable strict mode** in `tsconfig.json`:
+   ```json
+   {
+     "compilerOptions": {
+       "strict": true,
+       "noImplicitAny": true,
+       "strictNullChecks": true
+     }
+   }
+   ```
+
+2. **Avoid `any`**: Use `unknown` instead when type is truly unknown
+3. **Use type assertions sparingly**: Prefer type guards
+4. **Prefer `interface` over `type`** for object shapes
+5. **Export types**: Make types available for reuse
+6. **Use `readonly`**: For immutable data
+7. **Document complex types**: Add JSDoc comments
+8. **Type imports**: Use `import type` for type-only imports
+9. **Avoid type duplication**: Create reusable type definitions
+10. **Use discriminated unions**: For state machines and variants
+
+## Common Mistakes to Avoid
+
+```typescript
+// ❌ Bad - Using any
+function processData(data: any) { }
+
+// ✅ Good - Use proper types or unknown
+function processData(data: unknown) { }
+
+// ❌ Bad - Optional with null
+interface User {
+  name?: string | null
+}
+
+// ✅ Good - Choose one
+interface User {
+  name?: string  // or
+  name: string | null
+}
+
+// ❌ Bad - Type assertion without validation
+const user = data as User
+
+// ✅ Good - Validate before asserting
+function isUser(data: unknown): data is User {
+  return typeof data === 'object' && data !== null && 'name' in data
+}
+
+const user = isUser(data) ? data : null
+```

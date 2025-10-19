@@ -1,0 +1,518 @@
+---
+description: Testing strategies and best practices
+---
+
+# Testing Guide for QuizzyFlow
+
+## Testing Philosophy
+
+While QuizzyFlow doesn't currently have extensive tests, this guide outlines testing best practices for when tests are added.
+
+## Testing Stack Recommendations
+
+### Frontend Testing
+- **Unit Testing**: Vitest (compatible with Vite)
+- **Component Testing**: React Testing Library
+- **E2E Testing**: Playwright or Cypress
+- **Mocking**: MSW (Mock Service Worker)
+
+### Backend Testing
+- **Unit Testing**: Jest (already configured in NestJS)
+- **E2E Testing**: Supertest (already available)
+- **Database**: MongoDB Memory Server for testing
+
+## Frontend Testing Patterns
+
+### Component Testing
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import Button from '@/components/material/question-button'
+
+describe('QuestionButton', () => {
+  it('renders with correct text', () => {
+    render(<Button label="Click me" />)
+    expect(screen.getByText('Click me')).toBeInTheDocument()
+  })
+  
+  it('calls onClick when clicked', () => {
+    const handleClick = vi.fn()
+    render(<Button label="Click me" onClick={handleClick} />)
+    
+    fireEvent.click(screen.getByText('Click me'))
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+  
+  it('is disabled when disabled prop is true', () => {
+    render(<Button label="Click me" disabled />)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+  })
+})
+```
+
+### Testing with Redux
+
+```typescript
+import { render, screen } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { configureStore } from '@reduxjs/toolkit'
+import EditCanvas from '@/components/material/edit-canvas'
+import questionReducer from '@/store/modules/question-component'
+
+const renderWithRedux = (
+  component: React.ReactElement,
+  initialState = {}
+) => {
+  const store = configureStore({
+    reducer: {
+      questionComponent: questionReducer,
+    },
+    preloadedState: initialState,
+  })
+  
+  return render(<Provider store={store}>{component}</Provider>)
+}
+
+describe('EditCanvas', () => {
+  it('renders component list', () => {
+    const initialState = {
+      questionComponent: {
+        present: {
+          componentList: [
+            { fe_id: '1', type: 'input', title: 'Input 1' },
+            { fe_id: '2', type: 'radio', title: 'Radio 1' },
+          ],
+          selectedId: '',
+          copiedComponent: null,
+        },
+      },
+    }
+    
+    renderWithRedux(<EditCanvas />, initialState)
+    expect(screen.getByText('Input 1')).toBeInTheDocument()
+    expect(screen.getByText('Radio 1')).toBeInTheDocument()
+  })
+})
+```
+
+### Testing Hooks
+
+```typescript
+import { renderHook, act } from '@testing-library/react'
+import { useToggle } from '@/hooks/useToggle'
+
+describe('useToggle', () => {
+  it('should toggle value', () => {
+    const { result } = renderHook(() => useToggle(false))
+    
+    expect(result.current[0]).toBe(false)
+    
+    act(() => {
+      result.current[1]() // Call toggle function
+    })
+    
+    expect(result.current[0]).toBe(true)
+  })
+})
+```
+
+### Testing API Calls
+
+```typescript
+import { render, screen, waitFor } from '@testing-library/react'
+import { setupServer } from 'msw/node'
+import { rest } from 'msw'
+import QuestionList from '@/pages/manage/list'
+
+// Setup MSW server
+const server = setupServer(
+  rest.get('/api/question', (req, res, ctx) => {
+    return res(
+      ctx.json({
+        list: [
+          { _id: '1', title: 'Question 1' },
+          { _id: '2', title: 'Question 2' },
+        ],
+        total: 2,
+      })
+    )
+  })
+)
+
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
+describe('QuestionList', () => {
+  it('loads and displays questions', async () => {
+    render(<QuestionList />)
+    
+    // Wait for questions to load
+    await waitFor(() => {
+      expect(screen.getByText('Question 1')).toBeInTheDocument()
+      expect(screen.getByText('Question 2')).toBeInTheDocument()
+    })
+  })
+  
+  it('handles error state', async () => {
+    server.use(
+      rest.get('/api/question', (req, res, ctx) => {
+        return res(ctx.status(500))
+      })
+    )
+    
+    render(<QuestionList />)
+    
+    await waitFor(() => {
+      expect(screen.getByText(/error/i)).toBeInTheDocument()
+    })
+  })
+})
+```
+
+### Testing Forms
+
+```typescript
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import LoginForm from '@/pages/login'
+
+describe('LoginForm', () => {
+  it('submits form with valid data', async () => {
+    const user = userEvent.setup()
+    const handleSubmit = vi.fn()
+    
+    render(<LoginForm onSubmit={handleSubmit} />)
+    
+    // Fill form
+    await user.type(screen.getByLabelText(/email/i), 'test@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'password123')
+    
+    // Submit
+    await user.click(screen.getByRole('button', { name: /login/i }))
+    
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      })
+    })
+  })
+  
+  it('shows validation errors', async () => {
+    const user = userEvent.setup()
+    render(<LoginForm />)
+    
+    // Submit without filling
+    await user.click(screen.getByRole('button', { name: /login/i }))
+    
+    expect(screen.getByText(/email is required/i)).toBeInTheDocument()
+    expect(screen.getByText(/password is required/i)).toBeInTheDocument()
+  })
+})
+```
+
+## Backend Testing Patterns
+
+### Unit Testing Services
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing'
+import { QuestionService } from './question.service'
+import { getModelToken } from '@nestjs/mongoose'
+import { Question } from './schemas/question.schema'
+
+describe('QuestionService', () => {
+  let service: QuestionService
+  let mockQuestionModel: any
+  
+  beforeEach(async () => {
+    mockQuestionModel = {
+      find: jest.fn(),
+      findById: jest.fn(),
+      create: jest.fn(),
+      findByIdAndUpdate: jest.fn(),
+      findByIdAndDelete: jest.fn(),
+    }
+    
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        QuestionService,
+        {
+          provide: getModelToken(Question.name),
+          useValue: mockQuestionModel,
+        },
+      ],
+    }).compile()
+    
+    service = module.get<QuestionService>(QuestionService)
+  })
+  
+  it('should find all questions', async () => {
+    const questions = [
+      { _id: '1', title: 'Question 1' },
+      { _id: '2', title: 'Question 2' },
+    ]
+    
+    mockQuestionModel.find.mockReturnValue({
+      exec: jest.fn().mockResolvedValue(questions),
+    })
+    
+    const result = await service.findAll()
+    expect(result).toEqual(questions)
+    expect(mockQuestionModel.find).toHaveBeenCalled()
+  })
+  
+  it('should find one question by id', async () => {
+    const question = { _id: '1', title: 'Question 1' }
+    
+    mockQuestionModel.findById.mockReturnValue({
+      exec: jest.fn().mockResolvedValue(question),
+    })
+    
+    const result = await service.findOne('1')
+    expect(result).toEqual(question)
+    expect(mockQuestionModel.findById).toHaveBeenCalledWith('1')
+  })
+})
+```
+
+### E2E Testing Controllers
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing'
+import { INestApplication } from '@nestjs/common'
+import * as request from 'supertest'
+import { AppModule } from './../src/app.module'
+
+describe('QuestionController (e2e)', () => {
+  let app: INestApplication
+  let authToken: string
+  
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile()
+    
+    app = moduleFixture.createNestApplication()
+    await app.init()
+    
+    // Login to get token
+    const loginResponse = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username: 'test', password: 'test123' })
+    
+    authToken = loginResponse.body.access_token
+  })
+  
+  afterAll(async () => {
+    await app.close()
+  })
+  
+  it('/api/question (GET) - should return questions', () => {
+    return request(app.getHttpServer())
+      .get('/api/question')
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.data).toBeInstanceOf(Array)
+      })
+  })
+  
+  it('/api/question (POST) - should create question', () => {
+    return request(app.getHttpServer())
+      .post('/api/question')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        title: 'New Question',
+        description: 'Test description',
+      })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.data.title).toBe('New Question')
+      })
+  })
+  
+  it('/api/question/:id (GET) - should return single question', async () => {
+    // First create a question
+    const createRes = await request(app.getHttpServer())
+      .post('/api/question')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({ title: 'Test' })
+    
+    const questionId = createRes.body.data._id
+    
+    // Then fetch it
+    return request(app.getHttpServer())
+      .get(`/api/question/${questionId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.data._id).toBe(questionId)
+      })
+  })
+})
+```
+
+## Integration Testing
+
+### Testing Redux Store Integration
+
+```typescript
+import { configureStore } from '@reduxjs/toolkit'
+import questionReducer, {
+  addComponent,
+  deleteSelectedComponent,
+  changeSelectedId,
+} from '@/store/modules/question-component'
+import undoable from 'redux-undo'
+
+describe('Question Component Store', () => {
+  let store: any
+  
+  beforeEach(() => {
+    store = configureStore({
+      reducer: {
+        questionComponent: undoable(questionReducer, { limit: 20 }),
+      },
+    })
+  })
+  
+  it('should add component', () => {
+    const component = {
+      fe_id: '1',
+      type: 'input',
+      title: 'Input',
+      props: {},
+    }
+    
+    store.dispatch(addComponent(component))
+    
+    const state = store.getState().questionComponent.present
+    expect(state.componentList).toHaveLength(1)
+    expect(state.componentList[0]).toEqual(component)
+  })
+  
+  it('should support undo/redo', () => {
+    const component = {
+      fe_id: '1',
+      type: 'input',
+      title: 'Input',
+      props: {},
+    }
+    
+    store.dispatch(addComponent(component))
+    expect(store.getState().questionComponent.present.componentList).toHaveLength(1)
+    
+    store.dispatch(ActionCreators.undo())
+    expect(store.getState().questionComponent.present.componentList).toHaveLength(0)
+    
+    store.dispatch(ActionCreators.redo())
+    expect(store.getState().questionComponent.present.componentList).toHaveLength(1)
+  })
+})
+```
+
+## Snapshot Testing
+
+```typescript
+import { render } from '@testing-library/react'
+import QuestionInput from '@/components/material/question-input'
+
+describe('QuestionInput snapshots', () => {
+  it('matches snapshot with default props', () => {
+    const { container } = render(<QuestionInput />)
+    expect(container).toMatchSnapshot()
+  })
+  
+  it('matches snapshot with custom props', () => {
+    const { container } = render(
+      <QuestionInput 
+        title="Custom Title"
+        placeholder="Enter text"
+        required
+      />
+    )
+    expect(container).toMatchSnapshot()
+  })
+})
+```
+
+## Best Practices
+
+1. **Test Behavior, Not Implementation**: Focus on what the component does, not how
+2. **Use Testing Library Queries**: Prefer `getByRole`, `getByLabelText` over `getByTestId`
+3. **Mock External Dependencies**: Mock API calls, external libraries
+4. **Test User Interactions**: Test clicks, form inputs, keyboard events
+5. **Test Error States**: Don't just test happy paths
+6. **Test Loading States**: Verify loading indicators appear
+7. **Avoid Over-Mocking**: Only mock what's necessary
+8. **Keep Tests Simple**: One assertion per test when possible
+9. **Use Descriptive Test Names**: "should do X when Y"
+10. **Clean Up**: Reset mocks, close connections after tests
+
+## Test Organization
+
+### File Structure
+```
+src/
+├── components/
+│   └── material/
+│       └── question-input/
+│           ├── index.tsx
+│           └── index.test.tsx       # Component test
+├── hooks/
+│   ├── useToggle.ts
+│   └── useToggle.test.ts           # Hook test
+├── store/
+│   └── modules/
+│       ├── user.ts
+│       └── user.test.ts            # Store test
+└── utils/
+    ├── validation.ts
+    └── validation.test.ts          # Utility test
+
+server/
+└── src/
+    └── question/
+        ├── question.service.ts
+        ├── question.service.spec.ts    # Unit test
+        ├── question.controller.ts
+        └── question.controller.spec.ts  # Unit test
+```
+
+## Coverage Goals
+
+Aim for:
+- **Critical paths**: 100% coverage
+- **Business logic**: 90%+ coverage
+- **UI components**: 80%+ coverage
+- **Utilities**: 95%+ coverage
+
+## Running Tests
+
+```bash
+# Frontend (when configured)
+npm run test              # Run all tests
+npm run test:watch        # Watch mode
+npm run test:coverage     # With coverage report
+
+# Backend
+cd server
+npm run test              # Unit tests
+npm run test:e2e          # E2E tests
+npm run test:cov          # With coverage
+```
+
+## Future Testing Improvements
+
+1. Set up Vitest for frontend unit tests
+2. Add React Testing Library
+3. Configure MSW for API mocking
+4. Set up Playwright for E2E tests
+5. Add visual regression testing
+6. Implement CI/CD testing pipeline
+7. Add performance testing
+8. Set up test coverage thresholds

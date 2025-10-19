@@ -1,0 +1,130 @@
+---
+alwaysApply: true
+---
+
+# QuizzyFlow Project Architecture
+
+## Overview
+QuizzyFlow is a quiz/survey builder application with a React frontend and NestJS backend. The project uses a monorepo structure with clear separation between client, server, and mock API.
+
+## Project Structure
+
+### Frontend (React + TypeScript + Vite)
+- **Entry Point**: [src/main.tsx](mdc:src/main.tsx)
+- **App Root**: [src/App.tsx](mdc:src/App.tsx)
+- **Router Configuration**: [src/router/index.tsx](mdc:src/router/index.tsx)
+- **Redux Store**: [src/store/index.ts](mdc:src/store/index.ts)
+
+### Backend (NestJS + MongoDB)
+- **Entry Point**: [server/src/main.ts](mdc:server/src/main.ts)
+- **App Module**: [server/src/app.module.ts](mdc:server/src/app.module.ts)
+- Located in the `server/` directory
+
+### Mock API (Development)
+- **Entry Point**: [mock/index.js](mdc:mock/index.js)
+- **Core Modules**: [mock/core/index.js](mdc:mock/core/index.js)
+- Used for local development without backend
+
+## Technology Stack
+
+### Frontend Core
+- **Framework**: React 18.3+ with TypeScript
+- **Build Tool**: Vite 6.0+
+- **Router**: React Router DOM v7
+- **State Management**: Redux Toolkit with Redux Undo
+- **Styling**: TailwindCSS + Ant Design 5
+- **UI Components**: Radix UI primitives
+- **Drag & Drop**: @dnd-kit
+- **Canvas**: react-zoom-pan-pinch with custom rulers
+
+### Backend Core
+- **Framework**: NestJS 10
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (@nestjs/jwt)
+- **Validation**: Class-validator patterns
+
+## Key Features
+
+### 1. Question/Survey Editor
+- Canvas-based drag-and-drop interface
+- 60+ reusable material components (see [src/components/material](mdc:src/components/material))
+- Undo/redo functionality (redux-undo, limit: 20 actions)
+- Real-time component property editing
+
+### 2. State Management Modules
+As defined in [src/store/index.ts](mdc:src/store/index.ts):
+- **user**: User authentication and profile
+- **questionComponent**: Question components with undo/redo (excludes selection changes)
+- **pageInfo**: Question/survey metadata
+- **editorLayout**: Editor UI layout state
+- **canvasConfig**: Canvas viewport and zoom settings
+
+### 3. Routing Structure
+Three main layout contexts:
+- **HomeLayout**: Public pages (/, /login, /register, /terms, /privacy)
+- **ManageLayout**: Question management (/manage/list, /manage/star, /manage/trash)
+- **QuestionLayout**: Question editing (/question/edit/:id, /question/statistics/:id, /question/publish/:id)
+
+## Directory Conventions
+
+### Component Structure
+```
+src/components/
+  ├── material/              # 60+ reusable question components
+  │   ├── question-input/    # Each component has its own folder
+  │   │   ├── index.ts       # Exports
+  │   │   ├── index.tsx      # Main component
+  │   │   ├── interface.ts   # TypeScript interfaces
+  │   │   └── input-props.tsx # Property editor component
+  ├── canvas/                # Canvas-related utilities
+  ├── drag-sort/             # Drag & drop components
+  └── [other shared components]
+```
+
+### Page Structure
+```
+src/pages/
+  └── [feature]/
+      ├── index.tsx          # Main page component
+      ├── components/        # Page-specific components
+      ├── hooks/             # Page-specific hooks
+      └── types/             # Page-specific types
+```
+
+### Store Modules
+```
+src/store/modules/
+  └── [module-name].ts       # Slice with actions & reducers
+```
+
+## API Structure
+
+### Frontend API Layer
+- **Location**: [src/api](mdc:src/api)
+- **Pattern**: Organized by domain (user, question, statistics)
+- **HTTP Client**: Axios
+
+### Backend API Modules
+- **Location**: [server/src](mdc:server/src)
+- **Modules**: user, question, answer, stat, auth
+- **Pattern**: Each module has controller, service, schemas, and DTOs
+
+## Build & Development
+
+### Frontend Commands
+- `npm run dev` - Start Vite dev server
+- `npm run build` - Production build
+- `npm run preview` - Preview production build
+
+### Backend Commands
+- `npm run start:dev` - Start NestJS in watch mode
+- `npm run build` - Build NestJS app
+- `npm run start:prod` - Run production build
+
+## Important Notes
+
+1. **Path Aliases**: Use `@/` prefix for imports (resolves to `src/`)
+2. **Component IDs**: Generated using `nanoid` for uniqueness
+3. **Undo/Redo**: Excludes certain actions (resetComponents, changeSelectedId, selectPrevComponent, selectNextComponent)
+4. **Theming**: Custom theme context with dark mode support
+5. **Canvas System**: Custom implementation with rulers, grid, and zoom controls
