@@ -1,0 +1,510 @@
+---
+globs: src/api/**/*.ts,src/hooks/useLoad*.ts
+description: API integration patterns and data fetching
+---
+
+# API Integration Guide
+
+## API Structure
+
+API functions are organized in [src/api](mdc:src/api) by domain:
+
+```
+src/api/
+├── index.ts              # Axios instance configuration
+└── modules/
+    ├── user.ts          # User authentication APIs
+    ├── question.ts      # Question CRUD APIs
+    └── statistics.ts    # Statistics and analytics APIs
+```
+
+## Axios Configuration
+
+### Base Configuration
+
+Located in [src/api/index.ts](mdc:src/api/index.ts):
+
+```typescript
+import axios from 'axios'
+
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+  timeout: 10000,
+})
+
+// Request interceptor - Add auth token
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor - Handle errors
+instance.interceptors.response.use(
+  (response) => {
+    // Return only the data from response
+    return response.data
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      // Redirect to login on unauthorized
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+export default instance
+```
+
+## API Module Pattern
+
+### Creating an API Module
+
+```typescript
+// src/api/modules/question.ts
+import axios from '../index'
+
+export interface Question {
+  _id: string
+  title: string
+  description: string
+  componentList: any[]
+  isPublished: boolean
+  isStarred: boolean
+  isDeleted: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface QuestionListParams {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  isStarred?: boolean
+  isDeleted?: boolean
+}
+
+/**
+ * Get question list
+ */
+export const getQuestionList = async (
+  params: QuestionListParams = {}
+): Promise<{
+  list: Question[]
+  total: number
+}> => {
+  return axios.get('/api/question', { params })
+}
+
+/**
+ * Get single question by ID
+ */
+export const getQuestionById = async (id: string): Promise<Question> => {
+  return axios.get(`/api/question/${id}`)
+}
+
+/**
+ * Create new question
+ */
+export const createQuestion = async (
+  data: Partial<Question>
+): Promise<Question> => {
+  return axios.post('/api/question', data)
+}
+
+/**
+ * Update question
+ */
+export const updateQuestion = async (
+  id: string,
+  data: Partial<Question>
+): Promise<Question> => {
+  return axios.patch(`/api/question/${id}`, data)
+}
+
+/**
+ * Delete question (soft delete)
+ */
+export const deleteQuestion = async (id: string): Promise<void> => {
+  return axios.delete(`/api/question/${id}`)
+}
+
+/**
+ * Star/unstar question
+ */
+export const toggleStarQuestion = async (
+  id: string,
+  isStarred: boolean
+): Promise<Question> => {
+  return axios.patch(`/api/question/${id}`, { isStarred })
+}
+
+/**
+ * Duplicate question
+ */
+export const duplicateQuestion = async (id: string): Promise<Question> => {
+  return axios.post(`/api/question/${id}/duplicate`)
+}
+```
+
+## Data Fetching Hooks
+
+### Custom Hook Pattern
+
+Create custom hooks for data fetching to encapsulate API logic:
+
+```typescript
+// src/hooks/useLoadQuestionData.ts
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { getQuestionById } from '@/api/modules/question'
+import { resetComponents } from '@/store/modules/question-component'
+import { resetPageInfo } from '@/store/modules/pageinfo-reducer'
+import type { Question } from '@/api/modules/question'
+
+interface UseLoadQuestionDataResult {
+  loading: boolean
+  error: Error | null
+  data: Question | null
+}
+
+export const useLoadQuestionData = (): UseLoadQuestionDataResult => {
+  const { id } = useParams<{ id: string }>()
+  const dispatch = useDispatch()
+  
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [data, setData] = useState<Question | null>(null)
+  
+  useEffect(() => {
+    const loadData = async () => {
+      if (!id) return
+      
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const question = await getQuestionById(id)
+        setData(question)
+        
+        // Update Redux store
+        dispatch(resetComponents(question.componentList || []))
+        dispatch(resetPageInfo({
+          title: question.title,
+          desc: question.description,
+        }))
+        
+      } catch (err) {
+        console.error('Failed to load question:', err)
+        setError(err as Error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadData()
+  }, [id, dispatch])
+  
+  return { loading, error, data }
+}
+```
+
+### List Data Hook with Pagination
+
+```typescript
+// src/hooks/useLoadQuestionListData.ts
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { getQuestionList } from '@/api/modules/question'
+import type { Question } from '@/api/modules/question'
+
+interface UseLoadQuestionListDataResult {
+  loading: boolean
+  error: Error | null
+  data: Question[]
+  total: number
+  refresh: () => void
+}
+
+export const useLoadQuestionListData = (): UseLoadQuestionListDataResult => {
+  const [searchParams] = useSearchParams()
+  
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [data, setData] = useState<Question[]>([])
+  const [total, setTotal] = useState(0)
+  
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const params = {
+        page: Number(searchParams.get('page')) || 1,
+        pageSize: Number(searchParams.get('pageSize')) || 10,
+        keyword: searchParams.get('keyword') || undefined,
+        isStarred: searchParams.get('isStarred') === 'true',
+        isDeleted: searchParams.get('isDeleted') === 'true',
+      }
+      
+      const result = await getQuestionList(params)
+      setData(result.list)
+      setTotal(result.total)
+      
+    } catch (err) {
+      console.error('Failed to load question list:', err)
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  useEffect(() => {
+    loadData()
+  }, [searchParams])
+  
+  return { 
+    loading, 
+    error, 
+    data, 
+    total,
+    refresh: loadData 
+  }
+}
+```
+
+## Using ahooks for Data Fetching
+
+QuizzyFlow includes `ahooks` for common hook patterns:
+
+### useRequest Hook
+
+```typescript
+import { useRequest } from 'ahooks'
+import { getQuestionById } from '@/api/modules/question'
+
+const MyComponent: FC = () => {
+  const { data, loading, error, run } = useRequest(
+    () => getQuestionById(questionId),
+    {
+      manual: false, // Auto-run on mount
+      onSuccess: (data) => {
+        console.log('Loaded:', data)
+      },
+      onError: (error) => {
+        console.error('Failed:', error)
+      }
+    }
+  )
+  
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+  
+  return <div>{data?.title}</div>
+}
+```
+
+### useDebounce for Search
+
+```typescript
+import { useDebounce } from 'ahooks'
+import { useState, useEffect } from 'react'
+import { getQuestionList } from '@/api/modules/question'
+
+const SearchComponent: FC = () => {
+  const [keyword, setKeyword] = useState('')
+  const debouncedKeyword = useDebounce(keyword, { wait: 500 })
+  const [results, setResults] = useState([])
+  
+  useEffect(() => {
+    if (debouncedKeyword) {
+      getQuestionList({ keyword: debouncedKeyword })
+        .then(data => setResults(data.list))
+    }
+  }, [debouncedKeyword])
+  
+  return (
+    <input
+      value={keyword}
+      onChange={(e) => setKeyword(e.target.value)}
+      placeholder="Search..."
+    />
+  )
+}
+```
+
+## Error Handling
+
+### Component-Level Error Handling
+
+```typescript
+const MyComponent: FC = () => {
+  const [error, setError] = useState<string | null>(null)
+  
+  const handleSave = async () => {
+    try {
+      setError(null)
+      await updateQuestion(id, data)
+      message.success('Saved successfully')
+    } catch (err) {
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to save'
+      setError(errorMessage)
+      message.error(errorMessage)
+    }
+  }
+  
+  return (
+    <>
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      <button onClick={handleSave}>Save</button>
+    </>
+  )
+}
+```
+
+### Global Error Handling
+
+Handle common errors in axios interceptor:
+```typescript
+instance.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    // Network error
+    if (!error.response) {
+      message.error('Network error. Please check your connection.')
+      return Promise.reject(error)
+    }
+    
+    // Server errors
+    const { status, data } = error.response
+    
+    switch (status) {
+      case 401:
+        message.error('Unauthorized. Please login.')
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        break
+      case 403:
+        message.error('Access denied')
+        break
+      case 404:
+        message.error('Resource not found')
+        break
+      case 500:
+        message.error('Server error. Please try again later.')
+        break
+      default:
+        message.error(data?.message || 'An error occurred')
+    }
+    
+    return Promise.reject(error)
+  }
+)
+```
+
+## Loading States
+
+### Skeleton Loading
+
+```typescript
+import { Skeleton } from 'antd'
+
+const QuestionList: FC = () => {
+  const { loading, data } = useLoadQuestionListData()
+  
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} active paragraph={{ rows: 3 }} />
+        ))}
+      </div>
+    )
+  }
+  
+  return (
+    <div>
+      {data.map(question => (
+        <QuestionCard key={question._id} {...question} />
+      ))}
+    </div>
+  )
+}
+```
+
+### Spinner Loading
+
+```typescript
+import { Spin } from 'antd'
+
+const QuestionDetail: FC = () => {
+  const { loading, data } = useLoadQuestionData()
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spin size="large" tip="Loading question..." />
+      </div>
+    )
+  }
+  
+  return <div>{/* Content */}</div>
+}
+```
+
+## Optimistic Updates
+
+### Update UI Before API Response
+
+```typescript
+const handleToggleStar = async (id: string) => {
+  // Optimistically update UI
+  const question = data.find(q => q._id === id)
+  if (!question) return
+  
+  const newStarred = !question.isStarred
+  setData(prev => prev.map(q => 
+    q._id === id ? { ...q, isStarred: newStarred } : q
+  ))
+  
+  try {
+    // Make API call
+    await toggleStarQuestion(id, newStarred)
+  } catch (err) {
+    // Revert on error
+    setData(prev => prev.map(q => 
+      q._id === id ? { ...q, isStarred: !newStarred } : q
+    ))
+    message.error('Failed to update')
+  }
+}
+```
+
+## Best Practices
+
+1. **Type Safety**: Always define TypeScript interfaces for API responses
+2. **Error Handling**: Handle errors at both global and component level
+3. **Loading States**: Always show loading indicators for async operations
+4. **Caching**: Consider using React Query or SWR for advanced caching
+5. **Debouncing**: Debounce search and filter inputs
+6. **Optimistic Updates**: Update UI immediately for better UX
+7. **Cancel Requests**: Cancel pending requests on unmount
+8. **Retry Logic**: Implement retry for failed requests when appropriate
+9. **Token Management**: Store and refresh auth tokens securely
+10. **Environment Variables**: Use env variables for API URLs

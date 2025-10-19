@@ -1,258 +1,255 @@
 ---
-description: 组件开发规范和最佳实践
-globs: src/components/**,src/pages/**/*.tsx
+globs: src/components/material/**/*.ts,src/components/material/**/*.tsx
+description: Material component development patterns
 ---
 
-# 组件开发规范
+# Material Component Development Guide
 
-## 组件结构
+## Component Structure
 
-### 函数式组件模板
+Each material component in [src/components/material](mdc:src/components/material) follows a consistent structure:
+
+```
+question-[component-name]/
+├── index.ts              # Exports (component, interface, config)
+├── index.tsx             # Main component implementation
+├── interface.ts          # TypeScript interfaces and types
+└── [component]-props.tsx # Property editor component
+```
+
+## Component Implementation Pattern
+
+### 1. Interface Definition (interface.ts)
+
+Define the component's properties interface and configuration:
 
 ```typescript
-import React, { useState, useEffect } from 'react'
-import { Button } from 'antd'
-import { useDispatch, useSelector } from 'react-redux'
-
-interface MyComponentProps {
-  title: string
-  onSave?: (data: any) => void
-  className?: string
+export interface QuestionInputPropsType {
+  title?: string          // Display title
+  placeholder?: string    // Input placeholder
+  required?: boolean      // Is required field
+  // ... other props
 }
 
-const MyComponent: React.FC<MyComponentProps> = ({ 
-  title, 
-  onSave,
-  className = '' 
+export interface QuestionInputConfigType {
+  title: string           // Component type display name
+  type: string           // Unique component type identifier
+  props: QuestionInputPropsType  // Default props
+}
+
+export const QuestionInputDefaultProps: QuestionInputPropsType = {
+  title: 'Input Title',
+  placeholder: 'Please enter...',
+  required: false,
+}
+```
+
+### 2. Main Component (index.tsx)
+
+Implement the component that will be rendered in the canvas/preview:
+
+```typescript
+import type { FC } from 'react'
+import type { QuestionInputPropsType } from './interface'
+
+const QuestionInput: FC<QuestionInputPropsType> = (props) => {
+  const { title, placeholder, required } = { 
+    ...QuestionInputDefaultProps, 
+    ...props 
+  }
+  
+  return (
+    <div className="question-input">
+      <div className="title">
+        {required && <span className="required">*</span>}
+        {title}
+      </div>
+      <input 
+        placeholder={placeholder}
+        className="w-full p-2 border rounded"
+      />
+    </div>
+  )
+}
+
+export default QuestionInput
+```
+
+### 3. Props Editor ([component]-props.tsx)
+
+Create a property editor component for the right panel:
+
+```typescript
+import type { FC } from 'react'
+import { Input, Checkbox, Form } from 'antd'
+import type { QuestionInputPropsType } from './interface'
+
+interface PropsEditorProps {
+  props: QuestionInputPropsType
+  onChange: (newProps: QuestionInputPropsType) => void
+  disabled?: boolean
+}
+
+const QuestionInputProps: FC<PropsEditorProps> = ({ 
+  props, 
+  onChange, 
+  disabled 
 }) => {
-  const [loading, setLoading] = useState(false)
-  const dispatch = useDispatch()
-  
-  useEffect(() => {
-    // 副作用逻辑
-  }, [])
-  
-  const handleClick = () => {
-    // 事件处理
+  const handleChange = (key: string, value: any) => {
+    onChange({ ...props, [key]: value })
   }
   
   return (
-    <div className={`container ${className}`}>
-      <h1>{title}</h1>
-      <Button onClick={handleClick}>
-        点击
-      </Button>
-    </div>
-  )
-}
-
-export default MyComponent
-```
-
-## 样式规范
-
-### 1. Tailwind CSS 优先
-
-```tsx
-// ✅ 推荐: 使用 Tailwind
-<div className="flex items-center gap-4 p-6 bg-white rounded-lg shadow-md">
-  <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-    按钮
-  </button>
-</div>
-
-// ❌ 避免: 内联样式
-<div style={{ display: 'flex', padding: '24px' }}>
-```
-
-### 2. 主题适配
-
-使用 ThemeContext 支持深色/浅色主题：
-
-```typescript
-import { useTheme } from '@/contexts/ThemeContext'
-
-const MyComponent = () => {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-  
-  return (
-    <div className={`${
-      isDark ? 'bg-[#1a1a1f] text-white' : 'bg-white text-gray-900'
-    }`}>
-      内容
-    </div>
-  )
-}
-```
-
-### 3. 响应式设计
-
-使用 Tailwind 的响应式前缀：
-
-```tsx
-<div className="
-  w-full              // 移动端全宽
-  lg:w-[45%]          // 大屏幕 45%
-  px-6                // 水平内边距
-  lg:px-12            // 大屏幕更大内边距
-">
-```
-
-## 常用 Hooks
-
-### 1. 自定义 Hooks
-
-- `useLoadQuestionData` - 加载问卷数据
-- `useGetPageInfo` - 获取页面信息
-- `useGetComponentInfo` - 获取组件信息
-- `useNavPage` - 路由权限控制
-- `useLoadUserData` - 加载用户数据
-
-### 2. ahooks
-
-项目使用 ahooks 提供的 hooks：
-
-```typescript
-import { useRequest, useTitle } from 'ahooks'
-
-// API 请求
-const { run: fetchData, loading } = useRequest(
-  async () => await apiCall(),
-  {
-    manual: true,
-    onSuccess: (data) => {
-      // 成功回调
-    },
-    onError: (error) => {
-      // 错误处理
-    }
-  }
-)
-
-// 设置页面标题
-useTitle(`问卷编辑 - ${title}`)
-```
-
-## 表单开发
-
-### Ant Design Form
-
-```typescript
-import { Form, Input, Button, message } from 'antd'
-
-const MyForm = () => {
-  const [form] = Form.useForm()
-  
-  const onFinish = (values: any) => {
-    console.log('表单值:', values)
-  }
-  
-  return (
-    <Form
-      form={form}
-      name="myForm"
-      onFinish={onFinish}
-      layout="vertical"
-      requiredMark={false}
-    >
-      <Form.Item
-        name="username"
-        rules={[
-          { required: true, message: '请输入用户名' },
-          { min: 5, message: '至少5个字符' }
-        ]}
-      >
-        <Input placeholder="用户名" size="large" />
+    <Form layout="vertical">
+      <Form.Item label="Title">
+        <Input
+          value={props.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          disabled={disabled}
+        />
+      </Form.Item>
+      
+      <Form.Item label="Placeholder">
+        <Input
+          value={props.placeholder}
+          onChange={(e) => handleChange('placeholder', e.target.value)}
+          disabled={disabled}
+        />
       </Form.Item>
       
       <Form.Item>
-        <Button type="primary" htmlType="submit" block>
-          提交
-        </Button>
+        <Checkbox
+          checked={props.required}
+          onChange={(e) => handleChange('required', e.target.checked)}
+          disabled={disabled}
+        >
+          Required
+        </Checkbox>
       </Form.Item>
     </Form>
   )
 }
+
+export default QuestionInputProps
 ```
 
-## 性能优化
+### 4. Index Exports (index.ts)
 
-### 1. 避免不必要的重渲染
+Export all parts of the component:
 
 ```typescript
-import { memo, useCallback, useMemo } from 'react'
+import Component from './index'
+import PropsComponent from './input-props'
 
-// 使用 memo
-const MyComponent = memo(({ data }) => {
-  return <div>{data}</div>
-})
+export * from './interface'
 
-// 使用 useCallback
-const handleClick = useCallback(() => {
-  doSomething()
-}, [dependency])
-
-// 使用 useMemo
-const expensiveValue = useMemo(() => {
-  return computeExpensiveValue(a, b)
-}, [a, b])
+export default Component
+export { PropsComponent }
 ```
 
-### 2. 条件渲染
+## Component Registration
+
+### Adding to Material Components List
+
+After creating a new component, register it in [src/components/material/index.ts](mdc:src/components/material/index.ts):
 
 ```typescript
-// ✅ 推荐
-{showPanel && <Panel />}
-{loading ? <Spinner /> : <Content />}
+import QuestionInput, { 
+  PropsComponent as QuestionInputProps,
+  QuestionInputDefaultProps,
+  type QuestionInputPropsType 
+} from './question-input'
 
-// ❌ 避免
-{showPanel ? <Panel /> : null}
+export const componentConfigs = [
+  // ... other components
+  {
+    title: 'Input',
+    type: 'questionInput',
+    Component: QuestionInput,
+    PropsComponent: QuestionInputProps,
+    defaultProps: QuestionInputDefaultProps,
+  },
+]
 ```
 
-## 错误处理
+## Component Guidelines
 
+### Naming Conventions
+- **Component Folder**: `question-[name]` (kebab-case)
+- **Component Name**: `Question[Name]` (PascalCase)
+- **Props Type**: `Question[Name]PropsType`
+- **Config Type**: `Question[Name]ConfigType`
+- **Default Props**: `Question[Name]DefaultProps`
+
+### Props Best Practices
+
+1. **Always provide default props**: Every configurable property should have a sensible default
+2. **Keep props flat**: Avoid deeply nested prop objects
+3. **Use optional props**: Most props should be optional with defaults
+4. **Type everything**: Use proper TypeScript types for all props
+
+### Component Responsibilities
+
+1. **Rendering**: The main component (index.tsx) should only handle rendering
+2. **State**: Use local state for UI interactions, Redux for persisted data
+3. **Props**: Receive configuration through props, don't fetch data inside
+4. **Events**: Emit events to parent rather than handling side effects
+
+### Styling Guidelines
+
+1. **Use Tailwind**: Prefer Tailwind utility classes
+2. **Ant Design for Complex UI**: Use Ant Design components when appropriate
+3. **Responsive Design**: Ensure components work on mobile and desktop
+4. **Theme Support**: Respect the theme context for dark/light mode
+
+### Editor Component Guidelines
+
+The props editor component should:
+1. Provide intuitive controls for all configurable properties
+2. Group related properties logically
+3. Use appropriate input types (text, number, color, select, etc.)
+4. Show validation feedback immediately
+5. Be disabled when `disabled` prop is true
+
+### Common Props to Include
+
+Most components should support these standard props:
 ```typescript
-const MyComponent = () => {
-  const [error, setError] = useState<string | null>(null)
-  
-  const fetchData = async () => {
-    try {
-      const data = await apiCall()
-      // 处理数据
-    } catch (err) {
-      setError('加载失败，请重试')
-      message.error('加载失败')
-    }
-  }
-  
-  if (error) {
-    return <ErrorDisplay message={error} />
-  }
-  
-  return <div>正常内容</div>
+interface StandardProps {
+  title?: string          // Display title
+  required?: boolean      // Is field required
+  disabled?: boolean      // Is component disabled
+  hidden?: boolean        // Is component hidden
+  className?: string      // Additional CSS classes
 }
 ```
 
-## 命名规范
+## Example: Creating a New Component
 
-- **组件**: PascalCase - `MyComponent.tsx`
-- **函数**: camelCase - `handleClick`, `fetchData`
-- **常量**: UPPER_SNAKE_CASE - `API_BASE_URL`
-- **接口**: PascalCase + Interface 后缀 - `UserInfoInterface`
-- **类型**: PascalCase + Type 后缀 - `ComponentPropsType`
-- **CSS类**: kebab-case - `my-class-name`
+To create a new "Question Badge" component:
 
-## 文件组织
+1. Create folder: `src/components/material/question-badge/`
+2. Define interfaces in `interface.ts`
+3. Implement component in `index.tsx`
+4. Create props editor in `badge-props.tsx`
+5. Export in `index.ts`
+6. Register in `src/components/material/index.ts`
+7. Add to Redux store if needed
+8. Test in the canvas editor
 
-```
-ComponentName/
-├── index.tsx           # 主组件
-├── components/         # 子组件
-│   ├── SubComponent1.tsx
-│   └── SubComponent2.tsx
-├── hooks/              # 自定义 hooks
-│   └── useCustomHook.ts
-└── types/              # 类型定义
-    └── index.ts
-```
+## Drag & Drop Integration
+
+Components should work with the @dnd-kit system:
+- Provide a unique `id` prop (using nanoid)
+- Support the drag handle mechanism
+- Handle selection state
+- Support copy/paste operations
+
+## Undo/Redo Considerations
+
+Component prop changes should be:
+- Dispatched through Redux actions
+- Included in the undo/redo stack
+- Properly merged with existing state
+
+Note: Selection changes are excluded from undo/redo (see store configuration).
