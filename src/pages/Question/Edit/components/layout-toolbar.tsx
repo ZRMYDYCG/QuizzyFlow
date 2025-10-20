@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Dropdown, Tooltip, Divider, Space } from 'antd'
+import { Button, Tooltip, Divider, Space } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   EyeOutlined,
@@ -7,18 +7,14 @@ import {
   FullscreenOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  ZoomInOutlined,
-  ZoomOutOutlined,
   ReloadOutlined,
   ColumnWidthOutlined,
 } from '@ant-design/icons'
-import type { MenuProps } from 'antd'
 import { stateType } from '@/store'
 import {
   setViewMode,
   toggleLeftPanel,
   toggleRightPanel,
-  setCanvasScale,
   resetLayout,
   ViewMode,
 } from '@/store/modules/editor-layout'
@@ -31,7 +27,6 @@ const LayoutToolbar: React.FC = () => {
     viewMode,
     showLeftPanel,
     showRightPanel,
-    canvasScale,
   } = useSelector((state: stateType) => state.editorLayout)
 
   // 视图模式配置
@@ -41,35 +36,8 @@ const LayoutToolbar: React.FC = () => {
     preview: { icon: <EyeOutlined />, label: '预览', desc: '预览模式' },
   }
 
-  // 缩放预设选项
-  const scaleOptions: MenuProps['items'] = [
-    { key: '50', label: '50%' },
-    { key: '75', label: '75%' },
-    { key: '100', label: '100%' },
-    { key: '125', label: '125%' },
-    { key: '150', label: '150%' },
-    { type: 'divider' },
-    { key: 'fit', label: '自适应' },
-  ]
-
-  const handleScaleChange: MenuProps['onClick'] = ({ key }) => {
-    if (key === 'fit') {
-      dispatch(setCanvasScale(100))
-    } else {
-      dispatch(setCanvasScale(Number(key)))
-    }
-  }
-
   const handleViewModeChange = (mode: ViewMode) => {
     dispatch(setViewMode(mode))
-  }
-
-  const handleZoomIn = () => {
-    dispatch(setCanvasScale(Math.min(200, canvasScale + 10)))
-  }
-
-  const handleZoomOut = () => {
-    dispatch(setCanvasScale(Math.max(25, canvasScale - 10)))
   }
 
   const handleReset = () => {
@@ -130,38 +98,6 @@ const LayoutToolbar: React.FC = () => {
               }
               size="small"
               onClick={() => dispatch(toggleRightPanel())}
-            />
-          </Tooltip>
-        </Space>
-
-        {/* 缩放控制 */}
-        <Space size="small">
-          <Tooltip title="缩小">
-            <Button
-              type="text"
-              icon={<ZoomOutOutlined />}
-              size="small"
-              onClick={handleZoomOut}
-              disabled={canvasScale <= 25}
-            />
-          </Tooltip>
-
-          <Dropdown
-            menu={{ items: scaleOptions, onClick: handleScaleChange }}
-            trigger={['click']}
-          >
-            <Button type="text" size="small" className="min-w-[60px]">
-              {canvasScale}%
-            </Button>
-          </Dropdown>
-
-          <Tooltip title="放大">
-            <Button
-              type="text"
-              icon={<ZoomInOutlined />}
-              size="small"
-              onClick={handleZoomIn}
-              disabled={canvasScale >= 200}
             />
           </Tooltip>
         </Space>

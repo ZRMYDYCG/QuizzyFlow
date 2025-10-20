@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
+import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch'
 import { useDispatch, useSelector } from 'react-redux'
 import { setScale, setOffset } from '@/store/modules/canvas-config'
 import { stateType } from '@/store'
@@ -20,16 +21,37 @@ const EnhancedCanvasWrapper: React.FC<EnhancedCanvasWrapperProps> = ({
   const { theme } = useTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasContentRef = useRef<HTMLDivElement>(null)
+  const transformRef = useRef<ReactZoomPanPinchRef>(null)
   const { scale, showRuler } = useSelector(
     (state: stateType) => state.canvasConfig
   )
+  
+  const prevScaleRef = useRef<number>(scale)
 
   const isDark = theme === 'dark'
   
   // 空格键按下状态
-  const [isSpacePressed, setIsSpacePressed] = React.useState(false)
+  const [isSpacePressed, setIsSpacePressed] = useState(false)
   // 鼠标是否在画布内容区域
-  const [isOverCanvas, setIsOverCanvas] = React.useState(false)
+  const [isOverCanvas, setIsOverCanvas] = useState(false)
+
+  useEffect(() => {
+    if (transformRef.current && Math.abs(scale - prevScaleRef.current) > 0.001) {
+      const currentState = transformRef.current.instance.transformState
+      
+      if (Math.abs(currentState.scale - scale) > 0.001) {
+        transformRef.current.setTransform(
+          currentState.positionX,
+          currentState.positionY,
+          scale,
+          200,
+          'easeOut'
+        )
+      }
+      
+      prevScaleRef.current = scale
+    }
+  }, [scale])
 
   // 快捷键支持 + 空格键检测
   useEffect(() => {
@@ -88,6 +110,7 @@ const EnhancedCanvasWrapper: React.FC<EnhancedCanvasWrapperProps> = ({
           }}
         >
         <TransformWrapper
+          ref={transformRef}
           initialScale={scale}
           minScale={0.25}
           maxScale={2}
