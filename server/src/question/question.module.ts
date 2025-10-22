@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
 import { QuestionController } from './question.controller'
 import { QuestionService } from './question.service'
-import { MongooseModule } from '@nestjs/mongoose'
-import { QuestionSchema, Question } from './schemas/question.schema'
+import { Question, QuestionSchema } from './schemas/question.schema'
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { QuestionSchema, Question } from './schemas/question.schema'
     ]),
   ],
   controllers: [QuestionController],
-  exports: [QuestionService],
   providers: [QuestionService],
+  exports: [QuestionService],
 })
 export class QuestionModule {}
