@@ -1,43 +1,34 @@
-import React, { useState } from 'react'
-import { Form, Input, Button, message, Divider } from 'antd'
+import { type FC } from 'react'
+import { Form, Input, Button, message } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons'
+import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
 import { registerUser } from '@/api/modules/user'
 import { useRequest } from 'ahooks'
 
-const Register: React.FC = () => {
+const Register: FC = () => {
   const navigate = useNavigate()
   const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
 
-  const { run: register } = useRequest(
+  const { run: register, loading } = useRequest(
     async (values: any) => {
-      setLoading(true)
-      try {
-        const { username, password, nickname } = values
-        await registerUser({ username, password, nickname })
-      } finally {
-        setLoading(false)
-      }
+      const { username, password, nickname } = values
+      return await registerUser({ username, password, nickname })
     },
     {
       manual: true,
-      onSuccess: async () => {
-        message.success('注册成功，请登录')
+      onSuccess: async (userInfo) => {
+        message.success('注册成功！请登录')
+        // 注册成功后跳转到登录页
         navigate('/login')
       },
-      onError: () => {
-        setLoading(false)
+      onError: (error: any) => {
+        message.error(error?.message || '注册失败，请重试')
       },
     }
   )
 
   const onFinish = (values: any) => {
     register(values)
-  }
-
-  const handleGoogleRegister = () => {
-    message.info('Google 注册功能开发中...')
   }
 
   return (
@@ -56,22 +47,6 @@ const Register: React.FC = () => {
             <h1 className="text-3xl font-bold text-white mb-2">创建你的账号</h1>
             <p className="text-gray-400">开始你的问卷创作之旅</p>
           </div>
-
-          {/* Google注册按钮 */}
-          <Button
-            block
-            size="large"
-            icon={<GoogleOutlined />}
-            onClick={handleGoogleRegister}
-            className="mb-6 h-12 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-none"
-          >
-            <span className="font-medium">使用 Google 账号注册</span>
-          </Button>
-
-          {/* 分隔线 */}
-          <Divider className="my-6">
-            <span className="text-gray-500 text-sm">或</span>
-          </Divider>
 
           {/* 注册表单 */}
           <Form
@@ -117,11 +92,15 @@ const Register: React.FC = () => {
               rules={[
                 { required: true, message: '请输入你的密码' },
                 { min: 6, message: '密码至少6个字符' },
+                {
+                  pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/,
+                  message: '密码必须包含字母和数字',
+                },
               ]}
             >
               <Input.Password
                 prefix={<LockOutlined className="text-gray-400" />}
-                placeholder="请输入你的密码..."
+                placeholder="请输入你的密码（至少6位，包含字母和数字）..."
                 size="large"
                 className="h-12"
               />
@@ -208,7 +187,7 @@ const Register: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold mb-1">拖拽式问卷编辑</p>
-                    <p className="text-sm text-gray-200">可视化设计器，支持单选、多选、填空等多种题型</p>
+                    <p className="text-sm text-gray-200">可视化设计器，支持60+种组件类型，随心所欲创建问卷</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -217,7 +196,7 @@ const Register: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold mb-1">智能数据分析</p>
-                    <p className="text-sm text-gray-200">自动生成图表报告，实时查看答卷统计</p>
+                    <p className="text-sm text-gray-200">自动生成图表报告，实时查看答卷统计，洞察用户反馈</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -226,7 +205,7 @@ const Register: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold mb-1">多端分享发布</p>
-                    <p className="text-sm text-gray-200">一键生成链接，支持微信、邮件等多渠道分发</p>
+                    <p className="text-sm text-gray-200">一键生成链接，支持微信、邮件等多渠道分发，触达更多用户</p>
                   </div>
                 </div>
               </div>

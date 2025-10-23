@@ -105,7 +105,7 @@ export class QuestionService {
   /**
    * 获取单个问卷
    */
-  async findOne(id: string, username: string) {
+  async findOne(id: string, username?: string) {
     // 验证 ID 格式
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('无效的问卷ID')
@@ -122,7 +122,8 @@ export class QuestionService {
     }
 
     // 验证权限（只能查看自己的问卷，除非已发布）
-    if (question.author !== username && !question.isPublished) {
+    // 如果提供了 username，则检查权限
+    if (username && question.author !== username && !question.isPublished) {
       throw new ForbiddenException('无权访问此问卷')
     }
 

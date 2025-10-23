@@ -16,8 +16,8 @@ export class HttpExceptionFilter<T> implements ExceptionFilter {
     const message = exception.message ? exception.message : '服务器错误'
 
     response.status(status).json({
-      error: -1,
-      message,
+      errno: -1,
+      msg: message,
       timestamp: new Date().toISOString(),
       path: request.url,
     })

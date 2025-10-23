@@ -1,19 +1,47 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Request,
+} from '@nestjs/common'
 import { UserService } from './user.service'
-import { CreateUserDto } from './dto/create-user.dto'
-import { HttpException, HttpStatus } from '@nestjs/common'
+import { RegisterDto } from './dto/register.dto'
 import { Public } from '../auth/decorators/public.decorator'
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  /**
+   * 用户注册
+   * POST /api/user/register
+   */
   @Public()
   @Post('register')
-  async register(@Body() user: CreateUserDto) {
-    try {
-      return await this.userService.create(user)
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_GATEWAY)
-    }
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterDto) {
+    return await this.userService.create(registerDto)
+  }
+
+  /**
+   * 修改密码
+   * PATCH /api/user/password
+   */
+  @Patch('password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @Request() req,
+    @Body() body: { oldPassword: string; newPassword: string },
+  ) {
+    const userId = req.user.sub
+    await this.userService.changePassword(
+      userId,
+      body.oldPassword,
+      body.newPassword,
+    )
+    return { message: '密码修改成功' }
   }
 }

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { Form, Input, Button, Checkbox, message, Divider } from 'antd'
+import { useState, useEffect, type FC } from 'react'
+import { Form, Input, Button, Checkbox, message } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons'
-import { loginUser } from '@/api/modules/user'
+import { MailOutlined, LockOutlined } from '@ant-design/icons'
+import { useDispatch } from 'react-redux'
+import { loginUser, getUserInfo } from '@/api/modules/user'
+import { loginReducer } from '@/store/modules/user'
 import { useRequest } from 'ahooks'
 
 // 用户评价数据
@@ -29,50 +31,64 @@ const testimonials = [
   },
 ]
 
-const Login: React.FC = () => {
+const Login: FC = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
 
   // 评价轮播效果
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 5000) // 每5秒切换一次
-
+    }, 5000)
     return () => clearInterval(timer)
   }, [])
 
-  const { run: login } = useRequest(
+  const { run: login, loading } = useRequest(
     async (values: any) => {
-      setLoading(true)
-      try {
-        return await loginUser(values)
-      } finally {
-        setLoading(false)
-      }
+      // 1. 登录获取 token
+      const loginResult = await loginUser(values)
+      const { token } = loginResult
+      
+      // 2. 保存 token
+      localStorage.setItem('token', token)
+      
+      // 3. 获取用户完整信息
+      const userInfo = await getUserInfo()
+      
+      return { token, userInfo }
     },
     {
       manual: true,
-      onSuccess: async (result: any) => {
-        const { token = '' } = result
-        localStorage.setItem('token', token)
+      onSuccess: async ({ token, userInfo }) => {
+        // 4. 存储到 Redux store
+        dispatch(
+          loginReducer({
+            _id: userInfo._id,
+            username: userInfo.username,
+            nickname: userInfo.nickname,
+            isActive: userInfo.isActive,
+            lastLoginAt: userInfo.lastLoginAt,
+            createdAt: userInfo.createdAt,
+            updatedAt: userInfo.updatedAt,
+            token,
+          })
+        )
+        
         message.success('登录成功')
-        navigate('/manage/list')
+        
+        // 5. 跳转到管理页面
+        navigate('/manage/list', { replace: true })
       },
-      onError: () => {
-        setLoading(false)
+      onError: (error: any) => {
+        message.error(error?.message || '登录失败，请检查邮箱和密码')
       },
     }
   )
 
   const onFinish = (values: any) => {
     login(values)
-  }
-
-  const handleGoogleLogin = () => {
-    message.info('Google 登录功能开发中...')
   }
 
   return (
@@ -91,22 +107,6 @@ const Login: React.FC = () => {
             <h1 className="text-3xl font-bold text-white mb-2">欢迎回到 QuizzyFlow</h1>
             <p className="text-gray-400">登录以继续你的问卷之旅</p>
           </div>
-
-          {/* Google登录按钮 */}
-          <Button
-            block
-            size="large"
-            icon={<GoogleOutlined />}
-            onClick={handleGoogleLogin}
-            className="mb-6 h-12 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-none"
-          >
-            <span className="font-medium">使用 Google 账号登录</span>
-          </Button>
-
-          {/* 分隔线 */}
-          <Divider className="my-6">
-            <span className="text-gray-500 text-sm">或</span>
-          </Divider>
 
           {/* 登录表单 */}
           <Form

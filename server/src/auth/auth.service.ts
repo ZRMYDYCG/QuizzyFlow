@@ -1,25 +1,80 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { UserService } from '../user/user.service'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { UserService } from '../user/user.service'
+import { LoginDto } from '../user/dto/login.dto'
+import { UserResponseDto } from '../user/dto/user-response.dto'
+
+/**
+ * JWT 载荷接口
+ */
+interface JwtPayload {
+  sub: string // 用户ID
+  username: string
+  nickname: string
+}
+
+/**
+ * 登录响应接口
+ */
+export interface LoginResponse {
+  token: string
+  user: UserResponseDto
+}
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private readonly jwtService: JwtService
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(username: string, password: string) {
-    const user = await this.userService.findOne(username, password)
+  /**
+   * 用户登录
+   */
+  async signIn(loginDto: LoginDto): Promise<LoginResponse> {
+    const { username, password } = loginDto
+
+    // 验证用户凭证
+    const user = await this.userService.validateUser(username, password)
 
     if (!user) {
-      throw new UnauthorizedException('用户名或密码错误')
+      throw new UnauthorizedException('邮箱或密码错误')
     }
 
-    const { password: p, ...userInfo } = user.toObject()
+    // 生成 JWT token
+    const payload: JwtPayload = {
+      sub: user._id.toString(),
+      username: user.username,
+      nickname: user.nickname,
+    }
+
+    const token = await this.jwtService.signAsync(payload)
+
+    // 返回不包含密码的用户信息
+    const userResponse = new UserResponseDto(user.toObject())
 
     return {
-      token: this.jwtService.sign(userInfo),
+      token,
+      user: userResponse,
     }
+  }
+
+  /**
+   * 验证 token 并获取用户信息
+   */
+  async validateToken(token: string): Promise<JwtPayload> {
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token)
+      return payload
+    } catch (error) {
+      throw new UnauthorizedException('无效的token')
+    }
+  }
+
+  /**
+   * 获取当前用户信息
+   */
+  async getProfile(userId: string): Promise<UserResponseDto> {
+    return await this.userService.findById(userId)
   }
 }
