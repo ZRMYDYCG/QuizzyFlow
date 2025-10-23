@@ -13,7 +13,24 @@ export class HttpExceptionFilter<T> implements ExceptionFilter {
     const response = ctx.getResponse<Response>()
     const request = ctx.getRequest<Request>()
     const status = exception.getStatus()
-    const message = exception.message ? exception.message : '服务器错误'
+    
+    const exceptionResponse = exception.getResponse()
+    
+    let message = '服务器错误'
+    
+    if (typeof exceptionResponse === 'string') {
+      message = exceptionResponse
+    } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+      const responseObj = exceptionResponse as any
+      
+      if (Array.isArray(responseObj.message)) {
+        message = responseObj.message.join('; ')
+      } else if (responseObj.message) {
+        message = responseObj.message
+      } else if (responseObj.error) {
+        message = responseObj.error
+      }
+    }
 
     response.status(status).json({
       errno: -1,
