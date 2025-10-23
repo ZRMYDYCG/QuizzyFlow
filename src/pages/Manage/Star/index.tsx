@@ -2,7 +2,7 @@ import { useTitle } from 'ahooks'
 import { useState, useMemo } from 'react'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
 import useGetUserInfo from '@/hooks/useGetUserInfo'
-import { Loader2, Star as StarIcon, TrendingUp, FileText, AlertCircle, Sparkles } from 'lucide-react'
+import { Loader2, Star as StarIcon, TrendingUp, FileText, AlertCircle } from 'lucide-react'
 import { useManageTheme } from '@/hooks/useManageTheme'
 
 // 组件导入
@@ -13,9 +13,9 @@ import AttentionNeeded from './components/AttentionNeeded'
 import StarViewSwitcher, { StarViewMode } from './components/StarViewSwitcher'
 
 // 复用其他视图组件
-import QuestionsCard from '../List/components/QuestionsCard'
-import QuestionListView from '../List/components/QuestionListView'
-import QuestionTableView from '../List/components/QuestionTableView'
+import QuestionsCard from '../list/components/QuestionsCard'
+import QuestionListView from '../list/components/QuestionListView'
+import QuestionTableView from '../list/components/QuestionTableView'
 
 const Star = () => {
   useTitle('星标问卷')
@@ -60,19 +60,8 @@ const Star = () => {
 
   return (
     <div className="min-h-full">
-      {/* 顶部标题区域 */}
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className={`text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 ${t.text.primary}`}>
-              {greeting}, {nickname || username}!
-            </h1>
-            <p className={`text-sm flex items-center gap-2 ${t.text.secondary}`}>
-              <Sparkles className="w-4 h-4" />
-              您的星标收藏 · 共 {total} 个问卷
-            </p>
-          </div>
-          
           {/* 视图切换器 */}
           {list.length > 0 && (
             <StarViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />

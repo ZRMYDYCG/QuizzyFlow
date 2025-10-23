@@ -4,7 +4,7 @@ import { useRequest } from 'ahooks'
 import { message } from 'antd'
 import { useManageTheme } from '../../../../hooks/useManageTheme.ts'
 import { 
-  Home,
+  LayoutDashboard,
   FileText, 
   Star, 
   Trash2,
@@ -30,15 +30,16 @@ const Sidebar = () => {
     if (pathname.startsWith('/manage/list')) return 'list'
     if (pathname.startsWith('/manage/star')) return 'star'
     if (pathname.startsWith('/manage/trash')) return 'trash'
-    return 'list'
+    if (pathname === '/manage') return 'dashboard'
+    return 'dashboard'
   }
 
   const navItems = [
     {
-      key: 'home',
-      icon: Home,
-      label: '首页',
-      onClick: () => navigate('/manage/list'),
+      key: 'dashboard',
+      icon: LayoutDashboard,
+      label: '仪表盘',
+      onClick: () => navigate('/manage'),
     },
     {
       key: 'list',

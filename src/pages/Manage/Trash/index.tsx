@@ -184,21 +184,6 @@ const Trash: React.FC = () => {
 
   return (
     <div className="min-h-full">
-      {/* 头部 */}
-      <div className="mb-4 md:mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className={`text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2 ${t.text.primary}`}>
-              <Trash2 className="w-7 h-7 md:w-8 md:h-8 text-red-400" />
-              回收站智能管理
-            </h1>
-            <p className={`text-sm ${t.text.secondary}`}>
-              已删除 {total} 个问卷 · 自动清理周期 {AUTO_DELETE_DAYS} 天
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* 加载状态 */}
       {loading && (
         <div className={`flex items-center justify-center gap-2 py-20 ${t.text.secondary}`}>

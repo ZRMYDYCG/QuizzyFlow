@@ -9,6 +9,7 @@ import ForgotPassword from '@/pages/forgot-password'
 import Terms from '@/pages/terms'
 import Privacy from '@/pages/privacy'
 import NotFound from '@/pages/not-found'
+import Dashboard from '@/pages/manage/dashboard'
 import List from '@/pages/manage/list'
 import Trash from '@/pages/manage/trash'
 import Star from '@/pages/manage/star'
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
     path: 'manage',
     element: <ManageLayout />,
     children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
       {
         path: 'list',
         element: <List />,

@@ -150,21 +150,8 @@ const List = () => {
 
   return (
     <div className="min-h-full">
-      {/* 问候语区域 */}
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-          <div className="flex-1 min-w-0">
-            <h1 className={`text-2xl sm:text-3xl font-bold mb-2 ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            }`}>
-              {greeting}, {nickname || username}!
-            </h1>
-            <p className={`text-xs sm:text-sm italic hidden sm:block ${
-              theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
-            }`}>
-              "The final wisdom of life requires not the annulment of incongruity but the achievement of serenity within and above it." - Reinhold Niebuhr
-            </p>
-          </div>
           {/* 视图切换器 */}
           <div className="flex-shrink-0">
             <ViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />
