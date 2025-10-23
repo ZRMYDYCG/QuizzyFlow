@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { Edit, BarChart3, Copy, Trash2, Star, Clock, FileText } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { updateQuestion, duplicateQuestion } from '@/api/modules/question'
+import { updateQuestion, duplicateQuestion, deleteQuestion } from '@/api/modules/question'
 import { useRequest } from 'ahooks'
 import { message, Modal } from 'antd'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
@@ -12,10 +12,11 @@ const { confirm } = Modal
 
 interface QuestionListViewProps {
   questions: any[]
+  onDelete?: () => void // 删除成功回调
 }
 
 const QuestionListItem: FC<any> = (props) => {
-  const { _id, answerCount, isPublished, isStar, createdAt, title } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title, onDelete } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -49,13 +50,15 @@ const QuestionListItem: FC<any> = (props) => {
 
   const { loading: deleteLoading, run: del } = useRequest(
     async () => {
-      await updateQuestion(_id, { isDelete: true })
+      await deleteQuestion([_id])
     },
     {
       manual: true,
       onSuccess: async () => {
         await message.success('删除成功')
         setShowDeleteDialog(false)
+        // 调用回调函数通知父组件刷新列表
+        onDelete?.()
       },
     }
   )
@@ -195,11 +198,11 @@ const QuestionListItem: FC<any> = (props) => {
   )
 }
 
-const QuestionListView: FC<QuestionListViewProps> = ({ questions }) => {
+const QuestionListView: FC<QuestionListViewProps> = ({ questions, onDelete }) => {
   return (
     <div className="space-y-1.5 md:space-y-2">
       {questions.map((question: any) => (
-        <QuestionListItem key={question._id} {...question} />
+        <QuestionListItem key={question._id} {...question} onDelete={onDelete} />
       ))}
     </div>
   )

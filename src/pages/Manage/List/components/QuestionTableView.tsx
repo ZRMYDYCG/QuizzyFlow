@@ -1,7 +1,7 @@
 import { FC, useState } from 'react'
 import { Edit, BarChart3, Copy, Trash2, Star } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { updateQuestion, duplicateQuestion } from '@/api/modules/question'
+import { updateQuestion, duplicateQuestion, deleteQuestion } from '@/api/modules/question'
 import { useRequest } from 'ahooks'
 import { message, Modal } from 'antd'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
@@ -13,15 +13,17 @@ const { confirm } = Modal
 
 interface QuestionTableViewProps {
   questions: any[]
+  onDelete?: () => void // 删除成功回调
 }
 
 interface QuestionTableRowProps {
   question: any
   isSelected: boolean
   onSelect: (id: string) => void
+  onDelete?: () => void // 删除成功回调
 }
 
-const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onSelect }) => {
+const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onSelect, onDelete }) => {
   const { _id, answerCount, isPublished, isStar, createdAt, title } = question
   const navigate = useNavigate()
   const t = useManageTheme()
@@ -56,13 +58,15 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
 
   const { loading: deleteLoading, run: del } = useRequest(
     async () => {
-      await updateQuestion(_id, { isDelete: true })
+      await deleteQuestion([_id])
     },
     {
       manual: true,
       onSuccess: async () => {
         await message.success('删除成功')
         setShowDeleteDialog(false)
+        // 调用回调函数通知父组件刷新列表
+        onDelete?.()
       },
     }
   )
@@ -206,7 +210,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
 }
 
 // 移动端简化卡片视图
-const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id: string) => void }> = ({ question, isSelected, onSelect }) => {
+const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id: string) => void; onDelete?: () => void }> = ({ question, isSelected, onSelect, onDelete }) => {
   const { _id, answerCount, isPublished, isStar, createdAt, title } = question
   const navigate = useNavigate()
   const t = useManageTheme()
@@ -241,13 +245,15 @@ const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id
 
   const { loading: deleteLoading, run: del } = useRequest(
     async () => {
-      await updateQuestion(_id, { isDelete: true })
+      await deleteQuestion([_id])
     },
     {
       manual: true,
       onSuccess: async () => {
         await message.success('删除成功')
         setShowDeleteDialog(false)
+        // 调用回调函数通知父组件刷新列表
+        onDelete?.()
       },
     }
   )
@@ -362,7 +368,7 @@ const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id
   )
 }
 
-const QuestionTableView: FC<QuestionTableViewProps> = ({ questions }) => {
+const QuestionTableView: FC<QuestionTableViewProps> = ({ questions, onDelete }) => {
   const t = useManageTheme()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
@@ -392,6 +398,7 @@ const QuestionTableView: FC<QuestionTableViewProps> = ({ questions }) => {
             question={question}
             isSelected={selectedIds.includes(question._id)}
             onSelect={toggleSelect}
+            onDelete={onDelete}
           />
         ))}
         {selectedIds.length > 0 && (
@@ -452,6 +459,7 @@ const QuestionTableView: FC<QuestionTableViewProps> = ({ questions }) => {
                   question={question}
                   isSelected={selectedIds.includes(question._id)}
                   onSelect={toggleSelect}
+                  onDelete={onDelete}
                 />
               ))}
             </tbody>

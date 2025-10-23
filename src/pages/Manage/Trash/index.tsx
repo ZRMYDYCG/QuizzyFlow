@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useTitle } from 'ahooks'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
-import { updateQuestion, deleteQuestion } from '@/api/modules/question'
+import { restoreQuestion, permanentDeleteQuestion } from '@/api/modules/question'
 import { useRequest } from 'ahooks'
 import { message } from 'antd'
 import { 
@@ -95,7 +95,7 @@ const Trash: React.FC = () => {
   const { run: restore, loading: restoreLoading } = useRequest(
     async (ids: string[]) => {
       for await (const id of ids) {
-        await updateQuestion(id, { isDeleted: false })
+        await restoreQuestion(id)
       }
     },
     {
@@ -109,15 +109,17 @@ const Trash: React.FC = () => {
     }
   )
 
-  // 删除操作
+  // 永久删除操作
   const { run: deleteQuestions, loading: deleteLoading } = useRequest(
     async (ids: string[]) => {
-      return await deleteQuestion(ids)
+      for await (const id of ids) {
+        await permanentDeleteQuestion(id)
+      }
     },
     {
       manual: true,
       onSuccess: async () => {
-        message.success('删除成功')
+        message.success('永久删除成功')
         refresh()
         setSelectedIds([])
         setShowDeleteDialog(false)

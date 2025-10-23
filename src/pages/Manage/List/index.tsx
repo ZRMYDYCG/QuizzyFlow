@@ -39,7 +39,12 @@ const List = () => {
 
   const { run: load, loading } = useRequest(
     async () => {
-      return await getQuestionList({ page, pageSize: 10, keyword })
+      return await getQuestionList({ 
+        page, 
+        pageSize: 10, 
+        keyword,
+        isDeleted: false // 明确过滤已删除的问卷
+      })
     },
     {
       manual: true,
@@ -51,6 +56,18 @@ const List = () => {
       },
     }
   )
+
+  // 刷新列表函数
+  const refreshList = () => {
+    setStarted(false)
+    setPage(1)
+    setTotal(0)
+    setList([])
+    // 触发重新加载
+    setTimeout(() => {
+      tryLoadMore()
+    }, 100)
+  }
 
   const { run: tryLoadMore } = useDebounceFn(
     () => {
@@ -163,12 +180,12 @@ const List = () => {
               <div className="space-y-3 md:space-y-4">
                 {list.map((question: any) => {
                   const { _id } = question
-                  return <QuestionsCard key={_id} {...question} />
+                  return <QuestionsCard key={_id} {...question} onDelete={refreshList} />
                 })}
               </div>
             )}
-            {viewMode === 'list' && <QuestionListView questions={list} />}
-            {viewMode === 'table' && <QuestionTableView questions={list} />}
+            {viewMode === 'list' && <QuestionListView questions={list} onDelete={refreshList} />}
+            {viewMode === 'table' && <QuestionTableView questions={list} onDelete={refreshList} />}
           </>
         )}
       </div>

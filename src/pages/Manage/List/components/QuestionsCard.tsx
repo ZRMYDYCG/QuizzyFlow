@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import {
   updateQuestion,
   duplicateQuestion,
+  deleteQuestion,
 } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
@@ -19,10 +20,11 @@ interface QuestionCardProps {
   answerCount: number
   isStar: boolean
   isPublished: boolean
+  onDelete?: () => void // 删除成功回调
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, answerCount, isPublished, isStar, createdAt, title } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title, onDelete } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -56,13 +58,15 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
 
   const { loading: deleteLoading, run: del } = useRequest(
     async () => {
-      await updateQuestion(_id, { isDelete: true })
+      await deleteQuestion([_id])
     },
     {
       manual: true,
       onSuccess: async () => {
         await message.success('删除成功')
         setShowDeleteDialog(false)
+        // 调用回调函数通知父组件刷新列表
+        onDelete?.()
       },
     }
   )
