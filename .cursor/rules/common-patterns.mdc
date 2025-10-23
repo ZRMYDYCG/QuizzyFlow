@@ -1,0 +1,665 @@
+---
+description: Common patterns, utilities, and troubleshooting for QuizzyFlow development
+---
+
+# Common Patterns and Utilities
+
+## Custom Hooks Usage
+
+### useLoadQuestionData
+Load question/questionnaire data in edit/statistics pages:
+
+```typescript
+import { useLoadQuestionData } from '@/hooks/useLoadQuestionData'
+
+function QuestionPage() {
+  const { loading, error } = useLoadQuestionData()
+  
+  if (loading) return <Spin />
+  if (error) return <Alert type="error" message={error} />
+  
+  // Question data is now in Redux store
+  return <YourComponent />
+}
+```
+
+### useLoadUserData
+Load and verify user authentication:
+
+```typescript
+import { useLoadUserData } from '@/hooks/useLoadUserData'
+
+function ProtectedPage() {
+  const { loading } = useLoadUserData()
+  
+  if (loading) return <Spin />
+  
+  // User data loaded and verified
+  return <YourComponent />
+}
+```
+
+### useNavPage
+Navigate between pages with common patterns:
+
+```typescript
+import { useNavPage } from '@/hooks/useNavPage'
+
+function Component() {
+  const { gotoEdit, gotoStatistics, gotoList } = useNavPage()
+  
+  const handleEdit = () => {
+    gotoEdit(questionId)  // Navigate to /question/edit/:id
+  }
+}
+```
+
+### useGetComponentInfo
+Access selected component from Redux store:
+
+```typescript
+import { useGetComponentInfo } from '@/hooks/useGetComponentInfo'
+
+function ComponentEditor() {
+  const { selectedId, selectedComponent, componentList } = useGetComponentInfo()
+  
+  // selectedComponent contains current selected component data
+  // componentList contains all components
+}
+```
+
+## Redux Patterns
+
+### Reading State
+```typescript
+import { useSelector } from 'react-redux'
+import type { stateType } from '@/store'
+
+function Component() {
+  // Read user state
+  const user = useSelector((state: stateType) => state.user)
+  
+  // Read question components (with undo history)
+  const questionComponent = useSelector((state: stateType) => 
+    state.questionComponent.present
+  )
+  
+  // Read page info
+  const pageInfo = useSelector((state: stateType) => state.pageInfo)
+}
+```
+
+### Dispatching Actions
+```typescript
+import { useDispatch } from 'react-redux'
+import { addComponent, updateComponent } from '@/store/modules/question-component'
+
+function Component() {
+  const dispatch = useDispatch()
+  
+  const handleAddComponent = () => {
+    dispatch(addComponent({
+      fe_id: nanoid(),
+      type: 'question-input',
+      title: 'New Input',
+      isHidden: false,
+      isLocked: false,
+      props: { /* component props */ }
+    }))
+  }
+  
+  const handleUpdateComponent = (id: string, props: any) => {
+    dispatch(updateComponent({ fe_id: id, props }))
+  }
+}
+```
+
+### Undo/Redo
+```typescript
+import { ActionCreators } from 'redux-undo'
+import { useDispatch } from 'react-redux'
+
+function EditorToolbar() {
+  const dispatch = useDispatch()
+  
+  const handleUndo = () => {
+    dispatch(ActionCreators.undo())
+  }
+  
+  const handleRedo = () => {
+    dispatch(ActionCreators.redo())
+  }
+  
+  return (
+    <>
+      <Button onClick={handleUndo}>Undo</Button>
+      <Button onClick={handleRedo}>Redo</Button>
+    </>
+  )
+}
+```
+
+## API Patterns
+
+### API Module Structure
+API calls are organized in [src/api/modules/](mdc:src/api/modules):
+
+```typescript
+// src/api/modules/question.ts
+import axios from 'axios'
+
+export interface Question {
+  _id: string
+  title: string
+  isPublished: boolean
+  // ... other fields
+}
+
+export async function getQuestionList(params: any) {
+  const response = await axios.get('/api/question', { params })
+  return response.data
+}
+
+export async function getQuestion(id: string) {
+  const response = await axios.get(`/api/question/${id}`)
+  return response.data
+}
+
+export async function createQuestion(data: any) {
+  const response = await axios.post('/api/question', data)
+  return response.data
+}
+
+export async function updateQuestion(id: string, data: any) {
+  const response = await axios.patch(`/api/question/${id}`, data)
+  return response.data
+}
+
+export async function deleteQuestion(id: string) {
+  const response = await axios.delete(`/api/question/${id}`)
+  return response.data
+}
+```
+
+### Using APIs in Components
+```typescript
+import { useState, useEffect } from 'react'
+import { getQuestionList } from '@/api/modules/question'
+import { message } from 'antd'
+
+function QuestionList() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false)
+  
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const result = await getQuestionList({ page: 1, pageSize: 10 })
+      setData(result.data)
+    } catch (error) {
+      message.error('Failed to load data')
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  useEffect(() => {
+    loadData()
+  }, [])
+  
+  return (
+    <Spin spinning={loading}>
+      {/* Render data */}
+    </Spin>
+  )
+}
+```
+
+## Component Data Structure
+
+### Question Component Object
+Every component in the editor follows this structure:
+
+```typescript
+{
+  fe_id: string,           // Unique ID (generated by nanoid)
+  type: string,            // Component type identifier
+  title: string,           // Display title in component tree
+  isHidden: boolean,       // Visibility toggle
+  isLocked: boolean,       // Lock to prevent editing
+  props: {                 // Component-specific properties
+    // Your component's configuration
+  }
+}
+```
+
+### Creating a New Component Instance
+```typescript
+import { nanoid } from 'nanoid'
+import { QuestionInputDefaultData } from '@/components/material/question-input/interface'
+
+const newComponent = {
+  fe_id: nanoid(),
+  type: 'question-input',
+  title: '输入框',
+  isHidden: false,
+  isLocked: false,
+  props: { ...QuestionInputDefaultData }
+}
+```
+
+## Drag and Drop Patterns
+
+### Using @dnd-kit for Component Reordering
+
+```typescript
+import { DndContext, closestCenter } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+
+function ComponentList() {
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event
+    if (active.id !== over.id) {
+      // Reorder logic here
+      dispatch(reorderComponents({ activeId: active.id, overId: over.id }))
+    }
+  }
+  
+  return (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={componentIds} strategy={verticalListSortingStrategy}>
+        {componentList.map(component => (
+          <SortableComponent key={component.fe_id} component={component} />
+        ))}
+      </SortableContext>
+    </DndContext>
+  )
+}
+```
+
+## Form Handling
+
+### Ant Design Form Pattern
+```typescript
+import { Form, Input, Button } from 'antd'
+
+function MyForm() {
+  const [form] = Form.useForm()
+  
+  const onFinish = (values: any) => {
+    console.log('Success:', values)
+    // Submit form
+  }
+  
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Failed:', errorInfo)
+  }
+  
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+      initialValues={{ remember: true }}
+    >
+      <Form.Item
+        label="Username"
+        name="username"
+        rules={[{ required: true, message: 'Please input username!' }]}
+      >
+        <Input />
+      </Form.Item>
+      
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
+  )
+}
+```
+
+## Styling Patterns
+
+### Tailwind + Ant Design Combination
+```typescript
+import { Button } from 'antd'
+import { cn } from '@/utils'  // If you have a cn utility
+
+function Component() {
+  return (
+    <div className="flex flex-col gap-4 p-6">
+      <div className="text-2xl font-bold text-gray-900">
+        Title
+      </div>
+      
+      <Button 
+        type="primary" 
+        className="w-full"
+      >
+        Submit
+      </Button>
+    </div>
+  )
+}
+```
+
+### Conditional Classes with clsx
+```typescript
+import clsx from 'clsx'
+
+function Component({ isActive, isDisabled }: Props) {
+  return (
+    <div 
+      className={clsx(
+        'px-4 py-2 rounded',
+        isActive && 'bg-blue-500 text-white',
+        isDisabled && 'opacity-50 cursor-not-allowed',
+        !isActive && !isDisabled && 'bg-gray-100'
+      )}
+    >
+      Content
+    </div>
+  )
+}
+```
+
+## Theme Management
+
+### Using Theme Context
+```typescript
+import { useManageTheme } from '@/hooks/useManageTheme'
+
+function Component() {
+  const { theme, toggleTheme } = useManageTheme()
+  
+  return (
+    <Button onClick={toggleTheme}>
+      {theme === 'dark' ? 'Light' : 'Dark'} Mode
+    </Button>
+  )
+}
+```
+
+## Canvas/Editor Patterns
+
+### Canvas Configuration
+```typescript
+import { useSelector, useDispatch } from 'react-redux'
+import type { stateType } from '@/store'
+import { updateCanvasConfig } from '@/store/modules/canvas-config'
+
+function CanvasSettings() {
+  const canvasConfig = useSelector((state: stateType) => state.canvasConfig)
+  const dispatch = useDispatch()
+  
+  const handleConfigChange = (key: string, value: any) => {
+    dispatch(updateCanvasConfig({ [key]: value }))
+  }
+  
+  return (
+    <div>
+      {/* Canvas configuration UI */}
+    </div>
+  )
+}
+```
+
+### Editor Layout
+```typescript
+import { useSelector, useDispatch } from 'react-redux'
+import type { stateType } from '@/store'
+import { toggleLeftPanel, toggleRightPanel } from '@/store/modules/editor-layout'
+
+function EditorToolbar() {
+  const layout = useSelector((state: stateType) => state.editorLayout)
+  const dispatch = useDispatch()
+  
+  return (
+    <div>
+      <Button onClick={() => dispatch(toggleLeftPanel())}>
+        {layout.leftPanelVisible ? 'Hide' : 'Show'} Components
+      </Button>
+      
+      <Button onClick={() => dispatch(toggleRightPanel())}>
+        {layout.rightPanelVisible ? 'Hide' : 'Show'} Properties
+      </Button>
+    </div>
+  )
+}
+```
+
+## Common Utilities
+
+### ID Generation
+```typescript
+import { nanoid } from 'nanoid'
+
+const uniqueId = nanoid()  // e.g., "V1StGXR8_Z5jdHi6B-myT"
+```
+
+### Deep Clone
+```typescript
+import { cloneDeep } from 'lodash-es'
+
+const clonedObject = cloneDeep(originalObject)
+```
+
+### Debounce/Throttle (with ahooks)
+```typescript
+import { useDebounceFn, useThrottleFn } from 'ahooks'
+
+function SearchComponent() {
+  const { run: debouncedSearch } = useDebounceFn(
+    (value: string) => {
+      // Search logic
+      console.log('Searching:', value)
+    },
+    { wait: 500 }
+  )
+  
+  return (
+    <Input onChange={(e) => debouncedSearch(e.target.value)} />
+  )
+}
+```
+
+## Error Handling Patterns
+
+### Global Error Boundary
+```typescript
+import React from 'react'
+import { Alert } from 'antd'
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+  
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('Error caught by boundary:', error, errorInfo)
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Alert
+          type="error"
+          message="Something went wrong"
+          description={this.state.error?.message}
+        />
+      )
+    }
+    
+    return this.props.children
+  }
+}
+```
+
+### Async Error Handling
+```typescript
+import { message } from 'antd'
+
+async function fetchData() {
+  try {
+    const response = await api.getData()
+    return response.data
+  } catch (error) {
+    if (error.response?.status === 401) {
+      message.error('Please login')
+      // Redirect to login
+    } else if (error.response?.status === 404) {
+      message.error('Data not found')
+    } else {
+      message.error('An error occurred')
+    }
+    throw error
+  }
+}
+```
+
+## Performance Optimization
+
+### Lazy Loading Routes
+```typescript
+import { lazy, Suspense } from 'react'
+import { Spin } from 'antd'
+
+const LazyComponent = lazy(() => import('./HeavyComponent'))
+
+function App() {
+  return (
+    <Suspense fallback={<Spin size="large" />}>
+      <LazyComponent />
+    </Suspense>
+  )
+}
+```
+
+### Virtual Scrolling (for long lists)
+```typescript
+import { List } from 'antd'
+import { useVirtualList } from 'ahooks'
+
+function LongList({ data }: { data: any[] }) {
+  const { list, containerProps, wrapperProps } = useVirtualList(data, {
+    overscan: 10,
+    itemHeight: 50,
+  })
+  
+  return (
+    <div {...containerProps} style={{ height: '400px', overflow: 'auto' }}>
+      <div {...wrapperProps}>
+        {list.map(item => (
+          <div key={item.index} style={{ height: '50px' }}>
+            {item.data.name}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. "Cannot read property of undefined"
+**Cause**: Accessing properties on null/undefined objects
+**Solution**: Use optional chaining
+```typescript
+// ❌ Bad
+const name = user.profile.name
+
+// ✅ Good
+const name = user?.profile?.name ?? 'Unknown'
+```
+
+#### 2. "Maximum update depth exceeded"
+**Cause**: Infinite re-render loop
+**Solution**: Wrap callbacks in useCallback, dependencies in useEffect
+```typescript
+// ❌ Bad
+useEffect(() => {
+  setData(data + 1)
+}, [data])
+
+// ✅ Good
+useEffect(() => {
+  const fetchData = async () => {
+    const result = await api.getData()
+    setData(result)
+  }
+  fetchData()
+}, [])  // Empty dependency array
+```
+
+#### 3. Redux State Not Updating
+**Cause**: Mutating state directly
+**Solution**: Always return new state
+```typescript
+// ❌ Bad
+state.items.push(newItem)
+
+// ✅ Good
+state.items = [...state.items, newItem]
+```
+
+#### 4. CORS Errors
+**Cause**: Frontend and backend on different origins
+**Solution**: Use proxy in [vite.config.ts](mdc:vite.config.ts)
+```typescript
+proxy: {
+  '/api': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+  },
+}
+```
+
+#### 5. Build Fails with "Out of Memory"
+**Cause**: Large bundle size
+**Solution**: Optimize dependencies, check [vite.config.ts](mdc:vite.config.ts) code splitting
+
+### Debugging Tips
+
+1. **Use React DevTools**: Inspect component tree and props
+2. **Use Redux DevTools**: Track state changes and actions
+3. **Console Logs**: Strategic logging (removed in production by esbuild)
+4. **Network Tab**: Monitor API calls and responses
+5. **Breakpoints**: Use browser debugger
+
+### Environment Variables
+
+Development .env file (not committed):
+```bash
+# Backend
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DATABASE=quizzyflow
+JWT_SECRET=your-secret-key
+
+# Frontend (Vite vars must start with VITE_)
+VITE_API_URL=http://localhost:3000
+```
+
+Access in code:
+```typescript
+// Backend (NestJS)
+const dbUrl = process.env.MONGO_HOST
+
+// Frontend (Vite)
+const apiUrl = import.meta.env.VITE_API_URL
+```

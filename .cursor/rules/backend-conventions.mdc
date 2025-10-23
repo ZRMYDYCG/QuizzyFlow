@@ -1,412 +1,257 @@
 ---
 globs: server/**/*.ts
-description: Backend NestJS code conventions
+description: Backend NestJS and API development conventions
 ---
 
-# Backend (NestJS) Code Conventions
+# Backend Development Conventions (NestJS)
 
-## Module Structure
+## Project Structure
 
-Each feature module in [server/src](mdc:server/src) follows NestJS conventions:
+### Module Organization
+- Each feature has its own module directory in [server/src/](mdc:server/src)
+- Module structure:
+  - `*.module.ts` - Module definition
+  - `*.controller.ts` - Route handlers
+  - `*.service.ts` - Business logic
+  - `schemas/` - Mongoose schemas
+  - `dto/` - Data Transfer Objects
 
-```
-[feature]/
-├── [feature].controller.ts    # HTTP endpoints
-├── [feature].service.ts        # Business logic
-├── [feature].module.ts         # Module definition
-├── dto/                        # Data Transfer Objects
-│   └── [feature].dto.ts
-└── schemas/                    # Mongoose schemas
-    └── [feature].schema.ts
-```
+### Main Modules
+1. **Question Module** ([server/src/question/](mdc:server/src/question)) - Questionnaire CRUD
+2. **User Module** ([server/src/user/](mdc:server/src/user)) - User management
+3. **Auth Module** ([server/src/auth/](mdc:server/src/auth)) - Authentication
+4. **Answer Module** ([server/src/answer/](mdc:server/src/answer)) - Survey responses
+5. **Stat Module** ([server/src/stat/](mdc:server/src/stat)) - Statistics
 
-## Controller Pattern
+## NestJS Patterns
 
-### Basic Controller Structure
+### Controller Pattern
 
 ```typescript
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  UseGuards 
-} from '@nestjs/common'
-import { AuthGuard } from '@/auth/auth.guard'
-import { QuestionService } from './question.service'
-import { CreateQuestionDto } from './dto/question.dto'
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Request } from '@nestjs/common'
 
-@Controller('api/question')
-@UseGuards(AuthGuard)  // Apply auth to all routes
-export class QuestionController {
-  constructor(private readonly questionService: QuestionService) {}
-
-  @Get()
-  async findAll() {
-    return this.questionService.findAll()
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.questionService.findOne(id)
-  }
-
+@Controller('resource')
+export class ResourceController {
+  constructor(private readonly service: ResourceService) {}
+  
   @Post()
-  async create(@Body() createQuestionDto: CreateQuestionDto) {
-    return this.questionService.create(createQuestionDto)
+  async create(@Request() req, @Body() createDto: CreateDto) {
+    const { username } = req.user
+    return await this.service.create(username, createDto)
+  }
+  
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Request() req) {
+    const { username } = req.user
+    return await this.service.findOne(id, username)
   }
 }
 ```
 
-### Public Routes
-
-Use the `@Public()` decorator for routes that don't require authentication:
+### Service Pattern
 
 ```typescript
-import { Public } from '@/auth/decorators/public.decorator'
-
-@Public()
-@Post('login')
-async login(@Body() loginDto: LoginDto) {
-  return this.authService.login(loginDto)
-}
-```
-
-## Service Pattern
-
-### Business Logic in Services
-
-```typescript
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { Question } from './schemas/question.schema'
-import { CreateQuestionDto } from './dto/question.dto'
 
 @Injectable()
-export class QuestionService {
+export class ResourceService {
   constructor(
-    @InjectModel(Question.name) 
-    private questionModel: Model<Question>
+    @InjectModel(Resource.name) private resourceModel: Model<Resource>
   ) {}
-
-  async findAll(): Promise<Question[]> {
-    return this.questionModel.find().exec()
-  }
-
-  async findOne(id: string): Promise<Question> {
-    const question = await this.questionModel.findById(id).exec()
-    if (!question) {
-      throw new NotFoundException(`Question with ID ${id} not found`)
-    }
-    return question
-  }
-
-  async create(createQuestionDto: CreateQuestionDto): Promise<Question> {
-    const created = new this.questionModel(createQuestionDto)
-    return created.save()
-  }
-
-  async update(id: string, updateDto: CreateQuestionDto): Promise<Question> {
-    const updated = await this.questionModel
-      .findByIdAndUpdate(id, updateDto, { new: true })
-      .exec()
-    if (!updated) {
-      throw new NotFoundException(`Question with ID ${id} not found`)
-    }
-    return updated
-  }
-
-  async remove(id: string): Promise<void> {
-    const result = await this.questionModel.findByIdAndDelete(id).exec()
-    if (!result) {
-      throw new NotFoundException(`Question with ID ${id} not found`)
-    }
+  
+  async create(username: string, data: CreateDto) {
+    // Business logic here
   }
 }
 ```
 
-## Schema Definition (Mongoose)
+### DTOs (Data Transfer Objects)
 
-### Define MongoDB Schemas
-
-```typescript
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
-
-export type QuestionDocument = HydratedDocument<Question>
-
-@Schema({
-  timestamps: true,  // Adds createdAt and updatedAt
-})
-export class Question {
-  @Prop({ required: true })
-  title: string
-
-  @Prop({ required: true })
-  description: string
-
-  @Prop({ default: false })
-  isPublished: boolean
-
-  @Prop({ default: false })
-  isStarred: boolean
-
-  @Prop({ default: false })
-  isDeleted: boolean
-
-  @Prop({ type: Object })
-  components: Record<string, any>
-
-  @Prop()
-  userId: string
-}
-
-export const QuestionSchema = SchemaFactory.createForClass(Question)
-```
-
-## DTO Pattern
-
-### Data Transfer Objects
+- Located in `dto/` directories
+- Use class-validator decorators
+- Use class-transformer for transformation
 
 ```typescript
-import { 
-  IsString, 
-  IsBoolean, 
-  IsOptional, 
-  IsNotEmpty 
-} from 'class-validator'
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator'
 
-export class CreateQuestionDto {
+export class CreateResourceDto {
   @IsString()
   @IsNotEmpty()
   title: string
-
+  
   @IsString()
   @IsOptional()
   description?: string
-
-  @IsBoolean()
-  @IsOptional()
-  isPublished?: boolean
-
-  @IsOptional()
-  components?: Record<string, any>
-}
-
-export class UpdateQuestionDto {
-  @IsString()
-  @IsOptional()
-  title?: string
-
-  @IsString()
-  @IsOptional()
-  description?: string
-
-  @IsBoolean()
-  @IsOptional()
-  isPublished?: boolean
 }
 ```
 
-## Module Configuration
+## Database (MongoDB + Mongoose)
 
-### Module Registration
+### Schema Definition
 
 ```typescript
-import { Module } from '@nestjs/common'
-import { MongooseModule } from '@nestjs/mongoose'
-import { QuestionController } from './question.controller'
-import { QuestionService } from './question.service'
-import { Question, QuestionSchema } from './schemas/question.schema'
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose'
+import { Document } from 'mongoose'
 
-@Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Question.name, schema: QuestionSchema }
-    ])
-  ],
-  controllers: [QuestionController],
-  providers: [QuestionService],
-  exports: [QuestionService],  // Export if used by other modules
-})
-export class QuestionModule {}
+@Schema({ timestamps: true })
+export class Resource extends Document {
+  @Prop({ required: true })
+  title: string
+  
+  @Prop()
+  description: string
+  
+  @Prop({ required: true })
+  author: string
+}
+
+export const ResourceSchema = SchemaFactory.createForClass(Resource)
 ```
 
-## Authentication
+### Connection Configuration
+- Connection string in [server/src/app.module.ts](mdc:server/src/app.module.ts)
+- Uses environment variables: `MONGO_HOST`, `MONGO_PORT`, `MONGO_DATABASE`
+- Format: `mongodb://${host}:${port}/${database}`
+
+## Authentication & Authorization
 
 ### JWT Authentication
+- JWT module in [server/src/auth/](mdc:server/src/auth)
+- Token validation via AuthGuard
+- User data extracted from request: `req.user`
 
-The project uses JWT-based authentication via [server/src/auth](mdc:server/src/auth):
+### Password Security
+- Use bcryptjs for password hashing
+- Never store plain text passwords
+- Hash before saving: `bcrypt.hash(password, saltRounds)`
+- Compare for login: `bcrypt.compare(password, hashedPassword)`
+
+### Auth Guard Usage
 
 ```typescript
-// In auth.service.ts
-async signIn(username: string, password: string) {
-  const user = await this.userService.findByUsername(username)
-  if (!user || user.password !== password) {
-    throw new UnauthorizedException()
-  }
-  
-  const payload = { sub: user._id, username: user.username }
-  return {
-    access_token: await this.jwtService.signAsync(payload)
-  }
+import { UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+
+@UseGuards(AuthGuard('jwt'))
+@Controller('protected')
+export class ProtectedController {
+  // Protected routes
 }
 ```
 
-### Auth Guard
+## API Design
 
-Applied globally or per-controller:
+### RESTful Conventions
+
+| Method | Route | Purpose |
+|--------|-------|---------|
+| POST | `/api/resource` | Create |
+| GET | `/api/resource` | List (with query params) |
+| GET | `/api/resource/:id` | Get one |
+| PATCH | `/api/resource/:id` | Update |
+| DELETE | `/api/resource/:id` | Delete |
+
+### Query Parameters
+- `keyword` - Search term
+- `page` - Page number (pagination)
+- `pageSize` - Items per page
+- `isStar` - Filter starred items
+- `isDeleted` - Filter deleted items
+
+### Response Format
+- Success: `{ data: any, message?: string }`
+- Error: Handled by exception filters in [server/src/http-exeption/](mdc:server/src/http-exeption)
+
+### HTTP Status Codes
+- 200 OK - Successful GET/PATCH
+- 201 Created - Successful POST
+- 204 No Content - Successful DELETE
+- 400 Bad Request - Validation error
+- 401 Unauthorized - Authentication required
+- 403 Forbidden - Insufficient permissions
+- 404 Not Found - Resource not found
+
+Use `@HttpCode()` decorator when needed:
 ```typescript
-import { AuthGuard } from '@/auth/auth.guard'
-
-@UseGuards(AuthGuard)
-@Controller('api/protected')
-export class ProtectedController {}
+@Delete()
+@HttpCode(HttpStatus.OK)
+async delete() {
+  // Returns 200 instead of default 204
+}
 ```
+
+## Question Module Patterns
+
+### Common Operations (from [server/src/question/question.controller.ts](mdc:server/src/question/question.controller.ts))
+
+1. **Create** - `POST /api/question`
+2. **List** - `GET /api/question` (supports pagination, search, filters)
+3. **Get One** - `GET /api/question/:id`
+4. **Update** - `PATCH /api/question/:id`
+5. **Soft Delete** - `DELETE /api/question` (batch)
+6. **Restore** - `PATCH /api/question/:id/restore`
+7. **Permanent Delete** - `DELETE /api/question/:id/permanent`
+8. **Duplicate** - `POST /api/question/duplicate/:id`
+9. **Statistics** - `GET /api/question/statistics`
+
+### Soft Delete Pattern
+- Use `isDeleted` boolean field
+- Soft delete: Set `isDeleted = true`
+- Restore: Set `isDeleted = false`
+- Permanent delete: Actually remove from database
 
 ## Error Handling
 
-### HTTP Exception Filter
+### Exception Filters
+- Custom exception filter in [server/src/http-exeption/http-exception.filter.ts](mdc:server/src/http-exeption/http-exception.filter.ts)
+- Apply globally or per controller
+- Format errors consistently
 
-The project uses a global exception filter at [server/src/http-exeption/http-exception.filter.ts](mdc:server/src/http-exeption/http-exception.filter.ts):
-
+### Throwing Exceptions
 ```typescript
-import { 
-  ExceptionFilter, 
-  Catch, 
-  ArgumentsHost, 
-  HttpException 
-} from '@nestjs/common'
+import { NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common'
 
-@Catch(HttpException)
-export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp()
-    const response = ctx.getResponse()
-    const status = exception.getStatus()
-    
-    response.status(status).json({
-      statusCode: status,
-      message: exception.message,
-      timestamp: new Date().toISOString(),
-    })
-  }
-}
-```
-
-### Common Exceptions
-
-```typescript
-import { 
-  NotFoundException, 
-  BadRequestException,
-  UnauthorizedException,
-  ForbiddenException 
-} from '@nestjs/common'
-
-// Not found
 throw new NotFoundException('Resource not found')
-
-// Bad input
-throw new BadRequestException('Invalid input data')
-
-// Auth issues
-throw new UnauthorizedException('Invalid credentials')
-
-// Permission denied
-throw new ForbiddenException('Access denied')
+throw new BadRequestException('Invalid data')
+throw new UnauthorizedException('Please login')
 ```
 
-## Response Transformation
+## Configuration
 
-### Transform Interceptor
+### Environment Variables
+- Use `@nestjs/config` module
+- Load via `ConfigModule.forRoot()` in app.module.ts
+- Access via `process.env.VARIABLE_NAME`
 
-The project uses a global transform interceptor at [server/src/transform/transform.interceptor.ts](mdc:server/src/transform/transform.interceptor.ts) to standardize responses:
-
-```typescript
-{
-  code: 0,
-  data: { /* actual data */ },
-  message: 'Success'
-}
-```
-
-## Environment Configuration
-
-### Using ConfigModule
-
-```typescript
-import { ConfigService } from '@nestjs/config'
-
-@Injectable()
-export class MyService {
-  constructor(private configService: ConfigService) {}
-
-  getDatabaseUrl() {
-    return this.configService.get<string>('DATABASE_URL')
-  }
-}
-```
+### Development Scripts
+- `pnpm start:dev` - Development with watch mode
+- `pnpm build` - Production build
+- `pnpm start:prod` - Run production build
+- `pnpm test` - Run tests
 
 ## Testing
 
-### Unit Tests
+### Test Files
+- Unit tests: `*.spec.ts` files
+- E2E tests: `test/*.e2e-spec.ts`
+- Jest configuration in [server/package.json](mdc:server/package.json)
 
-```typescript
-import { Test, TestingModule } from '@nestjs/testing'
-import { QuestionService } from './question.service'
+### Test Commands
+- `pnpm test` - Run all tests
+- `pnpm test:watch` - Watch mode
+- `pnpm test:cov` - With coverage
+- `pnpm test:e2e` - E2E tests
 
-describe('QuestionService', () => {
-  let service: QuestionService
+## Dependencies
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [QuestionService],
-    }).compile()
-
-    service = module.get<QuestionService>(QuestionService)
-  })
-
-  it('should be defined', () => {
-    expect(service).toBeDefined()
-  })
-})
-```
-
-## Best Practices
-
-1. **Dependency Injection**: Always use constructor injection
-2. **Single Responsibility**: Keep services focused on one domain
-3. **Validation**: Use DTOs with class-validator
-4. **Error Handling**: Use NestJS exception classes
-5. **Async/Await**: Use async/await for asynchronous operations
-6. **Type Safety**: Leverage TypeScript types everywhere
-7. **Module Organization**: Keep related code in the same module
-8. **Environment Variables**: Never hardcode sensitive data
-
-## Database Operations
-
-### Query Best Practices
-
-```typescript
-// Use exec() for better error handling
-const result = await this.model.findOne({ id }).exec()
-
-// Use lean() for read-only operations (better performance)
-const results = await this.model.find().lean().exec()
-
-// Use projection to limit fields
-const results = await this.model
-  .find()
-  .select('title description')
-  .exec()
-
-// Use pagination
-const results = await this.model
-  .find()
-  .skip(skip)
-  .limit(limit)
-  .exec()
-```
+### Key Libraries
+- `@nestjs/common` - Core NestJS
+- `@nestjs/mongoose` - MongoDB integration
+- `@nestjs/jwt` - JWT authentication
+- `@nestjs/config` - Configuration management
+- `bcryptjs` - Password hashing
+- `class-validator` - Validation
+- `class-transformer` - Transformation
+- `nanoid` - ID generation

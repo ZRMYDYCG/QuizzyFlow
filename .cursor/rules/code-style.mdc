@@ -1,0 +1,421 @@
+---
+globs: *.ts,*.tsx,*.js,*.jsx
+---
+
+# Code Style and Formatting
+
+## General Principles
+
+### Code Quality
+- Write clean, readable, maintainable code
+- Follow DRY (Don't Repeat Yourself) principle
+- Keep functions small and focused (single responsibility)
+- Use meaningful variable and function names
+- Comment complex logic, but prefer self-documenting code
+
+### File Organization
+- One component per file
+- Group related files in directories
+- Keep file size reasonable (< 300 lines ideally)
+- Organize imports at the top
+
+## TypeScript Style
+
+### Type Annotations
+```typescript
+// ✅ Good - Explicit types
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0)
+}
+
+// ❌ Bad - Implicit any
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0)
+}
+```
+
+### Interface vs Type
+```typescript
+// ✅ Use interfaces for object shapes
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+// ✅ Use type for unions, intersections, primitives
+type Status = 'active' | 'inactive' | 'pending'
+type ID = string | number
+```
+
+### Naming Conventions
+
+| Category | Convention | Example |
+|----------|-----------|---------|
+| Interfaces | PascalCase with `I` prefix | `IUserProps` |
+| Types | PascalCase | `UserStatus` |
+| Components | PascalCase | `QuestionInput` |
+| Functions | camelCase | `getUserData` |
+| Variables | camelCase | `userName` |
+| Constants | UPPER_SNAKE_CASE or camelCase | `API_URL` or `defaultConfig` |
+| Files | kebab-case | `question-input.tsx` |
+| Directories | kebab-case | `question-input/` |
+
+## React Style
+
+### Component Structure
+```typescript
+// ✅ Good structure
+import React from 'react'
+import { Button } from 'antd'
+import { IComponentProps, ComponentDefaultData } from './interface'
+import styles from './component.module.css'
+
+const Component: React.FC<IComponentProps> = (props) => {
+  // 1. Props destructuring
+  const { title, onSubmit } = { ...ComponentDefaultData, ...props }
+  
+  // 2. State hooks
+  const [loading, setLoading] = React.useState(false)
+  
+  // 3. Effect hooks
+  React.useEffect(() => {
+    // Effect logic
+  }, [])
+  
+  // 4. Event handlers
+  const handleClick = () => {
+    setLoading(true)
+    onSubmit()
+  }
+  
+  // 5. Render logic
+  if (loading) {
+    return <div>Loading...</div>
+  }
+  
+  // 6. Main JSX
+  return (
+    <div>
+      <h1>{title}</h1>
+      <Button onClick={handleClick}>Submit</Button>
+    </div>
+  )
+}
+
+export default Component
+```
+
+### Hooks Order
+1. State hooks (`useState`)
+2. Context hooks (`useContext`)
+3. Reducer hooks (`useReducer`)
+4. Ref hooks (`useRef`)
+5. Effect hooks (`useEffect`, `useLayoutEffect`)
+6. Custom hooks
+7. Memoization hooks (`useMemo`, `useCallback`)
+
+### Conditional Rendering
+```typescript
+// ✅ Good - Early return for loading/error states
+if (loading) return <Spin />
+if (error) return <ErrorMessage error={error} />
+
+// ✅ Good - Ternary for simple conditions
+return isVisible ? <Component /> : null
+
+// ✅ Good - Logical AND for simple show/hide
+return (
+  <div>
+    {hasData && <DataDisplay data={data} />}
+  </div>
+)
+
+// ❌ Bad - Nested ternaries
+return (
+  <div>
+    {loading ? <Spin /> : error ? <Error /> : data ? <Data /> : <Empty />}
+  </div>
+)
+```
+
+### Event Handlers
+```typescript
+// ✅ Good - Defined separately
+const handleClick = (id: string) => {
+  console.log(id)
+}
+
+return <Button onClick={() => handleClick(item.id)}>Click</Button>
+
+// ⚠️ Acceptable for simple cases
+return <Button onClick={(e) => e.preventDefault()}>Click</Button>
+
+// ❌ Bad - Complex inline handlers
+return (
+  <Button onClick={() => {
+    // Multiple lines of logic
+    // This should be extracted
+  }}>
+    Click
+  </Button>
+)
+```
+
+## Import Organization
+
+### Import Order
+```typescript
+// 1. React imports
+import React from 'react'
+import { useState, useEffect } from 'react'
+
+// 2. Third-party libraries (alphabetical)
+import { Button, Input } from 'antd'
+import axios from 'axios'
+import { nanoid } from 'nanoid'
+
+// 3. Internal absolute imports (using @/)
+import { useAuth } from '@/hooks/useAuth'
+import { API_BASE_URL } from '@/config'
+
+// 4. Relative imports - Components
+import Header from './Header'
+import Footer from './Footer'
+
+// 5. Relative imports - Utilities/Types
+import { formatDate } from './utils'
+import type { User } from './types'
+
+// 6. Styles
+import styles from './Component.module.css'
+import './Component.css'
+```
+
+### Import Styles
+```typescript
+// ✅ Good - Named imports
+import { Button, Input } from 'antd'
+
+// ✅ Good - Default import
+import React from 'react'
+
+// ✅ Good - Type-only imports
+import type { User } from './types'
+
+// ❌ Bad - Wildcard imports (unless necessary)
+import * as antd from 'antd'
+```
+
+## Formatting
+
+### Indentation
+- Use 2 spaces for indentation
+- Consistent indentation throughout the file
+
+### Line Length
+- Prefer keeping lines under 100 characters
+- Break long lines logically
+
+### Spacing
+```typescript
+// ✅ Good spacing
+function calculate(a: number, b: number): number {
+  const result = a + b
+  return result
+}
+
+// ❌ Bad spacing
+function calculate(a:number,b:number):number{
+  const result=a+b
+  return result
+}
+```
+
+### Semicolons
+- Use semicolons consistently
+- Project uses semicolons (based on Prettier config)
+
+### Quotes
+```typescript
+// ✅ Prefer single quotes
+const message = 'Hello world'
+
+// ✅ Use backticks for template strings
+const greeting = `Hello, ${name}!`
+
+// ✅ Use double quotes for JSX attributes
+<Button type="primary">Click</Button>
+```
+
+### Object/Array Formatting
+```typescript
+// ✅ Good - Multi-line for readability
+const user = {
+  id: '123',
+  name: 'John Doe',
+  email: 'john@example.com',
+  role: 'admin',
+}
+
+// ✅ Good - Single line for small objects
+const point = { x: 10, y: 20 }
+
+// ✅ Good - Trailing commas
+const items = [
+  'item1',
+  'item2',
+  'item3',
+]
+```
+
+## Comments
+
+### When to Comment
+```typescript
+// ✅ Good - Explain complex logic
+// Calculate discounted price based on user tier and seasonal promotions
+const finalPrice = calculatePrice(basePrice, userTier, season)
+
+// ✅ Good - Document public APIs
+/**
+ * Fetches user data from the API
+ * @param userId - The unique identifier for the user
+ * @returns Promise resolving to user data
+ * @throws {NotFoundError} If user doesn't exist
+ */
+async function fetchUser(userId: string): Promise<User> {
+  // Implementation
+}
+
+// ❌ Bad - Obvious comments
+// Increment counter by 1
+counter++
+
+// ❌ Bad - Outdated comments
+// TODO: Fix this later (from 2 years ago)
+```
+
+### JSDoc for Functions
+```typescript
+/**
+ * Brief description of function
+ * 
+ * @param param1 - Description of param1
+ * @param param2 - Description of param2
+ * @returns Description of return value
+ * @throws {ErrorType} When error occurs
+ * @example
+ * ```typescript
+ * const result = myFunction('value1', 'value2')
+ * ```
+ */
+```
+
+## Best Practices
+
+### Error Handling
+```typescript
+// ✅ Good - Specific error handling
+try {
+  const data = await fetchData()
+  return data
+} catch (error) {
+  if (error instanceof NetworkError) {
+    console.error('Network error:', error.message)
+  } else {
+    console.error('Unexpected error:', error)
+  }
+  throw error
+}
+
+// ❌ Bad - Silent failures
+try {
+  const data = await fetchData()
+  return data
+} catch {
+  // Ignored
+}
+```
+
+### Async/Await
+```typescript
+// ✅ Good - async/await
+async function loadData() {
+  try {
+    const response = await fetch(url)
+    const data = await response.json()
+    return data
+  } catch (error) {
+    handleError(error)
+  }
+}
+
+// ⚠️ Acceptable - Promises (for specific cases)
+fetch(url)
+  .then(response => response.json())
+  .then(data => processData(data))
+  .catch(error => handleError(error))
+```
+
+### Destructuring
+```typescript
+// ✅ Good - Object destructuring
+const { name, email, age } = user
+
+// ✅ Good - Array destructuring
+const [first, second] = items
+
+// ✅ Good - With defaults
+const { name = 'Anonymous', age = 0 } = user
+
+// ✅ Good - Nested destructuring (when readable)
+const { user: { profile: { name } } } = data
+```
+
+### Optional Chaining & Nullish Coalescing
+```typescript
+// ✅ Good - Optional chaining
+const userName = user?.profile?.name
+
+// ✅ Good - Nullish coalescing
+const displayName = userName ?? 'Guest'
+
+// ✅ Good - Combined
+const name = user?.profile?.name ?? 'Anonymous'
+```
+
+## Performance Considerations
+
+### React Performance
+```typescript
+// ✅ Memoize expensive calculations
+const expensiveValue = useMemo(() => {
+  return calculateExpensiveValue(data)
+}, [data])
+
+// ✅ Memoize callbacks passed to child components
+const handleClick = useCallback(() => {
+  doSomething(id)
+}, [id])
+
+// ✅ Memoize components that receive stable props
+const MemoizedComponent = React.memo(Component)
+```
+
+### Avoid Unnecessary Work
+```typescript
+// ✅ Good - Early return
+function processUser(user: User | null) {
+  if (!user) return null
+  
+  // Process user
+  return processedData
+}
+
+// ❌ Bad - Unnecessary processing
+function processUser(user: User | null) {
+  const result = user ? processedData : null
+  return result
+}
+```

@@ -1,226 +1,145 @@
 ---
-globs: src/**/*.ts,src/**/*.tsx
-description: Frontend code conventions for React TypeScript
+globs: *.ts,*.tsx,*.jsx,*.js
+description: Frontend React and TypeScript coding conventions
 ---
 
-# Frontend Code Conventions
+# Frontend Development Conventions
 
 ## TypeScript Guidelines
 
-### Import Ordering
-1. External libraries (React, third-party packages)
-2. Internal modules using `@/` alias
-3. Relative imports
-4. Type imports (use `import type` when importing only types)
+### Strict Typing
+- Always define explicit types for function parameters and return values
+- Use interfaces for component props (prefix with `I` for interfaces)
+- Define default data constants for components (suffix with `DefaultData`)
+
+### Import Conventions
+- Use `@/` path alias for imports from `src/`
+- Import React as: `import React from 'react'`
+- Group imports: React → Third-party → Local components → Utilities → Types
 
 Example:
 ```typescript
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button } from 'antd'
-import { useDispatch, useSelector } from 'react-redux'
-import type { FC } from 'react'
-
-import { updateUser } from '@/store/modules/user'
-import { useGetUserInfo } from '@/hooks/useGetUserInfo'
-import type { IUserState } from '@/store/modules/user'
-
-import './styles.css'
+import React from 'react'
+import { Input, Typography } from 'antd'
+import { IQuestionInputProps, QuestionInputDefaultData } from './interface.ts'
 ```
 
-### Path Aliases
-Always use the `@/` alias for imports from `src/`:
+## Component Development
+
+### React Components
+- Use functional components with TypeScript
+- Props should be typed with interfaces
+- Destructure props with defaults from default data
+- Use the pattern: `const { prop1, prop2 } = { ...DefaultData, ...props }`
+
+Example Component Structure:
 ```typescript
-// ✅ Good
-import { Button } from '@/components/material/question-button'
-import { useGetPageInfo } from '@/hooks/useGetPageInfo'
+import React from 'react'
+import { IComponentProps, ComponentDefaultData } from './interface.ts'
 
-// ❌ Bad
-import { Button } from '../../components/material/question-button'
-import { useGetPageInfo } from '../hooks/useGetPageInfo'
-```
-
-## Component Patterns
-
-### Functional Components
-- Use `FC` type from React for function components
-- Destructure props in function parameters
-- Use proper TypeScript interfaces for props
-
-```typescript
-import type { FC } from 'react'
-
-interface ButtonComponentProps {
-  label: string
-  onClick: () => void
-  disabled?: boolean
-}
-
-const ButtonComponent: FC<ButtonComponentProps> = ({ 
-  label, 
-  onClick, 
-  disabled = false 
-}) => {
-  return <button onClick={onClick} disabled={disabled}>{label}</button>
-}
-
-export default ButtonComponent
-```
-
-### Hooks Usage
-- Custom hooks must start with `use`
-- Keep hooks in `src/hooks/` directory
-- Follow the naming pattern: `useActionName` (e.g., `useGetUserInfo`, `useLoadQuestionData`)
-
-### State Management with Redux
-
-#### Reading State
-```typescript
-import { useSelector } from 'react-redux'
-import type { stateType } from '@/store'
-
-const MyComponent: FC = () => {
-  const user = useSelector((state: stateType) => state.user)
-  const { componentList } = useSelector(
-    (state: stateType) => state.questionComponent.present
+const Component: React.FC<IComponentProps> = (props: IComponentProps) => {
+  const { title, placeholder } = { ...ComponentDefaultData, ...props }
+  
+  return (
+    <div>{/* component JSX */}</div>
   )
-  
-  // Note: questionComponent uses redux-undo, access via .present
-}
-```
-
-#### Dispatching Actions
-```typescript
-import { useDispatch } from 'react-redux'
-import { updatePageInfo } from '@/store/modules/pageinfo-reducer'
-
-const MyComponent: FC = () => {
-  const dispatch = useDispatch()
-  
-  const handleUpdate = () => {
-    dispatch(updatePageInfo({ title: 'New Title' }))
-  }
-}
-```
-
-#### Undo/Redo Actions
-For components with undo/redo support:
-```typescript
-import { ActionCreators } from 'redux-undo'
-
-const handleUndo = () => {
-  dispatch(ActionCreators.undo())
 }
 
-const handleRedo = () => {
-  dispatch(ActionCreators.redo())
-}
+export default Component
 ```
 
-## Styling Conventions
+### Component Files Organization
+Each material component should have:
+- `index.tsx` - Main component implementation
+- `interface.ts` - TypeScript interfaces and default data
+- `index.ts` - Component config and exports
+- Property editor component (e.g., `input-props.tsx`)
 
-### TailwindCSS
-- Prefer Tailwind utility classes for styling
-- Use `clsx` or `cn` utility for conditional classes
-- Keep className strings readable (break long strings into multiple lines if needed)
+## Redux/State Management
 
-```typescript
-import { clsx } from 'clsx'
+### Store Organization
+- Modules are in [src/store/modules/](mdc:src/store/modules)
+- Use Redux Toolkit's `createSlice`
+- Export both reducer and actions
+- Define state type interfaces
 
-<div className={clsx(
-  'flex items-center justify-between',
-  'p-4 rounded-lg border',
-  'hover:bg-gray-50 transition-colors',
-  isActive && 'bg-blue-50 border-blue-500',
-  isDisabled && 'opacity-50 cursor-not-allowed'
-)}>
-```
+### Using Redux Hooks
+- Import typed hooks if available: `useAppDispatch`, `useAppSelector`
+- Use `useSelector` for reading state
+- Use `useDispatch` for dispatching actions
 
-### Ant Design Integration
-- Import Ant Design components as needed
-- Use Ant Design for complex UI patterns (forms, tables, modals)
-- Use Radix UI for unstyled primitives when needed
+### Undo/Redo Aware Development
+- The `questionComponent` store has undo/redo enabled (20 steps)
+- Actions like `changeSelectedId` are excluded from undo history
+- Avoid creating actions that would pollute undo history for UI-only state changes
 
-## API Calls
+## Routing Patterns
 
-### Using Axios
-- API functions are in [src/api](mdc:src/api)
-- Organize by domain (user, question, statistics)
-- Always handle errors with try/catch or .catch()
+### Route Structure (from [src/router/index.tsx](mdc:src/router/index.tsx))
+- `/` - Home layout (public pages)
+- `/manage/*` - Management layout (list, star, trash)
+- `/question/edit/:id` - Question editor
+- `/question/statistics/:id` - Question statistics
+- `/question/publish/:id` - Question publish view
 
-```typescript
-import { getQuestionList } from '@/api/modules/question'
+### Navigation
+- Use `useNavigate()` hook for programmatic navigation
+- Use `useParams()` for route parameters
+- Use `<Link>` component for declarative navigation
 
-const loadData = async () => {
-  try {
-    const data = await getQuestionList()
-    // handle data
-  } catch (error) {
-    console.error('Failed to load questions:', error)
-    // handle error
-  }
-}
-```
+## Styling Guidelines
 
-## Form Handling
+### Tailwind CSS
+- Primary styling method via utility classes
+- Config in [tailwind.config.ts](mdc:tailwind.config.ts)
+- Use `cn()` helper from `tailwind-merge` for conditional classes
 
-### Controlled Components
-- Always use controlled components for forms
-- Use React state or Redux for form data
-- Validate on blur and/or submit
+### Ant Design
+- Use Ant Design components as base UI
+- Follow Ant Design design system
+- Use Typography components for text
 
-```typescript
-const [formData, setFormData] = useState({ name: '', email: '' })
+### CSS Modules (if used)
+- Use camelCase for class names
+- File naming: `component.module.css`
 
-const handleChange = (field: string) => (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
-  setFormData(prev => ({ ...prev, [field]: e.target.value }))
-}
+## API Integration
 
-<input 
-  value={formData.name} 
-  onChange={handleChange('name')} 
-/>
-```
+### API Calls
+- API utilities in [src/api/](mdc:src/api)
+- Use axios for HTTP requests
+- API base path: `/api` (proxied to backend)
+- Always handle loading and error states
 
-## Performance Optimization
+### Authentication
+- JWT token stored in localStorage/sessionStorage
+- Include token in request headers
+- Handle 401 responses (redirect to login)
 
-### Memoization
-Use React.memo, useMemo, and useCallback appropriately:
-```typescript
-import { memo, useMemo, useCallback } from 'react'
+## Custom Hooks
 
-// Memoize expensive calculations
-const sortedList = useMemo(() => {
-  return items.sort((a, b) => a.order - b.order)
-}, [items])
+Custom hooks are in [src/hooks/](mdc:src/hooks):
+- `useLoadQuestionData` - Load question data
+- `useLoadUserData` - Load user authentication data
+- `useNavPage` - Navigation utilities
+- `useGetComponentInfo` - Get component state from store
+- `useCanvasKeyPress` - Handle canvas keyboard shortcuts
+- `useManageTheme` - Theme management
 
-// Memoize callbacks passed to children
-const handleClick = useCallback(() => {
-  console.log('clicked')
-}, [])
+## Performance Best Practices
 
-// Memoize components
-export default memo(MyComponent)
-```
+### Code Splitting
+- Lazy load routes when possible
+- Use `React.lazy()` and `Suspense` for heavy components
+- Vite automatically splits vendor chunks (see [vite.config.ts](mdc:vite.config.ts))
 
-## Error Handling
-
-### Component Error Boundaries
-- Handle async errors gracefully
-- Show user-friendly error messages
-- Log errors for debugging
-
-### Loading States
-Always provide loading feedback:
-```typescript
-const [loading, setLoading] = useState(false)
-
-if (loading) return <Spin />
-```
+### Optimization
+- Use `React.memo()` for expensive components
+- Use `useMemo()` and `useCallback()` to prevent unnecessary re-renders
+- Avoid inline function definitions in props when possible
 
 ## Testing Considerations
-- Write testable code (pure functions, separated logic)
-- Avoid side effects in render
-- Keep business logic separate from UI
+
+- Component tests should be colocated or in `__tests__` directories
+- Test user interactions, not implementation details
+- Mock API calls in tests

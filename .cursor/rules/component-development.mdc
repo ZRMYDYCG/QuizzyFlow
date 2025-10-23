@@ -1,255 +1,303 @@
 ---
-globs: src/components/material/**/*.ts,src/components/material/**/*.tsx
-description: Material component development patterns
+description: Guidelines for creating new material components in the QuizzyFlow editor
 ---
 
 # Material Component Development Guide
 
+This guide explains how to create new question/form components for the QuizzyFlow editor.
+
+## Component Location
+
+All material components are in [src/components/material/](mdc:src/components/material)
+
 ## Component Structure
 
-Each material component in [src/components/material](mdc:src/components/material) follows a consistent structure:
+Each component should follow this directory structure:
 
 ```
-question-[component-name]/
-├── index.ts              # Exports (component, interface, config)
-├── index.tsx             # Main component implementation
-├── interface.ts          # TypeScript interfaces and types
-└── [component]-props.tsx # Property editor component
+src/components/material/question-<name>/
+  ├── index.tsx           # Main component implementation
+  ├── interface.ts        # TypeScript interfaces and defaults
+  ├── <name>-props.tsx    # Property editor component (optional)
+  └── index.ts            # Component configuration
 ```
 
-## Component Implementation Pattern
+## Step-by-Step Guide
 
-### 1. Interface Definition (interface.ts)
+### 1. Create Component Interface (`interface.ts`)
 
-Define the component's properties interface and configuration:
+Define the component's props interface and default data:
 
 ```typescript
-export interface QuestionInputPropsType {
-  title?: string          // Display title
-  placeholder?: string    // Input placeholder
-  required?: boolean      // Is required field
-  // ... other props
+/**
+ * @description Component description
+ */
+export interface IQuestionComponentProps {
+  // Property descriptions
+  title?: string
+  placeholder?: string
+  disabled?: boolean
+  onChange?: (value: IQuestionComponentProps) => void
 }
 
-export interface QuestionInputConfigType {
-  title: string           // Component type display name
-  type: string           // Unique component type identifier
-  props: QuestionInputPropsType  // Default props
-}
-
-export const QuestionInputDefaultProps: QuestionInputPropsType = {
-  title: 'Input Title',
-  placeholder: 'Please enter...',
-  required: false,
+export const QuestionComponentDefaultData: IQuestionComponentProps = {
+  title: 'Default Title',
+  placeholder: 'Enter text...',
+  disabled: false,
 }
 ```
 
-### 2. Main Component (index.tsx)
+**Naming Conventions:**
+- Interface: `IQuestion<Name>Props`
+- Default data: `Question<Name>DefaultData`
+- Use optional properties (`?`) for non-required props
+- Include an `onChange` callback if the component accepts user input
 
-Implement the component that will be rendered in the canvas/preview:
+### 2. Create Main Component (`index.tsx`)
+
+Implement the component using React and Ant Design:
 
 ```typescript
-import type { FC } from 'react'
-import type { QuestionInputPropsType } from './interface'
+import React from 'react'
+import { Input, Typography } from 'antd'
+import { IQuestionComponentProps, QuestionComponentDefaultData } from './interface.ts'
 
-const QuestionInput: FC<QuestionInputPropsType> = (props) => {
-  const { title, placeholder, required } = { 
-    ...QuestionInputDefaultProps, 
+const QuestionComponent: React.FC<IQuestionComponentProps> = (
+  props: IQuestionComponentProps
+) => {
+  const { title, placeholder, disabled } = { 
+    ...QuestionComponentDefaultData, 
     ...props 
   }
-  
+
   return (
-    <div className="question-input">
-      <div className="title">
-        {required && <span className="required">*</span>}
-        {title}
+    <div>
+      <Typography.Paragraph strong>{title}</Typography.Paragraph>
+      <div>
+        <Input 
+          placeholder={placeholder} 
+          disabled={disabled}
+        />
       </div>
-      <input 
-        placeholder={placeholder}
-        className="w-full p-2 border rounded"
-      />
     </div>
   )
 }
 
-export default QuestionInput
+export default QuestionComponent
 ```
 
-### 3. Props Editor ([component]-props.tsx)
+**Key Points:**
+- Use functional components with TypeScript
+- Destructure props with defaults: `{ ...DefaultData, ...props }`
+- Use Ant Design components for consistency
+- Keep components simple and focused
 
-Create a property editor component for the right panel:
+### 3. Create Property Editor (Optional)
+
+For components with editable properties, create a property editor:
 
 ```typescript
-import type { FC } from 'react'
-import { Input, Checkbox, Form } from 'antd'
-import type { QuestionInputPropsType } from './interface'
+import React from 'react'
+import { Form, Input, Switch } from 'antd'
+import { IQuestionComponentProps } from './interface.ts'
 
-interface PropsEditorProps {
-  props: QuestionInputPropsType
-  onChange: (newProps: QuestionInputPropsType) => void
-  disabled?: boolean
+interface PropComponentProps {
+  value?: IQuestionComponentProps
+  onChange?: (value: IQuestionComponentProps) => void
 }
 
-const QuestionInputProps: FC<PropsEditorProps> = ({ 
-  props, 
-  onChange, 
-  disabled 
-}) => {
-  const handleChange = (key: string, value: any) => {
-    onChange({ ...props, [key]: value })
+const PropComponent: React.FC<PropComponentProps> = ({ value, onChange }) => {
+  const handleChange = (key: string, val: any) => {
+    if (onChange) {
+      onChange({
+        ...value,
+        [key]: val,
+      })
+    }
   }
-  
+
   return (
     <Form layout="vertical">
       <Form.Item label="Title">
-        <Input
-          value={props.title}
+        <Input 
+          value={value?.title}
           onChange={(e) => handleChange('title', e.target.value)}
-          disabled={disabled}
         />
       </Form.Item>
       
       <Form.Item label="Placeholder">
-        <Input
-          value={props.placeholder}
+        <Input 
+          value={value?.placeholder}
           onChange={(e) => handleChange('placeholder', e.target.value)}
-          disabled={disabled}
         />
       </Form.Item>
       
-      <Form.Item>
-        <Checkbox
-          checked={props.required}
-          onChange={(e) => handleChange('required', e.target.checked)}
-          disabled={disabled}
-        >
-          Required
-        </Checkbox>
+      <Form.Item label="Disabled">
+        <Switch 
+          checked={value?.disabled}
+          onChange={(val) => handleChange('disabled', val)}
+        />
       </Form.Item>
     </Form>
   )
 }
 
-export default QuestionInputProps
+export default PropComponent
 ```
 
-### 4. Index Exports (index.ts)
+### 4. Create Component Configuration (`index.ts`)
 
-Export all parts of the component:
+Export component configuration for the component registry:
 
 ```typescript
-import Component from './index'
-import PropsComponent from './input-props'
+import Component from './index.tsx'
+import PropComponent from './component-props.tsx'
+import { IQuestionComponentProps, QuestionComponentDefaultData } from './interface.ts'
 
-export * from './interface'
+export default {
+  title: 'Component Display Name',
+  type: 'question-component',  // Must be unique
+  Component,                   // Main component
+  PropComponent,               // Property editor
+  defaultProps: QuestionComponentDefaultData,
+}
 
-export default Component
-export { PropsComponent }
+export { Component, PropComponent, IQuestionComponentProps, QuestionComponentDefaultData }
 ```
 
-## Component Registration
+### 5. Register Component
 
-### Adding to Material Components List
-
-After creating a new component, register it in [src/components/material/index.ts](mdc:src/components/material/index.ts):
+Add the new component to the main component registry in [src/components/material/index.ts](mdc:src/components/material/index.ts):
 
 ```typescript
-import QuestionInput, { 
-  PropsComponent as QuestionInputProps,
-  QuestionInputDefaultProps,
-  type QuestionInputPropsType 
-} from './question-input'
+import QuestionComponent from './question-component'
 
-export const componentConfigs = [
-  // ... other components
-  {
-    title: 'Input',
-    type: 'questionInput',
-    Component: QuestionInput,
-    PropsComponent: QuestionInputProps,
-    defaultProps: QuestionInputDefaultProps,
-  },
+// Add to exports
+export { QuestionComponent }
+
+// Add to component group (if applicable)
+export const formComponents = [
+  // ... existing components
+  QuestionComponent,
 ]
 ```
 
-## Component Guidelines
+## Component Categories
 
-### Naming Conventions
-- **Component Folder**: `question-[name]` (kebab-case)
-- **Component Name**: `Question[Name]` (PascalCase)
-- **Props Type**: `Question[Name]PropsType`
-- **Config Type**: `Question[Name]ConfigType`
-- **Default Props**: `Question[Name]DefaultProps`
+Components are typically organized into these categories:
 
-### Props Best Practices
+### 1. Form Input Components
+- Text inputs (input, textarea)
+- Selection (radio, checkbox, select, dropdown)
+- Date/Time (date, timer)
+- File upload
+- Advanced inputs (slider, rate, color picker)
 
-1. **Always provide default props**: Every configurable property should have a sensible default
-2. **Keep props flat**: Avoid deeply nested prop objects
-3. **Use optional props**: Most props should be optional with defaults
-4. **Type everything**: Use proper TypeScript types for all props
+### 2. Display Components
+- Text (title, paragraph, quote, highlight)
+- Media (image, video, audio, qrcode)
+- Data visualization (table, chart, statistic)
 
-### Component Responsibilities
+### 3. Layout Components
+- Containers (tabs, collapse, drawer, modal)
+- Navigation (menu, anchor, steps, timeline)
+- Organization (divider, separator)
 
-1. **Rendering**: The main component (index.tsx) should only handle rendering
-2. **State**: Use local state for UI interactions, Redux for persisted data
-3. **Props**: Receive configuration through props, don't fetch data inside
-4. **Events**: Emit events to parent rather than handling side effects
+### 4. Interactive Components
+- Buttons and actions
+- Feedback (alert, tooltip, popover, spin)
+- Status displays (progress, skeleton, empty, result)
 
-### Styling Guidelines
+### 5. Advanced Components
+- Timer and countdown
+- Signature pad
+- Matrix/grid questions
+- Ranking
+- Word cloud
+
+## Best Practices
+
+### Component Design
+
+1. **Keep it Simple**: Each component should do one thing well
+2. **Follow Ant Design**: Use Ant Design components as building blocks
+3. **Responsive Design**: Ensure components work on different screen sizes
+4. **Accessibility**: Include proper ARIA labels and keyboard navigation
+
+### Props and State
+
+1. **Minimal Props**: Only include necessary props in the interface
+2. **Sensible Defaults**: Provide good default values in DefaultData
+3. **Controlled Components**: Form inputs should be controlled when possible
+4. **Prop Validation**: Use TypeScript strictly
+
+### Styling
 
 1. **Use Tailwind**: Prefer Tailwind utility classes
-2. **Ant Design for Complex UI**: Use Ant Design components when appropriate
-3. **Responsive Design**: Ensure components work on mobile and desktop
-4. **Theme Support**: Respect the theme context for dark/light mode
+2. **Ant Design Theme**: Respect Ant Design's design system
+3. **Spacing**: Use consistent spacing (Tailwind spacing scale)
+4. **Colors**: Use theme colors from Ant Design or Tailwind config
 
-### Editor Component Guidelines
+### Performance
 
-The props editor component should:
-1. Provide intuitive controls for all configurable properties
-2. Group related properties logically
-3. Use appropriate input types (text, number, color, select, etc.)
-4. Show validation feedback immediately
-5. Be disabled when `disabled` prop is true
+1. **Memoization**: Use `React.memo()` for expensive render components
+2. **Lazy Loading**: Heavy components can be lazy loaded
+3. **Avoid Inline Functions**: Define handlers outside of JSX when possible
+4. **Optimize Re-renders**: Use `useMemo` and `useCallback` appropriately
 
-### Common Props to Include
+## Component Props Pattern
 
-Most components should support these standard props:
+All question components in the data structure have these common fields:
+
 ```typescript
-interface StandardProps {
-  title?: string          // Display title
-  required?: boolean      // Is field required
-  disabled?: boolean      // Is component disabled
-  hidden?: boolean        // Is component hidden
-  className?: string      // Additional CSS classes
+{
+  fe_id: string,           // Frontend unique ID (generated by nanoid)
+  type: string,            // Component type (e.g., 'question-input')
+  title: string,           // Component title/label
+  isHidden: boolean,       // Visibility flag
+  isLocked: boolean,       // Lock flag (prevents editing)
+  props: {                 // Component-specific properties
+    // Your component's props here
+  }
 }
 ```
 
-## Example: Creating a New Component
+When designing your component:
+- The `props` object contains your component's specific configuration
+- `fe_id`, `type`, `title`, `isHidden`, `isLocked` are managed by the editor
+- Your component receives the `props` object as its props
 
-To create a new "Question Badge" component:
+## Testing Components
 
-1. Create folder: `src/components/material/question-badge/`
-2. Define interfaces in `interface.ts`
-3. Implement component in `index.tsx`
-4. Create props editor in `badge-props.tsx`
-5. Export in `index.ts`
-6. Register in `src/components/material/index.ts`
-7. Add to Redux store if needed
-8. Test in the canvas editor
+### Manual Testing
+1. Add component to a questionnaire in the editor
+2. Test all property configurations
+3. Test in both edit and preview modes
+4. Test responsiveness on different screen sizes
+5. Test with keyboard navigation
 
-## Drag & Drop Integration
+### Checklist
+- [ ] Component renders correctly with default props
+- [ ] All props work as expected
+- [ ] Property editor updates component in real-time
+- [ ] Component is responsive
+- [ ] Accessibility features work
+- [ ] No console errors or warnings
+- [ ] Performance is acceptable
 
-Components should work with the @dnd-kit system:
-- Provide a unique `id` prop (using nanoid)
-- Support the drag handle mechanism
-- Handle selection state
-- Support copy/paste operations
+## Common Components to Reference
 
-## Undo/Redo Considerations
+Study these existing components as examples:
 
-Component prop changes should be:
-- Dispatched through Redux actions
-- Included in the undo/redo stack
-- Properly merged with existing state
+- **Simple Component**: [question-input](mdc:src/components/material/question-input/index.tsx)
+- **Complex Component**: [question-table](mdc:src/components/material/question-table)
+- **With Rich Props**: [question-title](mdc:src/components/material/question-title)
+- **Interactive**: [question-button](mdc:src/components/material/question-button)
 
-Note: Selection changes are excluded from undo/redo (see store configuration).
+## Component Data Flow
+
+1. **In Editor**: Component receives props from Redux store
+2. **Property Editor**: User edits props in right panel
+3. **Redux Action**: Props update dispatched to store
+4. **Re-render**: Component re-renders with new props
+5. **In Published Form**: Component renders with final props configuration

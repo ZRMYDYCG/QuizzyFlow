@@ -1,0 +1,106 @@
+---
+alwaysApply: true
+---
+
+# QuizzyFlow Project Overview
+
+QuizzyFlow is a full-stack questionnaire/survey builder application with a drag-and-drop editor.
+
+## Project Structure
+
+### Frontend (React + Vite + TypeScript)
+- **Entry Point**: [main.tsx](mdc:src/main.tsx)
+- **Router**: [src/router/index.tsx](mdc:src/router/index.tsx)
+- **Store**: Redux Toolkit with redux-undo in [src/store/index.ts](mdc:src/store/index.ts)
+- **Components**: Material components in [src/components/material/](mdc:src/components/material)
+- **Layouts**: Three main layouts (HomeLayout, ManageLayout, QuestionLayout)
+- **Pages**: Home, Login, Register, Question Edit, Statistics, Manage List/Star/Trash
+
+### Backend (NestJS + MongoDB + TypeScript)
+- **Entry Point**: [server/src/main.ts](mdc:server/src/main.ts)
+- **Main Module**: [server/src/app.module.ts](mdc:server/src/app.module.ts)
+- **Modules**: Question, User, Auth
+- **Database**: MongoDB via Mongoose
+- **Authentication**: JWT-based auth with bcryptjs
+
+## Tech Stack
+
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite with code splitting
+- **State Management**: Redux Toolkit + redux-undo (20 steps)
+- **UI Libraries**: Ant Design 5, Radix UI, Tailwind CSS
+- **Routing**: React Router DOM v7
+- **Drag & Drop**: @dnd-kit
+- **Charts**: Recharts
+- **Animations**: Framer Motion
+- **Utilities**: ahooks, axios, lodash-es, nanoid
+
+### Backend
+- **Framework**: NestJS 10
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (@nestjs/jwt)
+- **Validation**: class-validator, class-transformer
+- **Password Hashing**: bcryptjs
+
+## Key Conventions
+
+### Path Aliases
+- `@/` maps to `src/` directory (configured in [vite.config.ts](mdc:vite.config.ts))
+
+### Port Configuration
+- Frontend Dev Server: **8000**
+- Backend API Server: **3000**
+- API Proxy: `/api` proxies to `http://localhost:3000`
+
+### Environment
+- Backend uses MongoDB connection from environment variables:
+  - `MONGO_HOST`
+  - `MONGO_PORT`
+  - `MONGO_DATABASE`
+
+## Component System
+
+The application has a rich component library with 60+ question/form components in `src/components/material/`. Each component typically has:
+- `index.tsx` - Component implementation
+- `interface.ts` - TypeScript interfaces and default data
+- `input-props.tsx` or similar - Property editor component
+
+### Component Types
+- **Form Inputs**: input, textarea, radio, checkbox, select, upload, date, slider, rate
+- **Display**: title, paragraph, image, video, audio, qrcode, table, chart
+- **Layout**: tabs, collapse, drawer, modal, steps, timeline
+- **Interactive**: button, dropdown, menu, anchor, transfer
+- **Data**: tree, cascader, autocomplete, descriptions
+- **Feedback**: alert, tooltip, popover, spin, skeleton, empty, result
+- **Advanced**: timer, marquee, badge, code, quote, highlight
+
+## Redux Store Structure
+
+### Modules (in [src/store/modules/](mdc:src/store/modules))
+1. **user**: User authentication state
+2. **questionComponent**: Component list with undo/redo (redux-undo wrapper)
+3. **pageInfo**: Questionnaire metadata (title, description)
+4. **editorLayout**: Editor UI layout state
+5. **canvasConfig**: Canvas configuration settings
+
+### Undo/Redo Configuration
+- Limit: 20 steps
+- Excluded actions: resetComponents, changeSelectedId, selectPrevComponent, selectNextComponent
+
+## Build Configuration
+
+### Code Splitting Strategy ([vite.config.ts](mdc:vite.config.ts))
+- `react-vendor`: React core libraries
+- `redux-vendor`: Redux related
+- `antd-vendor`: Ant Design UI
+- `chart-vendor`: Recharts
+- `utils-vendor`: Axios, lodash-es, nanoid, ahooks
+- `dnd-vendor`: @dnd-kit libraries
+- `animation-vendor`: Framer Motion
+
+### Build Optimizations
+- Assets < 4KB inlined as base64
+- Console and debugger statements removed in production
+- CSS code splitting enabled
+- Image optimization via vite-plugin-imagemin
