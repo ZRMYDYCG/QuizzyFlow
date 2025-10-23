@@ -45,6 +45,12 @@ export class Question {
   @Prop({ default: false })
   isDeleted: boolean
 
+  @Prop({ type: Date, default: null })
+  deletedAt: Date | null
+
+  @Prop({ default: 0 })
+  answerCount: number
+
   @Prop({ required: true, index: true })
   author: string
 

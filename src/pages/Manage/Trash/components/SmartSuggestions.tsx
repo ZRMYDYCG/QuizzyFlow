@@ -29,7 +29,7 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
     }
 
     // 草稿清理建议
-    const draftQuestions = questions.filter(q => !q.isPublish && (q.answerCount || 0) === 0)
+    const draftQuestions = questions.filter(q => !q.isPublished && (q.answerCount || 0) === 0)
     if (draftQuestions.length > 0) {
       result.push({
         icon: Trash2,
@@ -45,7 +45,7 @@ const SmartSuggestions: FC<SmartSuggestionsProps> = ({ questions, onAction }) =>
 
     // 低价值问卷建议
     const lowValueQuestions = questions.filter(q => 
-      q.isPublish && (q.answerCount || 0) > 0 && (q.answerCount || 0) < 10
+      q.isPublished && (q.answerCount || 0) > 0 && (q.answerCount || 0) < 10
     )
     if (lowValueQuestions.length > 0) {
       result.push({

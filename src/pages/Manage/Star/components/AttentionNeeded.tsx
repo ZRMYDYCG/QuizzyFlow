@@ -12,7 +12,7 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
   
   // 筛选需要关注的问卷：已发布但答卷数低的，或者未发布的
   const needAttention = questions.filter(q => {
-    if (!q.isPublish) return true // 未发布的草稿
+    if (!q.isPublished) return true // 未发布的草稿
     if (q.answerCount < 10) return true // 答卷数太少
     return false
   }).slice(0, 3)
@@ -20,7 +20,7 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
   if (needAttention.length === 0) return null
 
   const getAlertType = (question: any) => {
-    if (!question.isPublish) {
+    if (!question.isPublished) {
       return {
         type: 'draft',
         icon: Clock,
@@ -67,14 +67,14 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
 
       <div className="space-y-3">
         {needAttention.map((question: any) => {
-          const { _id, title, answerCount = 0, isPublish } = question
+          const { _id, title, answerCount = 0, isPublished } = question
           const alert = getAlertType(question)
           const AlertIcon = alert.icon
 
           return (
             <Link
               key={_id}
-              to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+              to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
               className="block group"
             >
               <div className={`p-4 rounded-lg border hover:border-orange-500/50 transition-all ${
@@ -97,7 +97,7 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
                       <span className={`text-xs px-2 py-0.5 rounded ${alert.color.replace('text-', 'text-').replace('bg-', 'bg-')}`}>
                         {alert.label}
                       </span>
-                      {isPublish && (
+                      {isPublished && (
                         <span className={`text-xs ${t.text.tertiary}`}>
                           {answerCount} 答卷
                         </span>

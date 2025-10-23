@@ -26,10 +26,10 @@ const ManageLayout = () => {
   const { loading: isCreating, run: handleCreateQuestion } = useRequest(createQuestion, {
     manual: true,
     onSuccess: async (res) => {
-      const { id } = res || {}
-      if (id) {
+      const { _id } = res || {}
+      if (_id) {
         message.success('问卷创建成功')
-        navigate(`/question/edit/${id}`)
+        navigate(`/question/edit/${_id}`)
       }
     },
   })
@@ -137,7 +137,7 @@ const ManageLayout = () => {
             <div className="flex items-center gap-1.5 md:gap-3">
               {/* 新建按钮 - 移动端只显示图标 */}
               <button 
-                onClick={handleCreateQuestion}
+                onClick={() => handleCreateQuestion()}
                 disabled={isCreating}
                 className={`flex items-center justify-center gap-0 md:gap-2 px-2 md:px-3 h-8 md:h-9 rounded-lg ${themeClasses.buttonBg} ${themeClasses.text} hover:text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
               >

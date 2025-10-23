@@ -18,11 +18,11 @@ interface QuestionCardProps {
   createdAt: string
   answerCount: number
   isStar: boolean
-  isPublish: boolean
+  isPublished: boolean
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, answerCount, isPublish, isStar, createdAt, title } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -101,7 +101,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               
               <div className="flex-1 min-w-0">
                 <Link
-                  to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+                  to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
                   className={`text-base md:text-lg font-semibold hover:text-blue-400 transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
                 >
                   {title}
@@ -121,7 +121,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               <span className="text-xs font-medium text-rose-400 bg-rose-500/10 rounded-lg px-2 md:px-2.5 py-0.5 md:py-1 border border-rose-500/20">
                 考试
               </span>
-              {isPublish ? (
+              {isPublished ? (
                 <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded-lg px-2 md:px-2.5 py-0.5 md:py-1 border border-emerald-500/20">
                   已发布
                 </span>
@@ -156,7 +156,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
             </button>
             
             <button
-              disabled={!isPublish}
+              disabled={!isPublished}
               onClick={() => navigate(`/question/star/${_id}`)}
               className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:flex"
               title="查看统计"

@@ -53,13 +53,13 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
 
       <div className="space-y-3">
         {topQuestions.map((question: any, index: number) => {
-          const { _id, title, answerCount = 0, isPublish } = question
+          const { _id, title, answerCount = 0, isPublished } = question
           const percentage = maxCount > 0 ? (answerCount / maxCount) * 100 : 0
 
           return (
             <Link
               key={_id}
-              to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+              to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
               className="group block"
             >
               <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${

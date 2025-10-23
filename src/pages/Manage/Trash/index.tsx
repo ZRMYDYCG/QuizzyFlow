@@ -64,8 +64,8 @@ const Trash: React.FC = () => {
         const daysAgo = Math.floor((now - new Date(q.deletedAt).getTime()) / (1000 * 60 * 60 * 24))
         return daysAgo >= AUTO_DELETE_DAYS - 3
       }).length,
-      draft: list.filter((q: any) => !q.isPublish).length,
-      published: list.filter((q: any) => q.isPublish).length,
+      draft: list.filter((q: any) => !q.isPublished).length,
+      published: list.filter((q: any) => q.isPublished).length,
     }
   }, [list])
 
@@ -83,9 +83,9 @@ const Trash: React.FC = () => {
           return daysAgo >= AUTO_DELETE_DAYS - 3
         })
       case 'draft':
-        return list.filter((q: any) => !q.isPublish)
+        return list.filter((q: any) => !q.isPublished)
       case 'published':
-        return list.filter((q: any) => q.isPublish)
+        return list.filter((q: any) => q.isPublished)
       default:
         return list
     }

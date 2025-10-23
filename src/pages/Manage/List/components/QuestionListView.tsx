@@ -15,7 +15,7 @@ interface QuestionListViewProps {
 }
 
 const QuestionListItem: FC<any> = (props) => {
-  const { _id, answerCount, isPublish, isStar, createdAt, title } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -82,7 +82,7 @@ const QuestionListItem: FC<any> = (props) => {
           </button>
           
           <Link
-            to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
             className={`text-sm md:text-base font-medium hover:text-blue-400 transition-colors truncate flex-1 ${t.text.primary}`}
           >
             {title}
@@ -92,7 +92,7 @@ const QuestionListItem: FC<any> = (props) => {
             考试
           </span>
 
-          {isPublish ? (
+          {isPublished ? (
             <span className="flex-shrink-0 px-1.5 md:px-2 py-0.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20 hidden sm:inline">
               已发布
             </span>
@@ -130,7 +130,7 @@ const QuestionListItem: FC<any> = (props) => {
         </button>
         
         <button
-          disabled={!isPublish}
+          disabled={!isPublished}
           onClick={() => navigate(`/question/star/${_id}`)}
           className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed hidden sm:flex"
           title="统计"

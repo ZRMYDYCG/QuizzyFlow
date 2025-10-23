@@ -174,7 +174,10 @@ export class QuestionService {
         author: username,
       },
       {
-        $set: { isDeleted: true },
+        $set: { 
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
       },
     )
 
@@ -249,6 +252,7 @@ export class QuestionService {
     }
 
     question.isDeleted = false
+    question.deletedAt = null
     await question.save()
 
     return {

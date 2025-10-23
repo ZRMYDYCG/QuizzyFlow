@@ -22,7 +22,7 @@ interface QuestionTableRowProps {
 }
 
 const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onSelect }) => {
-  const { _id, answerCount, isPublish, isStar, createdAt, title } = question
+  const { _id, answerCount, isPublished, isStar, createdAt, title } = question
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -102,7 +102,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
       <td className="p-4">
         <div className="flex flex-col gap-1">
           <Link
-            to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
             className={`font-medium hover:text-blue-400 transition-colors ${t.text.primary}`}
           >
             {title}
@@ -116,7 +116,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
         </span>
       </td>
       <td className="p-4">
-        {isPublish ? (
+        {isPublished ? (
           <span className="px-3 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20">
             已发布
           </span>
@@ -139,7 +139,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
           </button>
           
           <button
-            disabled={!isPublish}
+            disabled={!isPublished}
             onClick={() => navigate(`/question/star/${_id}`)}
             className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             title="统计"
@@ -207,7 +207,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
 
 // 移动端简化卡片视图
 const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id: string) => void }> = ({ question, isSelected, onSelect }) => {
-  const { _id, answerCount, isPublish, isStar, createdAt, title } = question
+  const { _id, answerCount, isPublished, isStar, createdAt, title } = question
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -285,7 +285,7 @@ const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id
 
         <div className="flex-1 min-w-0">
           <Link
-            to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
             className={`text-sm font-medium hover:text-blue-400 transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
           >
             {title}
@@ -295,7 +295,7 @@ const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id
             <span className="text-xs font-medium text-rose-400 bg-rose-500/10 rounded px-2 py-0.5 border border-rose-500/20">
               考试
             </span>
-            {isPublish ? (
+            {isPublished ? (
               <span className="px-2 py-0.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20">
                 已发布
               </span>

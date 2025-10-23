@@ -25,7 +25,7 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
 }) => {
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const { _id, title, isPublish, answerCount = 0, createdAt, deletedAt } = question
+  const { _id, title, isPublished, answerCount = 0, createdAt, deletedAt } = question
 
   // 计算删除天数和剩余天数
   const { daysAgo, remainingDays, isUrgent, isHighValue } = useMemo(() => {
@@ -115,7 +115,7 @@ const EnhancedTrashItem: FC<EnhancedTrashItemProps> = ({
                 )}
 
                 {/* 状态 */}
-                {isPublish ? (
+                {isPublished ? (
                   <span className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20">
                     已发布
                   </span>

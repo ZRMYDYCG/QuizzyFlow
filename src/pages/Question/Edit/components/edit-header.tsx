@@ -106,7 +106,7 @@ const PublishButton: FC = () => {
   const { loading, run: publish } = useRequest(
     async () => {
       if (!id) return
-      await updateQuestion(id, { ...pageInfo, componentList, isPublish: true })
+      await updateQuestion(id, { ...pageInfo, componentList, isPublished: true })
     },
     {
       manual: true,

@@ -38,9 +38,9 @@ const Star = () => {
 
   // 计算统计数据
   const stats = useMemo(() => {
-    const published = list.filter((q: any) => q.isPublish).length
-    const active = list.filter((q: any) => q.isPublish && q.answerCount > 10).length
-    const needAttention = list.filter((q: any) => !q.isPublish || q.answerCount < 10).length
+    const published = list.filter((q: any) => q.isPublished).length
+    const active = list.filter((q: any) => q.isPublished && q.answerCount > 10).length
+    const needAttention = list.filter((q: any) => !q.isPublished || q.answerCount < 10).length
     
     return {
       total,

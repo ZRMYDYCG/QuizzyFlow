@@ -8,12 +8,12 @@ interface RecentStarredProps {
 }
 
 const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
-  const { _id, title, answerCount, createdAt, isPublish } = question
+  const { _id, title, answerCount, createdAt, isPublished } = question
   const t = useManageTheme()
 
   return (
     <Link
-      to={isPublish ? `/question/static/${_id}` : `/question/edit/${_id}`}
+      to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
       className="group relative flex-shrink-0 w-[280px] md:w-[320px]"
     >
       <div className={`p-4 rounded-xl border hover:border-yellow-500/50 hover:shadow-lg transition-all duration-300 h-full ${
@@ -33,7 +33,7 @@ const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
 
         {/* 状态标签 */}
         <div className="flex items-center gap-2 mb-3">
-          {isPublish ? (
+          {isPublished ? (
             <span className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20">
               已发布
             </span>
