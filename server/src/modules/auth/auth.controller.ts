@@ -8,13 +8,12 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { LoginDto } from '../user/dto/login.dto'
-import { Public } from '../../common/decorators/public.decorator'
+import { LoginDto } from '@/modules/user/dto/login.dto'
+import { Public } from '@/common/decorators/public.decorator'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
   /**
    * 用户登录
    * POST /api/auth/login
