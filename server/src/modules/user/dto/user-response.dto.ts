@@ -1,13 +1,28 @@
+import { ApiProperty } from '@nestjs/swagger'
+
 /**
  * 用户响应 DTO（不包含密码）
  */
 export class UserResponseDto {
+  @ApiProperty({ description: '用户ID' })
   _id: string
+
+  @ApiProperty({ description: '用户邮箱', example: 'user@example.com' })
   username: string
+
+  @ApiProperty({ description: '用户昵称', example: '张三' })
   nickname: string
+
+  @ApiProperty({ description: '账号是否激活', example: true })
   isActive: boolean
+
+  @ApiProperty({ description: '最后登录时间', example: '2024-01-01T00:00:00Z', nullable: true })
   lastLoginAt: Date | null
+
+  @ApiProperty({ description: '创建时间', example: '2024-01-01T00:00:00Z' })
   createdAt: Date
+
+  @ApiProperty({ description: '更新时间', example: '2024-01-01T00:00:00Z' })
   updatedAt: Date
 
   constructor(user: any) {
