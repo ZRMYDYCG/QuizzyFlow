@@ -104,6 +104,9 @@ export class QuestionService {
 
   /**
    * 获取单个问卷
+   * 权限规则：
+   * 1. 已发布的问卷：任何人都可以访问（包括未登录用户）
+   * 2. 未发布的问卷：仅作者可以访问
    */
   async findOne(id: string, username?: string) {
     // 验证 ID 格式
@@ -121,9 +124,14 @@ export class QuestionService {
       throw new NotFoundException('问卷不存在')
     }
 
-    // 验证权限（只能查看自己的问卷，除非已发布）
-    // 如果提供了 username，则检查权限
-    if (username && question.author !== username && !question.isPublished) {
+    // 权限验证
+    // 如果问卷已发布，任何人都可以访问
+    if (question.isPublished) {
+      return question
+    }
+
+    // 如果问卷未发布，只有作者可以访问
+    if (!username || question.author !== username) {
       throw new ForbiddenException('无权访问此问卷')
     }
 

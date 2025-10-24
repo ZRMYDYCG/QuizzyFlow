@@ -13,7 +13,7 @@ const useLoadUserData = () => {
   const dispatch = useDispatch()
   const { token } = useGetUserInfo()
 
-  const { run: fetchUserInfo } = useRequest(
+  const { run: fetchUserInfo, loading: waitingUserData } = useRequest(
     async () => {
       const userInfo = await getUserInfo()
       return userInfo
@@ -54,7 +54,7 @@ const useLoadUserData = () => {
     }
   }, [])
 
-  return {}
+  return { waitingUserData }
 }
 
 export default useLoadUserData

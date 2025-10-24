@@ -30,6 +30,7 @@ const useLoadQuestionData = () => {
       css = '',
       js = '',
       isPublished = false,
+      author = '',
     } = data
 
     // 获取默认的 selectedId
@@ -46,8 +47,8 @@ const useLoadQuestionData = () => {
         copiedComponent: null,
       })
     )
-    // pageInfo存储
-    dispatch(resetPageInfo({ title, desc, css, js, isPublished }))
+    // pageInfo存储，包含作者信息
+    dispatch(resetPageInfo({ title, desc, css, js, isPublished, author }))
   }, [data])
 
   // 判断 id 变化

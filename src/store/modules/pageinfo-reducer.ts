@@ -6,6 +6,7 @@ export interface IPageInfo {
   css?: string
   js?: string
   isPublished?: boolean
+  author?: string // 问卷作者
   padding?: string
   layout?: 'left' | 'center' | 'right' // 页面方向
   maxWidth?: string // 页面最大宽度

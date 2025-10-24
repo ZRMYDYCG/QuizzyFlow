@@ -23,6 +23,7 @@ import { CreateQuestionDto } from './dto/create-question.dto'
 import { UpdateQuestionDto } from './dto/update-question.dto'
 import { QueryQuestionDto } from './dto/query-question.dto'
 import { BatchDeleteDto } from './dto/batch-delete.dto'
+import { Public } from '@/common/decorators/public.decorator'
 
 @ApiTags('问卷')
 @ApiBearerAuth()
@@ -97,8 +98,13 @@ export class QuestionController {
   /**
    * 获取单个问卷
    * GET /api/question/:id
+   * 已发布的问卷可以公开访问
    */
-  @ApiOperation({ summary: '获取单个问卷详情', description: '根据问卷ID获取问卷的详细信息' })
+  @Public()
+  @ApiOperation({ 
+    summary: '获取单个问卷详情', 
+    description: '根据问卷ID获取问卷的详细信息。已发布的问卷无需认证即可访问。' 
+  })
   @ApiParam({
     name: 'id',
     description: '问卷ID',
@@ -113,12 +119,13 @@ export class QuestionController {
     description: '问卷不存在',
   })
   @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: '未授权',
+    status: HttpStatus.FORBIDDEN,
+    description: '无权访问（未发布的问卷）',
   })
   @Get(':id')
   async findOne(@Param('id') id: string, @Request() req) {
-    const { username } = req.user
+    // req.user 可能不存在（未登录用户）
+    const username = req.user?.username
     return await this.questionService.findOne(id, username)
   }
 
