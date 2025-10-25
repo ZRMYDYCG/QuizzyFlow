@@ -10,6 +10,7 @@ import {
 import { useRequest } from 'ahooks'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useManageTheme } from '@/hooks/useManageTheme'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const { confirm } = Modal
 
@@ -27,6 +28,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   const { _id, answerCount, isPublished, isStar, createdAt, title, onDelete } = props
   const navigate = useNavigate()
   const t = useManageTheme()
+  const { primaryColor } = useTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { loading: duplicateLoading, run: duplicate } = useRequest(
@@ -74,14 +76,42 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
   return (
     <div className="relative group">
       {/* 主卡片 */}
-      <div className={`relative p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all duration-300 overflow-hidden ${
-        t.isDark 
-          ? 'bg-gradient-to-br from-slate-800/80 to-slate-800/40 border-slate-700/50 hover:border-blue-500/50 backdrop-blur-sm' 
-          : 'bg-white border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-md'
-      }`}>
+      <div 
+        className={`relative p-4 md:p-5 rounded-xl md:rounded-2xl border transition-all duration-300 overflow-hidden ${
+          t.isDark 
+            ? 'bg-gradient-to-br from-slate-800/80 to-slate-800/40 border-slate-700/50 backdrop-blur-sm' 
+            : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
+        }`}
+        style={{
+          borderColor: t.isDark ? '' : primaryColor + '20'
+        }}
+        onMouseEnter={(e) => {
+          if (!t.isDark) {
+            e.currentTarget.style.borderColor = primaryColor + '40'
+          } else {
+            e.currentTarget.style.borderColor = primaryColor + '50'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!t.isDark) {
+            e.currentTarget.style.borderColor = primaryColor + '20'
+          } else {
+            e.currentTarget.style.borderColor = ''
+          }
+        }}
+      >
         {/* 背景装饰 - 仅深色模式 */}
         {t.isDark && (
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-all duration-500" />
+          <div 
+            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-500"
+            style={{ backgroundColor: primaryColor + '05' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = primaryColor + '10'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = primaryColor + '05'
+            }}
+          />
         )}
         
         {/* 顶部：标题和标签 */}
@@ -106,7 +136,10 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               <div className="flex-1 min-w-0">
                 <Link
                   to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
-                  className={`text-base md:text-lg font-semibold hover:text-blue-400 transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
+                  className={`text-base md:text-lg font-semibold transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
+                  style={{ color: t.text.primary }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = primaryColor }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = '' }}
                 >
                   {title}
                 </Link>
@@ -142,9 +175,15 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
         <div className={`relative flex items-center justify-between pt-3 md:pt-4 border-t ${t.divider}`}>
           {/* 答卷数统计 */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20">
-              <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-400" />
-              <span className="text-sm font-semibold text-blue-400">{answerCount}</span>
+            <div 
+              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-lg border"
+              style={{
+                backgroundColor: primaryColor + '15',
+                borderColor: primaryColor + '30'
+              }}
+            >
+              <BarChart3 className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ color: primaryColor }} />
+              <span className="text-sm font-semibold" style={{ color: primaryColor }}>{answerCount}</span>
               <span className="text-xs text-slate-500 hidden sm:inline">答卷</span>
             </div>
           </div>
@@ -153,8 +192,16 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
           <div className="flex items-center gap-1 md:gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={() => navigate(`/question/edit/${_id}`)}
-              className="p-1.5 md:p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
+              className="p-1.5 md:p-2 text-slate-400 rounded-lg transition-all"
               title="编辑问卷"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = primaryColor
+                e.currentTarget.style.backgroundColor = primaryColor + '15'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#94a3b8'
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
             >
               <Edit className="w-4 h-4" strokeWidth={2} />
             </button>

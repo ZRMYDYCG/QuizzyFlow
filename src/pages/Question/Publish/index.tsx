@@ -17,6 +17,7 @@ import useGetUserInfo from '@/hooks/useGetUserInfo'
 import { useTitle, useRequest } from 'ahooks'
 import { submitAnswer, AnswerItem } from '@/api/modules/answer'
 import { useManageTheme } from '@/hooks/useManageTheme'
+import { useTheme } from '@/contexts/ThemeContext'
 
 // 生成组件 - 区分预览模式和答题模式
 function genComponent(
@@ -116,6 +117,7 @@ const PublishPage: React.FC = () => {
   const pageInfo = useGetPageInfo()
   const { username } = useGetUserInfo()
   const t = useManageTheme()
+  const { primaryColor } = useTheme()
   
   const [copying, setCopying] = useState(false)
   const [answerValues, setAnswerValues] = useState<Record<string, any>>({})
@@ -329,7 +331,14 @@ const PublishPage: React.FC = () => {
               <h2 className={`text-base md:text-lg font-semibold truncate ${t.text.primary}`}>
                 {pageInfo.title}
               </h2>
-              <div className="hidden sm:block px-2 py-1 bg-blue-500/10 text-blue-400 text-xs rounded flex-shrink-0 border border-blue-500/20">
+              <div 
+                className="hidden sm:block px-2 py-1 text-xs rounded flex-shrink-0 border"
+                style={{
+                  backgroundColor: primaryColor + '10',
+                  color: primaryColor,
+                  borderColor: primaryColor + '20'
+                }}
+              >
                 预览模式
               </div>
             </div>

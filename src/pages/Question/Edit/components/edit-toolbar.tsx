@@ -31,7 +31,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 const EditToolbar: React.FC = () => {
   const dispatch = useDispatch()
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
   const { selectedId, selectedComponent, copiedComponent, componentList } =
     useGetComponentInfo()
   const { isLocked } = selectedComponent || {}
@@ -179,9 +179,22 @@ const EditToolbar: React.FC = () => {
           onClick={handleLock}
           className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
             isLocked 
-              ? 'bg-blue-500 text-white hover:bg-blue-600' 
+              ? 'text-white' 
               : buttonBaseClass.replace('w-8 h-8 flex items-center justify-center rounded-lg transition-all ', '')
           }`}
+          style={isLocked ? {
+            background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`,
+          } : {}}
+          onMouseEnter={(e) => {
+            if (isLocked) {
+              e.currentTarget.style.background = `linear-gradient(135deg, ${themeColors.primaryHover}, ${primaryColor})`
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isLocked) {
+              e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+            }
+          }}
         >
           <LockOutlined />
         </button>

@@ -18,7 +18,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 const Layers: FC = () => {
   const { componentList, selectedId } = useGetComponentInfo()
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
 
   console.log(componentList)
   const dispatch = useDispatch()
@@ -85,12 +85,17 @@ const Layers: FC = () => {
                 className={cn(
                   'flex justify-between items-center w-full py-2.5 px-3 mb-2 rounded-lg cursor-pointer transition-all border',
                   isSelected 
-                    ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' 
+                    ? '' 
                     : theme === 'dark'
                       ? 'bg-[#2a2a2f] border-white/5 text-slate-300 hover:bg-[#35353a] hover:border-white/10'
                       : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-gray-300',
                   isHidden && 'opacity-50'
                 )}
+                style={isSelected ? {
+                  backgroundColor: primaryColor + '15',
+                  borderColor: primaryColor + '50',
+                  color: primaryColor
+                } : {}}
               >
                 <div 
                   onClick={() => handleTitleClick(fe_id)}
@@ -115,11 +120,14 @@ const Layers: FC = () => {
                     className={cn(
                       'w-7 h-7 flex items-center justify-center rounded-md transition-all',
                       isHidden 
-                        ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                        ? 'text-white' 
                         : theme === 'dark'
                           ? 'bg-[#35353a] text-slate-400 hover:text-white hover:bg-[#404045]'
                           : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                     )}
+                    style={isHidden ? {
+                      background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                    } : {}}
                   >
                     <EyeInvisibleOutlined className="text-xs" />
                   </button>

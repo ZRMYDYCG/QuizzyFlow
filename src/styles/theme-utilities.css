@@ -1,0 +1,143 @@
+/* 主题色工具类 - 自动应用中国风主题色 */
+
+/* 背景色 */
+.theme-bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.theme-bg-primary-light {
+  background-color: var(--color-primary);
+  opacity: 0.1;
+}
+
+.theme-bg-primary-hover {
+  background-color: var(--color-primary-hover) !important;
+}
+
+/* 文字颜色 */
+.theme-text-primary {
+  color: var(--color-primary) !important;
+}
+
+.theme-text-primary-hover:hover {
+  color: var(--color-primary) !important;
+}
+
+/* 边框颜色 */
+.theme-border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.theme-border-primary-hover:hover {
+  border-color: var(--color-primary) !important;
+}
+
+/* 渐变背景 */
+.theme-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-active)) !important;
+}
+
+.theme-gradient-primary-vertical {
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-active)) !important;
+}
+
+/* 悬停效果 */
+.theme-hover-bg:hover {
+  background-color: var(--color-primary);
+  opacity: 0.15;
+}
+
+.theme-hover-text:hover {
+  color: var(--color-primary) !important;
+}
+
+.theme-hover-border:hover {
+  border-color: var(--color-primary) !important;
+}
+
+/* 激活状态 */
+.theme-active-bg {
+  background-color: var(--color-primary);
+  opacity: 0.15;
+  border-left: 3px solid var(--color-primary);
+}
+
+/* 阴影效果 */
+.theme-shadow-primary {
+  box-shadow: 0 10px 15px -3px var(--color-primary), 0 4px 6px -4px var(--color-primary);
+  opacity: 0.1;
+}
+
+.theme-shadow-primary-hover:hover {
+  box-shadow: 0 10px 15px -3px var(--color-primary), 0 4px 6px -4px var(--color-primary);
+  opacity: 0.15;
+}
+
+/* 组合样式 - 卡片悬停 */
+.theme-card-hover {
+  transition: all 0.3s;
+}
+
+.theme-card-hover:hover {
+  border-color: var(--color-primary);
+  opacity: 0.5;
+}
+
+/* 按钮样式 */
+.theme-button-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-active)) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.theme-button-primary:hover {
+  background: linear-gradient(135deg, var(--color-primary-hover), var(--color-primary)) !important;
+}
+
+.theme-button-outline {
+  border: 1px solid var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: transparent !important;
+}
+
+.theme-button-outline:hover {
+  background-color: var(--color-primary) !important;
+  opacity: 0.1;
+  color: var(--color-primary) !important;
+}
+
+/* 链接样式 */
+.theme-link {
+  color: var(--color-primary) !important;
+  transition: color 0.2s;
+}
+
+.theme-link:hover {
+  color: var(--color-primary-hover) !important;
+}
+
+/* 图标颜色 */
+.theme-icon-primary {
+  color: var(--color-primary) !important;
+}
+
+/* 徽章/标签 */
+.theme-badge {
+  background-color: var(--color-primary);
+  opacity: 0.15;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary) !important;
+}
+
+/* 进度条 */
+.theme-progress-bar {
+  background-color: var(--color-primary) !important;
+}
+
+/* 分割线 */
+.theme-divider {
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-active));
+  width: 4px;
+  border-radius: 2px;
+}
+

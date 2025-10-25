@@ -5,22 +5,24 @@ import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useGetUserInfo from '../../hooks/useGetUserInfo.ts'
 import { useState } from 'react'
-import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2 } from 'lucide-react'
+import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { createQuestion } from '../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import ThemeToggle from '../../components/ThemeToggle'
 import { useTheme } from '../../contexts/ThemeContext'
 import { editorDarkTheme, editorLightTheme } from '../../config/theme.config'
+import ThemeSelectorDialog from '../../components/theme-selector-dialog'
 
 const ManageLayout = () => {
   const { waitingUserData } = useLoadUserData()
   const { username, nickname } = useGetUserInfo()
   useNavPage(waitingUserData)
   const navigate = useNavigate()
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false)
 
   // 创建新问卷
   const { loading: isCreating, run: handleCreateQuestion } = useRequest(createQuestion, {
@@ -139,7 +141,20 @@ const ManageLayout = () => {
               <button 
                 onClick={() => handleCreateQuestion()}
                 disabled={isCreating}
-                className={`flex items-center justify-center gap-0 md:gap-2 px-2 md:px-3 h-8 md:h-9 rounded-lg ${themeClasses.buttonBg} ${themeClasses.text} hover:text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                className="flex items-center justify-center gap-0 md:gap-2 px-2 md:px-3 h-8 md:h-9 rounded-lg text-white text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`,
+                }}
+                onMouseEnter={(e) => {
+                  if (!isCreating) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${themeColors.primaryHover}, ${primaryColor})`
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isCreating) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                  }
+                }}
               >
                 {isCreating ? (
                   <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
@@ -156,7 +171,10 @@ const ManageLayout = () => {
               {/* 通知按钮 - 移动端隐藏 */}
               <button className={`hidden md:flex relative w-8 h-8 rounded-lg ${themeClasses.buttonBg} items-center justify-center ${themeClasses.textSecondary} hover:text-white transition-colors`}>
                 <Bell className="w-4 h-4" strokeWidth={2} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span 
+                  className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-lg"
+                  style={{ backgroundColor: primaryColor }}
+                ></span>
               </button>
 
               {/* 主题切换按钮 */}
@@ -166,7 +184,12 @@ const ManageLayout = () => {
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
                   <button className={`flex items-center gap-1 md:gap-2 pl-1 md:pl-2 pr-2 md:pr-3 h-8 md:h-9 rounded-lg ${themeClasses.buttonBg} transition-colors`}>
-                    <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                    <div 
+                      className="w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                      }}
+                    >
                       {(nickname || username || 'U').charAt(0).toUpperCase()}
                     </div>
                     <ChevronDown className="w-3 h-3 text-slate-500 hidden md:block" strokeWidth={2} />
@@ -189,16 +212,24 @@ const ManageLayout = () => {
                       <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {nickname || username}
                       </p>
-                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
-                        管理员
-                      </p>
                     </div>
-                    <DropdownMenu.Item className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
-                      theme === 'dark' 
-                        ? 'text-slate-300 hover:bg-white/10' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}>
-                      个人设置
+                    <DropdownMenu.Item 
+                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
+                        theme === 'dark' 
+                          ? 'text-slate-300 hover:bg-white/10' 
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      onSelect={() => setThemeDialogOpen(true)}
+                    >
+                      <Palette className="w-4 h-4" />
+                      <span className="flex-1">主题颜色</span>
+                      <div 
+                        className="w-4 h-4 rounded-full border"
+                        style={{ 
+                          backgroundColor: primaryColor,
+                          borderColor: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'
+                        }}
+                      />
                     </DropdownMenu.Item>
                     <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 rounded-lg outline-none cursor-pointer hover:bg-red-500/10 transition-colors">
                       退出登录
@@ -217,6 +248,12 @@ const ManageLayout = () => {
           </div>
         </div>
       </div>
+      
+      {/* 主题选择对话框 */}
+      <ThemeSelectorDialog 
+        open={themeDialogOpen} 
+        onOpenChange={setThemeDialogOpen}
+      />
       </div>
     </ConfigProvider>
   )

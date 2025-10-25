@@ -1,6 +1,4 @@
 import React from 'react'
-import { ConfigProvider } from 'antd'
-import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import { useTheme } from '@/contexts/ThemeContext'
 import EnhancedCanvasWrapper from '@/components/canvas/EnhancedCanvasWrapper.tsx'
 import useLoadQuestionData from '@/hooks/useLoadQuestionData.ts'
@@ -48,51 +46,46 @@ const EditQuestionPage: React.FC = () => {
     dispatch(setRightPanelWidth(width))
   }
 
-  // 根据主题选择配置
-  const currentTheme = theme === 'dark' ? editorDarkTheme : editorLightTheme
-
   return (
-    <ConfigProvider theme={currentTheme}>
-      <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
-        <EditHeader />
-        <div className="flex-auto overflow-hidden">
-          <div className="flex h-full">
-            {/* 左侧物料面板 - 可调整宽度 */}
-            {showLeftPanel && (
-              <ResizablePanel
-                position="left"
-                width={leftPanelWidth}
-                onWidthChange={handleLeftPanelResize}
-              >
-                <LeftPanel />
-              </ResizablePanel>
-            )}
-            
-            {/* 中间画布区域 - 增强版画布 */}
-            <div
-              className="flex-1 relative"
-              onClick={removeSelectedId}
+    <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
+      <EditHeader />
+      <div className="flex-auto overflow-hidden">
+        <div className="flex h-full">
+          {/* 左侧物料面板 - 可调整宽度 */}
+          {showLeftPanel && (
+            <ResizablePanel
+              position="left"
+              width={leftPanelWidth}
+              onWidthChange={handleLeftPanelResize}
             >
-              <EnhancedCanvasWrapper loading={loading} />
-              
-              {/* 布局工具栏 */}
-              <LayoutToolbar />
-            </div>
+              <LeftPanel />
+            </ResizablePanel>
+          )}
+          
+          {/* 中间画布区域 - 增强版画布 */}
+          <div
+            className="flex-1 relative"
+            onClick={removeSelectedId}
+          >
+            <EnhancedCanvasWrapper loading={loading} />
             
-            {/* 右侧属性面板 - 可调整宽度 */}
-            {showRightPanel && (
-              <ResizablePanel
-                position="right"
-                width={rightPanelWidth}
-                onWidthChange={handleRightPanelResize}
-              >
-                <RightPanel />
-              </ResizablePanel>
-            )}
+            {/* 布局工具栏 */}
+            <LayoutToolbar />
           </div>
+          
+          {/* 右侧属性面板 - 可调整宽度 */}
+          {showRightPanel && (
+            <ResizablePanel
+              position="right"
+              width={rightPanelWidth}
+              onWidthChange={handleRightPanelResize}
+            >
+              <RightPanel />
+            </ResizablePanel>
+          )}
         </div>
       </div>
-    </ConfigProvider>
+    </div>
   )
 }
 

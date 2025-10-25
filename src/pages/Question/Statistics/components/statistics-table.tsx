@@ -6,6 +6,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { getQuestionsStatistics } from '@/api/modules/statistics'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { cn } from '@/utils/index'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { ComponentSelectionProps, StatisticsAnswer } from '../types'
 
 interface ComponentData {
@@ -16,7 +17,7 @@ interface ComponentData {
 }
 
 // 根据组件类型渲染不同的单元格内容
-const renderCellByType = (type: string, value: any, props?: any, isMobile?: boolean) => {
+const renderCellByType = (type: string, value: any, props?: any, isMobile?: boolean, primaryColor?: string) => {
   // 空值处理
   if (value === null || value === undefined || value === '') {
     return <span className="text-gray-400 text-xs md:text-sm">-</span>
@@ -179,7 +180,10 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
       const numValue = typeof value === 'string' ? parseFloat(value) : value
       if (!isNaN(numValue)) {
         return (
-          <span className="text-xs md:text-sm font-semibold text-blue-600">
+          <span 
+            className="text-xs md:text-sm font-semibold" 
+            style={{ color: primaryColor || '#3b82f6' }}
+          >
             {numValue.toLocaleString()}
           </span>
         )
@@ -345,7 +349,11 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
             {value.split('').map((char, idx) => (
               <div 
                 key={idx}
-                className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center border-2 border-blue-400 rounded bg-blue-50 font-mono font-bold text-xs md:text-base"
+                className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center border-2 rounded font-mono font-bold text-xs md:text-base"
+                style={{
+                  borderColor: primaryColor || '#3b82f6',
+                  backgroundColor: (primaryColor || '#3b82f6') + '08',
+                }}
               >
                 {char}
               </div>
@@ -463,6 +471,7 @@ const StatisticsTable = memo(
     const { id = '' } = useParams()
     const responsive = useResponsive()
     const isMobile = !responsive.md
+    const { primaryColor } = useTheme()
 
     const { loading } = useRequest(
       async () => {
@@ -497,14 +506,27 @@ const StatisticsTable = memo(
           return {
             title: (
               <div
-                className="cursor-pointer hover:text-blue-600 transition-colors"
+                className="cursor-pointer transition-colors"
                 onClick={() => handleColumnClick(fe_id, type)}
+                style={fe_id === selectedComponentId ? {
+                  color: primaryColor
+                } : {}}
+                onMouseEnter={(e) => {
+                  if (fe_id !== selectedComponentId) {
+                    e.currentTarget.style.color = primaryColor
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (fe_id !== selectedComponentId) {
+                    e.currentTarget.style.color = ''
+                  }
+                }}
               >
                 <span
                   className={cn({
-                    'text-blue-500 font-semibold':
-                      fe_id === selectedComponentId,
+                    'font-semibold': fe_id === selectedComponentId,
                   })}
+                  style={fe_id === selectedComponentId ? { color: primaryColor } : {}}
                 >
                   {columnTitle}
                 </span>
@@ -528,12 +550,12 @@ const StatisticsTable = memo(
               150
             ),
             ellipsis: false,
-            render: (value: any) => renderCellByType(type, value, props, isMobile),
+            render: (value: any) => renderCellByType(type, value, props, isMobile, primaryColor),
             // 移动端固定第一列
             fixed: isMobile && index === 0 ? 'left' : undefined,
           }
         }),
-      [componentList, selectedComponentId, handleColumnClick, isMobile]
+      [componentList, selectedComponentId, handleColumnClick, isMobile, primaryColor]
     )
 
     const dataSource = useMemo(

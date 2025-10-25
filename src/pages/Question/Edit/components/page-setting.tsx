@@ -22,7 +22,7 @@ const PageSetting: React.FC = () => {
   const pageInfo = useGetPageInfo()
   const dispatch = useDispatch()
   const [form] = Form.useForm()
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
 
   useEffect(() => {
     form.setFieldsValue(pageInfo)
@@ -75,7 +75,12 @@ const PageSetting: React.FC = () => {
         {/* 基础信息 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-2" />
+            <span 
+              className="w-1 h-4 rounded-full mr-2" 
+              style={{
+                background: `linear-gradient(to bottom, ${primaryColor}, ${themeColors.primaryActive})`
+              }}
+            />
             <span className={`text-sm font-semibold ${titleClass}`}>基础信息</span>
           </div>
           
@@ -95,7 +100,12 @@ const PageSetting: React.FC = () => {
         {/* 布局设置 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-2" />
+            <span 
+              className="w-1 h-4 rounded-full mr-2" 
+              style={{
+                background: `linear-gradient(to bottom, ${primaryColor}, ${themeColors.primaryActive})`
+              }}
+            />
             <span className={`text-sm font-semibold ${titleClass}`}>布局设置</span>
           </div>
           
@@ -141,7 +151,12 @@ const PageSetting: React.FC = () => {
         {/* 背景设置 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-2" />
+            <span 
+              className="w-1 h-4 rounded-full mr-2" 
+              style={{
+                background: `linear-gradient(to bottom, ${primaryColor}, ${themeColors.primaryActive})`
+              }}
+            />
             <span className={`text-sm font-semibold ${titleClass}`}>背景设置</span>
           </div>
 
@@ -195,7 +210,12 @@ const PageSetting: React.FC = () => {
         {/* 高级设置 */}
         <div className="mb-6">
           <div className="flex items-center mb-3">
-            <span className="w-1 h-4 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-2" />
+            <span 
+              className="w-1 h-4 rounded-full mr-2" 
+              style={{
+                background: `linear-gradient(to bottom, ${primaryColor}, ${themeColors.primaryActive})`
+              }}
+            />
             <span className={`text-sm font-semibold ${titleClass}`}>高级设置</span>
           </div>
 

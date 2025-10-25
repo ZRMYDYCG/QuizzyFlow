@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 导入中国风主题工具类 */
+@import './styles/theme-utilities.css';
+
 /* 自定义滚动条 - 支持白天/黑夜模式 */
 
 /* Firefox - 暗黑模式 */

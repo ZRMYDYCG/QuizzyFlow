@@ -4,14 +4,18 @@ import useLoadUserData from '../../../../hooks/useLoadUserData.ts'
 import { logoutReducer } from '../../../../store/modules/user.ts'
 import useGetUserInfo from '../../../../hooks/useGetUserInfo.ts'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { User, Settings, LogOut, Loader2, Bell, Calendar, Clock } from 'lucide-react'
-import { useMemo } from 'react'
+import { User, Settings, LogOut, Loader2, Bell, Calendar, Clock, Palette } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import ThemeSelectorDialog from '../../../../components/theme-selector-dialog'
+import { useTheme } from '../../../../contexts/ThemeContext'
 
 const ContentHeader = () => {
   const { username, nickname } = useGetUserInfo()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { waitingUserData } = useLoadUserData()
+  const { primaryColor, themeColors } = useTheme()
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false)
 
   const logout = () => {
     navigate('/login')
@@ -81,10 +85,26 @@ const ContentHeader = () => {
 
           {/* 右侧操作区域 */}
           <div className="flex items-center gap-3">
+            {/* 主题颜色按钮 */}
+            <button 
+              onClick={() => setThemeDialogOpen(true)}
+              className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+              title="选择主题颜色"
+            >
+              <Palette className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+              <div 
+                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#1a1d29] shadow-lg"
+                style={{ backgroundColor: primaryColor }}
+              />
+            </button>
+
             {/* 通知按钮 */}
             <button className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
               <Bell className="w-5 h-5 text-slate-400" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <span 
+                className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-lg"
+                style={{ backgroundColor: primaryColor }}
+              ></span>
             </button>
 
             {/* 用户菜单 */}
@@ -92,7 +112,12 @@ const ContentHeader = () => {
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
                   <button className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                    <div 
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                      }}
+                    >
                       {(nickname || username || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col items-start">
@@ -130,6 +155,18 @@ const ContentHeader = () => {
                       <span>设置</span>
                     </DropdownMenu.Item>
 
+                    <DropdownMenu.Item
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 rounded-lg outline-none cursor-pointer hover:bg-white/10 transition-colors"
+                      onSelect={() => setThemeDialogOpen(true)}
+                    >
+                      <Palette className="w-4 h-4" />
+                      <span>主题颜色</span>
+                      <div 
+                        className="ml-auto w-4 h-4 rounded-full border border-white/20"
+                        style={{ backgroundColor: primaryColor }}
+                      />
+                    </DropdownMenu.Item>
+
                     <DropdownMenu.Separator className="h-px bg-white/10 my-2" />
 
                     <DropdownMenu.Item
@@ -146,6 +183,12 @@ const ContentHeader = () => {
           </div>
         </div>
       </div>
+
+      {/* 主题选择对话框 */}
+      <ThemeSelectorDialog 
+        open={themeDialogOpen} 
+        onOpenChange={setThemeDialogOpen}
+      />
     </div>
   )
 }

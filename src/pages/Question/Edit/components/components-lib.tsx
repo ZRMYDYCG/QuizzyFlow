@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 import ClassifyTitle from './classify-title'
 import { useTheme } from '@/contexts/ThemeContext'
 
-function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light') {
+function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light', primaryColor: string, themeColors: any) {
   const { title, type, component: Component, defaultProps } = c
   const dispatch = useDispatch()
 
@@ -29,9 +29,21 @@ function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light') {
       className={cn(
         'mb-3 cursor-pointer border rounded-lg p-3 transition-all duration-200 group',
         theme === 'dark'
-          ? 'bg-[#2a2a2f] border-white/5 hover:border-blue-500/50 hover:bg-[#35353a] hover:shadow-lg hover:shadow-blue-500/10'
-          : 'bg-white border-gray-200 hover:border-blue-400 hover:bg-gray-50 hover:shadow-md'
+          ? 'bg-[#2a2a2f] border-white/5 hover:bg-[#35353a] hover:shadow-lg'
+          : 'bg-white border-gray-200 hover:bg-gray-50 hover:shadow-md'
       )}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = primaryColor + (theme === 'dark' ? '50' : '40')
+        if (theme === 'dark') {
+          e.currentTarget.style.boxShadow = `0 10px 15px -3px ${primaryColor}10`
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = ''
+        if (theme === 'dark') {
+          e.currentTarget.style.boxShadow = ''
+        }
+      }}
     >
       <div className="pointer-events-none transition-transform group-hover:scale-[1.02]">
         <Component />
@@ -41,7 +53,7 @@ function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light') {
 }
 
 const ComponentsLib: React.FC = () => {
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
   
   return (
     <div className="h-full overflow-y-auto px-3 py-4 custom-scrollbar">
@@ -51,7 +63,7 @@ const ComponentsLib: React.FC = () => {
           <div key={index} className={cn(index > 0 && 'mt-6')}>
             <ClassifyTitle groupName={groupName} />
             <div className="mt-3">
-              {components.map((c) => generateComponent(c, theme))}
+              {components.map((c) => generateComponent(c, theme, primaryColor, themeColors))}
             </div>
           </div>
         )

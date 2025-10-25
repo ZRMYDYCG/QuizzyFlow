@@ -18,7 +18,7 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
   minWidth = 200,
   maxWidth = 600,
 }) => {
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
   const panelRef = useRef<HTMLDivElement>(null)
   const [isResizing, setIsResizing] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
@@ -91,13 +91,17 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
         <div
           className={`absolute top-0 ${
             position === 'left' ? 'right-0' : 'left-0'
-          } h-full w-[3px] transition-all duration-200 ${
-            isResizing || isHovering
-              ? 'bg-blue-500'
-              : isDark
-              ? 'bg-transparent hover:bg-blue-500/30'
-              : 'bg-transparent hover:bg-blue-500/20'
-          }`}
+          } h-full w-[3px] transition-all duration-200`}
+          style={{
+            backgroundColor: isResizing || isHovering
+              ? primaryColor
+              : 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            if (!isResizing && !isHovering) {
+              e.currentTarget.style.backgroundColor = primaryColor + (isDark ? '30' : '20')
+            }
+          }}
         />
 
         {/* 拖拽手柄 */}
@@ -105,7 +109,10 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
           <div
             className={`absolute top-1/2 -translate-y-1/2 ${
               position === 'left' ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2'
-            } w-6 h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg`}
+            } w-6 h-16 rounded-full flex items-center justify-center shadow-lg`}
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+            }}
           >
             <div className="flex gap-0.5">
               <div className="w-0.5 h-4 bg-white rounded-full" />

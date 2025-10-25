@@ -3,6 +3,7 @@ import { createQuestion } from '../../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import { message } from 'antd'
 import { useManageTheme } from '../../../../hooks/useManageTheme.ts'
+import { useTheme } from '../../../../contexts/ThemeContext'
 import { 
   LayoutDashboard,
   FileText, 
@@ -14,6 +15,7 @@ const Sidebar = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const t = useManageTheme()
+  const { primaryColor, themeColors } = useTheme()
 
   const { loading, run: handleCreate } = useRequest(createQuestion, {
     manual: true,
@@ -67,7 +69,12 @@ const Sidebar = () => {
     }`}>
       {/* Logo */}
       <div className="px-6 mb-8">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center p-1">
+        <div 
+          className="w-12 h-12 rounded-full flex items-center justify-center p-1 shadow-lg"
+          style={{ 
+            background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+          }}
+        >
           <img src="/vite.svg" alt="logo" />
         </div>
       </div>
@@ -82,20 +89,29 @@ const Sidebar = () => {
               key={item.key}
               onClick={item.onClick}
               className={`
-                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all relative overflow-hidden
                 ${
                   isActive
-                    ? t.isDark
-                      ? 'text-white bg-white/5'
-                      : 'text-gray-900 bg-gray-100'
+                    ? 'text-white'
                     : t.isDark
                       ? 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }
               `}
+              style={isActive ? {
+                background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}25)`,
+                borderLeft: `3px solid ${primaryColor}`,
+                paddingLeft: '9px'
+              } : {}}
             >
-              <Icon className="w-5 h-5" strokeWidth={1.5} />
-              <span>{item.label}</span>
+              <Icon 
+                className="w-5 h-5" 
+                strokeWidth={1.5}
+                style={isActive ? { color: primaryColor } : {}}
+              />
+              <span style={isActive ? { color: primaryColor, fontWeight: 600 } : {}}>
+                {item.label}
+              </span>
             </button>
           )
         })}

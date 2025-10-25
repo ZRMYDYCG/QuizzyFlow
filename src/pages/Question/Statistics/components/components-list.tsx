@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo } from 'react'
 import { getComponentConfigByType } from '@/components/material'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { cn } from '@/utils'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { ComponentSelectionProps } from '../types'
 
 interface ComponentData {
@@ -14,6 +15,7 @@ interface ComponentData {
 const ComponentsList = memo(
   ({ selectedComponentId, setSelectedComponent }: ComponentSelectionProps) => {
     const { componentList } = useGetComponentInfo()
+    const { primaryColor } = useTheme()
 
     const visibleComponents = useMemo(
       () =>
@@ -45,16 +47,22 @@ const ComponentsList = memo(
           ...props,
         }
 
+        const isSelected = fe_id === selectedComponentId
+
         return (
           <div
             key={fe_id}
             onClick={() => handleComponentClick(fe_id, type)}
             className={cn(
-              'w-full p-2 md:p-[12px] cursor-pointer border border-white rounded-md transition-colors hover:bg-gray-50 mb-2',
-              {
-                'border-blue-300 bg-blue-50': fe_id === selectedComponentId,
-              }
+              'w-full p-2 md:p-[12px] cursor-pointer border rounded-md transition-all mb-2',
+              isSelected 
+                ? '' 
+                : 'border-white hover:bg-gray-50'
             )}
+            style={isSelected ? {
+              borderColor: primaryColor,
+              backgroundColor: primaryColor + '08',
+            } : {}}
           >
             <div className="pointer-events-none scale-90 md:scale-100 origin-top-left">
               <Component {...(componentProps as any)} />

@@ -35,7 +35,7 @@ function genComponent(componentInfo: QuestionComponentType) {
 const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
   const dispatch = useDispatch()
   const { componentList = [], selectedId } = useGetComponentInfo()
-  const { theme } = useTheme()
+  const { theme, primaryColor, themeColors } = useTheme()
   const pageInfo = useSelector(
     (state: { pageInfo: IPageInfo }) => state.pageInfo
   )
@@ -130,24 +130,46 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
                   <SortableItem key={fe_id} id={fe_id}>
                     <div
                       onClick={(e) => handleClick(e, fe_id)}
-                      style={{ borderRadius: pageInfo.borderRadius }}
+                      style={{ 
+                        borderRadius: pageInfo.borderRadius,
+                        ...(isActive ? {
+                          borderWidth: '2px',
+                          borderColor: primaryColor,
+                          boxShadow: `0 10px 15px -3px ${primaryColor}30, 0 0 0 2px ${primaryColor}20`,
+                        } : {})
+                      }}
                       className={cn(
                         'm-3 p-3 transition-all duration-200 relative',
                         theme === 'dark' ? 'bg-[#2a2a2f]' : 'bg-white',
                         isActive
-                          ? 'border-2 border-blue-500 shadow-lg shadow-blue-500/30 ring-2 ring-blue-500/20'
+                          ? ''
                           : theme === 'dark'
-                            ? 'border border-white/10 hover:border-blue-400 hover:shadow-lg hover:bg-[#35353a] hover:border-white/20'
-                            : 'border border-gray-200 hover:border-blue-400 hover:shadow-lg hover:bg-gray-50',
+                            ? 'border border-white/10 hover:shadow-lg hover:bg-[#35353a] hover:border-white/20'
+                            : 'border border-gray-200 hover:shadow-lg hover:bg-gray-50',
                         isLocked 
                           ? 'opacity-50 cursor-not-allowed' 
                           : 'cursor-pointer',
                         'group'
                       )}
+                      onMouseEnter={(e) => {
+                        if (!isActive && !isLocked) {
+                          e.currentTarget.style.borderColor = primaryColor + (theme === 'dark' ? '40' : '40')
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive && !isLocked) {
+                          e.currentTarget.style.borderColor = ''
+                        }
+                      }}
                     >
                       {/* 选中指示器 */}
                       {isActive && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-md animate-in zoom-in duration-200">
+                        <div 
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-md animate-in zoom-in duration-200"
+                          style={{
+                            background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                          }}
+                        >
                           <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
