@@ -30,40 +30,40 @@ const ComponentsList = memo(
       [setSelectedComponent]
     )
 
-    return (
-      <div className="min-h-full overflow-y-auto bg-white p-[12px]">
-        {visibleComponents.map((component: ComponentData) => {
-          const { fe_id, props, type } = component
+  return (
+    <div className="min-h-full overflow-y-auto bg-white p-2 md:p-[12px]">
+      {visibleComponents.map((component: ComponentData) => {
+        const { fe_id, props, type } = component
 
-          const componentConfig = getComponentConfigByType(type)
-          if (componentConfig === null) return null
+        const componentConfig = getComponentConfigByType(type)
+        if (componentConfig === null) return null
 
-          const { component: Component } = componentConfig
+        const { component: Component } = componentConfig
 
-          const componentProps = {
-            fe_id,
-            ...props,
-          }
+        const componentProps = {
+          fe_id,
+          ...props,
+        }
 
-          return (
-            <div
-              key={fe_id}
-              onClick={() => handleComponentClick(fe_id, type)}
-              className={cn(
-                'w-full p-[12px] cursor-pointer border border-white rounded-md transition-colors hover:bg-gray-50',
-                {
-                  'border-blue-300 bg-blue-50': fe_id === selectedComponentId,
-                }
-              )}
-            >
-              <div className="pointer-events-none">
-                <Component {...(componentProps as any)} />
-              </div>
+        return (
+          <div
+            key={fe_id}
+            onClick={() => handleComponentClick(fe_id, type)}
+            className={cn(
+              'w-full p-2 md:p-[12px] cursor-pointer border border-white rounded-md transition-colors hover:bg-gray-50 mb-2',
+              {
+                'border-blue-300 bg-blue-50': fe_id === selectedComponentId,
+              }
+            )}
+          >
+            <div className="pointer-events-none scale-90 md:scale-100 origin-top-left">
+              <Component {...(componentProps as any)} />
             </div>
-          )
-        })}
-      </div>
-    )
+          </div>
+        )
+      })}
+    </div>
+  )
   }
 )
 

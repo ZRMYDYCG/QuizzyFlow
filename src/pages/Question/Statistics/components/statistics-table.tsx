@@ -1,5 +1,5 @@
 import { memo, useState, useMemo, useCallback } from 'react'
-import { useRequest } from 'ahooks'
+import { useRequest, useResponsive } from 'ahooks'
 import { useParams } from 'react-router-dom'
 import { Typography, Spin, Table, Pagination, Tooltip, Image, Tag, Rate } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
@@ -16,10 +16,10 @@ interface ComponentData {
 }
 
 // 根据组件类型渲染不同的单元格内容
-const renderCellByType = (type: string, value: any, props?: any) => {
+const renderCellByType = (type: string, value: any, props?: any, isMobile?: boolean) => {
   // 空值处理
   if (value === null || value === undefined || value === '') {
-    return <span className="text-gray-400">-</span>
+    return <span className="text-gray-400 text-xs md:text-sm">-</span>
   }
 
   switch (type) {
@@ -27,32 +27,32 @@ const renderCellByType = (type: string, value: any, props?: any) => {
     case 'question-signature':
       if (typeof value === 'string' && value.startsWith('data:image')) {
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <Image 
               src={value} 
               alt="签名" 
-              width={80}
-              height={40}
+              width={isMobile ? 60 : 80}
+              height={isMobile ? 30 : 40}
               style={{ objectFit: 'contain' }}
               preview={{
-                mask: '查看签名'
+                mask: '查看'
               }}
             />
           </div>
         )
       }
-      return <span className="text-gray-400">无签名</span>
+      return <span className="text-gray-400 text-xs">无签名</span>
 
     // ========== 颜色选择器 - 显示色块 ==========
     case 'question-color-picker':
       if (typeof value === 'string' && value.startsWith('#')) {
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <div 
-              className="w-8 h-8 rounded border-2 border-gray-300 shadow-sm"
+              className="w-6 h-6 md:w-8 md:h-8 rounded border-2 border-gray-300 shadow-sm flex-shrink-0"
               style={{ backgroundColor: value }}
             />
-            <span className="font-mono text-sm">{value}</span>
+            {!isMobile && <span className="font-mono text-xs md:text-sm">{value}</span>}
           </div>
         )
       }
@@ -64,9 +64,14 @@ const renderCellByType = (type: string, value: any, props?: any) => {
       const ratingValue = typeof value === 'string' ? parseFloat(value) : value
       if (!isNaN(ratingValue)) {
         return (
-          <div className="flex items-center gap-2">
-            <Rate disabled value={ratingValue} allowHalf />
-            <span className="text-sm text-gray-600">({ratingValue})</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <Rate 
+              disabled 
+              value={ratingValue} 
+              allowHalf 
+              style={{ fontSize: isMobile ? 12 : 20 }}
+            />
+            <span className="text-xs md:text-sm text-gray-600">({ratingValue})</span>
           </div>
         )
       }
@@ -86,9 +91,9 @@ const renderCellByType = (type: string, value: any, props?: any) => {
           label = '中立者'
         }
         return (
-          <div className="flex items-center gap-2">
-            <Tag color={color}>{npsValue} 分</Tag>
-            <span className="text-xs text-gray-500">{label}</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <Tag color={color} className="m-0">{npsValue} 分</Tag>
+            {!isMobile && <span className="text-xs text-gray-500">{label}</span>}
           </div>
         )
       }
@@ -98,18 +103,21 @@ const renderCellByType = (type: string, value: any, props?: any) => {
     case 'question-matrix':
       if (typeof value === 'object' && !Array.isArray(value)) {
         const entries = Object.entries(value)
-        if (entries.length === 0) return <span className="text-gray-400">未填写</span>
+        if (entries.length === 0) return <span className="text-gray-400 text-xs">未填写</span>
         
         return (
-          <div className="space-y-1">
-            {entries.map(([key, val], idx) => (
+          <div className="space-y-0.5 md:space-y-1">
+            {entries.slice(0, isMobile ? 2 : undefined).map(([key, val], idx) => (
               <div key={idx} className="text-xs">
-                <span className="font-medium text-gray-700">{key}:</span>{' '}
+                <span className="font-medium text-gray-700">{isMobile ? key.substring(0, 4) : key}:</span>{' '}
                 <span className="text-gray-600">
                   {Array.isArray(val) ? val.join(', ') : String(val)}
                 </span>
               </div>
             ))}
+            {isMobile && entries.length > 2 && (
+              <div className="text-xs text-gray-400">+{entries.length - 2}项</div>
+            )}
           </div>
         )
       }
@@ -117,31 +125,34 @@ const renderCellByType = (type: string, value: any, props?: any) => {
 
     // ========== Emoji 选择器 - 大号显示 ==========
     case 'question-emoji-picker':
-      return <span className="text-2xl">{String(value)}</span>
+      return <span className={isMobile ? 'text-xl' : 'text-2xl'}>{String(value)}</span>
 
     // ========== 图片选择 - 显示标签 ==========
     case 'question-image-choice':
       if (Array.isArray(value)) {
         return (
           <div className="flex flex-wrap gap-1">
-            {value.map((v, idx) => (
-              <Tag key={idx} color="blue">{v}</Tag>
+            {value.slice(0, isMobile ? 2 : undefined).map((v, idx) => (
+              <Tag key={idx} color="blue" className="text-xs">{v}</Tag>
             ))}
+            {isMobile && value.length > 2 && (
+              <Tag className="text-xs">+{value.length - 2}</Tag>
+            )}
           </div>
         )
       }
-      return <Tag color="blue">{String(value)}</Tag>
+      return <Tag color="blue" className="text-xs">{String(value)}</Tag>
 
     // ========== 文件上传 - 显示文件数量 ==========
     case 'question-upload':
       if (Array.isArray(value)) {
         return (
-          <Tag color="cyan">
-            {value.length} 个文件
+          <Tag color="cyan" className="text-xs m-0">
+            {value.length}个文件
           </Tag>
         )
       }
-      return <Tag color="cyan">1 个文件</Tag>
+      return <Tag color="cyan" className="text-xs m-0">1个文件</Tag>
 
     // ========== 数组类型 - 标签显示 ==========
     default:
@@ -183,6 +194,8 @@ const StatisticsTable = memo(
 
     const { componentList } = useGetComponentInfo()
     const { id = '' } = useParams()
+    const responsive = useResponsive()
+    const isMobile = !responsive.md
 
     const { loading } = useRequest(
       async () => {
@@ -232,16 +245,20 @@ const StatisticsTable = memo(
             ),
             dataIndex: fe_id,
             key: fe_id,
-            width: type === 'question-signature' ? 200 : 
-                   type === 'question-color-picker' ? 180 : 
-                   type === 'question-rate' || type === 'question-star-rating' ? 200 :
-                   type === 'question-matrix' ? 250 :
-                   150,
+            width: isMobile ? 120 : (
+              type === 'question-signature' ? 200 : 
+              type === 'question-color-picker' ? 180 : 
+              type === 'question-rate' || type === 'question-star-rating' ? 200 :
+              type === 'question-matrix' ? 250 :
+              150
+            ),
             ellipsis: false,
-            render: (value: any) => renderCellByType(type, value, props),
+            render: (value: any) => renderCellByType(type, value, props, isMobile),
+            // 移动端固定第一列
+            fixed: isMobile && index === 0 ? 'left' : undefined,
           }
         }),
-      [componentList, selectedComponentId, handleColumnClick]
+      [componentList, selectedComponentId, handleColumnClick, isMobile]
     )
 
     const dataSource = useMemo(
@@ -271,28 +288,36 @@ const StatisticsTable = memo(
 
     return (
       <div className="w-full h-full flex flex-col">
-        <Typography.Title level={3} className="flex-shrink-0 mb-4">
+        <Typography.Title 
+          level={isMobile ? 4 : 3} 
+          className="flex-shrink-0 mb-2 md:mb-4"
+        >
           答卷数量：{total}
         </Typography.Title>
-        <div className="flex-1 min-h-0 mb-4">
+        <div className="flex-1 min-h-0 mb-2 md:mb-4">
           <Table
             columns={columns}
             dataSource={dataSource}
             pagination={false}
             bordered
-            scroll={{ x: 'max-content', y: 'calc(100vh - 320px)' }}
-            size="middle"
+            scroll={{ 
+              x: isMobile ? 800 : 'max-content', 
+              y: isMobile ? 'calc(100vh - 280px)' : 'calc(100vh - 320px)' 
+            }}
+            size={isMobile ? 'small' : 'middle'}
           />
         </div>
-        <div className="flex-shrink-0 flex justify-end">
+        <div className="flex-shrink-0 flex justify-center md:justify-end">
           <Pagination
             total={total}
             current={page}
             pageSize={pageSize}
             onChange={handlePageChange}
             onShowSizeChange={handlePageSizeChange}
-            showSizeChanger
+            showSizeChanger={!isMobile}
             showTotal={(total) => `共 ${total} 条`}
+            size={isMobile ? 'small' : 'default'}
+            simple={isMobile}
           />
         </div>
       </div>

@@ -26,7 +26,8 @@ const QuestionSelect: React.FC<IQuestionSelectProps> = (
   
   // 根据 mode 确定默认值
   const getDefaultValue = () => {
-    if (externalValue !== undefined) {
+    // 如果有外部值且不为 null，使用外部值
+    if (externalValue !== undefined && externalValue !== null) {
       return externalValue
     }
     // multiple 和 tags 模式需要数组，default 模式需要 undefined
@@ -40,7 +41,8 @@ const QuestionSelect: React.FC<IQuestionSelectProps> = (
       // 答题模式：直接传递选中的值
       // 确保清空时返回正确的空值
       if (value === undefined || value === null) {
-        ;(onChange as any)(mode === 'multiple' || mode === 'tags' ? [] : null)
+        const emptyValue = mode === 'multiple' || mode === 'tags' ? [] : null
+        ;(onChange as any)(emptyValue)
       } else {
         ;(onChange as any)(value)
       }

@@ -24,7 +24,7 @@ const QuestionCascader: React.FC<IQuestionCascaderProps> = (
   const externalValue = (props as any).value
   
   // 根据 multiple 确定默认值
-  const currentValue = externalValue !== undefined 
+  const currentValue = (externalValue !== undefined && externalValue !== null)
     ? externalValue 
     : (multiple ? [] : undefined)
 
@@ -32,7 +32,8 @@ const QuestionCascader: React.FC<IQuestionCascaderProps> = (
     if (onChange) {
       // 确保清空时返回正确的空值
       if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
-        ;(onChange as any)(multiple ? [] : null)
+        const emptyValue = multiple ? [] : null
+        ;(onChange as any)(emptyValue)
       } else {
         ;(onChange as any)(value)
       }

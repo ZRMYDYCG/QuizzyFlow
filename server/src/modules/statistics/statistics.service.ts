@@ -177,10 +177,22 @@ export class StatisticsService {
         return option ? option.text : String(value)
 
       case 'question-select':
-        // select 的值也需要转换
+        // select 的值也需要转换（支持 text 和 label 两种字段）
         const selectOptions = props?.options || []
-        const selectedOption = selectOptions.find((opt: any) => opt.value === value)
-        return selectedOption ? selectedOption.text : String(value)
+        if (Array.isArray(value)) {
+          // 多选模式
+          const texts = value
+            .map((val: string) => {
+              const option = selectOptions.find((opt: any) => opt.value === val)
+              return option ? (option.text || option.label) : val
+            })
+            .filter(Boolean)
+          return texts.join(', ')
+        } else {
+          // 单选模式
+          const selectedOption = selectOptions.find((opt: any) => opt.value === value)
+          return selectedOption ? (selectedOption.text || selectedOption.label) : String(value)
+        }
 
       case 'question-rate':
       case 'question-star-rating':
@@ -327,7 +339,7 @@ export class StatisticsService {
       const options = props?.options || []
       options.forEach((option: any) => {
         result.push({
-          name: option.text,
+          name: option.text || option.label || option.value,
           count: stat[option.value] || 0,
         })
       })

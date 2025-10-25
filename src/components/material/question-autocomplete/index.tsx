@@ -13,7 +13,9 @@ const QuestionAutocomplete: React.FC<IQuestionAutocompleteProps> = (
 
   // 获取外部传入的 value（答题模式）
   const externalValue = (props as any).value
-  const currentValue = externalValue !== undefined ? externalValue : undefined
+  const currentValue = (externalValue !== undefined && externalValue !== null && externalValue !== '') 
+    ? externalValue 
+    : undefined
 
   const handleChange = (value: string) => {
     if (onChange) {
