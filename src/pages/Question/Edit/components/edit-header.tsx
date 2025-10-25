@@ -9,6 +9,7 @@ import {
   EyeOutlined,
   FullscreenOutlined,
   DownOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
@@ -20,6 +21,7 @@ import { updateQuestion } from '@/api/modules/question'
 import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
 import PreviewModal from './preview-modal'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useResponsive } from '@/hooks/useResponsive'
 
 const TitleElem: FC = () => {
   const { theme } = useTheme()
@@ -30,6 +32,8 @@ const TitleElem: FC = () => {
     dispatch(setTitle(e.target.value))
   }
 
+  const { isMobile } = useResponsive()
+
   if (editState) {
     return (
       <Input
@@ -38,15 +42,23 @@ const TitleElem: FC = () => {
         onChange={handleChange}
         onPressEnter={(e) => setEditState(false)}
         onBlur={() => setEditState(false)}
-        className="w-64"
+        className={isMobile ? 'w-full text-sm' : 'w-64'}
         autoFocus
       />
     )
   }
 
   return (
-    <Space>
-      <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-gray-900'}`}>{title}</h2>
+    <Space size="small">
+      <h2 
+        className={`
+          ${isMobile ? 'text-sm' : 'text-lg'} 
+          font-semibold truncate
+          ${theme === 'dark' ? 'text-slate-200' : 'text-gray-900'}
+        `}
+      >
+        {title}
+      </h2>
       <Button
         type="text"
         size="small"
@@ -172,10 +184,110 @@ const PreviewButton: FC = () => {
   )
 }
 
+// 移动端更多操作菜单
+const MobileMoreMenu: FC = () => {
+  const { id } = useParams()
+  const { componentList = [] } = useGetComponentInfo()
+  const pageInfo = useGetPageInfo()
+  const navigate = useNavigate()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const { loading: publishLoading, run: publish } = useRequest(
+    async () => {
+      if (!id) return
+      await updateQuestion(id, { ...pageInfo, componentList, isPublished: true })
+    },
+    {
+      manual: true,
+      onSuccess() {
+        message.success('发布成功')
+        navigate('/question/statistics/' + id)
+      },
+    }
+  )
+
+  const handleFullPreview = () => {
+    window.open(`/question/publish/${id}`, '_blank')
+  }
+
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'preview-quick',
+      label: '快速预览',
+      icon: <EyeOutlined />,
+      onClick: () => setIsModalOpen(true),
+    },
+    {
+      key: 'preview-full',
+      label: '完整预览',
+      icon: <FullscreenOutlined />,
+      onClick: handleFullPreview,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'publish',
+      label: '发布问卷',
+      disabled: publishLoading,
+      onClick: publish,
+    },
+  ]
+
+  return (
+    <>
+      <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
+        <Button type="text" icon={<MoreOutlined />} />
+      </Dropdown>
+      <PreviewModal
+        isOpen={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => setIsModalOpen(false)}
+        componentList={componentList}
+        pageInfo={pageInfo}
+      />
+    </>
+  )
+}
+
 const EditHeader: React.FC = () => {
   const navigate = useNavigate()
   const { theme } = useTheme()
+  const { isMobile } = useResponsive()
 
+  // 移动端布局
+  if (isMobile) {
+    return (
+      <div className={`h-14 border-b flex-shrink-0 ${
+        theme === 'dark' 
+          ? 'bg-[#1e1e23] border-white/5' 
+          : 'bg-white border-gray-200'
+      }`}>
+        <div className="flex items-center justify-between h-full px-3">
+          {/* 左侧：返回按钮 */}
+          <Button
+            type="text"
+            size="small"
+            icon={<LeftOutlined />}
+            onClick={() => navigate(-1)}
+          />
+
+          {/* 中间：标题 */}
+          <div className="flex-1 mx-2 overflow-hidden">
+            <TitleElem />
+          </div>
+
+          {/* 右侧：保存和更多操作 */}
+          <Space size="small">
+            <SaveButton />
+            <MobileMoreMenu />
+          </Space>
+        </div>
+      </div>
+    )
+  }
+
+  // 桌面端布局
   return (
     <div className={`h-16 border-b flex-shrink-0 ${
       theme === 'dark' 

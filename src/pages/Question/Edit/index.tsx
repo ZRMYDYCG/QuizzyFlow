@@ -14,14 +14,18 @@ import RightPanel from './components/right-panel.tsx'
 import EditHeader from './components/edit-header.tsx'
 import LayoutToolbar from './components/layout-toolbar.tsx'
 import ResizablePanel from './components/resizable-panel.tsx'
+import MobileBottomNav from './components/mobile-bottom-nav.tsx'
+import MobilePanelDrawer from './components/mobile-panel-drawer.tsx'
 import { useTitle } from 'ahooks'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
+import { useResponsive } from '@/hooks/useResponsive'
 
 const EditQuestionPage: React.FC = () => {
   const dispatch = useDispatch()
   const { loading } = useLoadQuestionData()
   const { title } = useGetPageInfo()
   const { theme } = useTheme()
+  const { isMobile } = useResponsive()
 
   // 获取布局配置
   const {
@@ -46,6 +50,36 @@ const EditQuestionPage: React.FC = () => {
     dispatch(setRightPanelWidth(width))
   }
 
+  // 移动端布局
+  if (isMobile) {
+    return (
+      <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
+        {/* 顶部Header */}
+        <EditHeader />
+        
+        {/* 画布区域 - 占满剩余空间 */}
+        <div className="flex-auto overflow-hidden pb-16">
+          <div
+            className="w-full h-full relative"
+            onClick={removeSelectedId}
+          >
+            <EnhancedCanvasWrapper loading={loading} />
+            
+            {/* 移动端简化的布局工具栏 */}
+            <LayoutToolbar />
+          </div>
+        </div>
+
+        {/* 底部导航栏 */}
+        <MobileBottomNav />
+
+        {/* 移动端抽屉（左右面板和工具栏） */}
+        <MobilePanelDrawer />
+      </div>
+    )
+  }
+
+  // 桌面端布局
   return (
     <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
       <EditHeader />

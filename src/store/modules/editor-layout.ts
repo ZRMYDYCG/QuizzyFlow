@@ -3,6 +3,9 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 // 视图模式类型
 export type ViewMode = 'standard' | 'focus' | 'preview'
 
+// 移动端激活面板类型
+export type MobileActivePanel = 'none' | 'left' | 'right' | 'toolbar'
+
 // 布局配置状态类型
 export interface EditorLayoutState {
   // 视图模式
@@ -19,6 +22,8 @@ export interface EditorLayoutState {
   canvasScale: number
   // 工具栏是否显示
   showToolbar: boolean
+  // 移动端激活的面板
+  mobileActivePanel: MobileActivePanel
 }
 
 // 默认配置
@@ -52,6 +57,7 @@ export const initialState: EditorLayoutState = {
   rightPanelWidth: DEFAULT_RIGHT_WIDTH,
   canvasScale: DEFAULT_SCALE,
   showToolbar: false,
+  mobileActivePanel: 'none',
 }
 
 // 创建slice
@@ -135,6 +141,20 @@ export const editorLayoutSlice = createSlice({
       state.canvasScale = DEFAULT_SCALE
       saveToLocalStorage(state)
     },
+    
+    // 移动端：设置激活的面板
+    setMobileActivePanel(state: EditorLayoutState, action: PayloadAction<MobileActivePanel>) {
+      state.mobileActivePanel = action.payload
+    },
+    
+    // 移动端：切换面板（关闭当前或打开新的）
+    toggleMobilePanel(state: EditorLayoutState, action: PayloadAction<MobileActivePanel>) {
+      if (state.mobileActivePanel === action.payload) {
+        state.mobileActivePanel = 'none'
+      } else {
+        state.mobileActivePanel = action.payload
+      }
+    },
   },
 })
 
@@ -165,6 +185,8 @@ export const {
   setCanvasScale,
   toggleToolbar,
   resetLayout,
+  setMobileActivePanel,
+  toggleMobilePanel,
 } = editorLayoutSlice.actions
 
 export default editorLayoutSlice.reducer

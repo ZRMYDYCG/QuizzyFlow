@@ -19,10 +19,12 @@ import {
   ViewMode,
 } from '@/store/modules/editor-layout'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useResponsive } from '@/hooks/useResponsive'
 
 const LayoutToolbar: React.FC = () => {
   const dispatch = useDispatch()
   const { theme } = useTheme()
+  const { isMobile } = useResponsive()
   const {
     viewMode,
     showLeftPanel,
@@ -46,6 +48,50 @@ const LayoutToolbar: React.FC = () => {
 
   const isDark = theme === 'dark'
 
+  // 移动端显示简化版工具栏
+  if (isMobile) {
+    return (
+      <div
+        className={`absolute bottom-20 left-1/2 -translate-x-1/2 z-40 ${
+          isDark ? 'bg-[#2a2a2f]' : 'bg-white'
+        } rounded-full shadow-2xl border ${
+          isDark ? 'border-white/10' : 'border-gray-200'
+        } px-3 py-1.5`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Space size="small">
+          {/* 视图模式切换 - 仅图标 */}
+          {(Object.keys(viewModeConfig) as ViewMode[]).map((mode) => {
+            const config = viewModeConfig[mode]
+            return (
+              <Tooltip key={mode} title={config.desc}>
+                <Button
+                  type={viewMode === mode ? 'primary' : 'text'}
+                  icon={config.icon}
+                  size="small"
+                  onClick={() => handleViewModeChange(mode)}
+                />
+              </Tooltip>
+            )
+          })}
+
+          <Divider type="vertical" className="mx-1" />
+
+          {/* 重置按钮 */}
+          <Tooltip title="重置布局">
+            <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              size="small"
+              onClick={handleReset}
+            />
+          </Tooltip>
+        </Space>
+      </div>
+    )
+  }
+
+  // 桌面端显示完整工具栏
   return (
     <div
       className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 ${
