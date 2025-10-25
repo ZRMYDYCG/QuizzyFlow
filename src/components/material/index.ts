@@ -69,6 +69,16 @@ import { IQuestionComparisonProps } from './question-comparison'
 import { IQuestionColorPickerProps } from './question-color-picker'
 import { IQuestionPainScaleProps } from './question-pain-scale'
 import { IQuestionWordCloudProps } from './question-word-cloud'
+import { IQuestionSwitchProps } from './question-switch'
+import { IQuestionTimePickerProps } from './question-time-picker'
+import { IQuestionNumberInputProps } from './question-number-input'
+import { IQuestionPasswordInputProps } from './question-password-input'
+import { IQuestionEmailInputProps } from './question-email-input'
+import { IQuestionPhoneInputProps } from './question-phone-input'
+import { IQuestionUrlInputProps } from './question-url-input'
+import { IQuestionTagsInputProps } from './question-tags-input'
+import { IQuestionRangePickerProps } from './question-range-picker'
+import { IQuestionTimeRangePickerProps } from './question-time-range-picker'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -135,6 +145,16 @@ import QuestionComparisonConfig from './question-comparison'
 import QuestionColorPickerConfig from './question-color-picker'
 import QuestionPainScaleConfig from './question-pain-scale'
 import QuestionWordCloudConfig from './question-word-cloud'
+import QuestionSwitchConfig from './question-switch'
+import QuestionTimePickerConfig from './question-time-picker'
+import QuestionNumberInputConfig from './question-number-input'
+import QuestionPasswordInputConfig from './question-password-input'
+import QuestionEmailInputConfig from './question-email-input'
+import QuestionPhoneInputConfig from './question-phone-input'
+import QuestionUrlInputConfig from './question-url-input'
+import QuestionTagsInputConfig from './question-tags-input'
+import QuestionRangePickerConfig from './question-range-picker'
+import QuestionTimeRangePickerConfig from './question-time-range-picker'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -200,7 +220,17 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionComparisonProps &
   IQuestionColorPickerProps &
   IQuestionPainScaleProps &
-  IQuestionWordCloudProps
+  IQuestionWordCloudProps &
+  IQuestionSwitchProps &
+  IQuestionTimePickerProps &
+  IQuestionNumberInputProps &
+  IQuestionPasswordInputProps &
+  IQuestionEmailInputProps &
+  IQuestionPhoneInputProps &
+  IQuestionUrlInputProps &
+  IQuestionTagsInputProps &
+  IQuestionRangePickerProps &
+  IQuestionTimeRangePickerProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -284,6 +314,16 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionColorPickerConfig,
   QuestionPainScaleConfig,
   QuestionWordCloudConfig,
+  QuestionSwitchConfig,
+  QuestionTimePickerConfig,
+  QuestionNumberInputConfig,
+  QuestionPasswordInputConfig,
+  QuestionEmailInputConfig,
+  QuestionPhoneInputConfig,
+  QuestionUrlInputConfig,
+  QuestionTagsInputConfig,
+  QuestionRangePickerConfig,
+  QuestionTimeRangePickerConfig,
 ]
 
 // 组件进行分组
@@ -336,11 +376,21 @@ export const componentConfigGroup = [
     components: [
       QuestionInputConfig,
       QuestionTextareaConfig,
+      QuestionNumberInputConfig,
+      QuestionPasswordInputConfig,
+      QuestionEmailInputConfig,
+      QuestionPhoneInputConfig,
+      QuestionUrlInputConfig,
+      QuestionTagsInputConfig,
       QuestionRateConfig,
       QuestionSliderConfig,
       QuestionDateConfig,
+      QuestionTimePickerConfig,
+      QuestionRangePickerConfig,
+      QuestionTimeRangePickerConfig,
       QuestionUploadConfig,
       QuestionButtonConfig,
+      QuestionSwitchConfig,
       QuestionSignatureConfig,
       QuestionStarRatingConfig,
       QuestionColorPickerConfig,

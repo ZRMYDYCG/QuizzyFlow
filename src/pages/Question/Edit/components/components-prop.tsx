@@ -9,7 +9,11 @@ import {
 } from '@/components/material'
 
 const NoSelectedComponent: React.FC = () => {
-  return <Empty description="还没有选中组件" />
+  return (
+    <div className="flex items-center justify-center h-full p-8">
+      <Empty description="还没有选中组件" />
+    </div>
+  )
 }
 
 const ComponentProp: React.FC = () => {
@@ -33,7 +37,9 @@ const ComponentProp: React.FC = () => {
     const { PropComponent } = ComponentConfig
 
     return (
-      <PropComponent {...props} onChange={changeProps} disabled={isLocked} />
+      <div className="h-full overflow-y-auto p-4 md:p-6">
+        <PropComponent {...props} onChange={changeProps} disabled={isLocked} />
+      </div>
     )
   } catch (error) {
     console.error(error)
