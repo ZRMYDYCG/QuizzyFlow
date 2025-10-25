@@ -154,6 +154,273 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
       }
       return <Tag color="cyan" className="text-xs m-0">1个文件</Tag>
 
+    // ========== 开关组件 - 显示开/关状态 ==========
+    case 'question-switch':
+      const isOn = value === true || value === 'true' || value === 1
+      return (
+        <Tag color={isOn ? 'green' : 'default'} className="text-xs m-0">
+          {isOn ? '开启' : '关闭'}
+        </Tag>
+      )
+
+    // ========== 时间选择器 - 格式化时间 ==========
+    case 'question-time-picker':
+      if (typeof value === 'string') {
+        return (
+          <span className="text-xs md:text-sm font-mono">
+            {value}
+          </span>
+        )
+      }
+      return String(value)
+
+    // ========== 数字输入框 - 数字格式化 ==========
+    case 'question-number-input':
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      if (!isNaN(numValue)) {
+        return (
+          <span className="text-xs md:text-sm font-semibold text-blue-600">
+            {numValue.toLocaleString()}
+          </span>
+        )
+      }
+      return String(value)
+
+    // ========== 密码输入框 - 隐藏显示 ==========
+    case 'question-password-input':
+      if (typeof value === 'string' && value.length > 0) {
+        return (
+          <span className="text-xs md:text-sm font-mono">
+            {'•'.repeat(Math.min(value.length, 8))}
+            {value.length > 8 ? '...' : ''}
+          </span>
+        )
+      }
+      return <span className="text-gray-400 text-xs">未填写</span>
+
+    // ========== 邮箱输入框 - 邮箱显示 ==========
+    case 'question-email-input':
+      if (typeof value === 'string' && value.includes('@')) {
+        return (
+          <a 
+            href={`mailto:${value}`}
+            className="text-xs md:text-sm text-blue-500 hover:text-blue-700 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isMobile && value.length > 20 ? value.substring(0, 17) + '...' : value}
+          </a>
+        )
+      }
+      return <span className="text-xs md:text-sm">{String(value)}</span>
+
+    // ========== 电话输入框 - 电话显示 ==========
+    case 'question-phone-input':
+      if (typeof value === 'string') {
+        return (
+          <a 
+            href={`tel:${value}`}
+            className="text-xs md:text-sm text-blue-500 hover:text-blue-700 hover:underline font-mono"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {value}
+          </a>
+        )
+      }
+      return <span className="text-xs md:text-sm">{String(value)}</span>
+
+    // ========== URL输入框 - 链接显示 ==========
+    case 'question-url-input':
+      if (typeof value === 'string' && (value.startsWith('http') || value.startsWith('https'))) {
+        const displayUrl = isMobile && value.length > 30 ? value.substring(0, 27) + '...' : value
+        return (
+          <a 
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs md:text-sm text-blue-500 hover:text-blue-700 hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {displayUrl}
+          </a>
+        )
+      }
+      return <span className="text-xs md:text-sm">{String(value)}</span>
+
+    // ========== 标签输入 - 标签列表显示 ==========
+    case 'question-tags-input':
+      if (Array.isArray(value) && value.length > 0) {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {value.slice(0, isMobile ? 3 : 5).map((tag, idx) => (
+              <Tag key={idx} color="blue" className="text-xs m-0">
+                {tag}
+              </Tag>
+            ))}
+            {value.length > (isMobile ? 3 : 5) && (
+              <Tag className="text-xs m-0">+{value.length - (isMobile ? 3 : 5)}</Tag>
+            )}
+          </div>
+        )
+      }
+      return <span className="text-gray-400 text-xs">无标签</span>
+
+    // ========== 日期范围选择器 - 日期范围显示 ==========
+    case 'question-range-picker':
+      if (Array.isArray(value) && value.length === 2) {
+        const [start, end] = value
+        // 检查是否为有效的日期字符串
+        if (start && end && start !== '' && end !== '') {
+          return (
+            <div className="text-xs md:text-sm space-y-1">
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500 text-xs">起:</span>
+                <span className="font-mono">{start}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500 text-xs">止:</span>
+                <span className="font-mono">{end}</span>
+              </div>
+            </div>
+          )
+        }
+      }
+      return <span className="text-gray-400 text-xs">未选择</span>
+
+    // ========== 时间范围选择器 - 时间范围显示 ==========
+    case 'question-time-range-picker':
+      if (Array.isArray(value) && value.length === 2) {
+        const [start, end] = value
+        // 检查是否为有效的时间字符串
+        if (start && end && start !== '' && end !== '') {
+          return (
+            <div className="text-xs md:text-sm font-mono">
+              <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1">
+                <span>{start}</span>
+                <span className="text-gray-400">~</span>
+                <span>{end}</span>
+              </div>
+            </div>
+          )
+        }
+      }
+      return <span className="text-gray-400 text-xs">未选择</span>
+
+    // ========== 搜索输入框 - 普通文本显示 ==========
+    case 'question-search-input':
+      return (
+        <Tooltip title={String(value)}>
+          <div className="truncate text-xs md:text-sm">
+            {String(value)}
+          </div>
+        </Tooltip>
+      )
+
+    // ========== @提及输入 - 高亮@符号 ==========
+    case 'question-mentions':
+    case 'question-mention-textarea':
+      if (typeof value === 'string') {
+        // 高亮 @ 和 # 符号
+        const parts = value.split(/(@\S+|#\S+)/g)
+        return (
+          <div className="text-xs md:text-sm">
+            {parts.map((part, idx) => {
+              if (part.startsWith('@')) {
+                return <Tag key={idx} color="blue" className="text-xs mx-0.5">{part}</Tag>
+              }
+              if (part.startsWith('#')) {
+                return <Tag key={idx} color="cyan" className="text-xs mx-0.5">{part}</Tag>
+              }
+              return <span key={idx}>{part}</span>
+            })}
+          </div>
+        )
+      }
+      return String(value)
+
+    // ========== OTP验证码输入 - 验证码显示 ==========
+    case 'question-otp-input':
+      if (typeof value === 'string') {
+        return (
+          <div className="flex gap-0.5 md:gap-1">
+            {value.split('').map((char, idx) => (
+              <div 
+                key={idx}
+                className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center border-2 border-blue-400 rounded bg-blue-50 font-mono font-bold text-xs md:text-base"
+              >
+                {char}
+              </div>
+            ))}
+          </div>
+        )
+      }
+      return String(value)
+
+    // ========== 周选择器 - 周显示 ==========
+    case 'question-week-picker':
+      return (
+        <span className="text-xs md:text-sm font-mono">
+          {String(value)}
+        </span>
+      )
+
+    // ========== 月份选择器 - 月份显示 ==========
+    case 'question-month-picker':
+      return (
+        <span className="text-xs md:text-sm font-mono">
+          {String(value)}
+        </span>
+      )
+
+    // ========== 年份选择器 - 年份显示 ==========
+    case 'question-year-picker':
+      return (
+        <span className="text-xs md:text-sm font-mono font-semibold">
+          {String(value)}
+        </span>
+      )
+
+    // ========== 区间滑块 - 区间显示 ==========
+    case 'question-range-slider':
+      if (Array.isArray(value) && value.length === 2) {
+        return (
+          <div className="flex items-center gap-1 md:gap-2">
+            <Tag color="blue" className="text-xs m-0 font-mono">{value[0]}</Tag>
+            <span className="text-gray-400 text-xs">~</span>
+            <Tag color="blue" className="text-xs m-0 font-mono">{value[1]}</Tag>
+          </div>
+        )
+      }
+      return String(value)
+
+    // ========== 树形选择 - 树形路径显示 ==========
+    case 'question-tree-select':
+      if (Array.isArray(value)) {
+        return (
+          <div className="flex flex-wrap gap-1">
+            {value.slice(0, isMobile ? 2 : 3).map((v, idx) => (
+              <Tag key={idx} color="purple" className="text-xs m-0">
+                {String(v)}
+              </Tag>
+            ))}
+            {value.length > (isMobile ? 2 : 3) && (
+              <Tag className="text-xs m-0">+{value.length - (isMobile ? 2 : 3)}</Tag>
+            )}
+          </div>
+        )
+      }
+      if (typeof value === 'string') {
+        return <Tag color="purple" className="text-xs m-0">{value}</Tag>
+      }
+      return String(value)
+
+    // ========== 分段控制器 - 选中项显示 ==========
+    case 'question-segmented':
+      return (
+        <Tag color="geekblue" className="text-xs m-0">
+          {String(value)}
+        </Tag>
+      )
+
     // ========== 数组类型 - 标签显示 ==========
     default:
       if (Array.isArray(value)) {
@@ -250,6 +517,14 @@ const StatisticsTable = memo(
               type === 'question-color-picker' ? 180 : 
               type === 'question-rate' || type === 'question-star-rating' ? 200 :
               type === 'question-matrix' ? 250 :
+              type === 'question-range-picker' ? 220 :
+              type === 'question-otp-input' ? 200 :
+              type === 'question-email-input' ? 180 :
+              type === 'question-url-input' ? 200 :
+              type === 'question-tags-input' ? 200 :
+              type === 'question-mentions' || type === 'question-mention-textarea' ? 180 :
+              type === 'question-range-slider' ? 150 :
+              type === 'question-tree-select' ? 180 :
               150
             ),
             ellipsis: false,
