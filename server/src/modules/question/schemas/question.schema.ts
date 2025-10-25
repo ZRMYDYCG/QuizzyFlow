@@ -30,6 +30,9 @@ export class Question {
   @Prop({ default: '', trim: true })
   desc: string
 
+  @Prop({ default: 'form', trim: true })
+  type: string // 问卷类型: survey, exam, vote, form 等
+
   @Prop({ default: '' })
   js: string
 

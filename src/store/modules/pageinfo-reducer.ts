@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 export interface IPageInfo {
   title: string
   desc?: string
+  type?: string // 问卷类型: survey, exam, vote, form 等
   css?: string
   js?: string
   isPublished?: boolean
@@ -20,6 +21,7 @@ export interface IPageInfo {
 export const pageInfoDefaultData: IPageInfo = {
   title: '',
   desc: '',
+  type: 'form', // 默认为通用表单
   css: '',
   js: '',
   padding: '16px',
@@ -41,6 +43,9 @@ const pageInfoSlice = createSlice({
     },
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload
+    },
+    setType: (state, action: PayloadAction<string>) => {
+      state.type = action.payload
     },
     setPagePadding: (state, action: PayloadAction<string>) => {
       state.padding = action.payload
@@ -81,6 +86,7 @@ const pageInfoSlice = createSlice({
 export const {
   resetPageInfo,
   setTitle,
+  setType,
   setPagePadding,
   setPageLayout,
   setMaxWidth,

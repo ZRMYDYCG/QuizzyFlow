@@ -123,16 +123,6 @@ const ManageLayout = () => {
                   <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
               </div>
-
-              {/* 搜索框 - 移动端隐藏文字 */}
-              <div className="relative ml-1 md:ml-2 flex-1 max-w-xs md:max-w-none">
-                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${themeClasses.textSecondary}`} />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className={`w-full md:w-64 h-8 md:h-9 pl-10 pr-4 ${themeClasses.inputBg} border-none rounded-lg text-sm ${themeClasses.text} ${themeClasses.placeholder} focus:outline-none transition-colors`}
-                />
-              </div>
             </div>
 
             {/* 右侧操作区 */}

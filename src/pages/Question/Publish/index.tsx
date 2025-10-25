@@ -18,6 +18,8 @@ import { useTitle, useRequest } from 'ahooks'
 import { submitAnswer, AnswerItem } from '@/api/modules/answer'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import { useTheme } from '@/contexts/ThemeContext'
+import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
+import { QuestionnaireType } from '@/constants/questionnaire-types'
 
 // 生成组件 - 区分预览模式和答题模式
 function genComponent(
@@ -328,9 +330,18 @@ const PublishPage: React.FC = () => {
               >
                 <span className="hidden sm:inline">返回</span>
               </Button>
-              <h2 className={`text-base md:text-lg font-semibold truncate ${t.text.primary}`}>
-                {pageInfo.title}
-              </h2>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <h2 className={`text-base md:text-lg font-semibold truncate ${t.text.primary}`}>
+                  {pageInfo.title}
+                </h2>
+                {pageInfo.type && (
+                  <QuestionnaireTypeTag 
+                    type={pageInfo.type as QuestionnaireType}
+                    showIcon={true}
+                    size="small"
+                  />
+                )}
+              </div>
               <div 
                 className="hidden sm:block px-2 py-1 text-xs rounded flex-shrink-0 border"
                 style={{

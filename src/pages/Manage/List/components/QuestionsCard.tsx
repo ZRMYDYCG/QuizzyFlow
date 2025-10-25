@@ -11,12 +11,15 @@ import { useRequest } from 'ahooks'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import { useTheme } from '@/contexts/ThemeContext'
+import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
+import { QuestionnaireType } from '@/constants/questionnaire-types'
 
 const { confirm } = Modal
 
 interface QuestionCardProps {
   _id: string
   title: string
+  type?: string // 问卷类型
   createdAt: string
   answerCount: number
   isStar: boolean
@@ -25,7 +28,7 @@ interface QuestionCardProps {
 }
 
 const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
-  const { _id, answerCount, isPublished, isStar, createdAt, title, onDelete } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title, type, onDelete } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const { primaryColor } = useTheme()
@@ -155,9 +158,13 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
 
             {/* 右侧：状态标签 */}
             <div className="flex flex-col items-end gap-1.5 md:gap-2 flex-shrink-0">
-              <span className="text-xs font-medium text-rose-400 bg-rose-500/10 rounded-lg px-2 md:px-2.5 py-0.5 md:py-1 border border-rose-500/20">
-                考试
-              </span>
+              {type && (
+                <QuestionnaireTypeTag 
+                  type={type as QuestionnaireType}
+                  showIcon={true}
+                  size="small"
+                />
+              )}
               {isPublished ? (
                 <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded-lg px-2 md:px-2.5 py-0.5 md:py-1 border border-emerald-500/20">
                   已发布

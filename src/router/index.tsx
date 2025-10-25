@@ -16,6 +16,8 @@ import Star from '@/pages/manage/star'
 import Edit from '@/pages/question/edit'
 import Statistics from '@/pages/question/statistics'
 import Publish from '@/pages/question/publish'
+import TemplateMarket from '@/pages/template/market'
+import TemplateDetail from '@/pages/template/detail'
 
 const router = createBrowserRouter([
   {
@@ -85,6 +87,20 @@ const router = createBrowserRouter([
       {
         path: 'trash',
         element: <Trash />,
+      },
+    ],
+  },
+  {
+    path: 'template',
+    element: <ManageLayout />,
+    children: [
+      {
+        path: 'market',
+        element: <TemplateMarket />,
+      },
+      {
+        path: 'detail/:id',
+        element: <TemplateDetail />,
       },
     ],
   },

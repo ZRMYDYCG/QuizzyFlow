@@ -8,6 +8,8 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import { useManageTheme } from '@/hooks/useManageTheme'
+import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
+import { QuestionnaireType } from '@/constants/questionnaire-types'
 
 const { confirm } = Modal
 
@@ -24,7 +26,7 @@ interface QuestionTableRowProps {
 }
 
 const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onSelect, onDelete }) => {
-  const { _id, answerCount, isPublished, isStar, createdAt, title } = question
+  const { _id, answerCount, isPublished, isStar, createdAt, title, type } = question
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -115,9 +117,13 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
         </div>
       </td>
       <td className="p-4">
-        <span className="text-xs font-medium text-rose-400 bg-rose-500/10 rounded px-2 py-1 border border-rose-500/20">
-          考试
-        </span>
+        {type && (
+          <QuestionnaireTypeTag 
+            type={type as QuestionnaireType}
+            showIcon={true}
+            size="small"
+          />
+        )}
       </td>
       <td className="p-4">
         {isPublished ? (

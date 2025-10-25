@@ -10,6 +10,7 @@ import {
   FullscreenOutlined,
   DownOutlined,
   MoreOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
@@ -20,6 +21,7 @@ import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { updateQuestion } from '@/api/modules/question'
 import { useRequest, useKeyPress, useDebounceEffect } from 'ahooks'
 import PreviewModal from './preview-modal'
+import PublishTemplateModal from '@/components/template/PublishTemplateModal'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useResponsive } from '@/hooks/useResponsive'
 
@@ -184,6 +186,31 @@ const PreviewButton: FC = () => {
   )
 }
 
+// 发布为模板按钮
+const PublishTemplateButton: FC = () => {
+  const { componentList = [] } = useGetComponentInfo()
+  const pageInfo = useGetPageInfo()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="default"
+        icon={<UploadOutlined />}
+        onClick={() => setIsModalOpen(true)}
+      >
+        发布为模板
+      </Button>
+      <PublishTemplateModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        componentList={componentList}
+        pageInfo={pageInfo}
+      />
+    </>
+  )
+}
+
 // 移动端更多操作菜单
 const MobileMoreMenu: FC = () => {
   const { id } = useParams()
@@ -191,6 +218,7 @@ const MobileMoreMenu: FC = () => {
   const pageInfo = useGetPageInfo()
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false)
 
   const { loading: publishLoading, run: publish } = useRequest(
     async () => {
@@ -232,6 +260,12 @@ const MobileMoreMenu: FC = () => {
       disabled: publishLoading,
       onClick: publish,
     },
+    {
+      key: 'publish-template',
+      label: '发布为模板',
+      icon: <UploadOutlined />,
+      onClick: () => setIsTemplateModalOpen(true),
+    },
   ]
 
   return (
@@ -243,6 +277,12 @@ const MobileMoreMenu: FC = () => {
         isOpen={isModalOpen}
         onOk={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
+        componentList={componentList}
+        pageInfo={pageInfo}
+      />
+      <PublishTemplateModal
+        open={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
         componentList={componentList}
         pageInfo={pageInfo}
       />
@@ -315,6 +355,7 @@ const EditHeader: React.FC = () => {
             <SaveButton />
             <PublishButton />
             <PreviewButton />
+            <PublishTemplateButton />
           </Space>
         </div>
       </div>

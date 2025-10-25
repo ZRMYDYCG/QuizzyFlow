@@ -13,8 +13,15 @@ import {
   setBgPosition,
   setParallaxEffect,
   setBorderRadius,
+  setType,
 } from '@/store/modules/pageinfo-reducer'
 import { useTheme } from '@/contexts/ThemeContext'
+import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
+import { 
+  QuestionnaireType, 
+  QUESTIONNAIRE_TYPES,
+  MVP_RECOMMENDED_TYPES 
+} from '@/constants/questionnaire-types'
 
 const { Option } = Select
 
@@ -32,6 +39,9 @@ const PageSetting: React.FC = () => {
     const values = form.getFieldsValue()
 
     // 处理特定字段的变化
+    if (changedValues.type !== undefined) {
+      dispatch(setType(changedValues.type))
+    }
     if (changedValues.padding !== undefined) {
       dispatch(setPagePadding(changedValues.padding))
     }
@@ -84,6 +94,48 @@ const PageSetting: React.FC = () => {
             <span className={`text-sm font-semibold ${titleClass}`}>基础信息</span>
           </div>
           
+          <Form.Item
+            label={<span className={labelClass}>问卷类型</span>}
+            name="type"
+            rules={[{ required: true, message: '请选择问卷类型' }]}
+            tooltip="选择问卷的业务场景类型，一旦发布后不可修改"
+          >
+            <Select
+              placeholder="请选择问卷类型"
+              optionLabelProp="label"
+            >
+              {MVP_RECOMMENDED_TYPES.map((type) => {
+                const config = QUESTIONNAIRE_TYPES[type]
+                return (
+                  <Select.Option 
+                    key={type} 
+                    value={type}
+                    label={
+                      <QuestionnaireTypeTag 
+                        type={type as QuestionnaireType} 
+                        showIcon={true}
+                        size="small"
+                      />
+                    }
+                  >
+                    <div className="flex items-start gap-2 py-1">
+                      <QuestionnaireTypeTag 
+                        type={type as QuestionnaireType} 
+                        showIcon={true}
+                        size="default"
+                      />
+                      <div className="flex-1">
+                        <div className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'} mt-1`}>
+                          {config.description}
+                        </div>
+                      </div>
+                    </div>
+                  </Select.Option>
+                )
+              })}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             label={<span className={labelClass}>问卷标题</span>}
             name="title"

@@ -7,6 +7,8 @@ import { message, Modal } from 'antd'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useState } from 'react'
 import { useManageTheme } from '@/hooks/useManageTheme'
+import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
+import { QuestionnaireType } from '@/constants/questionnaire-types'
 
 const { confirm } = Modal
 
@@ -16,7 +18,7 @@ interface QuestionListViewProps {
 }
 
 const QuestionListItem: FC<any> = (props) => {
-  const { _id, answerCount, isPublished, isStar, createdAt, title, onDelete } = props
+  const { _id, answerCount, isPublished, isStar, createdAt, title, type, onDelete } = props
   const navigate = useNavigate()
   const t = useManageTheme()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -91,9 +93,13 @@ const QuestionListItem: FC<any> = (props) => {
             {title}
           </Link>
 
-          <span className="flex-shrink-0 text-xs font-medium text-rose-400 bg-rose-500/10 rounded px-1.5 md:px-2 py-0.5 border border-rose-500/20">
-            考试
-          </span>
+          {type && (
+            <QuestionnaireTypeTag 
+              type={type as QuestionnaireType}
+              showIcon={true}
+              size="small"
+            />
+          )}
 
           {isPublished ? (
             <span className="flex-shrink-0 px-1.5 md:px-2 py-0.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/20 hidden sm:inline">

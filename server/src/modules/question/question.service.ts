@@ -3,6 +3,8 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
@@ -11,12 +13,15 @@ import { Question, QuestionDocument } from './schemas/question.schema'
 import { CreateQuestionDto } from './dto/create-question.dto'
 import { UpdateQuestionDto } from './dto/update-question.dto'
 import { QueryQuestionDto } from './dto/query-question.dto'
+import { TemplateService } from '../template/template.service'
 
 @Injectable()
 export class QuestionService {
   constructor(
     @InjectModel(Question.name)
     private readonly questionModel: Model<QuestionDocument>,
+    @Inject(forwardRef(() => TemplateService))
+    private readonly templateService: TemplateService,
   ) {}
 
   /**
@@ -234,6 +239,44 @@ export class QuestionService {
     })
 
     return await duplicated.save()
+  }
+
+  /**
+   * 从模板创建问卷
+   */
+  async createFromTemplate(templateId: string, username: string) {
+    // 获取模板数据
+    const template = await this.templateService.getTemplateDetail(templateId)
+
+    if (!template) {
+      throw new NotFoundException('模板不存在')
+    }
+
+    // 基于模板数据创建问卷
+    const question = new this.questionModel({
+      title: template.templateData.title,
+      desc: template.templateData.desc,
+      type: template.templateData.type,
+      author: username,
+      componentList: template.templateData.componentList.map((component) => ({
+        ...component,
+        fe_id: nanoid(), // 重新生成fe_id
+      })),
+      js: template.templateData.pageInfo?.js || '',
+      css: template.templateData.pageInfo?.css || '',
+      isPublished: false,
+      isStar: false,
+      isDeleted: false,
+      selectedId: null,
+      copiedComponent: null,
+    })
+
+    const savedQuestion = await question.save()
+
+    // 增加模板使用次数
+    await this.templateService.incrementUseCount(templateId)
+
+    return savedQuestion
   }
 
   /**

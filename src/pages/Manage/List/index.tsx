@@ -2,6 +2,7 @@ import QuestionsCard from './components/QuestionsCard'
 import QuestionListView from './components/QuestionListView'
 import QuestionTableView from './components/QuestionTableView'
 import ViewSwitcher, { ViewMode } from './components/ViewSwitcher'
+import TypeFilter from './components/TypeFilter'
 import { useDebounceFn, useRequest, useTitle } from 'ahooks'
 import { getQuestionList } from '@/api/modules/question'
 import { useEffect, useRef, useState, useMemo } from 'react'
@@ -29,6 +30,9 @@ const List = () => {
     return (saved as ViewMode) || 'list'
   })
 
+  // 类型筛选状态
+  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined)
+
   // 保存视图偏好到 localStorage
   const handleViewChange = (mode: ViewMode) => {
     setViewMode(mode)
@@ -39,12 +43,17 @@ const List = () => {
 
   const { run: load, loading } = useRequest(
     async () => {
-      return await getQuestionList({ 
+      const params: any = { 
         page, 
         pageSize: 10, 
         keyword,
         isDeleted: false // 明确过滤已删除的问卷
-      })
+      }
+      // 添加类型筛选参数
+      if (typeFilter) {
+        params.type = typeFilter
+      }
+      return await getQuestionList(params)
     },
     {
       manual: true,
@@ -102,7 +111,7 @@ const List = () => {
     setPage(1)
     setTotal(0)
     setList([])
-  }, [keyword])
+  }, [keyword, typeFilter])
 
   const LoadingMoreContentElement = useMemo(() => {
     if (!started || loading) {
@@ -152,9 +161,20 @@ const List = () => {
     <div className="min-h-full">
       <div className="mb-4 md:mb-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-          {/* 视图切换器 */}
+          {/* 左侧：视图切换器 */}
           <div className="flex-shrink-0">
             <ViewSwitcher currentView={viewMode} onViewChange={handleViewChange} />
+          </div>
+          
+          {/* 右侧：类型筛选 */}
+          <div className="flex-shrink-0">
+            <TypeFilter 
+              value={typeFilter}
+              onChange={(value) => {
+                setTypeFilter(value)
+                refreshList()
+              }}
+            />
           </div>
         </div>
       </div>

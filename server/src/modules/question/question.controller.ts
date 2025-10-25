@@ -282,4 +282,35 @@ export class QuestionController {
     const { username } = req.user
     return await this.questionService.duplicate(id, username)
   }
+
+  /**
+   * 从模板创建问卷
+   * POST /api/question/from-template/:templateId
+   */
+  @ApiOperation({ 
+    summary: '从模板创建问卷', 
+    description: '基于模板创建新问卷' 
+  })
+  @ApiParam({
+    name: 'templateId',
+    description: '模板ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '创建成功',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '模板不存在',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未授权',
+  })
+  @Post('from-template/:templateId')
+  @HttpCode(HttpStatus.CREATED)
+  async createFromTemplate(@Param('templateId') templateId: string, @Request() req) {
+    const { username } = req.user
+    return await this.questionService.createFromTemplate(templateId, username)
+  }
 }

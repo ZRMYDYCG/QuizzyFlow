@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AnswerModule } from './modules/answer/answer.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { TemplateModule } from './modules/template/template.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     AuthModule,
     AnswerModule,
     StatisticsModule,
+    TemplateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
