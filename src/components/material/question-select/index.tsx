@@ -15,13 +15,36 @@ const QuestionSelect: React.FC<IQuestionSelectProps> = (
     disabled,
     size,
     maxTagCount,
+    onChange,
   } = {
     ...QuestionSelectDefaultData,
     ...props,
   }
 
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  
+  // 根据 mode 确定默认值
+  const getDefaultValue = () => {
+    if (externalValue !== undefined) {
+      return externalValue
+    }
+    // multiple 和 tags 模式需要数组，default 模式需要 undefined
+    return mode === 'multiple' || mode === 'tags' ? [] : undefined
+  }
+  
+  const currentValue = getDefaultValue()
+
   const handleChange = (value: any) => {
-    console.log('Selected:', value)
+    if (onChange) {
+      // 答题模式：直接传递选中的值
+      // 确保清空时返回正确的空值
+      if (value === undefined || value === null) {
+        ;(onChange as any)(mode === 'multiple' || mode === 'tags' ? [] : null)
+      } else {
+        ;(onChange as any)(value)
+      }
+    }
   }
 
   return (
@@ -34,6 +57,7 @@ const QuestionSelect: React.FC<IQuestionSelectProps> = (
       disabled={disabled}
       size={size}
       maxTagCount={maxTagCount}
+      value={currentValue}
       onChange={handleChange}
       style={{ width: '100%', minWidth: 200 }}
     />

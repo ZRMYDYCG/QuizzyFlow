@@ -3,12 +3,15 @@ import { Typography } from 'antd'
 import { IQuestionNPSProps, QuestionNPSDefaultProps } from './interface'
 
 const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
-  const { title, value: initialValue, minLabel, maxLabel, showDescription } = {
+  const { title, value: initialValue, minLabel, maxLabel, showDescription, onChange } = {
     ...QuestionNPSDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState<number | undefined>(initialValue)
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined ? externalValue : initialValue
+
   const scores = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
   const getScoreColor = (score: number) => {
@@ -24,7 +27,9 @@ const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
   }
 
   const handleScoreClick = (score: number) => {
-    setValue(score)
+    if (onChange) {
+      ;(onChange as any)(score)
+    }
   }
 
   return (
@@ -44,7 +49,7 @@ const QuestionNPS: FC<IQuestionNPSProps> = (props: IQuestionNPSProps) => {
                 w-12 h-12 rounded-lg border-2 font-bold text-lg
                 transition-all duration-200 cursor-pointer
                 ${
-                  value === score
+                  currentValue === score
                     ? getScoreActiveColor(score)
                     : `${getScoreColor(score)} text-gray-700`
                 }

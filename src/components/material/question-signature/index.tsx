@@ -12,6 +12,7 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
     penColor,
     penWidth,
     value: initialValue,
+    onChange,
   } = {
     ...QuestionSignatureDefaultProps,
     ...props,
@@ -20,7 +21,10 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [isEmpty, setIsEmpty] = useState(true)
-  const [signatureData, setSignatureData] = useState<string>(initialValue || '')
+  
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentSignature = externalValue !== undefined ? externalValue : (initialValue || '')
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -33,16 +37,16 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
     ctx.fillStyle = backgroundColor || '#ffffff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // 如果有初始签名，加载它
-    if (initialValue) {
+    // 如果有签名，加载它
+    if (currentSignature) {
       const img = new Image()
       img.onload = () => {
         ctx.drawImage(img, 0, 0)
         setIsEmpty(false)
       }
-      img.src = initialValue
+      img.src = currentSignature
     }
-  }, [backgroundColor, initialValue])
+  }, [backgroundColor, currentSignature])
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true)
@@ -87,7 +91,9 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
       const canvas = canvasRef.current
       if (canvas) {
         const dataUrl = canvas.toDataURL('image/png')
-        setSignatureData(dataUrl)
+        if (onChange) {
+          ;(onChange as any)(dataUrl)
+        }
       }
     }
     setIsDrawing(false)
@@ -103,13 +109,9 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
     ctx.fillStyle = backgroundColor || '#ffffff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     setIsEmpty(true)
-    setSignatureData('')
-  }
-
-  const saveSignature = () => {
-    if (isEmpty) return
-    // 这里可以触发保存回调
-    console.log('签名已保存:', signatureData)
+    if (onChange) {
+      ;(onChange as any)('')
+    }
   }
 
   return (
@@ -143,19 +145,11 @@ const QuestionSignature: FC<IQuestionSignatureProps> = (props: IQuestionSignatur
           >
             清除签名
           </Button>
-          <Button
-            type="primary"
-            icon={<CheckOutlined />}
-            onClick={saveSignature}
-            disabled={isEmpty}
-          >
-            确认签名
-          </Button>
         </Space>
 
         {!isEmpty && (
           <Typography.Text type="secondary" className="text-sm">
-            提示：签名已保存，可以继续编辑或清除重签
+            提示：签名会在松开鼠标时自动保存
           </Typography.Text>
         )}
       </div>

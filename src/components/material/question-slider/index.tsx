@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import { Slider, Space, Typography } from 'antd'
 import {
   IQuestionSliderProps,
@@ -19,14 +19,23 @@ const QuestionSlider: FC<IQuestionSliderProps> = (
     marks = true,
     label = '请选择数值',
     showValue = true,
+    onChange,
   } = {
     ...QuestionSliderDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState<number | [number, number]>(
-    range ? [min, max / 2] : defaultValue
-  )
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined 
+    ? externalValue 
+    : (range ? [min, max / 2] : defaultValue)
+
+  const handleChange = (newValue: number | [number, number]) => {
+    if (onChange) {
+      ;(onChange as any)(newValue)
+    }
+  }
 
   // 禁用 marks 以避免宽度溢出问题
   const sliderMarks = undefined
@@ -49,8 +58,8 @@ const QuestionSlider: FC<IQuestionSliderProps> = (
             min={min}
             max={max}
             step={step}
-            value={value as any}
-            onChange={setValue as any}
+            value={currentValue as any}
+            onChange={handleChange as any}
             range={range}
             marks={sliderMarks}
           />
@@ -67,7 +76,7 @@ const QuestionSlider: FC<IQuestionSliderProps> = (
         </div>
         {showValue && (
           <Text type="secondary">
-            当前值: {Array.isArray(value) ? value.join(' ~ ') : value}
+            当前值: {Array.isArray(currentValue) ? currentValue.join(' ~ ') : currentValue}
           </Text>
         )}
       </Space>

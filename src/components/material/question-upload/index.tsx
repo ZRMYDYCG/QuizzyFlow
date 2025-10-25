@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { Upload, Space, Typography, message } from 'antd'
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
-import type { UploadProps } from 'antd'
+import type { UploadProps, UploadFile } from 'antd'
 import {
   IQuestionUploadProps,
   QuestionUploadDefaultProps,
@@ -21,9 +21,22 @@ const QuestionUpload: FC<IQuestionUploadProps> = (
     listType = 'text',
     multiple = true,
     drag = false,
+    onChange,
   } = {
     ...QuestionUploadDefaultProps,
     ...props,
+  }
+
+  // 获取外部传入的 fileList（答题模式）
+  const externalValue = (props as any).value || []
+  const fileList: UploadFile[] = Array.isArray(externalValue) ? externalValue : []
+
+  const handleChange = (info: any) => {
+    const { fileList: newFileList } = info
+    if (onChange) {
+      // 传递文件列表
+      ;(onChange as any)(newFileList)
+    }
   }
 
   const uploadProps: UploadProps = {
@@ -32,10 +45,13 @@ const QuestionUpload: FC<IQuestionUploadProps> = (
     accept,
     maxCount,
     listType,
+    fileList,
+    onChange: handleChange,
     beforeUpload: (file) => {
       const isLtSize = file.size / 1024 / 1024 < maxSize
       if (!isLtSize) {
         message.error(`文件大小不能超过 ${maxSize}MB!`)
+        return Upload.LIST_IGNORE
       }
       return false // 阻止自动上传
     },

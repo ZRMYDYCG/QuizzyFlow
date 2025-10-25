@@ -12,13 +12,17 @@ const QuestionEmojiPicker: FC<IQuestionEmojiPickerProps> = (
     values: initialValues,
     size,
     allowMultiple,
+    onChange,
   } = {
     ...QuestionEmojiPickerDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState<string>(initialValue || '')
-  const [values, setValues] = useState<string[]>(initialValues || [])
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined
+    ? (allowMultiple ? (Array.isArray(externalValue) ? externalValue : []) : externalValue)
+    : (allowMultiple ? (initialValues || []) : (initialValue || ''))
 
   const sizeMap = {
     small: 'text-3xl w-16 h-16',
@@ -30,22 +34,27 @@ const QuestionEmojiPicker: FC<IQuestionEmojiPickerProps> = (
 
   const isSelected = (optionValue: string) => {
     if (allowMultiple) {
-      return values.includes(optionValue)
+      return Array.isArray(currentValue) && currentValue.includes(optionValue)
     }
-    return value === optionValue
+    return currentValue === optionValue
   }
 
   const handleClick = (optionValue: string) => {
     if (allowMultiple) {
       // 多选模式
-      if (values.includes(optionValue)) {
-        setValues(values.filter((v) => v !== optionValue))
-      } else {
-        setValues([...values, optionValue])
+      const newValues = Array.isArray(currentValue)
+        ? (currentValue.includes(optionValue)
+          ? currentValue.filter((v) => v !== optionValue)
+          : [...currentValue, optionValue])
+        : [optionValue]
+      if (onChange) {
+        ;(onChange as any)(newValues)
       }
     } else {
       // 单选模式
-      setValue(optionValue)
+      if (onChange) {
+        ;(onChange as any)(optionValue)
+      }
     }
   }
 

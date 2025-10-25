@@ -6,17 +6,20 @@ import { AutoComplete } from 'antd'
 const QuestionAutocomplete: React.FC<IQuestionAutocompleteProps> = (
   props: IQuestionAutocompleteProps
 ) => {
-  const { placeholder, options, filterOption, disabled, allowClear } = {
+  const { placeholder, options, filterOption, disabled, allowClear, onChange } = {
     ...QuestionAutocompleteDefaultData,
     ...props,
   }
 
-  const handleSelect = (value: string) => {
-    console.log('Selected:', value)
-  }
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined ? externalValue : undefined
 
-  const handleSearch = (value: string) => {
-    console.log('Searching:', value)
+  const handleChange = (value: string) => {
+    if (onChange) {
+      // 确保清空时返回空字符串而不是 undefined
+      ;(onChange as any)(value || '')
+    }
   }
 
   return (
@@ -26,8 +29,8 @@ const QuestionAutocomplete: React.FC<IQuestionAutocompleteProps> = (
       filterOption={filterOption}
       disabled={disabled}
       allowClear={allowClear}
-      onSelect={handleSelect}
-      onSearch={handleSearch}
+      value={currentValue}
+      onChange={handleChange}
       style={{ width: '100%', minWidth: 200 }}
     />
   )

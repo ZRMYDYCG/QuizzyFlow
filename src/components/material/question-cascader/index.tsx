@@ -14,13 +14,29 @@ const QuestionCascader: React.FC<IQuestionCascaderProps> = (
     showSearch,
     multiple,
     disabled,
+    onChange,
   } = {
     ...QuestionCascaderDefaultData,
     ...props,
   }
 
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  
+  // 根据 multiple 确定默认值
+  const currentValue = externalValue !== undefined 
+    ? externalValue 
+    : (multiple ? [] : undefined)
+
   const handleChange = (value: any) => {
-    console.log('Selected:', value)
+    if (onChange) {
+      // 确保清空时返回正确的空值
+      if (value === undefined || value === null || (Array.isArray(value) && value.length === 0)) {
+        ;(onChange as any)(multiple ? [] : null)
+      } else {
+        ;(onChange as any)(value)
+      }
+    }
   }
 
   return (
@@ -32,6 +48,7 @@ const QuestionCascader: React.FC<IQuestionCascaderProps> = (
       showSearch={showSearch}
       multiple={multiple}
       disabled={disabled}
+      value={currentValue}
       onChange={handleChange}
       style={{ width: '100%', minWidth: 200 }}
     />

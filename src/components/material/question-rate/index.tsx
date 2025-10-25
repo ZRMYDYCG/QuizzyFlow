@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import { Rate, Space, Typography } from 'antd'
 import {
   IQuestionRateProps,
@@ -18,12 +18,21 @@ const QuestionRate: FC<IQuestionRateProps> = (
     defaultValue = 0,
     label = '请评分',
     showValue = true,
+    onChange,
   } = {
     ...QuestionRateDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState(defaultValue)
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined ? externalValue : defaultValue
+
+  const handleChange = (newValue: number) => {
+    if (onChange) {
+      ;(onChange as any)(newValue)
+    }
+  }
 
   return (
     <div style={{ width: '100%', maxWidth: 400 }}>
@@ -34,13 +43,13 @@ const QuestionRate: FC<IQuestionRateProps> = (
             count={count}
             allowHalf={allowHalf}
             allowClear={allowClear}
-            value={value}
-            onChange={setValue}
+            value={currentValue}
+            onChange={handleChange}
             style={{ color }}
           />
-          {showValue && value > 0 && (
+          {showValue && currentValue > 0 && (
             <Text type="secondary">
-              {value} {allowHalf ? '星' : `/ ${count}`}
+              {currentValue} {allowHalf ? '星' : `/ ${count}`}
             </Text>
           )}
         </Space>

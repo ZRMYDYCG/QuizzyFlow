@@ -1,5 +1,6 @@
 import { FC } from 'react'
 import { DatePicker, TimePicker, Space, Typography } from 'antd'
+import type { Dayjs } from 'dayjs'
 import {
   IQuestionDateProps,
   QuestionDateDefaultProps,
@@ -17,21 +18,65 @@ const QuestionDate: FC<IQuestionDateProps> = (
     label = '请选择日期',
     placeholder = '请选择',
     showTime = false,
+    onChange,
   } = {
     ...QuestionDateDefaultProps,
     ...props,
   }
 
+  // 获取外部传入的 value（答题模式）- 直接使用 Dayjs 对象
+  const externalValue = (props as any).value
+
+  const handleChange = (value: any) => {
+    if (onChange) {
+      // 直接传递 Dayjs 对象或数组，由提交时统一处理格式化
+      ;(onChange as any)(value)
+    }
+  }
+
   const renderPicker = () => {
     switch (mode) {
       case 'time':
-        return <TimePicker format="HH:mm:ss" placeholder={placeholder} style={{ width: '100%', maxWidth: 300 }} />
+        return (
+          <TimePicker 
+            format="HH:mm:ss" 
+            placeholder={placeholder} 
+            value={externalValue as Dayjs}
+            onChange={handleChange}
+            style={{ width: '100%', maxWidth: 300 }} 
+          />
+        )
       case 'datetime':
-        return <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" placeholder={placeholder} style={{ width: '100%', maxWidth: 300 }} />
+        return (
+          <DatePicker 
+            showTime 
+            format="YYYY-MM-DD HH:mm:ss" 
+            placeholder={placeholder}
+            value={externalValue as Dayjs}
+            onChange={handleChange}
+            style={{ width: '100%', maxWidth: 300 }} 
+          />
+        )
       case 'range':
-        return <RangePicker showTime={showTime} format={format} style={{ width: '100%', maxWidth: 400 }} />
+        return (
+          <RangePicker 
+            showTime={showTime} 
+            format={format}
+            value={externalValue as [Dayjs, Dayjs]}
+            onChange={handleChange as any}
+            style={{ width: '100%', maxWidth: 400 }} 
+          />
+        )
       default:
-        return <DatePicker format={format} placeholder={placeholder} style={{ width: '100%', maxWidth: 300 }} />
+        return (
+          <DatePicker 
+            format={format} 
+            placeholder={placeholder}
+            value={externalValue as Dayjs}
+            onChange={handleChange}
+            style={{ width: '100%', maxWidth: 300 }} 
+          />
+        )
     }
   }
 

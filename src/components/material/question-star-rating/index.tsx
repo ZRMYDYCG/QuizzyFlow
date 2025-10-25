@@ -13,22 +13,27 @@ const QuestionStarRating: FC<IQuestionStarRatingProps> = (
     allowClear,
     showValue,
     descriptions,
+    onChange,
   } = {
     ...QuestionStarRatingDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState<number>(initialValue || 0)
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined ? externalValue : (initialValue || 0)
 
   const handleChange = (newValue: number) => {
-    setValue(newValue)
+    if (onChange) {
+      ;(onChange as any)(newValue)
+    }
   }
 
   const getDescription = () => {
     if (!descriptions || descriptions.length === 0) return ''
-    if (value === 0) return ''
+    if (currentValue === 0) return ''
     
-    const index = Math.ceil(value) - 1
+    const index = Math.ceil(currentValue) - 1
     return descriptions[index] || ''
   }
 
@@ -42,7 +47,7 @@ const QuestionStarRating: FC<IQuestionStarRatingProps> = (
         {/* 星级评分 */}
         <Rate
           count={count}
-          value={value}
+          value={currentValue}
           onChange={handleChange}
           allowHalf={allowHalf}
           allowClear={allowClear}
@@ -50,10 +55,10 @@ const QuestionStarRating: FC<IQuestionStarRatingProps> = (
         />
 
         {/* 分值显示 */}
-        {showValue && value > 0 && (
+        {showValue && currentValue > 0 && (
           <div className="flex items-center gap-2">
             <Typography.Text className="text-3xl font-bold text-orange-500">
-              {value.toFixed(allowHalf ? 1 : 0)}
+              {currentValue.toFixed(allowHalf ? 1 : 0)}
             </Typography.Text>
             <Typography.Text className="text-gray-500">
               / {count}
@@ -68,7 +73,7 @@ const QuestionStarRating: FC<IQuestionStarRatingProps> = (
           </Typography.Text>
         )}
 
-        {value === 0 && (
+        {currentValue === 0 && (
           <Typography.Text type="secondary">
             点击星星进行评分
           </Typography.Text>

@@ -7,30 +7,35 @@ import type { TransferDirection } from 'antd/es/transfer'
 const QuestionTransfer: React.FC<IQuestionTransferProps> = (
   props: IQuestionTransferProps
 ) => {
-  const { dataSource, targetKeys, showSearch, titles, operations, disabled } = {
+  const { dataSource, targetKeys, showSearch, titles, operations, disabled, onChange } = {
     ...QuestionTransferDefaultData,
     ...props,
   }
 
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([])
-  const [currentTargetKeys, setCurrentTargetKeys] = useState<string[]>(
-    targetKeys || []
-  )
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  // Transfer 组件的 targetKeys 必须是数组
+  const currentTargetKeys = Array.isArray(externalValue) 
+    ? externalValue 
+    : (Array.isArray(targetKeys) ? targetKeys : [])
+
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([])
 
   const handleChange = (
-    newTargetKeys: string[],
+    newTargetKeys: React.Key[],
     direction: TransferDirection,
-    moveKeys: string[]
+    moveKeys: React.Key[]
   ) => {
-    console.log('New target keys:', newTargetKeys)
-    console.log('Direction:', direction)
-    console.log('Move keys:', moveKeys)
-    setCurrentTargetKeys(newTargetKeys)
+    if (onChange) {
+      // Transfer 总是返回数组，转换为字符串数组
+      const stringKeys = newTargetKeys.map(key => String(key))
+      ;(onChange as any)(stringKeys)
+    }
   }
 
   const handleSelectChange = (
-    sourceSelectedKeys: string[],
-    targetSelectedKeys: string[]
+    sourceSelectedKeys: React.Key[],
+    targetSelectedKeys: React.Key[]
   ) => {
     setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys])
   }
@@ -55,4 +60,3 @@ const QuestionTransfer: React.FC<IQuestionTransferProps> = (
 }
 
 export default QuestionTransfer
-

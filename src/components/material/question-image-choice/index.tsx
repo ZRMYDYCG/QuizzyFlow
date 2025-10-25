@@ -14,32 +14,41 @@ const QuestionImageChoice: FC<IQuestionImageChoiceProps> = (
     values: initialValues,
     columns,
     showLabel,
+    onChange,
   } = {
     ...QuestionImageChoiceDefaultProps,
     ...props,
   }
 
-  const [value, setValue] = useState<string>(initialValue || '')
-  const [values, setValues] = useState<string[]>(initialValues || [])
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentValue = externalValue !== undefined 
+    ? (isMultiple ? (Array.isArray(externalValue) ? externalValue : []) : externalValue)
+    : (isMultiple ? (initialValues || []) : (initialValue || ''))
 
   const isSelected = (optionValue: string) => {
     if (isMultiple) {
-      return values.includes(optionValue)
+      return Array.isArray(currentValue) && currentValue.includes(optionValue)
     }
-    return value === optionValue
+    return currentValue === optionValue
   }
 
   const handleClick = (optionValue: string) => {
     if (isMultiple) {
       // 多选模式
-      if (values.includes(optionValue)) {
-        setValues(values.filter((v) => v !== optionValue))
-      } else {
-        setValues([...values, optionValue])
+      const newValues = Array.isArray(currentValue)
+        ? (currentValue.includes(optionValue)
+          ? currentValue.filter((v) => v !== optionValue)
+          : [...currentValue, optionValue])
+        : [optionValue]
+      if (onChange) {
+        ;(onChange as any)(newValues)
       }
     } else {
       // 单选模式
-      setValue(optionValue)
+      if (onChange) {
+        ;(onChange as any)(optionValue)
+      }
     }
   }
 

@@ -58,7 +58,7 @@ const SortableItem: FC<{
 }
 
 const QuestionRanking: FC<IQuestionRankingProps> = (props: IQuestionRankingProps) => {
-  const { title, options: initialOptions, showNumbers, description } = {
+  const { title, options: initialOptions, showNumbers, description, onChange } = {
     ...QuestionRankingDefaultProps,
     ...props,
   }
@@ -68,7 +68,9 @@ const QuestionRanking: FC<IQuestionRankingProps> = (props: IQuestionRankingProps
     (a, b) => (a.order || 0) - (b.order || 0)
   )
 
-  const [options, setOptions] = useState<RankingOptionType[]>(sortedInitialOptions)
+  // 获取外部传入的 value（答题模式）
+  const externalValue = (props as any).value
+  const currentOptions = externalValue !== undefined ? externalValue : sortedInitialOptions
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -83,14 +85,16 @@ const QuestionRanking: FC<IQuestionRankingProps> = (props: IQuestionRankingProps
     if (over === null) return
 
     if (active.id !== over.id) {
-      setOptions((items) => {
-        const oldIndex = items.findIndex((item) => item.value === active.id)
-        const newIndex = items.findIndex((item) => item.value === over.id)
+      const oldIndex = currentOptions.findIndex((item: RankingOptionType) => item.value === active.id)
+      const newIndex = currentOptions.findIndex((item: RankingOptionType) => item.value === over.id)
 
-        const newItems = arrayMove(items, oldIndex, newIndex)
-        // 更新 order
-        return newItems.map((item, index) => ({ ...item, order: index + 1 }))
-      })
+      const newItems = arrayMove(currentOptions, oldIndex, newIndex)
+      // 更新 order
+      const updatedItems = newItems.map((item, index) => ({ ...item, order: index + 1 }))
+      
+      if (onChange) {
+        ;(onChange as any)(updatedItems)
+      }
     }
   }
 
@@ -111,9 +115,9 @@ const QuestionRanking: FC<IQuestionRankingProps> = (props: IQuestionRankingProps
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={options.map((o) => o.value)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={currentOptions.map((o: RankingOptionType) => o.value)} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
-            {options.map((option, index) => (
+            {currentOptions.map((option: RankingOptionType, index: number) => (
               <SortableItem
                 key={option.value}
                 option={option}

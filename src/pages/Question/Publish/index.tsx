@@ -34,12 +34,13 @@ function genComponent(
 
   // 如果是答题模式，需要处理交互组件
   if (isAnswerMode && isInteractiveComponent(type)) {
+    const ComponentToRender = Component as any
+    const currentValue = answerValues[fe_id]
     return (
       <div key={fe_id}>
-        {/* @ts-ignore */}
-        <Component
+        <ComponentToRender
           {...props}
-          value={answerValues[fe_id]}
+          value={currentValue}
           onChange={(value: any) => onAnswerChange(fe_id, value)}
         />
       </div>
@@ -47,10 +48,10 @@ function genComponent(
   }
 
   // 预览模式或展示组件，只渲染不可交互
+  const ComponentToRender = Component as any
   return (
     <div key={fe_id}>
-      {/* @ts-ignore */}
-      <Component {...props} disabled={!isAnswerMode} />
+      <ComponentToRender {...props} disabled={!isAnswerMode} />
     </div>
   )
 }
@@ -58,6 +59,7 @@ function genComponent(
 // 判断是否是交互组件（需要收集答案的组件）
 function isInteractiveComponent(type: string): boolean {
   const interactiveTypes = [
+    // 基础表单组件
     'question-input',
     'question-textarea',
     'question-radio',
@@ -66,8 +68,20 @@ function isInteractiveComponent(type: string): boolean {
     'question-rate',
     'question-slider',
     'question-date',
-    'question-time',
     'question-upload',
+    // 高级选择组件
+    'question-cascader',
+    'question-autocomplete',
+    'question-transfer',
+    // 高级交互组件
+    'question-ranking',
+    'question-matrix',
+    'question-nps',
+    'question-image-choice',
+    'question-star-rating',
+    'question-signature',
+    'question-color-picker',
+    'question-emoji-picker',
   ]
   return interactiveTypes.includes(type)
 }
@@ -112,11 +126,40 @@ const PublishPage: React.FC = () => {
         .filter((item: QuestionComponentType) => 
           !item.isHidden && isInteractiveComponent(item.type)
         )
-        .map((item: QuestionComponentType) => ({
-          componentId: item.fe_id,
-          componentType: item.type,
-          value: answerValues[item.fe_id] || null,
-        }))
+        .map((item: QuestionComponentType) => {
+          const value = answerValues[item.fe_id]
+          // 对于 checkbox，保留空数组；对于其他类型，空值转为 null
+          let finalValue = value
+          if (value === undefined || value === '') {
+            finalValue = null
+          } else if (item.type === 'question-checkbox' && Array.isArray(value)) {
+            // checkbox 保留空数组
+            finalValue = value
+          } else if (item.type === 'question-date') {
+            // 日期组件：将 Dayjs 对象转换为字符串
+            if (value) {
+              if (Array.isArray(value)) {
+                // Range picker
+                finalValue = value.map((v: any) => v?.format?.('YYYY-MM-DD') || v)
+              } else if (value.format) {
+                // Single picker with Dayjs object
+                finalValue = value.format('YYYY-MM-DD HH:mm:ss')
+              } else {
+                finalValue = value
+              }
+            } else {
+              finalValue = null
+            }
+          } else if (value === null) {
+            finalValue = null
+          }
+          
+          return {
+            componentId: item.fe_id,
+            componentType: item.type,
+            value: finalValue,
+          }
+        })
 
       // 计算答题用时（秒）
       const duration = Math.floor((Date.now() - startTime) / 1000)
