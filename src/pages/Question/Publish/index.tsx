@@ -73,6 +73,7 @@ function isInteractiveComponent(type: string): boolean {
     'question-cascader',
     'question-autocomplete',
     'question-transfer',
+    'question-tree-select',
     // 高级交互组件
     'question-ranking',
     'question-matrix',
@@ -82,6 +83,27 @@ function isInteractiveComponent(type: string): boolean {
     'question-signature',
     'question-color-picker',
     'question-emoji-picker',
+    // 扩展输入组件（第一批）
+    'question-switch',
+    'question-time-picker',
+    'question-number-input',
+    'question-password-input',
+    'question-email-input',
+    'question-phone-input',
+    'question-url-input',
+    'question-tags-input',
+    'question-range-picker',
+    'question-time-range-picker',
+    // 扩展输入组件（第二批）
+    'question-search-input',
+    'question-mentions',
+    'question-otp-input',
+    'question-week-picker',
+    'question-month-picker',
+    'question-year-picker',
+    'question-range-slider',
+    'question-mention-textarea',
+    'question-segmented',
   ]
   return interactiveTypes.includes(type)
 }

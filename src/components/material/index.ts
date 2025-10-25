@@ -79,6 +79,16 @@ import { IQuestionUrlInputProps } from './question-url-input'
 import { IQuestionTagsInputProps } from './question-tags-input'
 import { IQuestionRangePickerProps } from './question-range-picker'
 import { IQuestionTimeRangePickerProps } from './question-time-range-picker'
+import { IQuestionSearchInputProps } from './question-search-input'
+import { IQuestionMentionsProps } from './question-mentions'
+import { IQuestionOtpInputProps } from './question-otp-input'
+import { IQuestionWeekPickerProps } from './question-week-picker'
+import { IQuestionMonthPickerProps } from './question-month-picker'
+import { IQuestionYearPickerProps } from './question-year-picker'
+import { IQuestionRangeSliderProps } from './question-range-slider'
+import { IQuestionTreeSelectProps } from './question-tree-select'
+import { IQuestionMentionTextareaProps } from './question-mention-textarea'
+import { IQuestionSegmentedProps } from './question-segmented'
 import QuestionInputConfig from './question-input'
 import QuestionTitleConfig from './question-title'
 import QuestionParagraphConfig from './question-paragraph'
@@ -155,6 +165,16 @@ import QuestionUrlInputConfig from './question-url-input'
 import QuestionTagsInputConfig from './question-tags-input'
 import QuestionRangePickerConfig from './question-range-picker'
 import QuestionTimeRangePickerConfig from './question-time-range-picker'
+import QuestionSearchInputConfig from './question-search-input'
+import QuestionMentionsConfig from './question-mentions'
+import QuestionOtpInputConfig from './question-otp-input'
+import QuestionWeekPickerConfig from './question-week-picker'
+import QuestionMonthPickerConfig from './question-month-picker'
+import QuestionYearPickerConfig from './question-year-picker'
+import QuestionRangeSliderConfig from './question-range-slider'
+import QuestionTreeSelectConfig from './question-tree-select'
+import QuestionMentionTextareaConfig from './question-mention-textarea'
+import QuestionSegmentedConfig from './question-segmented'
 
 // 各组件的 prop 类型
 export type ComponentPropsType = IQuestionInputProps &
@@ -230,7 +250,17 @@ export type ComponentPropsType = IQuestionInputProps &
   IQuestionUrlInputProps &
   IQuestionTagsInputProps &
   IQuestionRangePickerProps &
-  IQuestionTimeRangePickerProps
+  IQuestionTimeRangePickerProps &
+  IQuestionSearchInputProps &
+  IQuestionMentionsProps &
+  IQuestionOtpInputProps &
+  IQuestionWeekPickerProps &
+  IQuestionMonthPickerProps &
+  IQuestionYearPickerProps &
+  IQuestionRangeSliderProps &
+  IQuestionTreeSelectProps &
+  IQuestionMentionTextareaProps &
+  IQuestionSegmentedProps
 
 // 各个组件的统计属性类型
 export type ComponentsStatisticsType = IComponentsStatisticsProps &
@@ -324,6 +354,16 @@ const componentConfigList: ComponentConfigType[] = [
   QuestionTagsInputConfig,
   QuestionRangePickerConfig,
   QuestionTimeRangePickerConfig,
+  QuestionSearchInputConfig,
+  QuestionMentionsConfig,
+  QuestionOtpInputConfig,
+  QuestionWeekPickerConfig,
+  QuestionMonthPickerConfig,
+  QuestionYearPickerConfig,
+  QuestionRangeSliderConfig,
+  QuestionTreeSelectConfig,
+  QuestionMentionTextareaConfig,
+  QuestionSegmentedConfig,
 ]
 
 // 组件进行分组
@@ -376,16 +416,24 @@ export const componentConfigGroup = [
     components: [
       QuestionInputConfig,
       QuestionTextareaConfig,
+      QuestionSearchInputConfig,
       QuestionNumberInputConfig,
       QuestionPasswordInputConfig,
       QuestionEmailInputConfig,
       QuestionPhoneInputConfig,
       QuestionUrlInputConfig,
+      QuestionMentionsConfig,
+      QuestionMentionTextareaConfig,
+      QuestionOtpInputConfig,
       QuestionTagsInputConfig,
       QuestionRateConfig,
       QuestionSliderConfig,
+      QuestionRangeSliderConfig,
       QuestionDateConfig,
       QuestionTimePickerConfig,
+      QuestionWeekPickerConfig,
+      QuestionMonthPickerConfig,
+      QuestionYearPickerConfig,
       QuestionRangePickerConfig,
       QuestionTimeRangePickerConfig,
       QuestionUploadConfig,
@@ -406,8 +454,10 @@ export const componentConfigGroup = [
     components: [
       QuestionRadioConfig,
       QuestionCheckboxConfig,
+      QuestionSegmentedConfig,
       QuestionSelectConfig,
       QuestionCascaderConfig,
+      QuestionTreeSelectConfig,
       QuestionAutocompleteConfig,
       QuestionTransferConfig,
       QuestionMatrixConfig,

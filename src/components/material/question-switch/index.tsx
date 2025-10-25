@@ -12,6 +12,8 @@ const QuestionSwitch: React.FC<IQuestionSwitchProps> = (
 
   // 获取外部传入的 value（答题模式）
   const externalValue = (props as any).value
+  // 确定实际显示的值：优先使用外部传入的值，否则使用默认值
+  const checkedValue = externalValue !== undefined && externalValue !== null ? externalValue : defaultChecked
 
   const handleChange = (checked: boolean) => {
     if (onChange) {
@@ -25,7 +27,7 @@ const QuestionSwitch: React.FC<IQuestionSwitchProps> = (
       <Typography.Paragraph strong>{title}</Typography.Paragraph>
       <Space>
         <Switch
-          checked={externalValue !== undefined ? externalValue : defaultChecked}
+          checked={checkedValue}
           checkedChildren={checkedText}
           unCheckedChildren={unCheckedText}
           onChange={handleChange}

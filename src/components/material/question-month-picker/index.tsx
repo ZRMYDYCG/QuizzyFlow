@@ -1,16 +1,16 @@
 import React from 'react'
-import { TimePicker, Typography } from 'antd'
+import { DatePicker, Typography } from 'antd'
 import type { Dayjs } from 'dayjs'
 import * as dayjsLib from 'dayjs'
-import { IQuestionTimePickerProps, QuestionTimePickerDefaultData } from './interface.ts'
+import { IQuestionMonthPickerProps, QuestionMonthPickerDefaultData } from './interface.ts'
 
 const dayjs = (dayjsLib as any).default || dayjsLib
 
-const QuestionTimePicker: React.FC<IQuestionTimePickerProps> = (
-  props: IQuestionTimePickerProps
+const QuestionMonthPicker: React.FC<IQuestionMonthPickerProps> = (
+  props: IQuestionMonthPickerProps
 ) => {
-  const { title, placeholder, format, use12Hours, disabled, onChange } = {
-    ...QuestionTimePickerDefaultData,
+  const { title, placeholder, format, disabled, onChange } = {
+    ...QuestionMonthPickerDefaultData,
     ...props,
   }
 
@@ -18,12 +18,12 @@ const QuestionTimePicker: React.FC<IQuestionTimePickerProps> = (
   const externalValue = (props as any).value
   
   // 将字符串转换为 Dayjs 对象
-  const dayjsValue = externalValue ? dayjs(externalValue, format) : null
+  const dayjsValue = externalValue ? dayjs(externalValue) : null
 
-  const handleChange = (time: Dayjs | null, timeString: string) => {
+  const handleChange = (date: Dayjs | null, dateString: string | string[]) => {
     if (onChange) {
-      // 答题模式：传递时间字符串
-      ;(onChange as any)(timeString)
+      // 答题模式：传递日期字符串
+      ;(onChange as any)(dateString)
     }
   }
 
@@ -31,11 +31,11 @@ const QuestionTimePicker: React.FC<IQuestionTimePickerProps> = (
     <div>
       <Typography.Paragraph strong>{title}</Typography.Paragraph>
       <div>
-        <TimePicker
+        <DatePicker
           value={dayjsValue}
           placeholder={placeholder}
+          picker="month"
           format={format}
-          use12Hours={use12Hours}
           onChange={handleChange}
           disabled={disabled}
           className="w-full"
@@ -45,5 +45,5 @@ const QuestionTimePicker: React.FC<IQuestionTimePickerProps> = (
   )
 }
 
-export default QuestionTimePicker
+export default QuestionMonthPicker
 
