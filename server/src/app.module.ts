@@ -10,6 +10,12 @@ import { AnswerModule } from './modules/answer/answer.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { TemplateModule } from './modules/template/template.module';
 import { AIChatModule } from './modules/ai-chat/ai-chat.module';
+// 🆕 RBAC 和管理功能模块
+import { RbacModule } from './modules/rbac/rbac.module';
+import { RoleModule } from './modules/role/role.module';
+import { PermissionModule } from './modules/permission/permission.module';
+import { AdminLogModule } from './modules/admin-log/admin-log.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -17,6 +23,7 @@ import { AIChatModule } from './modules/ai-chat/ai-chat.module';
     MongooseModule.forRoot(
       `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DATABASE}`
     ),
+    // 基础模块
     QuestionModule,
     UserModule,
     AuthModule,
@@ -24,6 +31,12 @@ import { AIChatModule } from './modules/ai-chat/ai-chat.module';
     StatisticsModule,
     TemplateModule,
     AIChatModule,
+    // RBAC 和管理功能模块
+    RbacModule,
+    RoleModule,
+    PermissionModule,
+    AdminLogModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

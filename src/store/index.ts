@@ -9,6 +9,8 @@ import editorLayoutReducer from './modules/editor-layout.ts'
 import { EditorLayoutState } from './modules/editor-layout.ts'
 import canvasConfigReducer from './modules/canvas-config.ts'
 import { CanvasConfigState } from './modules/canvas-config.ts'
+import adminReducer from './modules/admin.ts'
+import { IAdminState } from './modules/admin.ts'
 import undoable, { excludeAction, StateWithHistory } from 'redux-undo'
 
 export interface stateType {
@@ -17,6 +19,7 @@ export interface stateType {
   pageInfo: IPageInfo
   editorLayout: EditorLayoutState
   canvasConfig: CanvasConfigState
+  admin: IAdminState
 }
 
 export default configureStore({
@@ -40,5 +43,7 @@ export default configureStore({
     editorLayout: editorLayoutReducer,
     // 画布配置模块
     canvasConfig: canvasConfigReducer,
+    // 管理员模块
+    admin: adminReducer,
   },
 })
