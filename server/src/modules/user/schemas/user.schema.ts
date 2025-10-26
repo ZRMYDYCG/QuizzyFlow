@@ -69,7 +69,7 @@ export class User {
   @Prop({ type: Date, default: null })
   lastLoginAt: Date // 最后登录时间
 
-  // 🆕 新增字段
+  // 基本信息字段
   @Prop({ default: '' })
   avatar: string // 头像 URL
 
@@ -81,6 +81,31 @@ export class User {
 
   @Prop({ type: UserPreferences, default: {} })
   preferences: UserPreferences // 用户偏好设置
+
+  // 🆕 角色权限字段
+  @Prop({
+    default: 'user',
+    index: true,
+  })
+  role: string // 角色标识：user, admin, super_admin, custom_role_name
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  customPermissions: string[] // 自定义权限（补充角色权限）
+
+  @Prop({ default: false })
+  isBanned: boolean // 是否被封禁
+
+  @Prop({ type: Date, default: null })
+  bannedAt: Date // 封禁时间
+
+  @Prop({ default: '' })
+  bannedReason: string // 封禁原因
+
+  @Prop({ default: '' })
+  bannedBy: string // 封禁操作人
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
@@ -88,4 +113,6 @@ export const UserSchema = SchemaFactory.createForClass(User)
 // 添加索引
 UserSchema.index({ username: 1 }, { unique: true })
 UserSchema.index({ createdAt: -1 })
+UserSchema.index({ role: 1, isActive: 1 })
+UserSchema.index({ isBanned: 1 })
 
