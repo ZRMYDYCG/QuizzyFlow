@@ -5,6 +5,7 @@ import { FileTextOutlined, SettingOutlined } from '@ant-design/icons'
 import ComponentProp from './components-prop'
 import PageSetting from './page-setting'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import TextAIProvider from '@/features/ai-assistant/components/TextAIProvider'
 
 const RightPanel: React.FC = () => {
   const [activeKey, setActiveKey] = useState('prop')
@@ -39,20 +40,22 @@ const RightPanel: React.FC = () => {
   ]
   
   return (
-    <div className="flex flex-col h-full">
-      <Tabs
-        items={tabsItems}
-        activeKey={activeKey}
-        onChange={setActiveKey}
-        className="flex-1 overflow-hidden [&_.ant-tabs-content]:h-full [&_.ant-tabs-tabpane]:h-full"
-        tabBarStyle={{ 
-          marginBottom: 0, 
-          paddingLeft: 12, 
-          paddingRight: 12,
-          paddingTop: 8
-        }}
-      />
-    </div>
+    <TextAIProvider enabled={true}>
+      <div className="flex flex-col h-full">
+        <Tabs
+          items={tabsItems}
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          className="flex-1 overflow-hidden [&_.ant-tabs-content]:h-full [&_.ant-tabs-tabpane]:h-full"
+          tabBarStyle={{ 
+            marginBottom: 0, 
+            paddingLeft: 12, 
+            paddingRight: 12,
+            paddingTop: 8
+          }}
+        />
+      </div>
+    </TextAIProvider>
   )
 }
 

@@ -11,6 +11,7 @@ import {
   DownOutlined,
   MoreOutlined,
   UploadOutlined,
+  RobotOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
@@ -24,6 +25,7 @@ import PreviewModal from './preview-modal'
 import PublishTemplateModal from '@/components/template/PublishTemplateModal'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useResponsive } from '@/hooks/useResponsive'
+import { AIDrawer } from '@/features/ai-assistant'
 
 const TitleElem: FC = () => {
   const { theme } = useTheme()
@@ -211,6 +213,30 @@ const PublishTemplateButton: FC = () => {
   )
 }
 
+// AI 助手按钮
+const AIAssistantButton: FC = () => {
+  const { id } = useParams()
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        type="default"
+        icon={<RobotOutlined />}
+        onClick={() => setIsDrawerOpen(true)}
+        className="flex items-center gap-1"
+      >
+        AI 助手
+      </Button>
+      <AIDrawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        questionId={id}
+      />
+    </>
+  )
+}
+
 // 移动端更多操作菜单
 const MobileMoreMenu: FC = () => {
   const { id } = useParams()
@@ -352,6 +378,7 @@ const EditHeader: React.FC = () => {
         </div>
         <div className="flex-1 flex justify-end">
           <Space>
+            <AIAssistantButton />
             <SaveButton />
             <PublishButton />
             <PreviewButton />

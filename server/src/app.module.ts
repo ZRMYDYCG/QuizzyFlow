@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AnswerModule } from './modules/answer/answer.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { TemplateModule } from './modules/template/template.module';
+import { AIChatModule } from './modules/ai-chat/ai-chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TemplateModule } from './modules/template/template.module';
     AnswerModule,
     StatisticsModule,
     TemplateModule,
+    AIChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
