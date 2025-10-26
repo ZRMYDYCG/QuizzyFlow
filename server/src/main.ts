@@ -4,9 +4,17 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { NestExpressApplication } from '@nestjs/platform-express'
+import { join } from 'path'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  
+  // 配置静态文件服务（用于头像访问）
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  })
+  
   // 路由全局前缀
   app.setGlobalPrefix('/api')
   // 全局验证管道

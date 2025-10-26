@@ -27,6 +27,27 @@ export interface ChangePasswordParams {
 }
 
 /**
+ * 编辑器设置
+ */
+export interface EditorSettings {
+  autoSave: boolean
+  autoSaveInterval: number
+  defaultScale: number
+  showGrid: boolean
+  showRulers: boolean
+}
+
+/**
+ * 用户偏好设置
+ */
+export interface UserPreferences {
+  theme: 'light' | 'dark'
+  language: 'zh-CN' | 'en-US'
+  editorSettings: EditorSettings
+  listView: 'card' | 'table'
+}
+
+/**
  * 用户信息
  */
 export interface UserInfo {
@@ -37,6 +58,30 @@ export interface UserInfo {
   lastLoginAt: Date | null
   createdAt: Date
   updatedAt: Date
+  avatar?: string
+  bio?: string
+  phone?: string
+  preferences?: UserPreferences
+}
+
+/**
+ * 更新个人信息参数
+ */
+export interface UpdateProfileParams {
+  nickname?: string
+  avatar?: string
+  bio?: string
+  phone?: string
+}
+
+/**
+ * 更新偏好设置参数
+ */
+export interface UpdatePreferencesParams {
+  theme?: 'light' | 'dark'
+  language?: 'zh-CN' | 'en-US'
+  editorSettings?: Partial<EditorSettings>
+  listView?: 'card' | 'table'
 }
 
 /**
@@ -76,6 +121,34 @@ export const getUserInfo = async (): Promise<ResDataType> => {
 }
 
 /**
+ * 获取用户完整信息
+ * GET /api/user/profile
+ */
+export const getUserProfile = async (): Promise<ResDataType> => {
+  return await instance.get('/api/user/profile')
+}
+
+/**
+ * 更新个人信息
+ * PATCH /api/user/profile
+ */
+export const updateProfile = async (
+  params: UpdateProfileParams
+): Promise<ResDataType> => {
+  return await instance.patch('/api/user/profile', params)
+}
+
+/**
+ * 更新用户偏好设置
+ * PATCH /api/user/preferences
+ */
+export const updatePreferences = async (
+  params: UpdatePreferencesParams
+): Promise<ResDataType> => {
+  return await instance.patch('/api/user/preferences', params)
+}
+
+/**
  * 修改密码
  * PATCH /api/user/password
  */
@@ -83,4 +156,26 @@ export const changePassword = async (
   params: ChangePasswordParams
 ): Promise<ResDataType> => {
   return await instance.patch('/api/user/password', params)
+}
+
+/**
+ * 上传头像
+ * POST /api/user/avatar
+ */
+export const uploadAvatar = async (file: File): Promise<ResDataType> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return await instance.post('/api/user/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+/**
+ * 获取用户统计数据
+ * GET /api/user/statistics
+ */
+export const getUserStatistics = async (): Promise<ResDataType> => {
+  return await instance.get('/api/user/statistics')
 }

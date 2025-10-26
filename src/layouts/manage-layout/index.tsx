@@ -5,7 +5,7 @@ import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useGetUserInfo from '../../hooks/useGetUserInfo.ts'
 import { useState } from 'react'
-import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette } from 'lucide-react'
+import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette, User } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { createQuestion } from '../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
@@ -202,7 +202,21 @@ const ManageLayout = () => {
                       <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {nickname || username}
                       </p>
+                      <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>
+                        {username}
+                      </p>
                     </div>
+                    <DropdownMenu.Item 
+                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
+                        theme === 'dark' 
+                          ? 'text-slate-300 hover:bg-white/10' 
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      onSelect={() => navigate('/profile')}
+                    >
+                      <User className="w-4 h-4" />
+                      <span>个人中心</span>
+                    </DropdownMenu.Item>
                     <DropdownMenu.Item 
                       className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
                         theme === 'dark' 
@@ -221,6 +235,9 @@ const ManageLayout = () => {
                         }}
                       />
                     </DropdownMenu.Item>
+                    <DropdownMenu.Separator className={`h-px my-2 ${
+                      theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'
+                    }`} />
                     <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 rounded-lg outline-none cursor-pointer hover:bg-red-500/10 transition-colors">
                       退出登录
                     </DropdownMenu.Item>

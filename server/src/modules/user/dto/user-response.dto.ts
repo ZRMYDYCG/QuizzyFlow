@@ -25,6 +25,18 @@ export class UserResponseDto {
   @ApiProperty({ description: '更新时间', example: '2024-01-01T00:00:00Z' })
   updatedAt: Date
 
+  @ApiProperty({ description: '头像 URL', example: '', required: false })
+  avatar?: string
+
+  @ApiProperty({ description: '个人简介', example: '', required: false })
+  bio?: string
+
+  @ApiProperty({ description: '手机号', example: '', required: false })
+  phone?: string
+
+  @ApiProperty({ description: '用户偏好设置', required: false })
+  preferences?: any
+
   constructor(user: any) {
     this._id = user._id
     this.username = user.username
@@ -33,6 +45,10 @@ export class UserResponseDto {
     this.lastLoginAt = user.lastLoginAt
     this.createdAt = user.createdAt
     this.updatedAt = user.updatedAt
+    this.avatar = user.avatar || ''
+    this.bio = user.bio || ''
+    this.phone = user.phone || ''
+    this.preferences = user.preferences || {}
   }
 }
 

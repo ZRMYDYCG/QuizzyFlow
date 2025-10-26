@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import HomeLayout from '@/layouts/home-layout'
 import ManageLayout from '@/layouts/manage-layout'
 import QuestionLayout from '@/layouts/question-layout'
+import ProfileLayout from '@/layouts/profile-layout'
 import Home from '@/pages/home'
 import Login from '@/pages/login'
 import Register from '@/pages/register'
@@ -18,6 +19,11 @@ import Statistics from '@/pages/question/statistics'
 import Publish from '@/pages/question/publish'
 import TemplateMarket from '@/pages/template/market'
 import TemplateDetail from '@/pages/template/detail'
+import ProfileOverview from '@/pages/profile/overview'
+import ProfileInfo from '@/pages/profile/info'
+import ProfileSecurity from '@/pages/profile/security'
+import ProfileStatistics from '@/pages/profile/statistics'
+import ProfileSettings from '@/pages/profile/settings'
 
 const router = createBrowserRouter([
   {
@@ -101,6 +107,36 @@ const router = createBrowserRouter([
       {
         path: 'detail/:id',
         element: <TemplateDetail />,
+      },
+    ],
+  },
+  {
+    path: 'profile',
+    element: <ProfileLayout />,
+    children: [
+      {
+        index: true,
+        element: <ProfileOverview />,
+      },
+      {
+        path: 'overview',
+        element: <ProfileOverview />,
+      },
+      {
+        path: 'info',
+        element: <ProfileInfo />,
+      },
+      {
+        path: 'security',
+        element: <ProfileSecurity />,
+      },
+      {
+        path: 'statistics',
+        element: <ProfileStatistics />,
+      },
+      {
+        path: 'settings',
+        element: <ProfileSettings />,
       },
     ],
   },

@@ -41,6 +41,9 @@ importers:
       mongoose:
         specifier: ^8.10.1
         version: 8.19.1
+      multer:
+        specifier: ^2.0.2
+        version: 2.0.2
       nanoid:
         specifier: ^3.0.9
         version: 3.3.11

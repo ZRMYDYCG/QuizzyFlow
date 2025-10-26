@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Patch,
   Request,
+  Get,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -14,15 +15,22 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { UserService } from './user.service'
+import { UserStatisticsService } from './user-statistics.service'
 import { RegisterDto } from './dto/register.dto'
 import { ChangePasswordDto } from './dto/change-password.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
+import { UpdatePreferencesDto } from './dto/update-preferences.dto'
 import { UserResponseDto } from './dto/user-response.dto'
+import { UserStatisticsDto } from './dto/user-statistics.dto'
 import { Public } from '../../common/decorators/public.decorator'
 
 @ApiTags('用户')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly userStatisticsService: UserStatisticsService,
+  ) {}
 
   /**
    * 用户注册
@@ -43,6 +51,72 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto) {
     return await this.userService.create(registerDto)
+  }
+
+  /**
+   * 获取用户完整信息
+   * GET /api/user/profile
+   */
+  @ApiOperation({
+    summary: '获取用户完整信息',
+    description: '获取当前用户的完整信息（包含偏好设置）',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '获取成功',
+    type: UserResponseDto,
+  })
+  @ApiBearerAuth()
+  @Get('profile')
+  @HttpCode(HttpStatus.OK)
+  async getProfile(@Request() req) {
+    const userId = req.user.sub
+    return await this.userService.getProfile(userId)
+  }
+
+  /**
+   * 更新个人信息
+   * PATCH /api/user/profile
+   */
+  @ApiOperation({
+    summary: '更新个人信息',
+    description: '更新当前用户的基本信息（昵称、头像、简介等）',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: UserResponseDto,
+  })
+  @ApiBearerAuth()
+  @Patch('profile')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(@Request() req, @Body() updateProfileDto: UpdateProfileDto) {
+    const userId = req.user.sub
+    return await this.userService.updateProfile(userId, updateProfileDto)
+  }
+
+  /**
+   * 更新用户偏好设置
+   * PATCH /api/user/preferences
+   */
+  @ApiOperation({
+    summary: '更新用户偏好设置',
+    description: '更新用户的偏好设置（主题、语言、编辑器设置等）',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: UserResponseDto,
+  })
+  @ApiBearerAuth()
+  @Patch('preferences')
+  @HttpCode(HttpStatus.OK)
+  async updatePreferences(
+    @Request() req,
+    @Body() updatePreferencesDto: UpdatePreferencesDto,
+  ) {
+    const userId = req.user.sub
+    return await this.userService.updatePreferences(userId, updatePreferencesDto)
   }
 
   /**
@@ -81,5 +155,26 @@ export class UserController {
       changePasswordDto.newPassword,
     )
     return { message: '密码修改成功' }
+  }
+
+  /**
+   * 获取用户统计数据
+   * GET /api/user/statistics
+   */
+  @ApiOperation({
+    summary: '获取用户统计数据',
+    description: '获取用户的问卷统计、创建趋势、组件使用情况等',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '获取成功',
+    type: UserStatisticsDto,
+  })
+  @ApiBearerAuth()
+  @Get('statistics')
+  @HttpCode(HttpStatus.OK)
+  async getStatistics(@Request() req) {
+    const username = req.user.username
+    return await this.userStatisticsService.getUserStatistics(username)
   }
 }

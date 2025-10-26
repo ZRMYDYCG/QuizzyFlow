@@ -4,6 +4,43 @@ import { HydratedDocument } from 'mongoose'
 export type UserDocument = HydratedDocument<User>
 
 /**
+ * 编辑器设置
+ */
+export class EditorSettings {
+  @Prop({ default: true })
+  autoSave: boolean // 自动保存
+
+  @Prop({ default: 30 })
+  autoSaveInterval: number // 自动保存间隔（秒）
+
+  @Prop({ default: 1 })
+  defaultScale: number // 默认缩放比例
+
+  @Prop({ default: true })
+  showGrid: boolean // 显示网格
+
+  @Prop({ default: true })
+  showRulers: boolean // 显示标尺
+}
+
+/**
+ * 用户偏好设置
+ */
+export class UserPreferences {
+  @Prop({ default: 'light' })
+  theme: string // 主题：light / dark
+
+  @Prop({ default: 'zh-CN' })
+  language: string // 语言：zh-CN / en-US
+
+  @Prop({ type: EditorSettings, default: {} })
+  editorSettings: EditorSettings // 编辑器设置
+
+  @Prop({ default: 'card' })
+  listView: string // 列表展示方式：card / table
+}
+
+/**
  * 用户 Schema
  */
 @Schema({
@@ -31,6 +68,19 @@ export class User {
 
   @Prop({ type: Date, default: null })
   lastLoginAt: Date // 最后登录时间
+
+  // 🆕 新增字段
+  @Prop({ default: '' })
+  avatar: string // 头像 URL
+
+  @Prop({ default: '' })
+  bio: string // 个人简介
+
+  @Prop({ default: '' })
+  phone: string // 手机号
+
+  @Prop({ type: UserPreferences, default: {} })
+  preferences: UserPreferences // 用户偏好设置
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

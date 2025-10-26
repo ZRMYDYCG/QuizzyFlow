@@ -10,6 +10,8 @@ import * as bcrypt from 'bcryptjs'
 import { User, UserDocument } from './schemas/user.schema'
 import { RegisterDto } from './dto/register.dto'
 import { UserResponseDto } from './dto/user-response.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
+import { UpdatePreferencesDto } from './dto/update-preferences.dto'
 
 @Injectable()
 export class UserService {
@@ -150,5 +152,90 @@ export class UserService {
 
     user.password = hashedPassword
     await user.save()
+  }
+
+  /**
+   * 更新个人信息
+   */
+  async updateProfile(
+    id: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserResponseDto> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        id,
+        { $set: updateProfileDto },
+        { new: true, runValidators: true },
+      )
+      .lean()
+      .exec()
+
+    if (!updatedUser) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    return new UserResponseDto(updatedUser)
+  }
+
+  /**
+   * 更新用户偏好设置
+   */
+  async updatePreferences(
+    id: string,
+    updatePreferencesDto: UpdatePreferencesDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.userModel.findById(id).exec()
+
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    // 合并偏好设置
+    if (updatePreferencesDto.editorSettings) {
+      user.preferences = user.preferences || ({} as any)
+      const currentSettings = user.preferences.editorSettings || {
+        autoSave: true,
+        autoSaveInterval: 30,
+        defaultScale: 1,
+        showGrid: true,
+        showRulers: true,
+      }
+      user.preferences.editorSettings = {
+        ...currentSettings,
+        ...updatePreferencesDto.editorSettings,
+      } as any
+      delete updatePreferencesDto.editorSettings
+    }
+
+    // 更新其他偏好字段
+    if (updatePreferencesDto.theme !== undefined) {
+      user.preferences = user.preferences || ({} as any)
+      user.preferences.theme = updatePreferencesDto.theme
+    }
+    if (updatePreferencesDto.language !== undefined) {
+      user.preferences = user.preferences || ({} as any)
+      user.preferences.language = updatePreferencesDto.language
+    }
+    if (updatePreferencesDto.listView !== undefined) {
+      user.preferences = user.preferences || ({} as any)
+      user.preferences.listView = updatePreferencesDto.listView
+    }
+
+    await user.save()
+
+    return new UserResponseDto(user.toObject())
+  }
+
+  /**
+   * 获取用户完整信息（包含偏好设置）
+   */
+  async getProfile(id: string): Promise<UserResponseDto> {
+    const user = await this.userModel.findById(id).lean().exec()
+
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    return new UserResponseDto(user)
   }
 }

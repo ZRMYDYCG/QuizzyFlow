@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useRequest } from 'ahooks'
-import { getUserInfo } from '@/api/modules/user'
+import { getUserProfile } from '@/api/modules/user'
 import { loginReducer, logoutReducer } from '@/store/modules/user'
 import useGetUserInfo from './useGetUserInfo'
 
@@ -15,14 +15,14 @@ const useLoadUserData = () => {
 
   const { run: fetchUserInfo, loading: waitingUserData } = useRequest(
     async () => {
-      const userInfo = await getUserInfo()
+      const userInfo = await getUserProfile()
       return userInfo
     },
     {
       manual: true,
       onSuccess: (userInfo: any) => {
         const token = localStorage.getItem('token') || ''
-        // 存储用户信息到 Redux
+        // 存储用户信息到 Redux（包含所有字段）
         dispatch(
           loginReducer({
             _id: userInfo._id,
@@ -32,6 +32,21 @@ const useLoadUserData = () => {
             lastLoginAt: userInfo.lastLoginAt,
             createdAt: userInfo.createdAt,
             updatedAt: userInfo.updatedAt,
+            avatar: userInfo.avatar || '',
+            bio: userInfo.bio || '',
+            phone: userInfo.phone || '',
+            preferences: userInfo.preferences || {
+              theme: 'light',
+              language: 'zh-CN',
+              editorSettings: {
+                autoSave: true,
+                autoSaveInterval: 30,
+                defaultScale: 1,
+                showGrid: true,
+                showRulers: true,
+              },
+              listView: 'card',
+            },
             token,
           })
         )
