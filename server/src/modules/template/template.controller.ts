@@ -48,8 +48,15 @@ export class TemplateController {
   @UseGuards(AuthGuard)
   @Post()
   async createTemplate(@Request() req, @Body() createTemplateDto: CreateTemplateDto) {
-    const { username, nickname } = req.user
-    return await this.templateService.createTemplate(username, nickname, createTemplateDto)
+    const { username, nickname, sub } = req.user
+    // 获取用户完整信息（包含头像）
+    const userInfo = await this.templateService.getUserInfo(sub)
+    return await this.templateService.createTemplate(
+      username, 
+      nickname, 
+      userInfo.avatar || '',
+      createTemplateDto
+    )
   }
 
   // 更新模板

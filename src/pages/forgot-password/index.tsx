@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Form, Input, Button, message, Result } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import Logo from '@/components/Logo'
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate()
@@ -74,11 +75,8 @@ const ForgotPassword: React.FC = () => {
 
           {/* Logo和标题 */}
           <div className="mb-10">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-black font-bold text-xl">Q</span>
-              </div>
-              <span className="text-white text-xl font-semibold">QuizzyFlow</span>
+            <div className="mb-6">
+              <Logo size="medium" showText={true} onClick={() => navigate('/')} />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">忘记密码？</h1>
             <p className="text-gray-400">

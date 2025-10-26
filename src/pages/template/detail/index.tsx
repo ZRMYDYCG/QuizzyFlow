@@ -344,14 +344,22 @@ const TemplateDetailPage = () => {
                   👤 作者信息
                 </div>
                 <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
-                    style={{
-                      background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
-                    }}
-                  >
-                    {template.authorNickname?.[0] || template.author[0]}
-                  </div>
+                  {template.authorAvatar ? (
+                    <img 
+                      src={template.authorAvatar} 
+                      alt="author avatar" 
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                      }}
+                    >
+                      {(template.authorNickname || template.author || 'U').charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <div className={`font-medium ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'

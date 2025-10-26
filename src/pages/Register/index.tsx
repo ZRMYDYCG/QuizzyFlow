@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
 import { registerUser } from '@/api/modules/user'
 import { useRequest } from 'ahooks'
+import Logo from '@/components/Logo'
 
 const Register: FC = () => {
   const navigate = useNavigate()
@@ -38,11 +39,8 @@ const Register: FC = () => {
         <div className="w-full max-w-md">
           {/* Logo和标题 */}
           <div className="mb-10">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-black font-bold text-xl">Q</span>
-              </div>
-              <span className="text-white text-xl font-semibold">QuizzyFlow</span>
+            <div className="mb-6">
+              <Logo size="medium" showText={true} onClick={() => navigate('/')} />
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">创建你的账号</h1>
             <p className="text-gray-400">开始你的问卷创作之旅</p>

@@ -194,14 +194,22 @@ const TemplateCard: FC<TemplateCardProps> = ({ template, onLike, onUse }) => {
         {/* 作者信息 */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-200/50 dark:border-slate-700/50">
           <div className="flex items-center gap-2">
-            <div 
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-              style={{
-                background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
-              }}
-            >
-              {template.authorNickname?.[0] || template.author[0]}
-            </div>
+            {template.authorAvatar ? (
+              <img 
+                src={template.authorAvatar} 
+                alt="author avatar" 
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            ) : (
+              <div 
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                }}
+              >
+                {(template.authorNickname || template.author || 'U').charAt(0).toUpperCase()}
+              </div>
+            )}
             <span className={`text-xs ${
               theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
             }`}>

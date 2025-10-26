@@ -5,6 +5,8 @@ import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useGetUserInfo from '../../hooks/useGetUserInfo.ts'
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
+import type { stateType } from '@/store'
 import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette, User } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { createQuestion } from '../../api/modules/question.ts'
@@ -17,6 +19,7 @@ import ThemeSelectorDialog from '../../components/theme-selector-dialog'
 const ManageLayout = () => {
   const { waitingUserData } = useLoadUserData()
   const { username, nickname } = useGetUserInfo()
+  const user = useSelector((state: stateType) => state.user)
   useNavPage(waitingUserData)
   const navigate = useNavigate()
   const { theme, primaryColor, themeColors } = useTheme()
@@ -153,11 +156,6 @@ const ManageLayout = () => {
                 )}
               </button>
 
-              {/* 下拉菜单按钮 - 移动端隐藏 */}
-              <button className={`hidden md:flex w-8 h-8 rounded-lg ${themeClasses.buttonBg} items-center justify-center ${themeClasses.textSecondary} hover:text-white transition-colors`}>
-                <ChevronDown className="w-4 h-4" strokeWidth={2} />
-              </button>
-
               {/* 通知按钮 - 移动端隐藏 */}
               <button className={`hidden md:flex relative w-8 h-8 rounded-lg ${themeClasses.buttonBg} items-center justify-center ${themeClasses.textSecondary} hover:text-white transition-colors`}>
                 <Bell className="w-4 h-4" strokeWidth={2} />
@@ -174,14 +172,22 @@ const ManageLayout = () => {
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
                   <button className={`flex items-center gap-1 md:gap-2 pl-1 md:pl-2 pr-2 md:pr-3 h-8 md:h-9 rounded-lg ${themeClasses.buttonBg} transition-colors`}>
-                    <div 
-                      className="w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
-                      }}
-                    >
-                      {(nickname || username || 'U').charAt(0).toUpperCase()}
-                    </div>
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt="avatar" 
+                        className="w-6 h-6 md:w-7 md:h-7 rounded-lg object-cover shadow-lg"
+                      />
+                    ) : (
+                      <div 
+                        className="w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                        style={{
+                          background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
+                        }}
+                      >
+                        {(nickname || username || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <ChevronDown className="w-3 h-3 text-slate-500 hidden md:block" strokeWidth={2} />
                   </button>
                 </DropdownMenu.Trigger>

@@ -4,6 +4,7 @@ import { useRequest } from 'ahooks'
 import { message } from 'antd'
 import { useManageTheme } from '../../../../hooks/useManageTheme.ts'
 import { useTheme } from '../../../../contexts/ThemeContext'
+import Logo from '@/components/Logo'
 import { 
   LayoutDashboard,
   FileText, 
@@ -105,14 +106,7 @@ const Sidebar = () => {
     }`}>
       {/* Logo */}
       <div className="px-6 mb-8">
-        <div 
-          className="w-12 h-12 rounded-full flex items-center justify-center p-1 shadow-lg"
-          style={{ 
-            background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
-          }}
-        >
-          <img src="/vite.svg" alt="logo" />
-        </div>
+        <Logo size="medium" showText={true} />
       </div>
 
       {/* 导航菜单 */}

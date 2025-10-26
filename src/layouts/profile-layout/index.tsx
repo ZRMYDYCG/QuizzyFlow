@@ -13,6 +13,8 @@ import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { clsx } from 'clsx'
 import useLoadUserData from '@/hooks/useLoadUserData'
+import Logo from '@/components/Logo'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const { Sider, Content } = Layout
 const { Title, Text } = Typography
@@ -21,6 +23,7 @@ const ProfileLayout: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useSelector((state: stateType) => state.user)
+  const { theme } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
@@ -69,18 +72,37 @@ const ProfileLayout: React.FC = () => {
   // 侧边栏内容（桌面端和移动端共用）
   const sidebarContent = (
     <>
+      {/* Logo */}
+      {!collapsed && (
+        <div className="px-6 pt-2 pb-6 border-b border-gray-200 dark:border-gray-700">
+          <Logo size="small" showText={true} />
+        </div>
+      )}
+
       {/* 用户信息头部 */}
       <div className={clsx(
         'p-6 border-b border-gray-200 dark:border-gray-700',
         collapsed && 'p-4'
       )}>
         <div className="flex flex-col items-center">
-          <Avatar
-            size={collapsed ? 40 : 64}
-            src={user.avatar || undefined}
-            icon={!user.avatar && <UserOutlined />}
-            className="mb-3 bg-blue-500"
-          />
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt="avatar" 
+              className={clsx(
+                'mb-3 rounded-full object-cover shadow-md',
+                collapsed ? 'w-10 h-10' : 'w-16 h-16'
+              )}
+            />
+          ) : (
+            <Avatar
+              size={collapsed ? 40 : 64}
+              icon={<UserOutlined />}
+              className="mb-3 bg-blue-500"
+            >
+              {(user.nickname || user.username || 'U').charAt(0).toUpperCase()}
+            </Avatar>
+          )}
           {!collapsed && (
             <>
               <Title level={5} className="!mb-1 text-center">
@@ -100,12 +122,12 @@ const ProfileLayout: React.FC = () => {
           onClick={handleBackToManage}
           className={clsx(
             'w-full flex items-center justify-center gap-2',
-            'px-4 py-2 rounded-md',
+            'px-4 py-2.5 rounded-lg',
             'text-sm font-medium',
-            'text-gray-700 dark:text-gray-300',
-            'bg-gray-100 dark:bg-gray-700',
-            'hover:bg-gray-200 dark:hover:bg-gray-600',
-            'transition-colors'
+            theme === 'dark' 
+              ? 'text-slate-300 bg-slate-800 hover:bg-slate-700' 
+              : 'text-gray-700 bg-gray-100 hover:bg-gray-200',
+            'transition-all shadow-sm hover:shadow'
           )}
         >
           <LeftOutlined className="text-xs" />
