@@ -5,6 +5,7 @@ import useNavPage from '../../hooks/useNavPage.ts'
 import useLoadUserData from '../../hooks/useLoadUserData.ts'
 import useGetUserInfo from '../../hooks/useGetUserInfo.ts'
 import { useState } from 'react'
+import React from 'react'
 import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette, User } from 'lucide-react'
@@ -15,6 +16,7 @@ import ThemeToggle from '../../components/ThemeToggle'
 import { useTheme } from '../../contexts/ThemeContext'
 import { editorDarkTheme, editorLightTheme } from '../../config/theme.config'
 import ThemeSelectorDialog from '../../components/theme-selector-dialog'
+import { useNavigationHistory } from '@/hooks/useNavigationHistory'
 
 const ManageLayout = () => {
   const { waitingUserData } = useLoadUserData()
@@ -26,6 +28,9 @@ const ManageLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [themeDialogOpen, setThemeDialogOpen] = useState(false)
+
+  // 导航历史记录（前进/后退）
+  const { canGoBack, canGoForward, goBack, goForward } = useNavigationHistory()
 
   // 创建新问卷
   const { loading: isCreating, run: handleCreateQuestion } = useRequest(createQuestion, {
@@ -119,10 +124,28 @@ const ManageLayout = () => {
 
               {/* 后退/前进按钮 - 移动端隐藏 */}
               <div className="hidden md:flex items-center gap-1">
-                <button className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center ${themeClasses.textSecondary} transition-colors`}>
+                <button 
+                  onClick={goBack}
+                  disabled={!canGoBack}
+                  className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center transition-all ${
+                    canGoBack 
+                      ? `${themeClasses.textSecondary} hover:text-white cursor-pointer hover:shadow-md` 
+                      : 'text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed'
+                  }`}
+                  title={canGoBack ? '后退' : '无法后退'}
+                >
                   <ChevronLeft className="w-4 h-4" strokeWidth={2} />
                 </button>
-                <button className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center ${themeClasses.textSecondary} transition-colors`}>
+                <button 
+                  onClick={goForward}
+                  disabled={!canGoForward}
+                  className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center transition-all ${
+                    canGoForward 
+                      ? `${themeClasses.textSecondary} hover:text-white cursor-pointer hover:shadow-md` 
+                      : 'text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed'
+                  }`}
+                  title={canGoForward ? '前进' : '无法前进'}
+                >
                   <ChevronRight className="w-4 h-4" strokeWidth={2} />
                 </button>
               </div>

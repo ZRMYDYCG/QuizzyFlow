@@ -108,19 +108,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-full">
-      {/* 顶部问候 */}
-      <div className="mb-6 md:mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className={`text-2xl md:text-3xl font-bold ${t.text.primary}`}>
-            {greeting}, {nickname || username}!
-          </h1>
-          <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-        </div>
-        <p className={`text-sm md:text-base ${t.text.secondary}`}>
-          今天也要加油哦！这是您的数据概览
-        </p>
-      </div>
-
       {/* 加载状态 */}
       {loading && (
         <div className={`flex items-center justify-center gap-2 py-20 ${t.text.secondary}`}>
