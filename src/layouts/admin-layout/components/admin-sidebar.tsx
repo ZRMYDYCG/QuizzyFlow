@@ -1,6 +1,7 @@
 import React from 'react'
 import { Layout, Menu } from 'antd'
 import Logo from '@/components/Logo'
+import { useTheme } from '@/contexts/ThemeContext'
 import { sideMenuItems } from '../config'
 import type { AdminSidebarProps } from '../types'
 
@@ -14,6 +15,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   currentPath,
   onMenuClick,
 }) => {
+  const { theme } = useTheme()
+  
   const handleMenuClick = ({ key }: { key: string }) => {
     onMenuClick(key)
   }
@@ -32,13 +35,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         left: 0,
         top: 0,
         bottom: 0,
+        backgroundColor: theme === 'dark' ? '#001529' : '#ffffff',
       }}
     >
-      <div className="h-16 flex items-center justify-center border-b border-gray-700">
+      <div className={`h-16 flex items-center justify-center border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
         <Logo showText={!collapsed} size="small" />
       </div>
       <Menu
-        theme="dark"
+        theme={theme === 'dark' ? 'dark' : 'light'}
         mode="inline"
         selectedKeys={[currentPath]}
         items={sideMenuItems}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Drawer } from 'antd'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { NotificationDrawerProps } from '../types'
 
 /**
@@ -9,6 +10,8 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   visible,
   onClose,
 }) => {
+  const { theme } = useTheme()
+
   return (
     <Drawer
       title="通知"
@@ -17,7 +20,9 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       open={visible}
       width={400}
     >
-      <div className="text-center text-gray-400 py-8">暂无新通知</div>
+      <div className={`text-center py-8 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-400'}`}>
+        暂无新通知
+      </div>
     </Drawer>
   )
 }
