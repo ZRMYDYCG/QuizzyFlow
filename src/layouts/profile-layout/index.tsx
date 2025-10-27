@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Avatar, Typography, Drawer } from 'antd'
+import { Layout, Menu, Avatar, Typography, Drawer, Button } from 'antd'
 import {
   UserOutlined,
   SafetyOutlined,
@@ -8,12 +8,14 @@ import {
   SettingOutlined,
   LeftOutlined,
   MenuOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons'
 import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { clsx } from 'clsx'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
 import { useNavPage } from '@/hooks/useNavPage'
+import { usePermission } from '@/hooks/usePermission'
 import Logo from '@/components/Logo'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -25,6 +27,7 @@ const ProfileLayout: React.FC = () => {
   const location = useLocation()
   const user = useSelector((state: stateType) => state.user)
   const { theme } = useTheme()
+  const { isAdmin } = usePermission()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
@@ -120,8 +123,8 @@ const ProfileLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* 返回管理按钮 */}
-      <div className="p-4">
+      {/* 返回管理按钮和管理后台入口 */}
+      <div className="p-4 space-y-2">
         <button
           onClick={handleBackToManage}
           className={clsx(
@@ -137,6 +140,17 @@ const ProfileLayout: React.FC = () => {
           <LeftOutlined className="text-xs" />
           {!collapsed && '返回管理'}
         </button>
+        
+        {/* 🆕 管理后台入口 - 只对管理员显示 */}
+        {isAdmin() && !collapsed && (
+          <button
+            onClick={() => navigate('/admin/dashboard')}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm hover:shadow"
+          >
+            <DashboardOutlined />
+            管理后台
+          </button>
+        )}
       </div>
 
       {/* 导航菜单 */}
