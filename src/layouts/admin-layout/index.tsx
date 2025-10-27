@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom'
-import { Layout, Spin, ConfigProvider, FloatButton } from 'antd'
+import { Navigate } from 'react-router-dom'
+import { Spin, ConfigProvider, FloatButton } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
@@ -8,41 +8,25 @@ import { ROLES } from '@/constants/roles'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
 import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
-import AdminSidebar from './components/admin-sidebar'
-import AdminHeader from './components/admin-header'
-import NotificationDrawer from './components/notification-drawer'
-import TabNav from './components/tab-nav'
 import LayoutSettings from './components/layout-settings'
-import PageTransition from './components/page-transition'
 import ProgressBar from './components/progress-bar'
-import { useTabNav } from './hooks/useTabNav'
 
-const { Content } = Layout
+// 导入各种布局组件
+import VerticalLayout from './layouts/VerticalLayout'
+import HorizontalLayout from './layouts/HorizontalLayout'
+import MixedLayout from './layouts/MixedLayout'
+import ColumnsLayout from './layouts/ColumnsLayout'
 
 /**
  * 管理后台布局
+ * 根据配置动态选择布局模式
  */
 const AdminLayout: React.FC = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
   const { token, role } = useGetUserInfo()
   const { waitingUserData } = useLoadUserData()
   const { theme } = useTheme()
   const { config } = useLayoutConfig()
-  const [collapsed, setCollapsed] = useState(false)
-  const [notificationVisible, setNotificationVisible] = useState(false)
   const [settingsVisible, setSettingsVisible] = useState(false)
-
-  // 标签页导航
-  const {
-    tabs,
-    handleTabClick,
-    handleTabClose,
-    handleCloseOthers,
-    handleCloseAll,
-    handleCloseLeft,
-    handleCloseRight,
-  } = useTabNav(location.pathname)
 
   // 权限检查
   const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
@@ -69,24 +53,19 @@ const AdminLayout: React.FC = () => {
     return <Navigate to="/403" replace />
   }
 
-  // 处理侧边栏菜单点击
-  const handleMenuClick = (key: string) => {
-    navigate(key)
-  }
-
-  // 切换侧边栏折叠状态
-  const handleToggleCollapsed = () => {
-    setCollapsed(!collapsed)
-  }
-
-  // 打开通知抽屉
-  const handleNotificationClick = () => {
-    setNotificationVisible(true)
-  }
-
-  // 关闭通知抽屉
-  const handleCloseNotification = () => {
-    setNotificationVisible(false)
+  // 根据配置选择布局组件
+  const renderLayout = () => {
+    switch (config.layoutMode) {
+      case 'horizontal':
+        return <HorizontalLayout />
+      case 'mixed':
+        return <MixedLayout />
+      case 'columns':
+        return <ColumnsLayout />
+      case 'vertical':
+      default:
+        return <VerticalLayout />
+    }
   }
 
   return (
@@ -94,87 +73,23 @@ const AdminLayout: React.FC = () => {
       {/* 顶部进度条 */}
       <ProgressBar />
       
-      <Layout className={`min-h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
-        {/* 侧边栏 */}
-        <AdminSidebar
-          collapsed={collapsed}
-          currentPath={location.pathname}
-          onMenuClick={handleMenuClick}
-        />
+      {/* 渲染选中的布局 */}
+      {renderLayout()}
 
-        {/* 主体区域 */}
-        <Layout
-          className={theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}
-          style={{ 
-            marginLeft: collapsed ? 80 : config.sidebarWidth, 
-            transition: 'margin-left 0.2s' 
-          }}
-        >
-          {/* 顶部导航 */}
-          <AdminHeader
-            collapsed={collapsed}
-            onToggleCollapsed={handleToggleCollapsed}
-            onNotificationClick={handleNotificationClick}
-            notificationCount={5}
-          />
+      {/* 布局设置抽屉 */}
+      <LayoutSettings
+        visible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+      />
 
-          {/* 内容区域 */}
-          <Content
-            className="mx-6 my-6"
-            style={{
-              marginTop: 80,
-              minHeight: 'calc(100vh - 112px)',
-            }}
-          >
-            {/* 标签页导航 */}
-            {config.showTabs && (
-              <TabNav
-                currentPath={location.pathname}
-                tabs={tabs}
-                onTabClick={handleTabClick}
-                onTabClose={handleTabClose}
-                onCloseOthers={handleCloseOthers}
-                onCloseAll={handleCloseAll}
-                onCloseLeft={handleCloseLeft}
-                onCloseRight={handleCloseRight}
-              />
-            )}
-
-            <div 
-              className={`
-                ${theme === 'dark' ? 'bg-[#1e1e23] text-slate-300' : 'bg-white text-gray-700'} 
-                rounded-lg p-6 min-h-full transition-colors
-                ${config.boxStyle === 'border' ? 'border border-gray-200 dark:border-gray-700' : 'shadow-sm'}
-              `}
-            >
-              <PageTransition>
-                <Outlet />
-              </PageTransition>
-            </div>
-          </Content>
-        </Layout>
-
-        {/* 通知抽屉 */}
-        <NotificationDrawer
-          visible={notificationVisible}
-          onClose={handleCloseNotification}
-        />
-
-        {/* 布局设置抽屉 */}
-        <LayoutSettings
-          visible={settingsVisible}
-          onClose={() => setSettingsVisible(false)}
-        />
-
-        {/* 布局设置浮动按钮 */}
-        <FloatButton
-          icon={<SettingOutlined />}
-          type="primary"
-          onClick={() => setSettingsVisible(true)}
-          tooltip="布局设置"
-          style={{ right: 24, bottom: 24 }}
-        />
-      </Layout>
+      {/* 布局设置浮动按钮 */}
+      <FloatButton
+        icon={<SettingOutlined />}
+        type="primary"
+        onClick={() => setSettingsVisible(true)}
+        tooltip="布局设置"
+        style={{ right: 24, bottom: 24 }}
+      />
     </ConfigProvider>
   )
 }

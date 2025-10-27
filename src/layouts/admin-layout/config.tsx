@@ -52,6 +52,40 @@ export const sideMenuItems: MenuProps['items'] = [
 ]
 
 /**
+ * 水平菜单配置（用于水平布局）
+ */
+export const horizontalMenuItems: MenuProps['items'] = [
+  {
+    key: '/admin/dashboard',
+    label: '数据大盘',
+  },
+  {
+    key: '/admin/users',
+    label: '用户管理',
+  },
+  {
+    key: '/admin/roles',
+    label: '角色管理',
+  },
+  {
+    key: '/admin/permissions',
+    label: '权限管理',
+  },
+  {
+    key: '/admin/questions',
+    label: '问卷管理',
+  },
+  {
+    key: '/admin/logs',
+    label: '操作日志',
+  },
+  {
+    key: '/admin/settings',
+    label: '系统设置',
+  },
+]
+
+/**
  * 用户下拉菜单配置
  * @param onNavigate - 导航回调
  * @param onLogout - 退出登录回调
