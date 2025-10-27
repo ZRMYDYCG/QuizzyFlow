@@ -21,7 +21,7 @@ function isActiveElement() {
   return false
 }
 
-function useCanvasKeyPress() {
+export function useCanvasKeyPress() {
   const dispatch = useDispatch()
   // 删除组件
   useKeyPress(['backspace', 'delete'], () => {

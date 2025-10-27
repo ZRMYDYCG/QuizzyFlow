@@ -5,6 +5,7 @@ import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import { loginUser, getUserInfo } from '@/api/modules/user'
 import { loginReducer } from '@/store/modules/user'
+import { setUserPermissions } from '@/store/modules/admin'
 import { useRequest } from 'ahooks'
 import Logo from '@/components/Logo'
 
@@ -48,22 +49,36 @@ const Login: FC = () => {
 
   const { run: login, loading } = useRequest(
     async (values: any) => {
+      console.log('🔐 开始登录流程...')
+      
       // 1. 登录获取 token
       const loginResult = await loginUser(values)
       const { token } = loginResult
+      console.log('✅ 步骤1: 获取到 token (前50字符):', token?.substring(0, 50))
       
       // 2. 保存 token
       localStorage.setItem('token', token)
+      console.log('✅ 步骤2: token 已保存到 localStorage')
       
       // 3. 获取用户完整信息
       const userInfo = await getUserInfo()
+      console.log('✅ 步骤3: 获取到用户信息:', {
+        username: userInfo.username,
+        role: userInfo.role,
+        _id: userInfo._id
+      })
       
       return { token, userInfo }
     },
     {
       manual: true,
       onSuccess: async ({ token, userInfo }) => {
-        // 4. 存储到 Redux store
+        console.log('✅ 步骤4: 开始存储到 Redux store')
+        console.log('  - username:', userInfo.username)
+        console.log('  - role:', userInfo.role)
+        console.log('  - token (前50字符):', token?.substring(0, 50))
+        
+        // 4. 存储到 Redux store（包含所有字段）
         dispatch(
           loginReducer({
             _id: userInfo._id,
@@ -73,14 +88,52 @@ const Login: FC = () => {
             lastLoginAt: userInfo.lastLoginAt,
             createdAt: userInfo.createdAt,
             updatedAt: userInfo.updatedAt,
+            avatar: userInfo.avatar || '',
+            bio: userInfo.bio || '',
+            phone: userInfo.phone || '',
+            preferences: userInfo.preferences || {
+              theme: 'light',
+              language: 'zh-CN',
+              editorSettings: {
+                autoSave: true,
+                autoSaveInterval: 30,
+                defaultScale: 1,
+                showGrid: true,
+                showRulers: true,
+              },
+              listView: 'card',
+            },
+            role: userInfo.role || 'user',  // ← 关键！
+            customPermissions: userInfo.customPermissions || [],  // ← 关键！
+            isBanned: userInfo.isBanned || false,
             token,
           })
         )
+        console.log('✅ 步骤4完成: Redux store 已更新')
+        
+        // 5. 如果是管理员，设置 admin store
+        if (userInfo.role === 'admin' || userInfo.role === 'super_admin') {
+          console.log('✅ 步骤5: 检测到管理员角色，设置 admin store')
+          dispatch(
+            setUserPermissions({
+              role: userInfo.role,
+              permissions: [],
+              customPermissions: userInfo.customPermissions || [],
+            })
+          )
+        }
         
         message.success('登录成功')
         
-        // 5. 跳转到管理页面
-        navigate('/manage/list', { replace: true })
+        // 6. 根据角色跳转到合适的页面
+        if (userInfo.role === 'admin' || userInfo.role === 'super_admin') {
+          console.log('✅ 步骤6: 准备跳转到 /admin/dashboard')
+          navigate('/admin/dashboard', { replace: true })
+          console.log('✅ navigate 调用完成')
+        } else {
+          console.log('✅ 步骤6: 准备跳转到 /manage/list')
+          navigate('/manage/list', { replace: true })
+        }
       },
       onError: (error: any) => {
         message.error(error?.message || '登录失败，请检查邮箱和密码')

@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux'
 import { stateType } from '../store'
 
-function useGetComponentInfo() {
+export function useGetComponentInfo() {
   const components = useSelector<stateType>(
     (state) => state.questionComponent.present
   ) as any

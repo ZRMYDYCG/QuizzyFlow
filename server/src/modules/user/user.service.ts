@@ -107,6 +107,23 @@ export class UserService {
   }
 
   /**
+   * 更新用户角色（用于管理员初始化）
+   */
+  async updateUserRole(
+    userId: string,
+    role: string,
+    updatedBy: string,
+  ): Promise<UserDocument> {
+    const user = await this.userModel.findById(userId)
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    user.role = role
+    return await user.save()
+  }
+
+  /**
    * 更新用户信息
    */
   async update(id: string, updateData: Partial<User>): Promise<UserResponseDto> {

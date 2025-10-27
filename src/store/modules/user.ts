@@ -28,6 +28,9 @@ export interface IUserState {
   bio: string
   phone: string
   preferences: UserPreferences
+  role: string
+  customPermissions: string[]
+  isBanned: boolean
 }
 
 const defaultPreferences: UserPreferences = {
@@ -56,6 +59,9 @@ const initialState: IUserState = {
   bio: '',
   phone: '',
   preferences: defaultPreferences,
+  role: 'user',
+  customPermissions: [],
+  isBanned: false,
 }
 
 export const userSlice = createSlice({

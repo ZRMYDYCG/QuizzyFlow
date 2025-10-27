@@ -24,6 +24,8 @@ import ProfileInfo from '@/pages/profile/info'
 import ProfileSecurity from '@/pages/profile/security'
 import ProfileStatistics from '@/pages/profile/statistics'
 import ProfileSettings from '@/pages/profile/settings'
+import DebugAuth from '@/pages/debug-auth'
+import { adminRoutes } from './admin-routes'
 
 const router = createBrowserRouter([
   {
@@ -139,6 +141,11 @@ const router = createBrowserRouter([
         element: <ProfileSettings />,
       },
     ],
+  },
+  adminRoutes,
+  {
+    path: 'debug-auth',
+    element: <DebugAuth />,
   },
   {
     path: '*',

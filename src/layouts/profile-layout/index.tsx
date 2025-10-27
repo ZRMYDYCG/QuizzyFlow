@@ -12,7 +12,7 @@ import {
 import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { clsx } from 'clsx'
-import useLoadUserData from '@/hooks/useLoadUserData'
+import { useLoadUserData } from '@/hooks/useLoadUserData'
 import Logo from '@/components/Logo'
 import { useTheme } from '@/contexts/ThemeContext'
 

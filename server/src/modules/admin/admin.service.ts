@@ -96,7 +96,7 @@ export class AdminService {
   /**
    * 获取用户详情
    */
-  async getUserDetail(userId: string) {
+  async getUserDetail(userId: string): Promise<any> {
     const user = await this.userModel
       .findById(userId)
       .select('-password')

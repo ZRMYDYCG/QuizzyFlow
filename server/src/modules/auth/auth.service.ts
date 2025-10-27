@@ -11,6 +11,8 @@ interface JwtPayload {
   sub: string // 用户ID
   username: string
   nickname: string
+  role?: string // 用户角色
+  customPermissions?: string[] // 自定义权限
 }
 
 /**
@@ -41,11 +43,13 @@ export class AuthService {
       throw new UnauthorizedException('邮箱或密码错误')
     }
 
-    // 生成 JWT token
+    // 生成 JWT token，包含 role 和权限信息
     const payload: JwtPayload = {
       sub: user._id.toString(),
       username: user.username,
       nickname: user.nickname,
+      role: user.role || 'user',
+      customPermissions: user.customPermissions || [],
     }
 
     const token = await this.jwtService.signAsync(payload)

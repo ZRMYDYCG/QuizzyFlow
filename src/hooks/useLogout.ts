@@ -6,7 +6,7 @@ import { message } from 'antd'
 /**
  * 登出 Hook
  */
-const useLogout = () => {
+export const useLogout = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 

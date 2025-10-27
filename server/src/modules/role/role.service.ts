@@ -112,7 +112,7 @@ export class RoleService {
 
     // 系统角色不能修改名称和优先级
     if (role.isSystem) {
-      if (updateDto.name && updateDto.name !== role.name) {
+      if (updateDto.name !== undefined && updateDto.name !== role.name) {
         throw new BadRequestException('系统角色不能修改名称')
       }
       if (updateDto.priority !== undefined && updateDto.priority !== role.priority) {
@@ -121,7 +121,7 @@ export class RoleService {
     }
 
     // 如果修改了名称，检查是否重复
-    if (updateDto.name && updateDto.name !== role.name) {
+    if (updateDto.name !== undefined && updateDto.name !== role.name) {
       const existing = await this.roleModel.findOne({ name: updateDto.name })
       if (existing) {
         throw new ConflictException('角色名已存在')

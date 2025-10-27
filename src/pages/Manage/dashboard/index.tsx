@@ -1,7 +1,7 @@
 import { useTitle, useRequest } from 'ahooks'
 import { useMemo } from 'react'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
-import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { getQuestionStatistics } from '@/api/modules/question'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import { 

@@ -1,7 +1,7 @@
 import { useTitle } from 'ahooks'
 import { useState, useMemo } from 'react'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
-import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { Loader2, Star as StarIcon, TrendingUp, FileText, AlertCircle } from 'lucide-react'
 import { useManageTheme } from '@/hooks/useManageTheme'
 

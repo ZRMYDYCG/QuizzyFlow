@@ -1,7 +1,7 @@
 import { RouterProvider } from 'react-router-dom'
 import routerConfig from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
-import useLoadUserData from './hooks/useLoadUserData'
+import { useLoadUserData } from './hooks/useLoadUserData'
 import AntdThemeProvider from './components/antd-theme-provider'
 
 function App() {

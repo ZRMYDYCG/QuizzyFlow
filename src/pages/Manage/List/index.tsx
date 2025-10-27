@@ -8,7 +8,7 @@ import { getQuestionList } from '@/api/modules/question'
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Loader2, Inbox } from 'lucide-react'
-import useGetUserInfo from '@/hooks/useGetUserInfo'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const List = () => {

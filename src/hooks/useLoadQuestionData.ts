@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 import { resetComponents } from '../store/modules/question-component.ts'
 import { resetPageInfo } from '../store/modules/pageinfo-reducer.ts'
 
-const useLoadQuestionData = () => {
+export const useLoadQuestionData = () => {
   const { id = '' } = useParams()
   const dispatch = useDispatch()
 

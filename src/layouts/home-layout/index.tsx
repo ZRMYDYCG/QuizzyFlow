@@ -1,8 +1,8 @@
 import { Layout } from 'antd'
 import { Outlet } from 'react-router-dom'
 import React from 'react'
-import useLoadUserData from '../../hooks/useLoadUserData.ts'
-import useNavPage from '../../hooks/useNavPage.ts'
+import { useLoadUserData } from '../../hooks/useLoadUserData'
+import { useNavPage } from '../../hooks/useNavPage'
 
 const { Content } = Layout
 

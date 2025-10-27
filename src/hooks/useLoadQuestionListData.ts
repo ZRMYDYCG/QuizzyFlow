@@ -10,7 +10,7 @@ interface Options {
   pageSize: number
 }
 
-function useLoadQuestionListData(options: Partial<Options> = {}) {
+export function useLoadQuestionListData(options: Partial<Options> = {}) {
   const { isStar = false, isDeleted = false } = options
   const [searchParams] = useSearchParams()
 

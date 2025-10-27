@@ -37,6 +37,18 @@ export class UserResponseDto {
   @ApiProperty({ description: '用户偏好设置', required: false })
   preferences?: any
 
+  @ApiProperty({ description: '用户角色', example: 'user', required: false })
+  role?: string
+
+  @ApiProperty({ description: '自定义权限', example: [], required: false })
+  customPermissions?: string[]
+
+  @ApiProperty({ description: '是否被封禁', example: false, required: false })
+  isBanned?: boolean
+
+  @ApiProperty({ description: '封禁原因', required: false })
+  bannedReason?: string
+
   constructor(user: any) {
     this._id = user._id
     this.username = user.username
@@ -49,6 +61,10 @@ export class UserResponseDto {
     this.bio = user.bio || ''
     this.phone = user.phone || ''
     this.preferences = user.preferences || {}
+    this.role = user.role || 'user'
+    this.customPermissions = user.customPermissions || []
+    this.isBanned = user.isBanned || false
+    this.bannedReason = user.bannedReason || ''
   }
 }
 

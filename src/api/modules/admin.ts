@@ -1,5 +1,5 @@
-import axios from 'axios'
-import type { AxiosResponse } from 'axios'
+import instance from '../index'
+import type { ResDataType } from '../index'
 
 const BASE_URL = '/api/admin'
 
@@ -40,15 +40,15 @@ export interface BanUserData {
  */
 export async function getUsersAPI(
   params: QueryUsersParams
-): Promise<AxiosResponse> {
-  return axios.get(`${BASE_URL}/users`, { params })
+): Promise<ResDataType> {
+  return await instance.get(`${BASE_URL}/users`, { params })
 }
 
 /**
  * 获取用户详情
  */
-export async function getUserDetailAPI(id: string): Promise<AxiosResponse> {
-  return axios.get(`${BASE_URL}/users/${id}`)
+export async function getUserDetailAPI(id: string): Promise<ResDataType> {
+  return await instance.get(`${BASE_URL}/users/${id}`)
 }
 
 /**
@@ -56,8 +56,8 @@ export async function getUserDetailAPI(id: string): Promise<AxiosResponse> {
  */
 export async function createAdminUserAPI(
   data: CreateAdminUserData
-): Promise<AxiosResponse> {
-  return axios.post(`${BASE_URL}/users`, data)
+): Promise<ResDataType> {
+  return await instance.post(`${BASE_URL}/users`, data)
 }
 
 /**
@@ -66,8 +66,8 @@ export async function createAdminUserAPI(
 export async function updateUserRoleAPI(
   id: string,
   data: UpdateUserRoleData
-): Promise<AxiosResponse> {
-  return axios.patch(`${BASE_URL}/users/${id}/role`, data)
+): Promise<ResDataType> {
+  return await instance.patch(`${BASE_URL}/users/${id}/role`, data)
 }
 
 /**
@@ -76,8 +76,8 @@ export async function updateUserRoleAPI(
 export async function banUserAPI(
   id: string,
   data: BanUserData
-): Promise<AxiosResponse> {
-  return axios.patch(`${BASE_URL}/users/${id}/ban`, data)
+): Promise<ResDataType> {
+  return await instance.patch(`${BASE_URL}/users/${id}/ban`, data)
 }
 
 /**
@@ -86,8 +86,8 @@ export async function banUserAPI(
 export async function resetUserPasswordAPI(
   id: string,
   newPassword: string
-): Promise<AxiosResponse> {
-  return axios.patch(`${BASE_URL}/users/${id}/reset-password`, {
+): Promise<ResDataType> {
+  return await instance.patch(`${BASE_URL}/users/${id}/reset-password`, {
     newPassword,
   })
 }
@@ -95,8 +95,8 @@ export async function resetUserPasswordAPI(
 /**
  * 删除用户
  */
-export async function deleteUserAPI(id: string): Promise<AxiosResponse> {
-  return axios.delete(`${BASE_URL}/users/${id}`)
+export async function deleteUserAPI(id: string): Promise<ResDataType> {
+  return await instance.delete(`${BASE_URL}/users/${id}`)
 }
 
 // ==================== 统计数据 ====================
@@ -104,8 +104,8 @@ export async function deleteUserAPI(id: string): Promise<AxiosResponse> {
 /**
  * 获取系统统计数据
  */
-export async function getSystemStatisticsAPI(): Promise<AxiosResponse> {
-  return axios.get(`${BASE_URL}/statistics`)
+export async function getSystemStatisticsAPI(): Promise<ResDataType> {
+  return await instance.get(`${BASE_URL}/statistics`)
 }
 
 /**
@@ -113,8 +113,8 @@ export async function getSystemStatisticsAPI(): Promise<AxiosResponse> {
  */
 export async function getUserActivityAPI(
   days: number = 30
-): Promise<AxiosResponse> {
-  return axios.get(`${BASE_URL}/statistics/user-activity`, {
+): Promise<ResDataType> {
+  return await instance.get(`${BASE_URL}/statistics/user-activity`, {
     params: { days },
   })
 }
@@ -143,15 +143,15 @@ export interface QueryRolesParams {
  */
 export async function getRolesAPI(
   params?: QueryRolesParams
-): Promise<AxiosResponse> {
-  return axios.get('/api/admin/roles', { params })
+): Promise<ResDataType> {
+  return await instance.get('/api/admin/roles', { params })
 }
 
 /**
  * 获取角色详情
  */
-export async function getRoleDetailAPI(id: string): Promise<AxiosResponse> {
-  return axios.get(`/api/admin/roles/${id}`)
+export async function getRoleDetailAPI(id: string): Promise<ResDataType> {
+  return await instance.get(`/api/admin/roles/${id}`)
 }
 
 /**
@@ -159,8 +159,8 @@ export async function getRoleDetailAPI(id: string): Promise<AxiosResponse> {
  */
 export async function createRoleAPI(
   data: CreateRoleData
-): Promise<AxiosResponse> {
-  return axios.post('/api/admin/roles', data)
+): Promise<ResDataType> {
+  return await instance.post('/api/admin/roles', data)
 }
 
 /**
@@ -169,15 +169,15 @@ export async function createRoleAPI(
 export async function updateRoleAPI(
   id: string,
   data: UpdateRoleData
-): Promise<AxiosResponse> {
-  return axios.patch(`/api/admin/roles/${id}`, data)
+): Promise<ResDataType> {
+  return await instance.patch(`/api/admin/roles/${id}`, data)
 }
 
 /**
  * 删除角色
  */
-export async function deleteRoleAPI(id: string): Promise<AxiosResponse> {
-  return axios.delete(`/api/admin/roles/${id}`)
+export async function deleteRoleAPI(id: string): Promise<ResDataType> {
+  return await instance.delete(`/api/admin/roles/${id}`)
 }
 
 /**
@@ -186,15 +186,15 @@ export async function deleteRoleAPI(id: string): Promise<AxiosResponse> {
 export async function setRolePermissionsAPI(
   id: string,
   permissions: string[]
-): Promise<AxiosResponse> {
-  return axios.patch(`/api/admin/roles/${id}/permissions`, { permissions })
+): Promise<ResDataType> {
+  return await instance.patch(`/api/admin/roles/${id}/permissions`, { permissions })
 }
 
 /**
  * 获取角色统计
  */
-export async function getRoleStatisticsAPI(): Promise<AxiosResponse> {
-  return axios.get('/api/admin/roles/statistics')
+export async function getRoleStatisticsAPI(): Promise<ResDataType> {
+  return await instance.get('/api/admin/roles/statistics')
 }
 
 // ==================== 权限管理 ====================
@@ -212,22 +212,22 @@ export interface QueryPermissionsParams {
  */
 export async function getPermissionsAPI(
   params?: QueryPermissionsParams
-): Promise<AxiosResponse> {
-  return axios.get('/api/admin/permissions', { params })
+): Promise<ResDataType> {
+  return await instance.get('/api/admin/permissions', { params })
 }
 
 /**
  * 按模块分组获取权限
  */
-export async function getGroupedPermissionsAPI(): Promise<AxiosResponse> {
-  return axios.get('/api/admin/permissions/grouped')
+export async function getGroupedPermissionsAPI(): Promise<ResDataType> {
+  return await instance.get('/api/admin/permissions/grouped')
 }
 
 /**
  * 初始化系统权限
  */
-export async function initializePermissionsAPI(): Promise<AxiosResponse> {
-  return axios.post('/api/admin/permissions/initialize')
+export async function initializePermissionsAPI(): Promise<ResDataType> {
+  return await instance.post('/api/admin/permissions/initialize')
 }
 
 // ==================== 操作日志 ====================
@@ -250,28 +250,28 @@ export interface QueryLogsParams {
  */
 export async function getLogsAPI(
   params: QueryLogsParams
-): Promise<AxiosResponse> {
-  return axios.get('/api/admin/logs', { params })
+): Promise<ResDataType> {
+  return await instance.get('/api/admin/logs', { params })
 }
 
 /**
  * 获取日志详情
  */
-export async function getLogDetailAPI(id: string): Promise<AxiosResponse> {
-  return axios.get(`/api/admin/logs/${id}`)
+export async function getLogDetailAPI(id: string): Promise<ResDataType> {
+  return await instance.get(`/api/admin/logs/${id}`)
 }
 
 /**
  * 获取最近的操作日志
  */
-export async function getRecentLogsAPI(limit: number = 10): Promise<AxiosResponse> {
-  return axios.get('/api/admin/logs/recent/list', { params: { limit } })
+export async function getRecentLogsAPI(limit: number = 10): Promise<ResDataType> {
+  return await instance.get('/api/admin/logs/recent/list', { params: { limit } })
 }
 
 /**
  * 获取日志统计
  */
-export async function getLogStatisticsAPI(days: number = 30): Promise<AxiosResponse> {
-  return axios.get('/api/admin/logs/statistics/summary', { params: { days } })
+export async function getLogStatisticsAPI(days: number = 30): Promise<ResDataType> {
+  return await instance.get('/api/admin/logs/statistics/summary', { params: { days } })
 }
 

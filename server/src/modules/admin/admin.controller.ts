@@ -72,7 +72,7 @@ export class AdminController {
   @Get('users/:id')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_VIEW_ALL)
-  async getUserDetail(@Param('id') id: string) {
+  async getUserDetail(@Param('id') id: string): Promise<any> {
     const user = await this.adminService.getUserDetail(id)
     return { data: user }
   }

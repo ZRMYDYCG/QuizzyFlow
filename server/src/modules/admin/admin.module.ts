@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { AdminController } from './admin.controller'
 import { AdminService } from './admin.service'
@@ -16,9 +16,9 @@ import { RoleModule } from '../role/role.module'
       { name: Question.name, schema: QuestionSchema },
       { name: Answer.name, schema: AnswerSchema },
     ]),
-    RbacModule,
-    AdminLogModule,
-    RoleModule,
+    forwardRef(() => RbacModule),
+    forwardRef(() => AdminLogModule),
+    forwardRef(() => RoleModule),
   ],
   controllers: [AdminController],
   providers: [AdminService],

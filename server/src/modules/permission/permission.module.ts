@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { PermissionController } from './permission.controller'
 import { PermissionService } from './permission.service'
@@ -11,8 +11,8 @@ import { AdminLogModule } from '../admin-log/admin-log.module'
     MongooseModule.forFeature([
       { name: Permission.name, schema: PermissionSchema },
     ]),
-    RbacModule,
-    AdminLogModule,
+    forwardRef(() => RbacModule),
+    forwardRef(() => AdminLogModule),
   ],
   controllers: [PermissionController],
   providers: [PermissionService],

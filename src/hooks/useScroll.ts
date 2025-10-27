@@ -2,7 +2,7 @@ import { useEffect, RefObject } from 'react'
 
 type DocumentOrHTMLElement = Document | HTMLElement
 
-const useScroll = (
+export const useScroll = (
   ref: RefObject<DocumentOrHTMLElement>,
   threshold: number,
   callbackAboveThreshold: () => void,

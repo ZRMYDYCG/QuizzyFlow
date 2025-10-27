@@ -180,12 +180,12 @@ export class PermissionService {
     }
 
     // 系统权限不能修改代码
-    if (permission.isSystem && updateDto.code) {
+    if (permission.isSystem && updateDto.code !== undefined) {
       throw new BadRequestException('系统权限不能修改代码')
     }
 
     // 如果修改了代码，检查是否重复
-    if (updateDto.code && updateDto.code !== permission.code) {
+    if (updateDto.code !== undefined && updateDto.code !== permission.code) {
       const existing = await this.permissionModel.findOne({
         code: updateDto.code,
       })
