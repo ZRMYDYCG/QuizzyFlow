@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
 type Theme = 'light' | 'dark'
+type ThemeMode = 'light' | 'dark' | 'system'
 
 interface ThemeColor {
   primary: string
@@ -19,8 +20,10 @@ interface ThemeColor {
 
 interface ThemeContextType {
   theme: Theme
+  themeMode: ThemeMode
   toggleTheme: () => void
   setTheme: (theme: Theme) => void
+  setThemeMode: (mode: ThemeMode) => void
   primaryColor: string
   setPrimaryColor: (color: string) => void
   themeColors: ThemeColor
@@ -56,9 +59,25 @@ const generateThemeColors = (primaryColor: string, isDark: boolean): ThemeColor 
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => {
+    const savedMode = localStorage.getItem('quizzy-theme-mode') as ThemeMode
+    return savedMode || 'dark'
+  })
+
+  // 获取系统主题偏好
+  const getSystemTheme = (): Theme => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+    return 'light'
+  }
+
+  // 实际应用的主题
   const [theme, setThemeState] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('quizzy-theme') as Theme
-    return savedTheme || 'dark'
+    if (themeMode === 'system') {
+      return getSystemTheme()
+    }
+    return themeMode as Theme
   })
 
   const [primaryColor, setPrimaryColorState] = useState<string>(() => {
@@ -69,6 +88,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [themeColors, setThemeColors] = useState<ThemeColor>(() => 
     generateThemeColors(primaryColor, theme === 'dark')
   )
+
+  // 监听系统主题变化
+  useEffect(() => {
+    if (themeMode !== 'system') return
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = (e: MediaQueryListEvent) => {
+      setThemeState(e.matches ? 'dark' : 'light')
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [themeMode])
+
+  // themeMode 改变时更新实际主题
+  useEffect(() => {
+    localStorage.setItem('quizzy-theme-mode', themeMode)
+    
+    if (themeMode === 'system') {
+      setThemeState(getSystemTheme())
+    } else {
+      setThemeState(themeMode as Theme)
+    }
+  }, [themeMode])
 
   // 主题改变时保存到 localStorage 并更新主题色
   useEffect(() => {
@@ -108,11 +151,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [themeColors, primaryColor])
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'light' ? 'dark' : 'light')
+    const newMode: ThemeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light'
+    setThemeModeState(newMode)
   }
 
   const setTheme = (newTheme: Theme) => {
+    setThemeModeState(newTheme)
     setThemeState(newTheme)
+  }
+
+  const setThemeMode = (mode: ThemeMode) => {
+    setThemeModeState(mode)
   }
 
   const setPrimaryColor = (color: string) => {
@@ -123,8 +172,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ThemeContext.Provider 
       value={{ 
         theme, 
+        themeMode,
         toggleTheme, 
         setTheme, 
+        setThemeMode,
         primaryColor, 
         setPrimaryColor,
         themeColors 

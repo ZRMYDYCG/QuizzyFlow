@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom'
-import { Layout, Spin, ConfigProvider } from 'antd'
+import { Layout, Spin, ConfigProvider, FloatButton } from 'antd'
+import { SettingOutlined } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
 import { ROLES } from '@/constants/roles'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLayoutConfig } from '@/contexts/LayoutContext'
 import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import AdminSidebar from './components/admin-sidebar'
 import AdminHeader from './components/admin-header'
 import NotificationDrawer from './components/notification-drawer'
 import TabNav from './components/tab-nav'
+import LayoutSettings from './components/layout-settings'
 import { useTabNav } from './hooks/useTabNav'
 
 const { Content } = Layout
@@ -23,8 +26,10 @@ const AdminLayout: React.FC = () => {
   const { token, role } = useGetUserInfo()
   const { waitingUserData } = useLoadUserData()
   const { theme } = useTheme()
+  const { config } = useLayoutConfig()
   const [collapsed, setCollapsed] = useState(false)
   const [notificationVisible, setNotificationVisible] = useState(false)
+  const [settingsVisible, setSettingsVisible] = useState(false)
 
   // 标签页导航
   const {
@@ -95,7 +100,10 @@ const AdminLayout: React.FC = () => {
         {/* 主体区域 */}
         <Layout
           className={theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}
-          style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.2s' }}
+          style={{ 
+            marginLeft: collapsed ? 80 : config.sidebarWidth, 
+            transition: 'margin-left 0.2s' 
+          }}
         >
           {/* 顶部导航 */}
           <AdminHeader
@@ -114,21 +122,24 @@ const AdminLayout: React.FC = () => {
             }}
           >
             {/* 标签页导航 */}
-            <TabNav
-              currentPath={location.pathname}
-              tabs={tabs}
-              onTabClick={handleTabClick}
-              onTabClose={handleTabClose}
-              onCloseOthers={handleCloseOthers}
-              onCloseAll={handleCloseAll}
-              onCloseLeft={handleCloseLeft}
-              onCloseRight={handleCloseRight}
-            />
+            {config.showTabs && (
+              <TabNav
+                currentPath={location.pathname}
+                tabs={tabs}
+                onTabClick={handleTabClick}
+                onTabClose={handleTabClose}
+                onCloseOthers={handleCloseOthers}
+                onCloseAll={handleCloseAll}
+                onCloseLeft={handleCloseLeft}
+                onCloseRight={handleCloseRight}
+              />
+            )}
 
             <div 
               className={`
                 ${theme === 'dark' ? 'bg-[#1e1e23] text-slate-300' : 'bg-white text-gray-700'} 
-                rounded-lg shadow-sm p-6 min-h-full transition-colors
+                rounded-lg p-6 min-h-full transition-colors
+                ${config.boxStyle === 'border' ? 'border border-gray-200 dark:border-gray-700' : 'shadow-sm'}
               `}
             >
               <Outlet />
@@ -140,6 +151,21 @@ const AdminLayout: React.FC = () => {
         <NotificationDrawer
           visible={notificationVisible}
           onClose={handleCloseNotification}
+        />
+
+        {/* 布局设置抽屉 */}
+        <LayoutSettings
+          visible={settingsVisible}
+          onClose={() => setSettingsVisible(false)}
+        />
+
+        {/* 布局设置浮动按钮 */}
+        <FloatButton
+          icon={<SettingOutlined />}
+          type="primary"
+          onClick={() => setSettingsVisible(true)}
+          tooltip="布局设置"
+          style={{ right: 24, bottom: 24 }}
         />
       </Layout>
     </ConfigProvider>

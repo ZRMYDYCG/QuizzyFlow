@@ -1,6 +1,7 @@
 import { RouterProvider } from 'react-router-dom'
 import routerConfig from './router'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { LayoutProvider } from './contexts/LayoutContext'
 import { useLoadUserData } from './hooks/useLoadUserData'
 import AntdThemeProvider from './components/antd-theme-provider'
 
@@ -10,9 +11,11 @@ function App() {
 
   return (
     <ThemeProvider>
-      <AntdThemeProvider>
-        <RouterProvider router={routerConfig} />
-      </AntdThemeProvider>
+      <LayoutProvider>
+        <AntdThemeProvider>
+          <RouterProvider router={routerConfig} />
+        </AntdThemeProvider>
+      </LayoutProvider>
     </ThemeProvider>
   )
 }
