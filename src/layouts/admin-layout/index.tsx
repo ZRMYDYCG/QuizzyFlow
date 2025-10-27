@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense, lazy } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Spin, ConfigProvider, FloatButton } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
@@ -11,11 +11,11 @@ import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import LayoutSettings from './components/layout-settings'
 import ProgressBar from './components/progress-bar'
 
-// 导入各种布局组件
-import VerticalLayout from './layouts/VerticalLayout'
-import HorizontalLayout from './layouts/HorizontalLayout'
-import MixedLayout from './layouts/MixedLayout'
-import ColumnsLayout from './layouts/ColumnsLayout'
+// 懒加载布局组件以优化首屏加载
+const VerticalLayout = lazy(() => import('./layouts/VerticalLayout'))
+const HorizontalLayout = lazy(() => import('./layouts/HorizontalLayout'))
+const MixedLayout = lazy(() => import('./layouts/MixedLayout'))
+const ColumnsLayout = lazy(() => import('./layouts/ColumnsLayout'))
 
 /**
  * 管理后台布局
@@ -55,17 +55,31 @@ const AdminLayout: React.FC = () => {
 
   // 根据配置选择布局组件
   const renderLayout = () => {
-    switch (config.layoutMode) {
-      case 'horizontal':
-        return <HorizontalLayout />
-      case 'mixed':
-        return <MixedLayout />
-      case 'columns':
-        return <ColumnsLayout />
-      case 'vertical':
-      default:
-        return <VerticalLayout />
-    }
+    const LayoutComponent = (() => {
+      switch (config.layoutMode) {
+        case 'horizontal':
+          return HorizontalLayout
+        case 'mixed':
+          return MixedLayout
+        case 'columns':
+          return ColumnsLayout
+        case 'vertical':
+        default:
+          return VerticalLayout
+      }
+    })()
+
+    return (
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <Spin size="large" tip="加载布局中..." />
+          </div>
+        }
+      >
+        <LayoutComponent />
+      </Suspense>
+    )
   }
 
   return (

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { LayoutConfig } from '@/types/layout'
 import { DEFAULT_LAYOUT_CONFIG } from '@/types/layout'
 
@@ -68,24 +68,8 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     saveConfigToStorage(config)
   }, [config])
 
-  // 应用 CSS 变量
-  useEffect(() => {
-    const root = document.documentElement
-    
-    // 设置侧边栏宽度
-    root.style.setProperty('--sidebar-width', `${config.sidebarWidth}px`)
-    root.style.setProperty('--sidebar-collapsed-width', '80px')
-    
-    // 设置标签页宽度
-    root.style.setProperty('--tab-width', `${config.tabWidth}px`)
-    
-    // 设置动画时长
-    root.style.setProperty('--transition-duration', `${config.transitionDuration}ms`)
-    
-    // 设置主题色
-    root.style.setProperty('--primary-color', config.primaryColor)
-    
-    // 设置容器宽度
+  // 应用 CSS 变量 - 使用 useMemo 避免不必要的计算
+  const cssVariables = useMemo(() => {
     let maxWidth = '100%'
     switch (config.containerWidth) {
       case 'fixed-1200':
@@ -98,7 +82,24 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         maxWidth = '1600px'
         break
     }
-    root.style.setProperty('--container-max-width', maxWidth)
+    return {
+      '--sidebar-width': `${config.sidebarWidth}px`,
+      '--sidebar-collapsed-width': '80px',
+      '--tab-width': `${config.tabWidth}px`,
+      '--transition-duration': `${config.transitionDuration}ms`,
+      '--primary-color': config.primaryColor,
+      '--container-max-width': maxWidth,
+    }
+  }, [config.sidebarWidth, config.tabWidth, config.transitionDuration, config.primaryColor, config.containerWidth])
+
+  // 应用 CSS 变量
+  useEffect(() => {
+    const root = document.documentElement
+    
+    // 批量设置 CSS 变量以提升性能
+    Object.entries(cssVariables).forEach(([key, value]) => {
+      root.style.setProperty(key, value as string)
+    })
     
     // 色弱模式
     if (config.colorWeaknessMode) {
@@ -106,7 +107,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } else {
       document.documentElement.classList.remove('color-weakness')
     }
-  }, [config])
+  }, [config.colorWeaknessMode, cssVariables])
 
   /**
    * 更新配置（部分更新）

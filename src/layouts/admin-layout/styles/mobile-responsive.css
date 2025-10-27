@@ -1,0 +1,226 @@
+/**
+ * 移动端响应式适配
+ */
+
+/* 移动端基础适配 */
+@media (max-width: 768px) {
+  /* 确保移动端viewport设置正确 */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  /* 移动端禁用某些hover效果 */
+  .hover\:shadow-lg:hover,
+  .hover\:scale-105:hover {
+    box-shadow: inherit;
+    transform: none;
+  }
+
+  /* 移动端优化触摸目标大小（至少 44x44px） */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 移动端隐藏某些元素 */
+  .mobile\:hidden {
+    display: none !important;
+  }
+
+  /* 移动端全宽 */
+  .mobile\:w-full {
+    width: 100% !important;
+  }
+
+  /* 移动端padding调整 */
+  .mobile\:px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* 移动端文字大小调整 */
+  .mobile\:text-sm {
+    font-size: 0.875rem !important;
+  }
+
+  /* 侧边栏在移动端完全隐藏 */
+  .ant-layout-sider {
+    position: fixed !important;
+    left: -100% !important;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ant-layout-sider.mobile-menu-open {
+    left: 0 !important;
+  }
+
+  /* 移动端header调整 */
+  .ant-layout-header {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* 移动端content调整 */
+  .ant-layout-content {
+    margin: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+
+  /* 移动端标签页调整 */
+  .tab-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 移动端浮动按钮调整 */
+  .ant-float-btn {
+    right: 16px !important;
+    bottom: 16px !important;
+  }
+
+  /* 移动端抽屉优化 */
+  .ant-drawer-content-wrapper {
+    width: 85vw !important;
+    max-width: 320px !important;
+  }
+}
+
+/* 平板适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* 平板端侧边栏默认折叠 */
+  .ant-layout-sider {
+    width: 80px !important;
+  }
+
+  /* 平板端content调整 */
+  .ant-layout-content {
+    margin: 1rem !important;
+  }
+}
+
+/* 移动端菜单遮罩 */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-menu-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 移动端汉堡菜单按钮 */
+.mobile-menu-button {
+  display: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: flex;
+  }
+}
+
+/* 移动端优化滚动条 */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px !important;
+    height: 4px !important;
+  }
+}
+
+/* 横屏移动端适配 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .ant-layout-header {
+    height: 48px !important;
+    line-height: 48px !important;
+  }
+
+  .mobile-menu-button {
+    height: 32px;
+  }
+}
+
+/* 移动端禁用动画（性能优化） */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* PWA 安全区域适配（刘海屏） */
+@supports (padding: max(0px)) {
+  .mobile-safe-area-top {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+
+  .mobile-safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+}
+
+/* 移动端优化表格显示 */
+@media (max-width: 768px) {
+  .ant-table {
+    font-size: 12px;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 8px 4px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px !important;
+  }
+}
+
+/* 移动端优化表单 */
+@media (max-width: 768px) {
+  .ant-form-item {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-form-item-label {
+    padding-bottom: 4px !important;
+  }
+}
+
+/* 移动端优化模态框 */
+@media (max-width: 768px) {
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto !important;
+  }
+
+  .ant-modal-body {
+    padding: 16px !important;
+  }
+}
+

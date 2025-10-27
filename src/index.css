@@ -5,6 +5,12 @@
 /* 导入色弱模式样式 */
 @import './styles/color-weakness.css';
 
+/* 导入布局过渡动画 */
+@import './layouts/admin-layout/styles/layout-transitions.css';
+
+/* 导入移动端响应式样式 */
+@import './layouts/admin-layout/styles/mobile-responsive.css';
+
 /* 导入中国风主题工具类 */
 @import './styles/theme-utilities.css';
 
