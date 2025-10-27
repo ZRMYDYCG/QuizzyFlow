@@ -51,6 +51,9 @@ export class Question {
   @Prop({ type: Date, default: null })
   deletedAt: Date | null
 
+  @Prop({ default: false })
+  isRecommended: boolean
+
   @Prop({ default: 0 })
   answerCount: number
 

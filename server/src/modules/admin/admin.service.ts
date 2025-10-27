@@ -399,5 +399,214 @@ export class AdminService {
 
     return activity
   }
+
+  /**
+   * 获取所有问卷列表（管理员）
+   */
+  async getQuestions(query: any) {
+    const {
+      page = 1,
+      pageSize = 20,
+      keyword,
+      status,
+      type,
+      author,
+      isRecommended,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query
+
+    // 构建查询条件
+    const filter: any = {}
+
+    if (keyword) {
+      filter.$or = [
+        { title: { $regex: keyword, $options: 'i' } },
+        { desc: { $regex: keyword, $options: 'i' } },
+      ]
+    }
+
+    if (status === 'published') {
+      filter.isPublished = true
+    } else if (status === 'draft') {
+      filter.isPublished = false
+    }
+
+    if (type) {
+      filter.type = type
+    }
+
+    if (author) {
+      filter.author = author
+    }
+
+    if (isRecommended !== undefined) {
+      filter.isRecommended = isRecommended
+    }
+
+    // 不包括已删除的
+    filter.isDeleted = false
+
+    // 排序
+    const sort: any = {}
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1
+
+    // 查询
+    const [list, total] = await Promise.all([
+      this.questionModel
+        .find(filter)
+        .sort(sort)
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      this.questionModel.countDocuments(filter),
+    ])
+
+    // 获取创建者信息
+    const listWithAuthor = await Promise.all(
+      list.map(async (question) => {
+        const user = await this.userModel
+          .findOne({ username: question.author })
+          .select('username nickname')
+          .lean()
+
+        return {
+          ...question,
+          authorInfo: user,
+        }
+      }),
+    )
+
+    return {
+      list: listWithAuthor,
+      total,
+      page,
+      pageSize,
+    }
+  }
+
+  /**
+   * 获取问卷详情（管理员）
+   */
+  async getQuestionDetail(id: string) {
+    const question = await this.questionModel.findById(id).lean()
+
+    if (!question) {
+      throw new NotFoundException('问卷不存在')
+    }
+
+    // 获取创建者信息
+    const user = await this.userModel
+      .findOne({ username: question.author })
+      .select('username nickname email phone')
+      .lean()
+
+    // 获取答卷数量
+    const answerCount = await this.answerModel.countDocuments({
+      questionId: id,
+    })
+
+    return {
+      ...question,
+      authorInfo: user,
+      answerCount,
+    }
+  }
+
+  /**
+   * 更新问卷状态（发布/下架）
+   */
+  async updateQuestionStatus(id: string, updateDto: any, operator: string) {
+    const question = await this.questionModel.findById(id)
+
+    if (!question) {
+      throw new NotFoundException('问卷不存在')
+    }
+
+    const { isPublished, reason } = updateDto
+
+    if (isPublished !== undefined) {
+      question.isPublished = isPublished
+    }
+
+    await question.save()
+
+    return {
+      message: isPublished ? '问卷已发布' : '问卷已下架',
+      question,
+    }
+  }
+
+  /**
+   * 删除问卷（管理员）
+   */
+  async deleteQuestion(id: string, operator: string) {
+    const question = await this.questionModel.findById(id)
+
+    if (!question) {
+      throw new NotFoundException('问卷不存在')
+    }
+
+    // 硬删除
+    await this.questionModel.findByIdAndDelete(id)
+
+    // 同时删除相关的答卷
+    await this.answerModel.deleteMany({ questionId: id })
+
+    return {
+      message: '问卷已永久删除',
+    }
+  }
+
+  /**
+   * 设置问卷为推荐
+   */
+  async setQuestionRecommended(
+    id: string,
+    isRecommended: boolean,
+    operator: string,
+  ) {
+    const question = await this.questionModel.findById(id)
+
+    if (!question) {
+      throw new NotFoundException('问卷不存在')
+    }
+
+    question.isRecommended = isRecommended
+    await question.save()
+
+    return {
+      message: isRecommended ? '已设为推荐' : '已取消推荐',
+      question,
+    }
+  }
+
+  /**
+   * 获取问卷统计数据
+   */
+  async getQuestionStatistics() {
+    const [total, published, draft, recommended] = await Promise.all([
+      this.questionModel.countDocuments({ isDeleted: false }),
+      this.questionModel.countDocuments({
+        isDeleted: false,
+        isPublished: true,
+      }),
+      this.questionModel.countDocuments({
+        isDeleted: false,
+        isPublished: false,
+      }),
+      this.questionModel.countDocuments({
+        isDeleted: false,
+        isRecommended: true,
+      }),
+    ])
+
+    return {
+      total,
+      published,
+      draft,
+      recommended,
+    }
+  }
 }
 

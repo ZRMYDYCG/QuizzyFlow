@@ -25,6 +25,7 @@ export const PERMISSIONS = {
   QUESTION_DELETE: 'question:delete',
   QUESTION_DELETE_ANY: 'question:delete_any',
   QUESTION_PUBLISH: 'question:publish',
+  QUESTION_MANAGE: 'question:manage',
   QUESTION_AUDIT: 'question:audit',
   QUESTION_EXPORT: 'question:export',
 

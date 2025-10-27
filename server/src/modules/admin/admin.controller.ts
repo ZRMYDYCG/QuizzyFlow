@@ -171,5 +171,99 @@ export class AdminController {
   async deleteUser(@Param('id') id: string) {
     return await this.adminService.deleteUser(id)
   }
+
+  /**
+   * 获取所有问卷列表（管理员）
+   */
+  @Get('questions')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_VIEW_ALL)
+  async getQuestions(@Query() query: any) {
+    return await this.adminService.getQuestions(query)
+  }
+
+  /**
+   * 获取问卷统计数据
+   */
+  @Get('questions/statistics')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
+  async getQuestionStatistics() {
+    return await this.adminService.getQuestionStatistics()
+  }
+
+  /**
+   * 获取问卷详情（管理员）
+   */
+  @Get('questions/:id')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_VIEW_ALL)
+  async getQuestionDetail(@Param('id') id: string) {
+    return await this.adminService.getQuestionDetail(id)
+  }
+
+  /**
+   * 更新问卷状态（发布/下架）
+   */
+  @Patch('questions/:id/status')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_MANAGE)
+  @LogOperation({
+    module: 'question',
+    action: 'update',
+    resource: 'question',
+    description: '更新问卷状态',
+  })
+  async updateQuestionStatus(
+    @Param('id') id: string,
+    @Body() updateDto: any,
+    @Request() req,
+  ) {
+    return await this.adminService.updateQuestionStatus(
+      id,
+      updateDto,
+      req.user.username,
+    )
+  }
+
+  /**
+   * 删除问卷（管理员）
+   */
+  @Delete('questions/:id')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_DELETE)
+  @LogOperation({
+    module: 'question',
+    action: 'delete',
+    resource: 'question',
+    description: '删除问卷',
+  })
+  async deleteQuestion(@Param('id') id: string, @Request() req) {
+    return await this.adminService.deleteQuestion(id, req.user.username)
+  }
+
+  /**
+   * 设置问卷为推荐
+   */
+  @Patch('questions/:id/recommended')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_MANAGE)
+  @LogOperation({
+    module: 'question',
+    action: 'update',
+    resource: 'question',
+    description: '设置问卷推荐状态',
+  })
+  async setQuestionRecommended(
+    @Param('id') id: string,
+    @Body() body: { isRecommended: boolean },
+    @Request() req,
+  ) {
+    return await this.adminService.setQuestionRecommended(
+      id,
+      body.isRecommended,
+      req.user.username,
+    )
+  }
 }
 

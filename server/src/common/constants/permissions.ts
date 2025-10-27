@@ -51,6 +51,7 @@ export const PERMISSIONS = {
   QUESTION_DELETE: 'question:delete', // 删除自己的问卷
   QUESTION_DELETE_ANY: 'question:delete_any', // 删除任何问卷
   QUESTION_PUBLISH: 'question:publish', // 发布问卷
+  QUESTION_MANAGE: 'question:manage', // 管理问卷（发布、下架、推荐等）
   QUESTION_AUDIT: 'question:audit', // 审核问卷
   QUESTION_EXPORT: 'question:export', // 导出问卷
 
@@ -126,6 +127,7 @@ export const PERMISSION_DESCRIPTIONS: Record<string, { name: string; description
   [PERMISSIONS.QUESTION_DELETE]: { name: '删除问卷', description: '可以删除自己的问卷' },
   [PERMISSIONS.QUESTION_DELETE_ANY]: { name: '删除任何问卷', description: '可以删除任何用户的问卷' },
   [PERMISSIONS.QUESTION_PUBLISH]: { name: '发布问卷', description: '可以发布问卷' },
+  [PERMISSIONS.QUESTION_MANAGE]: { name: '管理问卷', description: '可以管理问卷状态（发布、下架、推荐等）' },
   [PERMISSIONS.QUESTION_AUDIT]: { name: '审核问卷', description: '可以审核问卷内容' },
   [PERMISSIONS.QUESTION_EXPORT]: { name: '导出问卷', description: '可以导出问卷数据' },
 
@@ -212,6 +214,7 @@ export const DEFAULT_ROLES = {
       PERMISSIONS.QUESTION_VIEW_ALL,
       PERMISSIONS.QUESTION_UPDATE_ANY,
       PERMISSIONS.QUESTION_DELETE_ANY,
+      PERMISSIONS.QUESTION_MANAGE,
       PERMISSIONS.QUESTION_AUDIT,
       PERMISSIONS.QUESTION_EXPORT,
       // 模板管理
@@ -266,6 +269,7 @@ export const PERMISSIONS_BY_MODULE = {
     PERMISSIONS.QUESTION_DELETE,
     PERMISSIONS.QUESTION_DELETE_ANY,
     PERMISSIONS.QUESTION_PUBLISH,
+    PERMISSIONS.QUESTION_MANAGE,
     PERMISSIONS.QUESTION_AUDIT,
     PERMISSIONS.QUESTION_EXPORT,
   ],

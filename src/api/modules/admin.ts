@@ -275,3 +275,74 @@ export async function getLogStatisticsAPI(days: number = 30): Promise<ResDataTyp
   return await instance.get('/api/admin/logs/statistics/summary', { params: { days } })
 }
 
+// ==================== 问卷管理 ====================
+
+export interface QueryQuestionsParams {
+  page?: number
+  pageSize?: number
+  keyword?: string
+  status?: 'published' | 'draft'
+  type?: string
+  author?: string
+  isRecommended?: boolean
+  sortBy?: 'createdAt' | 'updatedAt' | 'answerCount'
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface UpdateQuestionStatusData {
+  isPublished?: boolean
+  reason?: string
+}
+
+/**
+ * 获取所有问卷列表（管理员）
+ */
+export async function getAdminQuestionsAPI(
+  params: QueryQuestionsParams
+): Promise<ResDataType> {
+  return await instance.get('/api/admin/questions', { params })
+}
+
+/**
+ * 获取问卷详情（管理员）
+ */
+export async function getAdminQuestionDetailAPI(id: string): Promise<ResDataType> {
+  return await instance.get(`/api/admin/questions/${id}`)
+}
+
+/**
+ * 更新问卷状态（发布/下架）
+ */
+export async function updateQuestionStatusAPI(
+  id: string,
+  data: UpdateQuestionStatusData
+): Promise<ResDataType> {
+  return await instance.patch(`/api/admin/questions/${id}/status`, data)
+}
+
+/**
+ * 删除问卷（管理员）
+ */
+export async function deleteQuestionAPI(id: string): Promise<ResDataType> {
+  return await instance.delete(`/api/admin/questions/${id}`)
+}
+
+/**
+ * 设置问卷为推荐
+ */
+export async function setQuestionRecommendedAPI(
+  id: string,
+  isRecommended: boolean
+): Promise<ResDataType> {
+  return await instance.patch(`/api/admin/questions/${id}/recommended`, {
+    isRecommended,
+  })
+}
+
+/**
+ * 获取问卷统计数据
+ */
+export async function getQuestionStatisticsAPI(): Promise<ResDataType> {
+  return await instance.get('/api/admin/questions/statistics')
+}
+

@@ -388,3 +388,39 @@ export const MVP_RECOMMENDED_TYPES: QuestionnaireType[] = [
   QuestionnaireType.FORM,          // 通用表单 - 兜底
 ]
 
+// 问卷类型名称映射（用于快速显示）
+export const QUESTIONNAIRE_TYPE_NAMES = {
+  survey: '调查问卷',
+  feedback: '反馈表单',
+  registration: '报名表单',
+  application: '申请表单',
+  exam: '考试测验',
+  quiz: '趣味测试',
+  assessment: '能力评估',
+  vote: '投票选举',
+  poll: '民意调查',
+  form: '通用表单',
+  order: '订单表单',
+  checklist: '检查清单',
+  lottery: '抽奖活动',
+  game: '互动游戏',
+} as const
+
+// 问卷类型颜色映射（用于 Tag 等组件）
+export const QUESTIONNAIRE_TYPE_COLORS = {
+  survey: 'blue',
+  feedback: 'green',
+  registration: 'purple',
+  application: 'orange',
+  exam: 'red',
+  quiz: 'magenta',
+  assessment: 'cyan',
+  vote: 'green',
+  poll: 'blue',
+  form: 'default',
+  order: 'volcano',
+  checklist: 'geekblue',
+  lottery: 'orange',
+  game: 'magenta',
+} as const
+
