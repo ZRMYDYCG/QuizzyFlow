@@ -11,7 +11,7 @@ const UsersManagement = lazy(() => import('@/pages/admin/users'))
 const RolesManagement = lazy(() => import('@/pages/admin/roles'))
 const PermissionsManagement = lazy(() => import('@/pages/admin/permissions'))
 const QuestionsManagement = lazy(() => import('@/pages/admin/questions'))
-const LogsManagement = lazy(() => import('@/pages/admin/logs'))
+// const LogsManagement = lazy(() => import('@/pages/admin/logs'))
 const SystemSettings = lazy(() => import('@/pages/admin/settings'))
 const AdminNotFound = lazy(() => import('@/pages/admin/not-found'))
 
@@ -79,16 +79,16 @@ export const adminRoutes = {
         </PermissionGuard>
       ),
     },
-    {
-      path: 'logs',
-      element: (
-        <PermissionGuard permission={PERMISSIONS.SYSTEM_LOGS_VIEW}>
-          <Suspense fallback={<LoadingFallback />}>
-            <LogsManagement />
-          </Suspense>
-        </PermissionGuard>
-      ),
-    },
+    // {
+    //   path: 'logs',
+    //   element: (
+    //     <PermissionGuard permission={PERMISSIONS.SYSTEM_LOGS_VIEW}>
+    //       <Suspense fallback={<LoadingFallback />}>
+    //         <LogsManagement />
+    //       </Suspense>
+    //     </PermissionGuard>
+    //   ),
+    // },
     {
       path: 'settings',
       element: (

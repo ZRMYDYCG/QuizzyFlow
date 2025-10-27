@@ -39,8 +39,7 @@ export class AdminController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
   async getStatistics() {
-    const stats = await this.adminService.getSystemStatistics()
-    return { data: stats }
+    return await this.adminService.getSystemStatistics()
   }
 
   /**
@@ -50,10 +49,9 @@ export class AdminController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
   async getUserActivity(@Query('days') days?: string) {
-    const activity = await this.adminService.getUserActivity(
+    return await this.adminService.getUserActivity(
       days ? Number(days) : 30,
     )
-    return { data: activity }
   }
 
   /**
@@ -73,8 +71,7 @@ export class AdminController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_VIEW_ALL)
   async getUserDetail(@Param('id') id: string): Promise<any> {
-    const user = await this.adminService.getUserDetail(id)
-    return { data: user }
+    return await this.adminService.getUserDetail(id)
   }
 
   /**
@@ -90,14 +87,10 @@ export class AdminController {
     description: '创建用户',
   })
   async createUser(@Body() createDto: CreateAdminUserDto, @Request() req) {
-    const user = await this.adminService.createAdminUser(
+    return await this.adminService.createAdminUser(
       createDto,
       req.user.username,
     )
-    return {
-      message: '用户创建成功',
-      data: user,
-    }
   }
 
   /**
@@ -117,15 +110,11 @@ export class AdminController {
     @Body() updateDto: UpdateUserRoleDto,
     @Request() req,
   ) {
-    const user = await this.adminService.updateUserRole(
+    return await this.adminService.updateUserRole(
       id,
       updateDto,
       req.user.username,
     )
-    return {
-      message: '角色更新成功',
-      data: user,
-    }
   }
 
   /**
@@ -145,11 +134,7 @@ export class AdminController {
     @Body() banDto: BanUserDto,
     @Request() req,
   ) {
-    const user = await this.adminService.banUser(id, banDto, req.user.username)
-    return {
-      message: banDto.isBanned ? '用户已封禁' : '用户已解封',
-      data: user,
-    }
+    return await this.adminService.banUser(id, banDto, req.user.username)
   }
 
   /**
@@ -168,8 +153,7 @@ export class AdminController {
     @Param('id') id: string,
     @Body('newPassword') newPassword: string,
   ) {
-    await this.adminService.resetUserPassword(id, newPassword)
-    return { message: '密码重置成功' }
+    return await this.adminService.resetUserPassword(id, newPassword)
   }
 
   /**
@@ -185,8 +169,7 @@ export class AdminController {
     description: '删除用户',
   })
   async deleteUser(@Param('id') id: string) {
-    await this.adminService.deleteUser(id)
-    return { message: '用户删除成功' }
+    return await this.adminService.deleteUser(id)
   }
 }
 

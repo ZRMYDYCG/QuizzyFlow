@@ -40,8 +40,7 @@ export class AdminLogController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.SYSTEM_LOGS_VIEW)
   async findOne(@Param('id') id: string) {
-    const log = await this.adminLogService.findOne(id)
-    return { data: log }
+    return await this.adminLogService.findOne(id)
   }
 
   /**
@@ -51,10 +50,9 @@ export class AdminLogController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.SYSTEM_LOGS_VIEW)
   async getStatistics(@Query('days') days?: number) {
-    const stats = await this.adminLogService.getStatistics(
+    return await this.adminLogService.getStatistics(
       days ? Number(days) : 30,
     )
-    return { data: stats }
   }
 
   /**
@@ -64,10 +62,9 @@ export class AdminLogController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.SYSTEM_LOGS_VIEW)
   async getRecentLogs(@Query('limit') limit?: number) {
-    const logs = await this.adminLogService.getRecentLogs(
+    return await this.adminLogService.getRecentLogs(
       limit ? Number(limit) : 10,
     )
-    return { data: logs }
   }
 
   /**
@@ -79,10 +76,7 @@ export class AdminLogController {
   async cleanup(@Query('before') beforeDate: string) {
     const date = new Date(beforeDate)
     const count = await this.adminLogService.deleteBeforeDate(date)
-    return {
-      message: `已删除 ${count} 条日志`,
-      deletedCount: count,
-    }
+    return { deletedCount: count }
   }
 }
 

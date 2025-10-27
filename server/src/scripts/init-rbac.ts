@@ -99,5 +99,7 @@ async function bootstrap() {
   process.exit(0)
 }
 
+
+// 脚本启动：pnpm exec ts-node -r tsconfig-paths/register src/scripts/init-rbac.ts
 bootstrap()
 

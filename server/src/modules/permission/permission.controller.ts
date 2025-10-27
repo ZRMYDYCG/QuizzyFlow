@@ -37,8 +37,7 @@ export class PermissionController {
   @Roles('super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_CREATE)
   async initialize() {
-    await this.permissionService.initializeSystemPermissions()
-    return { message: '系统权限初始化成功' }
+    return await this.permissionService.initializeSystemPermissions()
   }
 
   /**
@@ -54,14 +53,10 @@ export class PermissionController {
     description: '创建权限',
   })
   async create(@Body() createDto: CreatePermissionDto, @Request() req) {
-    const permission = await this.permissionService.create(
+    return await this.permissionService.create(
       createDto,
       req.user.username,
     )
-    return {
-      message: '权限创建成功',
-      data: permission,
-    }
   }
 
   /**
@@ -71,11 +66,7 @@ export class PermissionController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   async findAll(@Query() queryDto: QueryPermissionDto) {
-    const permissions = await this.permissionService.findAll(queryDto)
-    return {
-      data: permissions,
-      total: permissions.length,
-    }
+    return await this.permissionService.findAll(queryDto)
   }
 
   /**
@@ -85,8 +76,7 @@ export class PermissionController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   async findGrouped() {
-    const grouped = await this.permissionService.findGroupedByModule()
-    return { data: grouped }
+    return await this.permissionService.findGroupedByModule()
   }
 
   /**
@@ -96,8 +86,7 @@ export class PermissionController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   async getStatistics() {
-    const stats = await this.permissionService.getStatistics()
-    return { data: stats }
+    return await this.permissionService.getStatistics()
   }
 
   /**
@@ -107,8 +96,7 @@ export class PermissionController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   async findOne(@Param('id') id: string) {
-    const permission = await this.permissionService.findOne(id)
-    return { data: permission }
+    return await this.permissionService.findOne(id)
   }
 
   /**
@@ -127,11 +115,7 @@ export class PermissionController {
     @Param('id') id: string,
     @Body() updateDto: UpdatePermissionDto,
   ) {
-    const permission = await this.permissionService.update(id, updateDto)
-    return {
-      message: '权限更新成功',
-      data: permission,
-    }
+    return await this.permissionService.update(id, updateDto)
   }
 
   /**
@@ -147,8 +131,7 @@ export class PermissionController {
     description: '删除权限',
   })
   async remove(@Param('id') id: string) {
-    await this.permissionService.remove(id)
-    return { message: '权限删除成功' }
+    return await this.permissionService.remove(id)
   }
 
   /**
@@ -158,8 +141,7 @@ export class PermissionController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   async validate(@Body('codes') codes: string[]) {
-    const result = await this.permissionService.validatePermissions(codes)
-    return { data: result }
+    return await this.permissionService.validatePermissions(codes)
   }
 }
 

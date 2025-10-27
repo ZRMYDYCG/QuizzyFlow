@@ -43,11 +43,7 @@ export class RoleController {
     description: '创建角色',
   })
   async create(@Body() createDto: CreateRoleDto, @Request() req) {
-    const role = await this.roleService.create(createDto, req.user.username)
-    return {
-      message: '角色创建成功',
-      data: role,
-    }
+    return await this.roleService.create(createDto, req.user.username)
   }
 
   /**
@@ -57,11 +53,7 @@ export class RoleController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.ROLE_VIEW)
   async findAll(@Query() queryDto: QueryRoleDto) {
-    const roles = await this.roleService.findAll(queryDto)
-    return {
-      data: roles,
-      total: roles.length,
-    }
+    return await this.roleService.findAll(queryDto)
   }
 
   /**
@@ -71,8 +63,7 @@ export class RoleController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.ROLE_VIEW)
   async getStatistics() {
-    const stats = await this.roleService.getStatistics()
-    return { data: stats }
+    return await this.roleService.getStatistics()
   }
 
   /**
@@ -82,8 +73,7 @@ export class RoleController {
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.ROLE_VIEW)
   async findOne(@Param('id') id: string) {
-    const role = await this.roleService.findOne(id)
-    return { data: role }
+    return await this.roleService.findOne(id)
   }
 
   /**
@@ -103,11 +93,7 @@ export class RoleController {
     @Body() updateDto: UpdateRoleDto,
     @Request() req,
   ) {
-    const role = await this.roleService.update(id, updateDto, req.user.username)
-    return {
-      message: '角色更新成功',
-      data: role,
-    }
+    return await this.roleService.update(id, updateDto, req.user.username)
   }
 
   /**
@@ -123,8 +109,7 @@ export class RoleController {
     description: '删除角色',
   })
   async remove(@Param('id') id: string) {
-    await this.roleService.remove(id)
-    return { message: '角色删除成功' }
+    return await this.roleService.remove(id)
   }
 
   /**
@@ -144,15 +129,11 @@ export class RoleController {
     @Body('permissions') permissions: string[],
     @Request() req,
   ) {
-    const role = await this.roleService.addPermissions(
+    return await this.roleService.addPermissions(
       id,
       permissions,
       req.user.username,
     )
-    return {
-      message: '权限添加成功',
-      data: role,
-    }
   }
 
   /**
@@ -172,15 +153,11 @@ export class RoleController {
     @Body('permissions') permissions: string[],
     @Request() req,
   ) {
-    const role = await this.roleService.removePermissions(
+    return await this.roleService.removePermissions(
       id,
       permissions,
       req.user.username,
     )
-    return {
-      message: '权限移除成功',
-      data: role,
-    }
   }
 
   /**
@@ -200,15 +177,11 @@ export class RoleController {
     @Body('permissions') permissions: string[],
     @Request() req,
   ) {
-    const role = await this.roleService.setPermissions(
+    return await this.roleService.setPermissions(
       id,
       permissions,
       req.user.username,
     )
-    return {
-      message: '权限设置成功',
-      data: role,
-    }
   }
 }
 
