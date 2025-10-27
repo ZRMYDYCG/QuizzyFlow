@@ -9,6 +9,8 @@ import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import AdminSidebar from './components/admin-sidebar'
 import AdminHeader from './components/admin-header'
 import NotificationDrawer from './components/notification-drawer'
+import TabNav from './components/tab-nav'
+import { useTabNav } from './hooks/useTabNav'
 
 const { Content } = Layout
 
@@ -23,6 +25,17 @@ const AdminLayout: React.FC = () => {
   const { theme } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
   const [notificationVisible, setNotificationVisible] = useState(false)
+
+  // 标签页导航
+  const {
+    tabs,
+    handleTabClick,
+    handleTabClose,
+    handleCloseOthers,
+    handleCloseAll,
+    handleCloseLeft,
+    handleCloseRight,
+  } = useTabNav(location.pathname)
 
   // 权限检查
   const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
@@ -100,6 +113,18 @@ const AdminLayout: React.FC = () => {
               minHeight: 'calc(100vh - 112px)',
             }}
           >
+            {/* 标签页导航 */}
+            <TabNav
+              currentPath={location.pathname}
+              tabs={tabs}
+              onTabClick={handleTabClick}
+              onTabClose={handleTabClose}
+              onCloseOthers={handleCloseOthers}
+              onCloseAll={handleCloseAll}
+              onCloseLeft={handleCloseLeft}
+              onCloseRight={handleCloseRight}
+            />
+
             <div 
               className={`
                 ${theme === 'dark' ? 'bg-[#1e1e23] text-slate-300' : 'bg-white text-gray-700'} 
