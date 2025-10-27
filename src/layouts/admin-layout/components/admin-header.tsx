@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Layout } from 'antd'
-import { Bell, PanelLeft, PanelLeftClose } from 'lucide-react'
+import { Bell, PanelLeft, PanelLeftClose, RotateCw } from 'lucide-react'
 import UserDropdown from './user-dropdown'
 import ThemeToggle from '@/components/ThemeToggle'
 import AdminBreadcrumb from './admin-breadcrumb'
@@ -8,6 +8,7 @@ import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useNavigate } from 'react-router-dom'
 import { useLogout } from '@/hooks/useLogout'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLayoutConfig } from '@/contexts/LayoutContext'
 import type { AdminHeaderProps } from '../types'
 
 const { Header } = Layout
@@ -25,9 +26,17 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   const { username, nickname, avatar } = useGetUserInfo()
   const { logout } = useLogout()
   const { theme, primaryColor } = useTheme()
+  const { config } = useLayoutConfig()
+  const [isReloading, setIsReloading] = useState(false)
 
   const handleNavigate = (path: string) => {
     navigate(path)
+  }
+
+  // 重载当前页面
+  const handleReload = () => {
+    setIsReloading(true)
+    window.location.reload()
   }
 
   return (
@@ -64,6 +73,25 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
+        {/* 重载按钮 */}
+        {config.showReloadButton && (
+          <button
+            onClick={handleReload}
+            disabled={isReloading}
+            className={`
+              w-8 h-8 rounded-lg flex items-center justify-center transition-all
+              ${theme === 'dark' ? 'bg-[#2a2a2f] hover:bg-[#35353a] text-slate-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-500'}
+              ${isReloading ? 'cursor-not-allowed opacity-50' : 'hover:text-white'}
+            `}
+            title="重载页面"
+          >
+            <RotateCw 
+              className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`} 
+              strokeWidth={2} 
+            />
+          </button>
+        )}
+
         {/* 通知按钮 */}
         <button
           onClick={onNotificationClick}

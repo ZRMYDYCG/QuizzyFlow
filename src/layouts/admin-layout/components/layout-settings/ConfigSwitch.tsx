@@ -1,7 +1,7 @@
 import React from 'react'
-import { Switch, Space, Slider, Segmented } from 'antd'
+import { Switch, Space, Slider, Segmented, Select } from 'antd'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
-import type { BoxStyle, ContainerWidth, TabNavStyle } from '@/types/layout'
+import type { BoxStyle, ContainerWidth, TabNavStyle, PageTransition } from '@/types/layout'
 
 /**
  * 配置开关组件
@@ -158,6 +158,41 @@ const ConfigSwitch: React.FC = () => {
           tooltip={{ formatter: (value) => `${value}px` }}
         />
       </div>
+
+      {/* 页面切换动画 */}
+      <div>
+        <div className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">页面切换动画</div>
+        <Select
+          value={config.pageTransition}
+          onChange={(value) => updateConfig({ pageTransition: value as PageTransition })}
+          className="w-full"
+          options={[
+            { label: '左侧滑入', value: 'slide-left' },
+            { label: '右侧滑入', value: 'slide-right' },
+            { label: '淡入淡出', value: 'fade' },
+            { label: '缩放', value: 'zoom' },
+            { label: '无动画', value: 'none' },
+          ]}
+        />
+      </div>
+
+      {/* 动画时长 */}
+      {config.pageTransition !== 'none' && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">动画时长</span>
+            <span className="text-xs text-gray-500">{config.transitionDuration}ms</span>
+          </div>
+          <Slider
+            min={100}
+            max={800}
+            step={50}
+            value={config.transitionDuration}
+            onChange={(value) => updateConfig({ transitionDuration: value })}
+            tooltip={{ formatter: (value) => `${value}ms` }}
+          />
+        </div>
+      )}
     </div>
   )
 }

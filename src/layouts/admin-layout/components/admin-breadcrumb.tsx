@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import { ChevronRight, Home } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLayoutConfig } from '@/contexts/LayoutContext'
 
 /**
  * 面包屑项配置
@@ -37,6 +38,12 @@ const breadcrumbNameMap: Record<string, string> = {
 const AdminBreadcrumb: React.FC = () => {
   const location = useLocation()
   const { theme } = useTheme()
+  const { config } = useLayoutConfig()
+
+  // 如果配置中关闭了面包屑，不渲染
+  if (!config.showBreadcrumb) {
+    return null
+  }
 
   // 根据当前路径生成面包屑数据
   const breadcrumbs = useMemo(() => {

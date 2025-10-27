@@ -13,6 +13,8 @@ import AdminHeader from './components/admin-header'
 import NotificationDrawer from './components/notification-drawer'
 import TabNav from './components/tab-nav'
 import LayoutSettings from './components/layout-settings'
+import PageTransition from './components/page-transition'
+import ProgressBar from './components/progress-bar'
 import { useTabNav } from './hooks/useTabNav'
 
 const { Content } = Layout
@@ -89,6 +91,9 @@ const AdminLayout: React.FC = () => {
 
   return (
     <ConfigProvider theme={currentTheme}>
+      {/* 顶部进度条 */}
+      <ProgressBar />
+      
       <Layout className={`min-h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
         {/* 侧边栏 */}
         <AdminSidebar
@@ -142,7 +147,9 @@ const AdminLayout: React.FC = () => {
                 ${config.boxStyle === 'border' ? 'border border-gray-200 dark:border-gray-700' : 'shadow-sm'}
               `}
             >
-              <Outlet />
+              <PageTransition>
+                <Outlet />
+              </PageTransition>
             </div>
           </Content>
         </Layout>

@@ -102,9 +102,9 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     
     // 色弱模式
     if (config.colorWeaknessMode) {
-      root.classList.add('color-weakness')
+      document.documentElement.classList.add('color-weakness')
     } else {
-      root.classList.remove('color-weakness')
+      document.documentElement.classList.remove('color-weakness')
     }
   }, [config])
 

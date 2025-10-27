@@ -1,0 +1,84 @@
+/* 标签页样式 - Chrome 风格 */
+.tab-chrome {
+  position: relative;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+  border: 1px solid transparent;
+  border-bottom: none;
+  margin: 0 -8px;
+  padding: 0 16px;
+}
+
+.tab-chrome::before,
+.tab-chrome::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+}
+
+.tab-chrome::before {
+  left: -8px;
+  border-bottom-right-radius: 8px;
+  box-shadow: 2px 2px 0 currentColor;
+}
+
+.tab-chrome::after {
+  right: -8px;
+  border-bottom-left-radius: 8px;
+  box-shadow: -2px 2px 0 currentColor;
+}
+
+.tab-chrome.active {
+  background: var(--tab-active-bg, white);
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode Chrome 风格 */
+.dark .tab-chrome {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
+}
+
+.dark .tab-chrome.active {
+  background: var(--tab-active-bg, #2a2a30);
+}
+
+/* 标签页样式 - 卡片风格 */
+.tab-card {
+  border-radius: 8px;
+  border: 1px solid;
+  margin: 0 4px;
+  transition: all 0.2s;
+}
+
+.tab-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-card.active {
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Dark mode 卡片风格 */
+.dark .tab-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .tab-card.active {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* 标签页样式 - 默认风格 */
+.tab-default {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-default.active {
+  border-bottom-color: var(--primary-color, #3b82f6);
+}
+

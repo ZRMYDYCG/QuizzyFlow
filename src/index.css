@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 导入色弱模式样式 */
+@import './styles/color-weakness.css';
+
 /* 导入中国风主题工具类 */
 @import './styles/theme-utilities.css';
 

@@ -1,0 +1,40 @@
+/**
+ * 色弱模式样式
+ * 通过 CSS filter 调整页面颜色，帮助色弱用户更好地区分颜色
+ */
+
+/* 色弱模式激活时应用到根元素 */
+html.color-weakness {
+  /* 使用 invert 和 hue-rotate 调整颜色 */
+  filter: hue-rotate(180deg) saturate(0.8) contrast(1.1);
+}
+
+/* 排除某些元素不受色弱模式影响 */
+html.color-weakness img,
+html.color-weakness video,
+html.color-weakness canvas {
+  filter: hue-rotate(-180deg);
+}
+
+/* 备选方案：使用更柔和的色弱滤镜 */
+html.color-weakness-alt {
+  filter: grayscale(30%) contrast(1.15) brightness(1.05);
+}
+
+/* 针对不同类型的色弱提供不同的滤镜 */
+
+/* 红色弱（Protanopia）*/
+html.color-weakness-red {
+  filter: url(#protanopia-filter);
+}
+
+/* 绿色弱（Deuteranopia）*/
+html.color-weakness-green {
+  filter: url(#deuteranopia-filter);
+}
+
+/* 蓝色弱（Tritanopia）*/
+html.color-weakness-blue {
+  filter: url(#tritanopia-filter);
+}
+

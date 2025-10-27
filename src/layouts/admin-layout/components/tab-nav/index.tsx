@@ -9,7 +9,9 @@ import {
   MinusCircleOutlined,
 } from '@ant-design/icons'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLayoutConfig } from '@/contexts/LayoutContext'
 import clsx from 'clsx'
+import './tab-styles.css'
 
 // ==================== 类型定义 ====================
 
@@ -92,6 +94,7 @@ const TabNav: React.FC<TabNavProps> = ({
   onCloseRight,
 }) => {
   const { theme, themeColors } = useTheme()
+  const { config } = useLayoutConfig()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [contextMenuTab, setContextMenuTab] = useState<TabItem | null>(null)
   const [contextMenuVisible, setContextMenuVisible] = useState(false)
@@ -250,20 +253,39 @@ const TabNav: React.FC<TabNavProps> = ({
                 <div
                   data-path={tab.path}
                   className={clsx(
-                    'inline-flex items-center h-8 rounded-t-md cursor-pointer',
+                    'inline-flex items-center h-8 cursor-pointer',
                     'transition-all duration-200 select-none',
                     'group relative',
-                    'pl-4 border-b-2',
+                    'pl-4',
                     tab.closable !== false ? 'pr-2 group-hover:pr-2' : 'pr-4',
+                    // 根据配置应用不同样式
+                    config.tabStyle === 'chrome' && 'tab-chrome',
+                    config.tabStyle === 'card' && 'tab-card',
+                    config.tabStyle === 'default' && 'tab-default',
+                    // 激活状态
+                    isActive && 'active',
+                    // 默认颜色
                     isActive
                       ? theme === 'dark'
                         ? 'bg-[#2a2a30] text-white'
                         : 'bg-white text-gray-900'
                       : theme === 'dark'
-                      ? 'bg-transparent text-gray-400 hover:bg-[#2a2a30] hover:text-gray-200 border-transparent'
-                      : 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-transparent'
+                      ? 'bg-transparent text-gray-400 hover:bg-[#2a2a30] hover:text-gray-200'
+                      : 'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                    // 卡片风格边框
+                    config.tabStyle === 'card' && (
+                      theme === 'dark' 
+                        ? 'border-gray-700 hover:border-gray-600' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    )
                   )}
-                  style={isActive ? { borderBottomColor: themeColors.primary } : undefined}
+                  style={
+                    isActive && config.tabStyle === 'default'
+                      ? { borderBottomColor: themeColors.primary }
+                      : config.tabStyle === 'chrome'
+                      ? { '--tab-active-bg': theme === 'dark' ? '#2a2a30' : '#ffffff' } as React.CSSProperties
+                      : undefined
+                  }
                   onClick={() => handleTabClick(tab.path)}
                   onContextMenu={(e) => handleContextMenu(e, tab)}
                 >
