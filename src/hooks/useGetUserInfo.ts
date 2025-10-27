@@ -1,13 +1,16 @@
 import { useSelector } from 'react-redux'
-import { stateType } from '../store'
-import { IUserState } from '../store/modules/user.ts'
+import type { stateType } from '@/store'
+import type { IUserState } from '@/store/modules/user'
 
+/**
+ * 获取用户信息 Hook
+ * 从 Redux store 中获取当前用户信息
+ */
 export const useGetUserInfo = () => {
   const user = useSelector<stateType>((state) => state.user) as IUserState
   
   return {
     ...user,
-    // 便捷的 token 检查
     isLoggedIn: !!user.token,
   }
 }

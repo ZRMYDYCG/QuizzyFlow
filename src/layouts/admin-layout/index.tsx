@@ -15,10 +15,6 @@ import {
   ProfileOutlined,
 } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
-import { usePermission } from '@/hooks/usePermission'
-import { useLoadUserData } from '@/hooks/useLoadUserData'
-import { PERMISSIONS } from '@/constants/permissions'
-import { ROLES } from '@/constants/roles'
 import Logo from '@/components/Logo'
 import type { MenuProps } from 'antd'
 
@@ -30,45 +26,9 @@ const { Header, Sider, Content } = Layout
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { username, nickname, avatar, token, role } = useGetUserInfo()
-  const { isAdmin } = usePermission()
-  const { waitingUserData } = useLoadUserData()
+  const { username, nickname, avatar } = useGetUserInfo()
   const [collapsed, setCollapsed] = useState(false)
   const [notificationVisible, setNotificationVisible] = useState(false)
-
-  console.log('🏛️ AdminLayout 渲染:', {
-    token: token ? '存在' : '不存在',
-    username: username || '未加载',
-    role: role || '未加载',
-    waitingUserData,
-    isAdmin: isAdmin()
-  })
-
-  // 检查1：如果没有token，重定向到登录页
-  if (!token) {
-    console.log('  → 没有 token，重定向到登录页')
-    return <Navigate to="/login" replace />
-  }
-
-  // 检查2：等待用户数据加载
-  if (waitingUserData) {
-    console.log('  → 用户数据加载中...')
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="加载用户数据..." />
-      </div>
-    )
-  }
-
-  // 检查3：数据已加载完成，检查权限
-  if (!isAdmin()) {
-    console.log('  → 权限检查失败，不是管理员')
-    console.log('     username:', username)
-    console.log('     role:', role)
-    return <Navigate to="/manage/list" replace />
-  }
-
-  console.log('  → ✅ 权限检查通过，显示管理后台')
 
   // 侧边栏菜单项
   const menuItems: MenuProps['items'] = [
