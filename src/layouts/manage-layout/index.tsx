@@ -1,9 +1,10 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { ConfigProvider, message } from 'antd'
 import Sidebar from './components/sidebar/index.tsx'
-import { useNavPage } from '../../hooks/useNavPage'
-import { useLoadUserData } from '../../hooks/useLoadUserData'
 import { useGetUserInfo } from '../../hooks/useGetUserInfo'
+import { useLogout } from '../../hooks/useLogout'
+import { useLoadUserData } from '../../hooks/useLoadUserData'
+import { useNavPage } from '../../hooks/useNavPage'
 import { useState } from 'react'
 import React from 'react'
 import { useSelector } from 'react-redux'
@@ -19,11 +20,14 @@ import ThemeSelectorDialog from '../../components/theme-selector-dialog'
 import { useNavigationHistory } from '@/hooks/useNavigationHistory'
 
 const ManageLayout = () => {
-  const { waitingUserData } = useLoadUserData()
   const { username, nickname } = useGetUserInfo()
+  const { logout } = useLogout()
+  const { waitingUserData } = useLoadUserData()
   const user = useSelector((state: stateType) => state.user)
-  useNavPage(waitingUserData)
   const navigate = useNavigate()
+  
+  // 路由拦截（只处理非 admin 路径）
+  useNavPage(waitingUserData)
   const { theme, primaryColor, themeColors } = useTheme()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -267,7 +271,10 @@ const ManageLayout = () => {
                     <DropdownMenu.Separator className={`h-px my-2 ${
                       theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'
                     }`} />
-                    <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 rounded-lg outline-none cursor-pointer hover:bg-red-500/10 transition-colors">
+                    <DropdownMenu.Item 
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 rounded-lg outline-none cursor-pointer hover:bg-red-500/10 transition-colors"
+                      onSelect={logout}
+                    >
                       退出登录
                     </DropdownMenu.Item>
                   </DropdownMenu.Content>

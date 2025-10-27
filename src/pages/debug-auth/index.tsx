@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import type { stateType } from '@/store'
 import { usePermission } from '@/hooks/usePermission'
+import { useLogout } from '@/hooks/useLogout'
 
 /**
  * 调试页面 - 查看当前用户权限信息
@@ -13,12 +14,7 @@ const DebugAuth: React.FC = () => {
   const admin = useSelector((state: stateType) => state.admin)
   const { isAdmin, isSuperAdmin, hasRole } = usePermission()
   const navigate = useNavigate()
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    navigate('/login')
-    window.location.reload()
-  }
+  const { logout } = useLogout()
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -84,7 +80,7 @@ const DebugAuth: React.FC = () => {
         <Button onClick={() => navigate('/manage/list')}>
           返回用户中心
         </Button>
-        <Button danger onClick={handleLogout}>
+        <Button danger onClick={logout}>
           退出并重新登录
         </Button>
       </div>

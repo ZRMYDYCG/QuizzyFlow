@@ -15,6 +15,9 @@ import {
   ProfileOutlined,
 } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
+import { useLogout } from '@/hooks/useLogout'
+import { useLoadUserData } from '@/hooks/useLoadUserData'
+import { ROLES } from '@/constants/roles'
 import Logo from '@/components/Logo'
 import type { MenuProps } from 'antd'
 
@@ -26,9 +29,33 @@ const { Header, Sider, Content } = Layout
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { username, nickname, avatar } = useGetUserInfo()
+  const { username, nickname, avatar, token, role } = useGetUserInfo()
+  const { logout } = useLogout()
+  const { waitingUserData } = useLoadUserData()
   const [collapsed, setCollapsed] = useState(false)
   const [notificationVisible, setNotificationVisible] = useState(false)
+
+  // 权限检查
+  const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
+
+  // 未登录，重定向到登录页
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+
+  // 等待用户数据加载
+  if (waitingUserData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spin size="large" tip="加载用户数据..." />
+      </div>
+    )
+  }
+
+  // 不是管理员，重定向到 403 页面
+  if (!isAdmin) {
+    return <Navigate to="/403" replace />
+  }
 
   // 侧边栏菜单项
   const menuItems: MenuProps['items'] = [
@@ -90,10 +117,7 @@ const AdminLayout: React.FC = () => {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: '退出登录',
-      onClick: () => {
-        localStorage.removeItem('token')
-        navigate('/login')
-      },
+      onClick: logout,
     },
   ]
 

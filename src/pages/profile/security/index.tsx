@@ -3,11 +3,13 @@ import { Card, Form, Input, Button, message, Typography, Alert } from 'antd'
 import { LockOutlined, SafetyOutlined } from '@ant-design/icons'
 import { changePassword } from '@/api/modules/user'
 import { useRequest } from 'ahooks'
+import { useLogout } from '@/hooks/useLogout'
 
 const { Title, Text } = Typography
 
 const ProfileSecurity: React.FC = () => {
   const [form] = Form.useForm()
+  const { logout } = useLogout()
 
   const { run: runChangePassword, loading } = useRequest(
     async (values: any) => {
@@ -19,13 +21,12 @@ const ProfileSecurity: React.FC = () => {
     {
       manual: true,
       onSuccess: () => {
-        message.success('密码修改成功，请重新登录')
+        message.success('密码修改成功，3秒后将退出登录')
         form.resetFields()
         
-        // 3秒后跳转到登录页
+        // 3秒后退出登录
         setTimeout(() => {
-          localStorage.removeItem('token')
-          window.location.href = '/login'
+          logout()
         }, 3000)
       },
     }

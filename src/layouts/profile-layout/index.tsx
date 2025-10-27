@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { clsx } from 'clsx'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
+import { useNavPage } from '@/hooks/useNavPage'
 import Logo from '@/components/Logo'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -28,7 +29,10 @@ const ProfileLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   // 加载用户数据（刷新时重新获取）
-  useLoadUserData()
+  const { waitingUserData } = useLoadUserData()
+  
+  // 路由拦截
+  useNavPage(waitingUserData)
 
   // 菜单项配置
   const menuItems = [

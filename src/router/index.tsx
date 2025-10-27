@@ -10,6 +10,7 @@ import ForgotPassword from '@/pages/forgot-password'
 import Terms from '@/pages/terms'
 import Privacy from '@/pages/privacy'
 import NotFound from '@/pages/not-found'
+import Forbidden from '@/pages/forbidden'
 import Dashboard from '@/pages/manage/dashboard'
 import List from '@/pages/manage/list'
 import Trash from '@/pages/manage/trash'
@@ -146,6 +147,10 @@ const router = createBrowserRouter([
   {
     path: 'debug-auth',
     element: <DebugAuth />,
+  },
+  {
+    path: '403',
+    element: <Forbidden />,
   },
   {
     path: '*',
