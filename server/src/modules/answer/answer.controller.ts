@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Patch,
   Body,
   Param,
   Query,
@@ -23,7 +24,12 @@ import {
 import { AnswerService } from './answer.service'
 import { CreateAnswerDto } from './dto/create-answer.dto'
 import { QueryAnswerDto } from './dto/query-answer.dto'
+import { QueryAnswerAdminDto } from './dto/query-answer-admin.dto'
+import { BatchDeleteAnswerDto } from './dto/batch-delete-answer.dto'
+import { MarkAnswerDto } from './dto/mark-answer.dto'
 import { AuthGuard } from '../auth/auth.guard'
+import { RolesGuard } from '../../common/guards/roles.guard'
+import { Roles } from '../../common/decorators/roles.decorator'
 
 @ApiTags('答卷')
 @Controller('answer')
@@ -145,6 +151,93 @@ export class AnswerController {
   async remove(@Param('id') id: string, @Request() req) {
     const { username } = req.user
     return await this.answerService.remove(id, username)
+  }
+
+  // ==================== 管理员接口 ====================
+
+  /**
+   * 获取所有答卷列表（管理员）
+   * GET /api/answer/admin/list
+   */
+  @ApiOperation({
+    summary: '获取所有答卷列表（管理员）',
+    description: '管理员查看所有答卷，支持多种筛选条件',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin')
+  @Get('admin/list')
+  async findAllAdmin(@Query() query: QueryAnswerAdminDto) {
+    return await this.answerService.findAllAdmin(query)
+  }
+
+  /**
+   * 标记答卷（管理员）
+   * PATCH /api/answer/admin/:id/mark
+   */
+  @ApiOperation({
+    summary: '标记答卷',
+    description: '管理员标记答卷为正常或异常',
+  })
+  @ApiParam({
+    name: 'id',
+    description: '答卷ID',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin')
+  @Patch('admin/:id/mark')
+  async markAnswer(@Param('id') id: string, @Body() markDto: MarkAnswerDto) {
+    return await this.answerService.markAnswer(id, markDto)
+  }
+
+  /**
+   * 批量删除答卷（管理员）
+   * DELETE /api/answer/admin/batch-delete
+   */
+  @ApiOperation({
+    summary: '批量删除答卷',
+    description: '管理员批量删除答卷',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin')
+  @Delete('admin/batch-delete')
+  @HttpCode(HttpStatus.OK)
+  async batchDeleteAnswers(@Body() batchDeleteDto: BatchDeleteAnswerDto) {
+    return await this.answerService.batchDeleteAnswers(batchDeleteDto)
+  }
+
+  /**
+   * 获取答卷统计数据（管理员）
+   * GET /api/answer/admin/statistics
+   */
+  @ApiOperation({
+    summary: '获取答卷统计数据',
+    description: '管理员查看答卷统计数据',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin')
+  @Get('admin/statistics')
+  async getStatistics() {
+    return await this.answerService.getStatistics()
+  }
+
+  /**
+   * 导出答卷数据（管理员）
+   * GET /api/answer/admin/export
+   */
+  @ApiOperation({
+    summary: '导出答卷数据',
+    description: '管理员导出答卷数据（返回JSON格式，前端处理成Excel）',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'super_admin')
+  @Get('admin/export')
+  async exportAnswers(@Query() query: QueryAnswerAdminDto) {
+    return await this.answerService.exportAnswers(query)
   }
 }
 

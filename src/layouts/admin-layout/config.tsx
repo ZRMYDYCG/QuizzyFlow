@@ -8,6 +8,7 @@ import {
   ProfileOutlined,
   LogoutOutlined,
   AppstoreOutlined,
+  FormOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
@@ -60,6 +61,21 @@ export const sideMenuItems: MenuProps['items'] = [
       {
         key: '/admin/templates/statistics',
         label: '统计数据',
+      },
+    ],
+  },
+  {
+    key: '/admin/answers',
+    icon: <FormOutlined />,
+    label: '答卷管理',
+    children: [
+      {
+        key: '/admin/answers/list',
+        label: '答卷列表',
+      },
+      {
+        key: '/admin/answers/statistics',
+        label: '统计分析',
       },
     ],
   },
@@ -118,6 +134,20 @@ export const horizontalMenuItems: MenuProps['items'] = [
       {
         key: '/admin/templates/statistics',
         label: '统计数据',
+      },
+    ],
+  },
+  {
+    key: '/admin/answers',
+    label: '答卷管理',
+    children: [
+      {
+        key: '/admin/answers/list',
+        label: '答卷列表',
+      },
+      {
+        key: '/admin/answers/statistics',
+        label: '统计分析',
       },
     ],
   },

@@ -46,6 +46,9 @@ export class Answer {
 
   @Prop({ default: false })
   isValid: boolean // 是否有效（用于标记垃圾答卷）
+
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export const AnswerSchema = SchemaFactory.createForClass(Answer)

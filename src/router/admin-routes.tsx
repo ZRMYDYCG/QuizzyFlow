@@ -22,6 +22,11 @@ const TemplateReview = lazy(() => import('@/pages/admin/templates/review'))
 const TemplateCategories = lazy(() => import('@/pages/admin/templates/categories'))
 const TemplateStatistics = lazy(() => import('@/pages/admin/templates/statistics'))
 
+// 答卷管理相关页面
+const AnswersLayout = lazy(() => import('@/pages/admin/answers'))
+const AnswerList = lazy(() => import('@/pages/admin/answers/list'))
+const AnswerStatistics = lazy(() => import('@/pages/admin/answers/statistics'))
+
 // 加载组件
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -145,6 +150,34 @@ export const adminRoutes = {
           element: (
             <Suspense fallback={<LoadingFallback />}>
               <TemplateStatistics />
+            </Suspense>
+          ),
+        },
+      ],
+    },
+    {
+      path: 'answers',
+      element: (
+        <PermissionGuard role={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+          <Suspense fallback={<LoadingFallback />}>
+            <AnswersLayout />
+          </Suspense>
+        </PermissionGuard>
+      ),
+      children: [
+        {
+          path: 'list',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <AnswerList />
+            </Suspense>
+          ),
+        },
+        {
+          path: 'statistics',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <AnswerStatistics />
             </Suspense>
           ),
         },
