@@ -1,7 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { createQuestion } from '../../../api/modules/question.ts'
-import { useRequest } from 'ahooks'
-import { message } from 'antd'
 import { useManageTheme } from '../../../hooks/useManageTheme.ts'
 import { useTheme } from '../../../contexts/ThemeContext.tsx'
 import Logo from '@/components/Logo'
@@ -34,17 +31,6 @@ const Sidebar = () => {
   const { pathname } = useLocation()
   const t = useManageTheme()
   const { primaryColor, themeColors } = useTheme()
-
-  const { loading, run: handleCreate } = useRequest(createQuestion, {
-    manual: true,
-    onSuccess: async (res) => {
-      const { id } = res || {}
-      if (id) {
-        navigate(`/question/edit/${id}`)
-        message.success('创建成功')
-      }
-    },
-  })
 
   const getSelectedKey = () => {
     if (pathname.startsWith('/manage/list')) return 'list'

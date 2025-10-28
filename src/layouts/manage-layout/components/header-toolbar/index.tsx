@@ -10,17 +10,15 @@ import type { IHeaderToolbarProps } from '../../types'
 const HeaderToolbar: React.FC<IHeaderToolbarProps> = ({
   sidebarCollapsed,
   mobileSidebarOpen,
-  isCreating,
   canGoBack,
   canGoForward,
   themeDialogOpen,
   onToggleSidebar,
-  onCreateQuestion,
   onGoBack,
   onGoForward,
   onOpenThemeDialog,
 }) => {
-  const { primaryColor, themeColors } = useTheme()
+  const { primaryColor } = useTheme()
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -71,7 +69,7 @@ const HeaderToolbar: React.FC<IHeaderToolbarProps> = ({
 
         {/* 右侧操作区 */}
         <div className="flex items-center gap-1.5 md:gap-3">
-          <CreateButton loading={isCreating} onClick={onCreateQuestion} />
+          <CreateButton />
           
           {/* 通知按钮 - 移动端隐藏 */}
           <button className="hidden md:flex relative w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] items-center justify-center text-gray-500 dark:text-slate-400 hover:text-white transition-colors">
