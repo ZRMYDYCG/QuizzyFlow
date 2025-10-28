@@ -1,9 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { createQuestion } from '../../../../api/modules/question.ts'
+import { createQuestion } from '../../../api/modules/question.ts'
 import { useRequest } from 'ahooks'
 import { message } from 'antd'
-import { useManageTheme } from '../../../../hooks/useManageTheme.ts'
-import { useTheme } from '../../../../contexts/ThemeContext'
+import { useManageTheme } from '../../../hooks/useManageTheme.ts'
+import { useTheme } from '../../../contexts/ThemeContext.tsx'
 import Logo from '@/components/Logo'
 import { 
   LayoutDashboard,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { ConfigProvider, message } from 'antd'
-import Sidebar from './components/sidebar/index.tsx'
+import Sidebar from './components/sidebar.tsx'
 import { useGetUserInfo } from '../../hooks/useGetUserInfo'
 import { useLogout } from '../../hooks/useLogout'
 import { useLoadUserData } from '../../hooks/useLoadUserData'
