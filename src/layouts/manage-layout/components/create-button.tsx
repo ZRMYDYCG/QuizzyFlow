@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRequest } from 'ahooks'
@@ -9,6 +9,7 @@ import { createQuestion } from '@/api/modules/question'
 const CreateButton: React.FC = () => {
   const navigate = useNavigate()
   const { primaryColor, themeColors } = useTheme()
+  const [isHovered, setIsHovered] = useState(false)
 
   const { loading, run: handleCreate } = useRequest(
     async () => {
@@ -25,28 +26,30 @@ const CreateButton: React.FC = () => {
           navigate(`/question/edit/${_id}`)
         }
       },
-      onError: () => {
-      },
     }
   )
+
+  const handleMouseEnter = useCallback(() => {
+    if (!loading) {
+      setIsHovered(true)
+    }
+  }, [loading])
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false)
+  }, [])
 
   return (
     <button 
       onClick={handleCreate}
       disabled={loading}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="flex items-center justify-center gap-0 md:gap-2 px-2 md:px-3 h-8 md:h-9 rounded-lg text-white text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
       style={{
-        background: `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`,
-      }}
-      onMouseEnter={(e) => {
-        if (!loading) {
-          e.currentTarget.style.background = `linear-gradient(135deg, ${themeColors.primaryHover}, ${primaryColor})`
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!loading) {
-          e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`
-        }
+        background: isHovered 
+          ? `linear-gradient(135deg, ${themeColors.primaryHover}, ${primaryColor})`
+          : `linear-gradient(135deg, ${primaryColor}, ${themeColors.primaryActive})`,
       }}
     >
       {loading ? (
