@@ -1,3 +1,4 @@
+import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { ConfigProvider, message } from 'antd'
 import Sidebar from './components/sidebar/index.tsx'
@@ -7,7 +8,6 @@ import { useLoadUserData } from '../../hooks/useLoadUserData'
 import { useNavPage } from '../../hooks/useNavPage'
 import { usePermission } from '../../hooks/usePermission'
 import { useState } from 'react'
-import React from 'react'
 import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import { Plus, PanelLeftClose, PanelLeft, ChevronLeft, ChevronRight, Search, Bell, ChevronDown, Loader2, Palette, User } from 'lucide-react'
@@ -60,24 +60,12 @@ const ManageLayout = () => {
     }
   }
 
-  // 主题相关的类名
-  const themeClasses = {
-    bg: theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-white',
-    cardBg: theme === 'dark' ? 'bg-[#1e1e23]' : 'bg-white',
-    buttonBg: theme === 'dark' ? 'bg-[#2a2a2f] hover:bg-[#35353a]' : 'bg-gray-100 hover:bg-gray-200',
-    border: theme === 'dark' ? 'border-white/5' : 'border-gray-200',
-    text: theme === 'dark' ? 'text-slate-300' : 'text-gray-700',
-    textSecondary: theme === 'dark' ? 'text-slate-400' : 'text-gray-500',
-    inputBg: theme === 'dark' ? 'bg-[#2a2a2f]' : 'bg-gray-50',
-    placeholder: theme === 'dark' ? 'placeholder:text-slate-600' : 'placeholder:text-gray-400',
-  }
-
   // 根据主题选择 Ant Design 配置
   const currentTheme = theme === 'dark' ? editorDarkTheme : editorLightTheme
 
   return (
     <ConfigProvider theme={currentTheme}>
-      <div className={`flex h-screen overflow-hidden ${themeClasses.bg}`}>
+      <div className="flex h-screen overflow-hidden bg-white dark:bg-[#1a1a1f]">
       {/* 移动端遮罩层 */}
       {mobileSidebarOpen && (
         <div 
@@ -110,15 +98,14 @@ const ManageLayout = () => {
           ${sidebarCollapsed ? 'md:p-3' : 'md:p-[30px]'}
         `}
       >
-        {/* 内层圆角边框容器 */}
-        <div className={`h-full ${themeClasses.cardBg} rounded-xl md:rounded-2xl border ${themeClasses.border} flex flex-col overflow-hidden transition-all duration-300`}>
+        <div className="h-full bg-white dark:bg-[#1e1e23] rounded-xl md:rounded-2xl border border-gray-200 dark:border-white/5 flex flex-col overflow-hidden transition-all duration-300">
           {/* 顶部工具栏 */}
-          <div className={`h-14 md:h-16 flex items-center justify-between px-3 md:px-6 border-b ${themeClasses.border}`}>
+          <div className="h-14 md:h-16 flex items-center justify-between px-3 md:px-6 border-b border-gray-200 dark:border-white/5">
             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
               {/* 收起/展开按钮 */}
               <button
                 onClick={toggleSidebar}
-                className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center ${themeClasses.textSecondary} hover:text-white transition-colors flex-shrink-0`}
+                className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-white transition-colors flex-shrink-0"
                 title={sidebarCollapsed || !mobileSidebarOpen ? '展开侧边栏' : '收起侧边栏'}
               >
                 {(sidebarCollapsed && window.innerWidth >= 768) || (!mobileSidebarOpen && window.innerWidth < 768) ? (
@@ -133,9 +120,9 @@ const ManageLayout = () => {
                 <button 
                   onClick={goBack}
                   disabled={!canGoBack}
-                  className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center transition-all ${
+                  className={`w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] flex items-center justify-center transition-all ${
                     canGoBack 
-                      ? `${themeClasses.textSecondary} hover:text-white cursor-pointer hover:shadow-md` 
+                      ? 'text-gray-500 dark:text-slate-400 hover:text-white cursor-pointer hover:shadow-md' 
                       : 'text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed'
                   }`}
                   title={canGoBack ? '后退' : '无法后退'}
@@ -145,9 +132,9 @@ const ManageLayout = () => {
                 <button 
                   onClick={goForward}
                   disabled={!canGoForward}
-                  className={`w-8 h-8 rounded-lg ${themeClasses.buttonBg} flex items-center justify-center transition-all ${
+                  className={`w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] flex items-center justify-center transition-all ${
                     canGoForward 
-                      ? `${themeClasses.textSecondary} hover:text-white cursor-pointer hover:shadow-md` 
+                      ? 'text-gray-500 dark:text-slate-400 hover:text-white cursor-pointer hover:shadow-md' 
                       : 'text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed'
                   }`}
                   title={canGoForward ? '前进' : '无法前进'}
@@ -186,7 +173,7 @@ const ManageLayout = () => {
               </button>
 
               {/* 通知按钮 - 移动端隐藏 */}
-              <button className={`hidden md:flex relative w-8 h-8 rounded-lg ${themeClasses.buttonBg} items-center justify-center ${themeClasses.textSecondary} hover:text-white transition-colors`}>
+              <button className="hidden md:flex relative w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] items-center justify-center text-gray-500 dark:text-slate-400 hover:text-white transition-colors">
                 <Bell className="w-4 h-4" strokeWidth={2} />
                 <span 
                   className="absolute top-1 right-1 w-2 h-2 rounded-full shadow-lg"
@@ -200,7 +187,7 @@ const ManageLayout = () => {
               {/* 用户菜单 */}
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
-                  <button className={`flex items-center gap-1 md:gap-2 pl-1 md:pl-2 pr-2 md:pr-3 h-8 md:h-9 rounded-lg ${themeClasses.buttonBg} transition-colors`}>
+                  <button className="flex items-center gap-1 md:gap-2 pl-1 md:pl-2 pr-2 md:pr-3 h-8 md:h-9 rounded-lg bg-gray-100 dark:bg-[#2a2a2f] hover:bg-gray-200 dark:hover:bg-[#35353a] transition-colors">
                     {user.avatar ? (
                       <img 
                         src={user.avatar} 
@@ -223,50 +210,35 @@ const ManageLayout = () => {
 
                 <DropdownMenu.Portal>
                   <DropdownMenu.Content
-                    className={`min-w-[200px] rounded-xl border shadow-2xl p-2 z-50 animate-in fade-in-0 zoom-in-95 ${
-                      theme === 'dark' 
-                        ? 'bg-[#2a2a2f] border-white/10' 
-                        : 'bg-white border-gray-200'
-                    }`}
+                    className="min-w-[200px] rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#2a2a2f] shadow-2xl p-2 z-50 animate-in fade-in-0 zoom-in-95"
                     sideOffset={8}
                     align="end"
                   >
-                    <div className={`px-3 py-2 border-b mb-2 ${
-                      theme === 'dark' ? 'border-white/10' : 'border-gray-200'
-                    }`}>
-                      <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className="px-3 py-2 border-b border-gray-200 dark:border-white/10 mb-2">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {nickname || username}
                       </p>
-                      <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>
+                      <p className="text-xs mt-0.5 text-gray-500 dark:text-slate-400">
                         {username}
                       </p>
                     </div>
                     <DropdownMenu.Item 
-                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
-                        theme === 'dark' 
-                          ? 'text-slate-300 hover:bg-white/10' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10"
                       onSelect={() => navigate('/profile')}
                     >
                       <User className="w-4 h-4" />
                       <span>个人中心</span>
                     </DropdownMenu.Item>
                     <DropdownMenu.Item 
-                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors ${
-                        theme === 'dark' 
-                          ? 'text-slate-300 hover:bg-white/10' 
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10"
                       onSelect={() => setThemeDialogOpen(true)}
                     >
                       <Palette className="w-4 h-4" />
                       <span className="flex-1">主题颜色</span>
                       <div 
-                        className="w-4 h-4 rounded-full border"
+                        className="w-4 h-4 rounded-full border border-black/10 dark:border-white/20"
                         style={{ 
                           backgroundColor: primaryColor,
-                          borderColor: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'
                         }}
                       />
                     </DropdownMenu.Item>
@@ -274,9 +246,7 @@ const ManageLayout = () => {
                     {/* 🆕 管理后台入口 - 只对管理员显示 */}
                     {isAdmin() && (
                       <>
-                        <DropdownMenu.Separator className={`h-px my-2 ${
-                          theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'
-                        }`} />
+                        <DropdownMenu.Separator className="h-px my-2 bg-gray-200 dark:bg-white/10" />
                         <DropdownMenu.Item 
                           className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-pointer transition-colors text-blue-500 hover:bg-blue-500/10 font-medium"
                           onSelect={() => navigate('/admin/dashboard')}
@@ -289,9 +259,7 @@ const ManageLayout = () => {
                       </>
                     )}
                     
-                    <DropdownMenu.Separator className={`h-px my-2 ${
-                      theme === 'dark' ? 'bg-white/10' : 'bg-gray-200'
-                    }`} />
+                    <DropdownMenu.Separator className="h-px my-2 bg-gray-200 dark:bg-white/10" />
                     <DropdownMenu.Item 
                       className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 rounded-lg outline-none cursor-pointer hover:bg-red-500/10 transition-colors"
                       onSelect={logout}
