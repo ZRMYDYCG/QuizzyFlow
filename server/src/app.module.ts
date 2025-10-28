@@ -16,6 +16,7 @@ import { RoleModule } from './modules/role/role.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { AdminLogModule } from './modules/admin-log/admin-log.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { SystemConfigModule } from './modules/system-config/system-config.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AdminModule } from './modules/admin/admin.module';
     PermissionModule,
     AdminLogModule,
     AdminModule,
+    SystemConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],
