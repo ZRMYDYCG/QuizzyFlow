@@ -10,6 +10,7 @@ import {
   AppstoreOutlined,
   FormOutlined,
   AuditOutlined,
+  MessageOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
@@ -100,6 +101,21 @@ export const sideMenuItems: MenuProps['items'] = [
     ],
   },
   {
+    key: '/admin/feedback',
+    icon: <MessageOutlined />,
+    label: '反馈管理',
+    children: [
+      {
+        key: '/admin/feedback/list',
+        label: '反馈列表',
+      },
+      {
+        key: '/admin/feedback/statistics',
+        label: '反馈统计',
+      },
+    ],
+  },
+  {
     key: '/admin/logs',
     icon: <ProfileOutlined />,
     label: '操作日志',
@@ -173,6 +189,7 @@ export const horizontalMenuItems: MenuProps['items'] = [
   },
   {
     key: '/admin/moderation',
+    icon: <AuditOutlined />,
     label: '内容审核',
     children: [
       {
@@ -186,6 +203,21 @@ export const horizontalMenuItems: MenuProps['items'] = [
       {
         key: '/admin/moderation/statistics',
         label: '审核统计',
+      },
+    ],
+  },
+  {
+    key: '/admin/feedback',
+    icon: <MessageOutlined />,
+    label: '反馈管理',
+    children: [
+      {
+        key: '/admin/feedback/list',
+        label: '反馈列表',
+      },
+      {
+        key: '/admin/feedback/statistics',
+        label: '反馈统计',
       },
     ],
   },

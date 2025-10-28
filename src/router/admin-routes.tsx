@@ -33,6 +33,11 @@ const ModerationQueue = lazy(() => import('@/pages/admin/moderation/queue'))
 const SensitiveWords = lazy(() => import('@/pages/admin/moderation/sensitive-words'))
 const ModerationStatistics = lazy(() => import('@/pages/admin/moderation/statistics'))
 
+// 反馈管理相关页面
+const FeedbackLayout = lazy(() => import('@/pages/admin/feedback'))
+const FeedbackList = lazy(() => import('@/pages/admin/feedback/list'))
+const FeedbackStatistics = lazy(() => import('@/pages/admin/feedback/statistics'))
+
 // 加载组件
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -220,6 +225,34 @@ export const adminRoutes = {
           element: (
             <Suspense fallback={<LoadingFallback />}>
               <ModerationStatistics />
+            </Suspense>
+          ),
+        },
+      ],
+    },
+    {
+      path: 'feedback',
+      element: (
+        <PermissionGuard role={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+          <Suspense fallback={<LoadingFallback />}>
+            <FeedbackLayout />
+          </Suspense>
+        </PermissionGuard>
+      ),
+      children: [
+        {
+          path: 'list',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <FeedbackList />
+            </Suspense>
+          ),
+        },
+        {
+          path: 'statistics',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <FeedbackStatistics />
             </Suspense>
           ),
         },

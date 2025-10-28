@@ -11,6 +11,7 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
 import { TemplateModule } from './modules/template/template.module';
 import { AIChatModule } from './modules/ai-chat/ai-chat.module';
 import { ModerationModule } from './modules/moderation/moderation.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 // 🆕 RBAC 和管理功能模块
 import { RbacModule } from './modules/rbac/rbac.module';
 import { RoleModule } from './modules/role/role.module';
@@ -34,6 +35,7 @@ import { SystemConfigModule } from './modules/system-config/system-config.module
     TemplateModule,
     AIChatModule,
     ModerationModule,
+    FeedbackModule,
     // RBAC 和管理功能模块
     RbacModule,
     RoleModule,
