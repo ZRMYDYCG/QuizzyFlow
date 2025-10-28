@@ -26,4 +26,5 @@ export interface IMobileOverlayProps {
 
 export interface IContentWrapperProps {
   sidebarCollapsed: boolean
+  children?: React.ReactNode
 }

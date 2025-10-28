@@ -1,10 +1,10 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
 import type { IContentWrapperProps } from '../../types'
 import { LAYOUT_CONFIG } from '../../config'
 
-const ContentWrapper: React.FC<IContentWrapperProps> = ({ 
-  sidebarCollapsed 
+const ContentWrapper: React.FC<IContentWrapperProps & { children: React.ReactNode }> = ({ 
+  sidebarCollapsed,
+  children
 }) => {
   return (
     <div 
@@ -15,7 +15,7 @@ const ContentWrapper: React.FC<IContentWrapperProps> = ({
       `}
     >
       <div className="h-full bg-white dark:bg-[#1e1e23] rounded-xl md:rounded-2xl border border-gray-200 dark:border-white/5 flex flex-col overflow-hidden transition-all duration-300">
-        <Outlet />
+        {children}
       </div>
     </div>
   )
