@@ -27,6 +27,12 @@ const AnswersLayout = lazy(() => import('@/pages/admin/answers'))
 const AnswerList = lazy(() => import('@/pages/admin/answers/list'))
 const AnswerStatistics = lazy(() => import('@/pages/admin/answers/statistics'))
 
+// 内容审核相关页面
+const ModerationLayout = lazy(() => import('@/pages/admin/moderation'))
+const ModerationQueue = lazy(() => import('@/pages/admin/moderation/queue'))
+const SensitiveWords = lazy(() => import('@/pages/admin/moderation/sensitive-words'))
+const ModerationStatistics = lazy(() => import('@/pages/admin/moderation/statistics'))
+
 // 加载组件
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -178,6 +184,42 @@ export const adminRoutes = {
           element: (
             <Suspense fallback={<LoadingFallback />}>
               <AnswerStatistics />
+            </Suspense>
+          ),
+        },
+      ],
+    },
+    {
+      path: 'moderation',
+      element: (
+        <PermissionGuard role={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+          <Suspense fallback={<LoadingFallback />}>
+            <ModerationLayout />
+          </Suspense>
+        </PermissionGuard>
+      ),
+      children: [
+        {
+          path: 'queue',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <ModerationQueue />
+            </Suspense>
+          ),
+        },
+        {
+          path: 'sensitive-words',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <SensitiveWords />
+            </Suspense>
+          ),
+        },
+        {
+          path: 'statistics',
+          element: (
+            <Suspense fallback={<LoadingFallback />}>
+              <ModerationStatistics />
             </Suspense>
           ),
         },

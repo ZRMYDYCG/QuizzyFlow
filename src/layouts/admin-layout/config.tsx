@@ -9,6 +9,7 @@ import {
   LogoutOutlined,
   AppstoreOutlined,
   FormOutlined,
+  AuditOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
@@ -76,6 +77,25 @@ export const sideMenuItems: MenuProps['items'] = [
       {
         key: '/admin/answers/statistics',
         label: '统计分析',
+      },
+    ],
+  },
+  {
+    key: '/admin/moderation',
+    icon: <AuditOutlined />,
+    label: '内容审核',
+    children: [
+      {
+        key: '/admin/moderation/queue',
+        label: '待审核队列',
+      },
+      {
+        key: '/admin/moderation/sensitive-words',
+        label: '敏感词管理',
+      },
+      {
+        key: '/admin/moderation/statistics',
+        label: '审核统计',
       },
     ],
   },
@@ -148,6 +168,24 @@ export const horizontalMenuItems: MenuProps['items'] = [
       {
         key: '/admin/answers/statistics',
         label: '统计分析',
+      },
+    ],
+  },
+  {
+    key: '/admin/moderation',
+    label: '内容审核',
+    children: [
+      {
+        key: '/admin/moderation/queue',
+        label: '待审核队列',
+      },
+      {
+        key: '/admin/moderation/sensitive-words',
+        label: '敏感词管理',
+      },
+      {
+        key: '/admin/moderation/statistics',
+        label: '审核统计',
       },
     ],
   },
