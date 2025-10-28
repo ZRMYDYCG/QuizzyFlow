@@ -9,10 +9,10 @@ import {
 } from '@ant-design/icons'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
 import { useTheme } from '@/contexts/ThemeContext'
-import ThemeSelector from './ThemeSelector'
-import LayoutSelector from './LayoutSelector'
-import ColorPicker from './ColorPicker'
-import ConfigSwitch from './ConfigSwitch'
+import ThemeSelector from './theme-selector'
+import LayoutSelector from './layout-selector'
+import ColorPicker from './color-picker'
+import ConfigSwitch from './config-switch'
 
 interface LayoutSettingsProps {
   visible: boolean

@@ -12,10 +12,10 @@ import LayoutSettings from './components/layout-settings'
 import ProgressBar from './components/progress-bar'
 
 // 懒加载布局组件以优化首屏加载
-const VerticalLayout = lazy(() => import('./layouts/VerticalLayout'))
-const HorizontalLayout = lazy(() => import('./layouts/HorizontalLayout'))
-const MixedLayout = lazy(() => import('./layouts/MixedLayout'))
-const ColumnsLayout = lazy(() => import('./layouts/ColumnsLayout'))
+const VerticalLayout = lazy(() => import('./components/layouts/vertical-layout'))
+const HorizontalLayout = lazy(() => import('./components/layouts/horizontal-layout'))
+const MixedLayout = lazy(() => import('./components/layouts/mixed-layout'))
+const ColumnsLayout = lazy(() => import('./components/layouts/columns-layout'))
 
 /**
  * 管理后台布局

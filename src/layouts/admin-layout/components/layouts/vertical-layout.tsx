@@ -3,12 +3,12 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout } from 'antd'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
-import AdminSidebar from '../components/admin-sidebar'
-import AdminHeader from '../components/admin-header'
-import NotificationDrawer from '../components/notification-drawer'
-import TabNav from '../components/tab-nav'
-import PageTransition from '../components/page-transition'
-import { useTabNav } from '../hooks/useTabNav'
+import AdminSidebar from '../admin-sidebar'
+import AdminHeader from '../admin-header'
+import NotificationDrawer from '../notification-drawer'
+import TabNav from '../tab-nav'
+import PageTransition from '../page-transition'
+import { useTabNav } from '../../hooks/useTabNav'
 
 const { Content } = Layout
 

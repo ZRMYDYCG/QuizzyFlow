@@ -12,12 +12,12 @@ import {
 } from '@ant-design/icons'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
-import AdminHeader from '../components/admin-header'
-import NotificationDrawer from '../components/notification-drawer'
-import TabNav from '../components/tab-nav'
-import PageTransition from '../components/page-transition'
-import { useTabNav } from '../hooks/useTabNav'
-import { sideMenuItems } from '../config'
+import AdminHeader from '../admin-header'
+import NotificationDrawer from '../notification-drawer'
+import TabNav from '../tab-nav'
+import PageTransition from '../page-transition'
+import { useTabNav } from '../../hooks/useTabNav'
+import { sideMenuItems } from '../../config'
 
 const { Content } = Layout
 
