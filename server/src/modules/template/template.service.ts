@@ -222,5 +222,238 @@ export class TemplateService {
     const user = await this.userModel.findById(userId).lean().exec()
     return user || { avatar: '' }
   }
+
+  // ==================== 管理员方法 ====================
+
+  // 获取所有模板（管理员）
+  async getAdminTemplateList(query: any) {
+    const {
+      page = 1,
+      pageSize = 20,
+      keyword,
+      category,
+      type,
+      author,
+      isOfficial,
+      isFeatured,
+      approvalStatus,
+      sortBy = 'createdAt',
+    } = query
+
+    const filter: any = {}
+
+    // 筛选条件
+    if (keyword) {
+      filter.$or = [
+        { name: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+      ]
+    }
+
+    if (category) filter.category = category
+    if (type) filter.type = type
+    if (author) filter.author = author
+    if (isOfficial !== undefined) filter.isOfficial = isOfficial === 'true'
+    if (isFeatured !== undefined) filter.isFeatured = isFeatured === 'true'
+    if (approvalStatus) filter.approvalStatus = approvalStatus
+
+    // 排序
+    let sort: any = {}
+    switch (sortBy) {
+      case 'latest':
+        sort = { createdAt: -1 }
+        break
+      case 'useCount':
+        sort = { useCount: -1 }
+        break
+      case 'likeCount':
+        sort = { likeCount: -1 }
+        break
+      default:
+        sort = { createdAt: -1 }
+    }
+
+    const skip = (page - 1) * pageSize
+    const list = await this.templateModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(pageSize)
+      .lean()
+      .exec()
+
+    const total = await this.templateModel.countDocuments(filter)
+
+    return {
+      list,
+      total,
+      page: Number(page),
+      pageSize: Number(pageSize),
+    }
+  }
+
+  // 审核模板
+  async approveTemplate(id: string, action: 'approve' | 'reject', adminUsername: string, reason?: string) {
+    const template = await this.templateModel.findById(id)
+    if (!template) {
+      throw new NotFoundException('模板不存在')
+    }
+
+    if (action === 'approve') {
+      template.approvalStatus = 'approved'
+      template.approvedAt = new Date()
+      template.approvedBy = adminUsername
+      template.rejectionReason = ''
+    } else {
+      template.approvalStatus = 'rejected'
+      template.rejectionReason = reason || '不符合规范'
+      template.approvedAt = undefined
+      template.approvedBy = undefined
+    }
+
+    await template.save()
+    return template
+  }
+
+  // 设置为官方模板
+  async setOfficial(id: string, isOfficial: boolean) {
+    const template = await this.templateModel.findByIdAndUpdate(
+      id,
+      { isOfficial },
+      { new: true }
+    )
+
+    if (!template) {
+      throw new NotFoundException('模板不存在')
+    }
+
+    return template
+  }
+
+  // 设置为精选模板
+  async setFeatured(id: string, isFeatured: boolean) {
+    const template = await this.templateModel.findByIdAndUpdate(
+      id,
+      { isFeatured },
+      { new: true }
+    )
+
+    if (!template) {
+      throw new NotFoundException('模板不存在')
+    }
+
+    return template
+  }
+
+  // 批量删除模板
+  async batchDeleteTemplates(ids: string[]) {
+    const result = await this.templateModel.deleteMany({
+      _id: { $in: ids },
+    })
+
+    return {
+      message: `成功删除 ${result.deletedCount} 个模板`,
+      deletedCount: result.deletedCount,
+    }
+  }
+
+  // 批量设置精选
+  async batchSetFeatured(ids: string[], isFeatured: boolean) {
+    const result = await this.templateModel.updateMany(
+      { _id: { $in: ids } },
+      { isFeatured }
+    )
+
+    return {
+      message: `成功更新 ${result.modifiedCount} 个模板`,
+      modifiedCount: result.modifiedCount,
+    }
+  }
+
+  // 获取模板统计数据
+  async getTemplateStatistics() {
+    const [
+      total,
+      official,
+      userCreated,
+      featured,
+      pending,
+      approved,
+      rejected,
+      byCategory,
+      topTemplates,
+    ] = await Promise.all([
+      // 总数
+      this.templateModel.countDocuments(),
+      
+      // 官方模板数
+      this.templateModel.countDocuments({ isOfficial: true }),
+      
+      // 用户创建数
+      this.templateModel.countDocuments({ isOfficial: false }),
+      
+      // 精选模板数
+      this.templateModel.countDocuments({ isFeatured: true }),
+      
+      // 待审核
+      this.templateModel.countDocuments({ approvalStatus: 'pending' }),
+      
+      // 已通过
+      this.templateModel.countDocuments({ approvalStatus: 'approved' }),
+      
+      // 已拒绝
+      this.templateModel.countDocuments({ approvalStatus: 'rejected' }),
+      
+      // 按分类统计
+      this.templateModel.aggregate([
+        {
+          $group: {
+            _id: '$category',
+            count: { $sum: 1 },
+            avgUseCount: { $avg: '$useCount' },
+          },
+        },
+        {
+          $sort: { count: -1 },
+        },
+      ]),
+      
+      // Top 10 模板
+      this.templateModel
+        .find()
+        .sort({ useCount: -1, likeCount: -1 })
+        .limit(10)
+        .select('name useCount likeCount viewCount rating author')
+        .lean()
+        .exec(),
+    ])
+
+    return {
+      total,
+      official,
+      userCreated,
+      featured,
+      pending,
+      approved,
+      rejected,
+      byCategory,
+      topTemplates,
+    }
+  }
+
+  // 更新模板管理属性（管理员专用）
+  async updateTemplateAdmin(id: string, updateData: any) {
+    const template = await this.templateModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    )
+
+    if (!template) {
+      throw new NotFoundException('模板不存在')
+    }
+
+    return template
+  }
 }
 

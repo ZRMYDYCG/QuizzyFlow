@@ -72,6 +72,24 @@ export class Template {
 
   @Prop({ default: 5 })
   rating: number
+
+  // 审核相关字段
+  @Prop({ 
+    type: String, 
+    enum: ['pending', 'approved', 'rejected'], 
+    default: 'approved',
+    index: true 
+  })
+  approvalStatus: string
+
+  @Prop({ default: '' })
+  rejectionReason: string
+
+  @Prop({ type: Date })
+  approvedAt?: Date
+
+  @Prop()
+  approvedBy?: string
 }
 
 export const TemplateSchema = SchemaFactory.createForClass(Template)

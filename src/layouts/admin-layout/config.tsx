@@ -7,6 +7,7 @@ import {
   SettingOutlined,
   ProfileOutlined,
   LogoutOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
@@ -38,6 +39,29 @@ export const sideMenuItems: MenuProps['items'] = [
     key: '/admin/questions',
     icon: <FileTextOutlined />,
     label: '问卷管理',
+  },
+  {
+    key: '/admin/templates',
+    icon: <AppstoreOutlined />,
+    label: '模板管理',
+    children: [
+      {
+        key: '/admin/templates/list',
+        label: '模板列表',
+      },
+      {
+        key: '/admin/templates/review',
+        label: '审核中心',
+      },
+      {
+        key: '/admin/templates/categories',
+        label: '分类管理',
+      },
+      {
+        key: '/admin/templates/statistics',
+        label: '统计数据',
+      },
+    ],
   },
   {
     key: '/admin/logs',
@@ -74,6 +98,28 @@ export const horizontalMenuItems: MenuProps['items'] = [
   {
     key: '/admin/questions',
     label: '问卷管理',
+  },
+  {
+    key: '/admin/templates',
+    label: '模板管理',
+    children: [
+      {
+        key: '/admin/templates/list',
+        label: '模板列表',
+      },
+      {
+        key: '/admin/templates/review',
+        label: '审核中心',
+      },
+      {
+        key: '/admin/templates/categories',
+        label: '分类管理',
+      },
+      {
+        key: '/admin/templates/statistics',
+        label: '统计数据',
+      },
+    ],
   },
   {
     key: '/admin/logs',
