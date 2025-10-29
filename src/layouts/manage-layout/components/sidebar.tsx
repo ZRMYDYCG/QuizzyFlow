@@ -8,6 +8,7 @@ import {
   Star, 
   Trash2,
   Store,
+  Workflow,
   LucideIcon,
 } from 'lucide-react'
 
@@ -36,6 +37,7 @@ const Sidebar = () => {
     if (pathname.startsWith('/manage/list')) return 'list'
     if (pathname.startsWith('/manage/star')) return 'star'
     if (pathname.startsWith('/manage/trash')) return 'trash'
+    if (pathname.startsWith('/manage/flow')) return 'flow'
     if (pathname.startsWith('/template')) return 'template'
     if (pathname === '/manage') return 'dashboard'
     return 'dashboard'
@@ -76,11 +78,17 @@ const Sidebar = () => {
       title: '扩展功能',
       items: [
         {
+          key: 'flow',
+          icon: Workflow,
+          label: '工作流',
+          onClick: () => navigate('/manage/flow'),
+          badge: 'New',
+        },
+        {
           key: 'template',
           icon: Store,
           label: '模板市场',
           onClick: () => navigate('/template/market'),
-          badge: 'New',
         }
       ]
     }

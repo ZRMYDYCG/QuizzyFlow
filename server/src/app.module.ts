@@ -19,6 +19,7 @@ import { PermissionModule } from './modules/permission/permission.module';
 import { AdminLogModule } from './modules/admin-log/admin-log.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { SystemConfigModule } from './modules/system-config/system-config.module';
+import { FlowModule } from './modules/flow/flow.module';
 
 @Module({
   imports: [
@@ -43,6 +44,8 @@ import { SystemConfigModule } from './modules/system-config/system-config.module
     AdminLogModule,
     AdminModule,
     SystemConfigModule,
+    // Flow 工作流模块
+    FlowModule,
   ],
   controllers: [AppController],
   providers: [AppService],

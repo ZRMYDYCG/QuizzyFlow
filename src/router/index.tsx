@@ -3,6 +3,7 @@ import HomeLayout from '@/layouts/home-layout'
 import ManageLayout from '@/layouts/manage-layout'
 import QuestionLayout from '@/layouts/question-layout'
 import ProfileLayout from '@/layouts/profile-layout'
+import FlowLayout from '@/layouts/flow-layout'
 import Home from '@/pages/home'
 import Login from '@/pages/login'
 import Register from '@/pages/register'
@@ -26,6 +27,8 @@ import ProfileSecurity from '@/pages/profile/security'
 import ProfileStatistics from '@/pages/profile/statistics'
 import ProfileSettings from '@/pages/profile/settings'
 import DebugAuth from '@/pages/debug-auth'
+import FlowList from '@/pages/flow/list'
+import FlowEdit from '@/pages/flow/edit'
 import { adminRoutes } from './admin-routes'
 
 const router = createBrowserRouter([
@@ -97,6 +100,10 @@ const router = createBrowserRouter([
         path: 'trash',
         element: <Trash />,
       },
+      {
+        path: 'flow',
+        element: <FlowList />,
+      },
     ],
   },
   {
@@ -110,6 +117,16 @@ const router = createBrowserRouter([
       {
         path: 'detail/:id',
         element: <TemplateDetail />,
+      },
+    ],
+  },
+  {
+    path: 'flow',
+    element: <FlowLayout />,
+    children: [
+      {
+        path: 'edit/:id',
+        element: <FlowEdit />,
       },
     ],
   },

@@ -11,6 +11,10 @@ import canvasConfigReducer from './modules/canvas-config.ts'
 import { CanvasConfigState } from './modules/canvas-config.ts'
 import adminReducer from './modules/admin.ts'
 import { IAdminState } from './modules/admin.ts'
+import flowListReducer from './modules/flowList.ts'
+import { FlowListState } from './modules/flowList.ts'
+import flowEditorReducer from './modules/flowEditor.ts'
+import { FlowEditorStateWithHistory } from './modules/flowEditor.ts'
 import undoable, { excludeAction, StateWithHistory } from 'redux-undo'
 
 export interface stateType {
@@ -20,6 +24,8 @@ export interface stateType {
   editorLayout: EditorLayoutState
   canvasConfig: CanvasConfigState
   admin: IAdminState
+  flowList: FlowListState
+  flowEditor: FlowEditorStateWithHistory
 }
 
 export default configureStore({
@@ -45,5 +51,8 @@ export default configureStore({
     canvasConfig: canvasConfigReducer,
     // 管理员模块
     admin: adminReducer,
+    // Flow 工作流模块
+    flowList: flowListReducer,
+    flowEditor: flowEditorReducer,
   },
 })
