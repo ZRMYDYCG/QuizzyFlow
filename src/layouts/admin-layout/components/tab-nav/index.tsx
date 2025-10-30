@@ -1,6 +1,5 @@
 import React, { useRef } from 'react'
 import clsx from 'clsx'
-import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
 import type { TabNavProps } from './types'
 import TabItem from './tab-item'
@@ -30,7 +29,6 @@ const TabNav: React.FC<TabNavProps> = ({
   onCloseLeft,
   onCloseRight,
 }) => {
-  const { theme } = useTheme()
   const { config } = useLayoutConfig()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -50,9 +48,8 @@ const TabNav: React.FC<TabNavProps> = ({
         className={clsx(
           'h-full overflow-x-auto overflow-y-hidden',
           'scrollbar-thin',
-          theme === 'dark'
-            ? 'scrollbar-thumb-gray-600 scrollbar-track-gray-800'
-            : 'scrollbar-thumb-gray-300 scrollbar-track-gray-100'
+          'scrollbar-thumb-gray-300 scrollbar-track-gray-100',
+          'dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800'
         )}
         style={{
           whiteSpace: 'nowrap',
@@ -77,22 +74,6 @@ const TabNav: React.FC<TabNavProps> = ({
           ))}
         </div>
       </div>
-
-      {/* 自定义滚动条样式 */}
-      <style>{`
-        .scrollbar-thin::-webkit-scrollbar {
-          height: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          border-radius: 2px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background: ${theme === 'dark' ? '#4b5563' : '#9ca3af'};
-        }
-      `}</style>
     </div>
   )
 }
