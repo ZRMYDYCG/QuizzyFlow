@@ -121,11 +121,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold mb-2">数据大盘</h1>
-        <p className="text-gray-600">系统运营数据概览</p>
-      </div>
-
       {/* 关键指标卡片 */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
