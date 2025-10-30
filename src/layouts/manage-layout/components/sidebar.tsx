@@ -10,6 +10,7 @@ import {
   Store,
   Workflow,
   LucideIcon,
+  ExternalLink,
 } from 'lucide-react'
 
 // 菜单项类型定义
@@ -19,6 +20,7 @@ interface MenuItem {
   label: string
   onClick: () => void
   badge?: string
+  external?: boolean
 }
 
 // 菜单组类型定义
@@ -88,7 +90,8 @@ const Sidebar = () => {
           key: 'template',
           icon: Store,
           label: '模板市场',
-          onClick: () => navigate('/template/market'),
+          onClick: () => window.open('/template/market', '_blank'),
+          external: true,
         }
       ]
     }
@@ -164,6 +167,15 @@ const Sidebar = () => {
                       >
                         {item.badge}
                       </span>
+                    )}
+
+                    {/*外部链接图标 */}
+                    {item.external && (
+                      <ExternalLink 
+                        className={`w-3.5 h-3.5 opacity-50 ${
+                          t.isDark ? 'text-slate-500' : 'text-gray-400'
+                        }`}
+                      />
                     )}
                   </button>
                 )

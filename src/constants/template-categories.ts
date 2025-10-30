@@ -23,7 +23,6 @@ export interface TemplateCategoryConfig {
   icon: string           // Lucide icon name
   color: string          // 主题色
   bgGradient: string     // 背景渐变
-  emoji: string          // Emoji 图标
   tags: string[]         // 常用标签
 }
 
@@ -36,7 +35,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'Grid3x3',
     color: '#6366f1',
     bgGradient: 'from-indigo-500 to-purple-500',
-    emoji: '📦',
     tags: [],
   },
   
@@ -47,7 +45,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'TrendingUp',
     color: '#3b82f6',
     bgGradient: 'from-blue-500 to-cyan-500',
-    emoji: '💼',
     tags: ['市场调研', '客户满意度', '产品体验', '品牌认知'],
   },
   
@@ -58,7 +55,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'GraduationCap',
     color: '#8b5cf6',
     bgGradient: 'from-violet-500 to-purple-500',
-    emoji: '🎓',
     tags: ['课程评价', '学习反馈', '知识测验', '培训效果'],
   },
   
@@ -69,7 +65,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'FlaskConical',
     color: '#06b6d4',
     bgGradient: 'from-cyan-500 to-teal-500',
-    emoji: '🔬',
     tags: ['社会调查', '数据收集', '研究问卷', '统计分析'],
   },
   
@@ -80,7 +75,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'Users',
     color: '#f59e0b',
     bgGradient: 'from-amber-500 to-orange-500',
-    emoji: '👥',
     tags: ['员工满意度', '绩效考核', '入职调查', '离职面谈'],
   },
   
@@ -91,7 +85,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'CalendarCheck',
     color: '#ec4899',
     bgGradient: 'from-pink-500 to-rose-500',
-    emoji: '🎉',
     tags: ['活动报名', '会议签到', '活动反馈', '嘉宾登记'],
   },
   
@@ -102,7 +95,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'MessageSquare',
     color: '#10b981',
     bgGradient: 'from-emerald-500 to-green-500',
-    emoji: '💬',
     tags: ['用户反馈', '产品建议', 'Bug反馈', '功能需求'],
   },
   
@@ -113,7 +105,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'Heart',
     color: '#ef4444',
     bgGradient: 'from-red-500 to-pink-500',
-    emoji: '🏥',
     tags: ['健康问卷', '症状记录', '满意度调查', '体检预约'],
   },
   
@@ -124,7 +115,6 @@ export const TEMPLATE_CATEGORIES: Record<TemplateCategory, TemplateCategoryConfi
     icon: 'Sparkles',
     color: '#64748b',
     bgGradient: 'from-slate-500 to-gray-500',
-    emoji: '✨',
     tags: ['自定义', '个性化', '创意'],
   },
 }

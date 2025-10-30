@@ -4,6 +4,7 @@ import ManageLayout from '@/layouts/manage-layout'
 import QuestionLayout from '@/layouts/question-layout'
 import ProfileLayout from '@/layouts/profile-layout'
 import FlowLayout from '@/layouts/flow-layout'
+import TemplateLayout from '@/layouts/template-layout'
 import Home from '@/pages/home'
 import Login from '@/pages/login'
 import Register from '@/pages/register'
@@ -108,7 +109,7 @@ const router = createBrowserRouter([
   },
   {
     path: 'template',
-    element: <ManageLayout />,
+    element: <TemplateLayout />,
     children: [
       {
         path: 'market',
