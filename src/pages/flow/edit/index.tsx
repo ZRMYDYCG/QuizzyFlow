@@ -489,9 +489,9 @@ const FlowEdit: FC = () => {
             </div>
           )}
 
-          {/* 节点统计 - 右下角 */}
+          {/* 节点统计 - 右上角 */}
           {nodes.length > 0 && (
-            <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 flex items-center gap-4 text-xs">
+            <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg px-3 py-2 flex items-center gap-4 text-xs z-10">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-blue-500" />
                 <span className="text-gray-600 dark:text-gray-400">
