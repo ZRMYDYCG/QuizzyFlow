@@ -288,9 +288,9 @@ const FlowList: FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <div className="border-b border-gray-200 dark:border-gray-800">
         <div className="px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -328,7 +328,7 @@ const FlowList: FC = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-auto">
         <div className="px-8 py-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96">
