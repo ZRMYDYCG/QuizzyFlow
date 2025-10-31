@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { SystemConfigService } from './system-config.service'
 import { AuthGuard } from '@nestjs/passport'
 import { RolesGuard } from '../../common/guards/roles.guard'
@@ -21,6 +22,7 @@ import {
 } from './dto/update-config.dto'
 import { QueryConfigDto } from './dto/query-config.dto'
 
+@ApiTags('系统配置')
 @Controller('admin/system-config')
 export class SystemConfigController {
   constructor(private readonly systemConfigService: SystemConfigService) {}

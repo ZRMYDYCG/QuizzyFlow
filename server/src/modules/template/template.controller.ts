@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Request, UseGuards } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { TemplateService } from './template.service'
 import { CreateTemplateDto } from './dto/create-template.dto'
 import { ApproveTemplateDto } from './dto/approve-template.dto'
@@ -8,6 +9,7 @@ import { Public } from '../../common/decorators/public.decorator'
 import { Roles } from '../../common/decorators/roles.decorator'
 import { RolesGuard } from '../../common/guards/roles.guard'
 
+@ApiTags('模板市场')
 @Controller('template')
 export class TemplateController {
   constructor(private readonly templateService: TemplateService) {}

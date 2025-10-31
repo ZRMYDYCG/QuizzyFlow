@@ -10,6 +10,14 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { AdminService } from './admin.service'
 import { QueryUsersDto } from './dto/query-users.dto'
@@ -27,6 +35,8 @@ import { PERMISSIONS } from '../../common/constants/permissions'
  * 管理员控制器
  * 提供用户管理、系统统计等管理功能
  */
+@ApiTags('管理后台')
+@ApiBearerAuth()
 @Controller('admin')
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 export class AdminController {
@@ -35,6 +45,8 @@ export class AdminController {
   /**
    * 获取系统统计数据
    */
+  @ApiOperation({ summary: '获取系统统计数据', description: '获取系统整体统计信息' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('statistics')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
@@ -45,6 +57,9 @@ export class AdminController {
   /**
    * 获取用户活跃度
    */
+  @ApiOperation({ summary: '获取用户活跃度', description: '获取指定天数内的用户活跃度数据' })
+  @ApiQuery({ name: 'days', required: false, description: '天数', example: 30 })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('statistics/user-activity')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
@@ -57,6 +72,8 @@ export class AdminController {
   /**
    * 获取用户列表
    */
+  @ApiOperation({ summary: '获取用户列表', description: '分页查询用户列表' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('users')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_VIEW_ALL)
@@ -67,6 +84,9 @@ export class AdminController {
   /**
    * 获取用户详情
    */
+  @ApiOperation({ summary: '获取用户详情', description: '获取单个用户的详细信息' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('users/:id')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_VIEW_ALL)
@@ -77,6 +97,8 @@ export class AdminController {
   /**
    * 创建管理员用户
    */
+  @ApiOperation({ summary: '创建管理员用户', description: '创建新的管理员账号' })
+  @ApiResponse({ status: 201, description: '创建成功' })
   @Post('users')
   @Roles('super_admin')
   @RequirePermissions(PERMISSIONS.USER_CREATE)
@@ -96,6 +118,9 @@ export class AdminController {
   /**
    * 更新用户角色
    */
+  @ApiOperation({ summary: '更新用户角色', description: '修改用户的角色权限' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @ApiResponse({ status: 200, description: '更新成功' })
   @Patch('users/:id/role')
   @Roles('super_admin')
   @RequirePermissions(PERMISSIONS.USER_MANAGE_ROLE)
@@ -120,6 +145,9 @@ export class AdminController {
   /**
    * 封禁/解封用户
    */
+  @ApiOperation({ summary: '封禁/解封用户', description: '封禁或解封用户账号' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @ApiResponse({ status: 200, description: '操作成功' })
   @Patch('users/:id/ban')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_BAN)
@@ -140,6 +168,9 @@ export class AdminController {
   /**
    * 重置用户密码
    */
+  @ApiOperation({ summary: '重置用户密码', description: '管理员重置用户密码' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @ApiResponse({ status: 200, description: '重置成功' })
   @Patch('users/:id/reset-password')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.USER_RESET_PASSWORD)
@@ -159,6 +190,9 @@ export class AdminController {
   /**
    * 删除用户
    */
+  @ApiOperation({ summary: '删除用户', description: '永久删除用户账号' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @ApiResponse({ status: 200, description: '删除成功' })
   @Delete('users/:id')
   @Roles('super_admin')
   @RequirePermissions(PERMISSIONS.USER_DELETE)
@@ -175,6 +209,8 @@ export class AdminController {
   /**
    * 获取所有问卷列表（管理员）
    */
+  @ApiOperation({ summary: '获取所有问卷列表', description: '管理员查看所有用户的问卷' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('questions')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.QUESTION_VIEW_ALL)
@@ -185,6 +221,8 @@ export class AdminController {
   /**
    * 获取问卷统计数据
    */
+  @ApiOperation({ summary: '获取问卷统计数据', description: '获取问卷的统计信息' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('questions/statistics')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.STATISTICS_VIEW_ALL)
@@ -195,6 +233,9 @@ export class AdminController {
   /**
    * 获取问卷详情（管理员）
    */
+  @ApiOperation({ summary: '获取问卷详情', description: '管理员查看问卷详细信息' })
+  @ApiParam({ name: 'id', description: '问卷ID' })
+  @ApiResponse({ status: 200, description: '获取成功' })
   @Get('questions/:id')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.QUESTION_VIEW_ALL)
@@ -205,6 +246,9 @@ export class AdminController {
   /**
    * 更新问卷状态（发布/下架）
    */
+  @ApiOperation({ summary: '更新问卷状态', description: '管理员发布或下架问卷' })
+  @ApiParam({ name: 'id', description: '问卷ID' })
+  @ApiResponse({ status: 200, description: '更新成功' })
   @Patch('questions/:id/status')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.QUESTION_MANAGE)
@@ -229,6 +273,9 @@ export class AdminController {
   /**
    * 删除问卷（管理员）
    */
+  @ApiOperation({ summary: '删除问卷', description: '管理员删除问卷' })
+  @ApiParam({ name: 'id', description: '问卷ID' })
+  @ApiResponse({ status: 200, description: '删除成功' })
   @Delete('questions/:id')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.QUESTION_DELETE)
@@ -245,6 +292,9 @@ export class AdminController {
   /**
    * 设置问卷为推荐
    */
+  @ApiOperation({ summary: '设置问卷推荐状态', description: '管理员设置问卷是否推荐' })
+  @ApiParam({ name: 'id', description: '问卷ID' })
+  @ApiResponse({ status: 200, description: '设置成功' })
   @Patch('questions/:id/recommended')
   @Roles('admin', 'super_admin')
   @RequirePermissions(PERMISSIONS.QUESTION_MANAGE)
@@ -266,4 +316,3 @@ export class AdminController {
     )
   }
 }
-

@@ -6,6 +6,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { AdminLogService } from './admin-log.service'
 import { QueryAdminLogDto } from './dto/query-admin-log.dto'
@@ -18,6 +19,7 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 /**
  * 操作日志控制器
  */
+@ApiTags('操作日志')
 @Controller('admin/logs')
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 export class AdminLogController {

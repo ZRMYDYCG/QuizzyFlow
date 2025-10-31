@@ -13,6 +13,7 @@ import {
   Res,
   Sse,
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 import { AIChatService } from './ai-chat.service'
 import { AIChatProxyService } from './ai-chat-proxy.service'
@@ -21,6 +22,7 @@ import { AddMessageDto } from './dto/add-message.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
 import { QueryChatDto } from './dto/query-chat.dto'
 
+@ApiTags('AI 助手')
 @Controller('ai-chat')
 export class AIChatController {
   constructor(

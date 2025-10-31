@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@nestjs/passport'
 import { PermissionService } from './permission.service'
 import { CreatePermissionDto } from './dto/create-permission.dto'
@@ -22,9 +23,7 @@ import { RequirePermissions } from '../../common/decorators/permissions.decorato
 import { LogOperation } from '../../common/decorators/log-operation.decorator'
 import { PERMISSIONS } from '../../common/constants/permissions'
 
-/**
- * 权限管理控制器
- */
+@ApiTags('权限管理')
 @Controller('admin/permissions')
 @UseGuards(AuthGuard('jwt'), RolesGuard, PermissionsGuard)
 export class PermissionController {
