@@ -233,6 +233,7 @@ export class AdminService {
     }
 
     user.isBanned = banDto.isBanned
+    user.isActive = !banDto.isBanned // 停用就是封禁的意思
     user.bannedReason = banDto.reason
     user.bannedBy = bannedBy
     user.bannedAt = banDto.isBanned ? new Date() : null
