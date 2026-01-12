@@ -13,6 +13,7 @@ export default defineConfig({
     react(),
     codeInspectorPlugin({
       bundler: 'vite',
+      editor: 'trae',
     }),
     viteImagemin({
       gifsicle: { optimizationLevel: 7 },
