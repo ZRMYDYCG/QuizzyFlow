@@ -9,6 +9,7 @@ import {
   getRolesAPI,
 } from '@/api/modules/admin'
 import { useRequest } from 'ahooks'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 
 import CreateUserModal from './components/dialog/create-user-modal'
 import UpdateRoleModal from './components/dialog/update-role-modal'
@@ -34,6 +35,8 @@ const UsersManagement: React.FC = () => {
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
 
+  const { _id: currentUserId } = useGetUserInfo()
+
   const { run: loadUsers, loading } = useRequest(
     async () => {
       return await getUsersAPI({
@@ -50,8 +53,8 @@ const UsersManagement: React.FC = () => {
         setUsers(result.list || [])
         setTotal(result.total || 0)
       },
-      onError: () => {
-        message.error('加载用户列表失败')
+      onError: (error) => {
+        console.error('加载用户列表失败', error)
       },
     }
   )
@@ -93,7 +96,7 @@ const UsersManagement: React.FC = () => {
       message.success(isBanned ? '用户已封禁' : '用户已解封')
       loadUsers()
     } catch (error: any) {
-      message.error(error.response?.data?.message || '操作失败')
+      console.error(error)
     }
   }
 
@@ -113,7 +116,7 @@ const UsersManagement: React.FC = () => {
           await resetUserPasswordAPI(user._id, '123456')
           message.success('密码重置成功')
         } catch (error: any) {
-          message.error(error.response?.data?.message || '重置失败')
+          console.error(error)
         }
       },
     })
@@ -125,7 +128,7 @@ const UsersManagement: React.FC = () => {
       message.success('用户删除成功')
       loadUsers()
     } catch (error: any) {
-      message.error(error.response?.data?.message || '删除失败')
+      console.error(error)
     }
   }
 
@@ -177,6 +180,7 @@ const UsersManagement: React.FC = () => {
         onBanUser={handleBanUser}
         onResetPassword={handleResetPassword}
         onDeleteUser={handleDeleteUser}
+        currentUserId={currentUserId}
       />
 
       <CreateUserModal

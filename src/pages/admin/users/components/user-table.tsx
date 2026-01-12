@@ -21,6 +21,7 @@ interface UserTableProps {
   onBanUser: (record: any) => void
   onResetPassword: (record: any) => void
   onDeleteUser: (record: any) => void
+  currentUserId?: string
 }
 
 const UserTable: React.FC<UserTableProps> = ({
@@ -35,6 +36,7 @@ const UserTable: React.FC<UserTableProps> = ({
   onBanUser,
   onResetPassword,
   onDeleteUser,
+  currentUserId,
 }) => {
   const columns: ColumnsType<any> = [
     {
@@ -126,8 +128,15 @@ const UserTable: React.FC<UserTableProps> = ({
             onConfirm={() => onDeleteUser(record)}
             okText="确定"
             cancelText="取消"
+            disabled={record._id === currentUserId}
           >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+            <Button
+              type="link"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              disabled={record._id === currentUserId}
+            >
               删除
             </Button>
           </Popconfirm>
