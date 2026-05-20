@@ -59,6 +59,7 @@ export const useLoadQuestionData = () => {
   return {
     loading,
     error,
+    loaded: !!data && !loading,
   }
 }
 

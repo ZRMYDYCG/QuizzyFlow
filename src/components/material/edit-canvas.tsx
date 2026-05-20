@@ -12,6 +12,7 @@ import { cn } from '../../utils/index.ts'
 import useCanvasKeyPress from '../../hooks/useCanvasKeyPress.ts'
 import { IPageInfo } from '../../store/modules/pageinfo-reducer.ts'
 import { useTheme } from '../../contexts/ThemeContext'
+import { MousePointerClick } from 'lucide-react'
 
 interface IPopsEditCanvas {
   loading: boolean
@@ -90,32 +91,64 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
   const visibleComponents = componentList.filter((item: any) => !item.isHidden)
   const isEmpty = visibleComponents.length === 0
 
+  const canvasMinHeight = isEmpty ? '712px' : '100vh'
+
   return (
     <div
       style={{
-        padding: pageInfo.padding,
+        padding: isEmpty ? 0 : pageInfo.padding,
         backgroundImage: pageInfo.bgImage ? `url(${pageInfo.bgImage})` : 'none',
         backgroundColor: pageInfo.bgImage ? 'transparent' : (theme === 'dark' ? '#1a1a1f' : '#f9fafb'),
         backgroundSize: 'cover',
         backgroundRepeat: pageInfo.bgRepeat || 'no-repeat',
         backgroundPosition: pageInfo.bgPosition || 'center',
         ...parallaxStyle,
-        minHeight: '100vh',
+        minHeight: canvasMinHeight,
       }}
-      className="relative"
+      className={cn('relative w-full', isEmpty && 'flex flex-col')}
     >
       <div
         style={{
-          maxWidth: pageInfo.maxWidth || '100%',
-          margin: getLayoutMargin(),
+          maxWidth: isEmpty ? '100%' : pageInfo.maxWidth || '100%',
+          margin: isEmpty ? 0 : getLayoutMargin(),
           transition: 'all 0.3s ease',
         }}
+        className={cn(isEmpty && 'flex-1 flex items-center justify-center min-h-[712px]')}
       >
         {isEmpty ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px]">
-            <div className="text-6xl mb-4 opacity-30">📋</div>
-            <p className={`text-lg font-medium ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>画布为空</p>
-            <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>从左侧拖拽组件到这里开始编辑</p>
+          <div
+            className={cn(
+              'flex flex-col items-center justify-center text-center mx-6 px-8 py-10 rounded-2xl border-2 border-dashed w-full max-w-[320px]',
+              theme === 'dark'
+                ? 'border-white/15 bg-white/[0.03]'
+                : 'border-gray-200 bg-gray-50/80'
+            )}
+          >
+            <p
+              className={cn(
+                'text-base font-semibold tracking-tight',
+                theme === 'dark' ? 'text-slate-200' : 'text-gray-800'
+              )}
+            >
+              画布为空
+            </p>
+            <p
+              className={cn(
+                'text-sm mt-2 leading-relaxed max-w-[240px]',
+                theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+              )}
+            >
+              从左侧组件库拖拽或点击添加，即可开始设计问卷
+            </p>
+            <div
+              className={cn(
+                'flex items-center gap-1.5 mt-5 text-xs',
+                theme === 'dark' ? 'text-slate-500' : 'text-gray-400'
+              )}
+            >
+              <MousePointerClick className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+              <span>支持拖拽排序与属性编辑</span>
+            </div>
           </div>
         ) : (
           <SortableContainer

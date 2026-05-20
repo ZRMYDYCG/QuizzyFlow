@@ -25,6 +25,29 @@ export class QuestionService {
   ) {}
 
   /**
+   * 过滤会触发 Mongoose 校验失败的更新字段（如空标题）
+   */
+  private sanitizeUpdateDto(updateDto: UpdateQuestionDto): UpdateQuestionDto {
+    const sanitized = { ...updateDto }
+
+    if (typeof sanitized.title === 'string' && !sanitized.title.trim()) {
+      delete sanitized.title
+    }
+
+    if (Array.isArray(sanitized.componentList)) {
+      sanitized.componentList = sanitized.componentList.filter(
+        (item) =>
+          item?.fe_id?.trim() &&
+          item?.type?.trim() &&
+          typeof item?.title === 'string' &&
+          item.title.trim(),
+      )
+    }
+
+    return sanitized
+  }
+
+  /**
    * 创建新问卷
    */
   async create(username: string, createDto?: CreateQuestionDto) {
@@ -32,19 +55,7 @@ export class QuestionService {
       title: createDto?.title || `问卷标题_${Date.now()}`,
       desc: createDto?.desc || '问卷描述',
       author: username,
-      componentList: createDto?.componentList || [
-        {
-          fe_id: nanoid(),
-          type: 'question-info',
-          title: '问卷信息',
-          isHidden: false,
-          isLocked: false,
-          props: {
-            title: '问卷标题',
-            desc: '问卷描述...',
-          },
-        },
-      ],
+      componentList: createDto?.componentList ?? [],
       js: createDto?.js || '',
       css: createDto?.css || '',
       isPublished: createDto?.isPublished || false,
@@ -163,8 +174,10 @@ export class QuestionService {
       throw new ForbiddenException('无权修改此问卷')
     }
 
+    const sanitized = this.sanitizeUpdateDto(updateDto)
+
     // 更新问卷
-    Object.assign(question, updateDto)
+    Object.assign(question, sanitized)
     await question.save()
 
     return question

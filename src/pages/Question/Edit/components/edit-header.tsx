@@ -73,7 +73,7 @@ const TitleElem: FC = () => {
   )
 }
 
-const SaveButton: FC = () => {
+const SaveButton: FC<{ dataLoaded?: boolean }> = ({ dataLoaded = false }) => {
   const { id } = useParams()
   const { componentList = [] } = useGetComponentInfo()
   const pageInfo = useGetPageInfo()
@@ -84,12 +84,13 @@ const SaveButton: FC = () => {
     if (!loading) save()
   })
 
-  // 自动保存(防抖处理)
+  // 自动保存(防抖处理)：问卷数据加载完成后再保存，避免用空标题覆盖服务端默认值
   useDebounceEffect(
     () => {
+      if (!dataLoaded || !pageInfo.title?.trim()) return
       save()
     },
-    [componentList, pageInfo],
+    [componentList, pageInfo, dataLoaded],
     { wait: 1000 }
   )
 
@@ -316,7 +317,11 @@ const MobileMoreMenu: FC = () => {
   )
 }
 
-const EditHeader: React.FC = () => {
+interface EditHeaderProps {
+  dataLoaded?: boolean
+}
+
+const EditHeader: React.FC<EditHeaderProps> = ({ dataLoaded = false }) => {
   const navigate = useNavigate()
   const { theme } = useTheme()
   const { isMobile } = useResponsive()
@@ -345,7 +350,7 @@ const EditHeader: React.FC = () => {
 
           {/* 右侧：保存和更多操作 */}
           <Space size="small">
-            <SaveButton />
+            <SaveButton dataLoaded={dataLoaded} />
             <MobileMoreMenu />
           </Space>
         </div>
@@ -379,7 +384,7 @@ const EditHeader: React.FC = () => {
         <div className="flex-1 flex justify-end">
           <Space>
             <AIAssistantButton />
-            <SaveButton />
+            <SaveButton dataLoaded={dataLoaded} />
             <PublishButton />
             <PreviewButton />
             <PublishTemplateButton />

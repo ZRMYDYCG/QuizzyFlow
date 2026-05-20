@@ -24,16 +24,29 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ])
+    const request = context.switchToHttp().getRequest()
+    const token = this.extractTokenFromHeader(request)
+
     if (isPublic) {
-      // 💡 See this condition
+      // 公开路由：有 token 时仍解析用户，供「未发布但作者可访问」等权限判断
+      if (token) {
+        await this.attachUserFromToken(request, token, false)
+      }
       return true
     }
 
-    const request = context.switchToHttp().getRequest()
-    const token = this.extractTokenFromHeader(request)
     if (!token) {
       throw new UnauthorizedException('未登录')
     }
+    await this.attachUserFromToken(request, token, true)
+    return true
+  }
+
+  private async attachUserFromToken(
+    request: Request,
+    token: string,
+    required: boolean,
+  ): Promise<void> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: JwtConstants.secret,
@@ -43,12 +56,14 @@ export class AuthGuard implements CanActivate {
       const user = await this.userService.assertUserCanAccess(userId)
       request['user'] = this.userService.toRequestUser(user)
     } catch (error) {
+      if (!required) {
+        return
+      }
       if (error instanceof UnauthorizedException) {
         throw error
       }
       throw new UnauthorizedException('Token 无效或已过期')
     }
-    return true
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

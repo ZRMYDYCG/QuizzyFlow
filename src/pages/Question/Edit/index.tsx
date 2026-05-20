@@ -22,7 +22,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 
 const EditQuestionPage: React.FC = () => {
   const dispatch = useDispatch()
-  const { loading } = useLoadQuestionData()
+  const { loading, loaded: dataLoaded } = useLoadQuestionData()
   const { title } = useGetPageInfo()
   const { theme } = useTheme()
   const { isMobile } = useResponsive()
@@ -55,7 +55,7 @@ const EditQuestionPage: React.FC = () => {
     return (
       <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
         {/* 顶部Header */}
-        <EditHeader />
+        <EditHeader dataLoaded={dataLoaded} />
         
         {/* 画布区域 - 占满剩余空间 */}
         <div className="flex-auto overflow-hidden pb-16">
@@ -82,7 +82,7 @@ const EditQuestionPage: React.FC = () => {
   // 桌面端布局
   return (
     <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
-      <EditHeader />
+      <EditHeader dataLoaded={dataLoaded} />
       <div className="flex-auto overflow-hidden">
         <div className="flex h-full">
           {/* 左侧物料面板 - 可调整宽度 */}
