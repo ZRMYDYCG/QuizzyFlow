@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Spin } from 'antd'
 import { getComponentConfigByType } from './index.ts'
 import UnsupportedComponent from './unsupported-component.tsx'
@@ -14,6 +14,8 @@ import useCanvasKeyPress from '../../hooks/useCanvasKeyPress.ts'
 import { IPageInfo } from '../../store/modules/pageinfo-reducer.ts'
 import { useTheme } from '../../contexts/ThemeContext'
 import { MousePointerClick } from 'lucide-react'
+import { useQuestionnairePagination } from '@/hooks/useQuestionnairePagination'
+import QuestionnairePagination from '@/components/questionnaire/questionnaire-pagination'
 
 interface IPopsEditCanvas {
   loading: boolean
@@ -47,12 +49,38 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
     dispatch(changeSelectedId(id))
   }
 
-  const componentListWithId = componentList.map((component: any) => {
+  const visibleComponents = useMemo(
+    () => componentList.filter((item: QuestionComponentType) => !item.isHidden),
+    [componentList]
+  )
+
+  const {
+    paginationEnabled,
+    itemsPerPage,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    displayItems: paginatedVisibleComponents,
+  } = useQuestionnairePagination(visibleComponents, pageInfo)
+
+  const componentListWithId = paginatedVisibleComponents.map((component: any) => {
     return { ...component, id: component.fe_id }
   })
 
   function handleDragEnd(sourceIndex: number, targetIndex: number) {
-    dispatch(swapComponent({ sourceIndex, targetIndex }))
+    const source = paginatedVisibleComponents[sourceIndex]
+    const target = paginatedVisibleComponents[targetIndex]
+    if (!source || !target) return
+
+    const globalSourceIndex = componentList.findIndex(
+      (c) => c.fe_id === source.fe_id
+    )
+    const globalTargetIndex = componentList.findIndex(
+      (c) => c.fe_id === target.fe_id
+    )
+    if (globalSourceIndex < 0 || globalTargetIndex < 0) return
+
+    dispatch(swapComponent({ sourceIndex: globalSourceIndex, targetIndex: globalTargetIndex }))
   }
 
   if (loading) {
@@ -87,7 +115,6 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
       }
     : {}
 
-  const visibleComponents = componentList.filter((item: any) => !item.isHidden)
   const isEmpty = visibleComponents.length === 0
 
   const canvasMinHeight = isEmpty ? '712px' : '100vh'
@@ -155,7 +182,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
             onDragEnd={handleDragEnd}
           >
             <div>
-              {visibleComponents.map((item: QuestionComponentType) => {
+              {paginatedVisibleComponents.map((item: QuestionComponentType) => {
                 const { fe_id, isLocked } = item
                 const isActive = fe_id === selectedId
                 return (
@@ -227,6 +254,14 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
               })}
             </div>
           </SortableContainer>
+        )}
+        {paginationEnabled && !isEmpty && (
+          <QuestionnairePagination
+            current={currentPage}
+            total={totalItems}
+            pageSize={itemsPerPage}
+            onChange={setCurrentPage}
+          />
         )}
       </div>
     </div>

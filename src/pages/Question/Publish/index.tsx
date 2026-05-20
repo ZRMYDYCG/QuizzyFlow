@@ -26,6 +26,8 @@ import { useManageTheme } from '@/hooks/useManageTheme'
 import { useTheme } from '@/contexts/ThemeContext'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
 import { QuestionnaireType } from '@/constants/questionnaire-types'
+import { useQuestionnairePagination } from '@/hooks/useQuestionnairePagination'
+import QuestionnairePagination from '@/components/questionnaire/questionnaire-pagination'
 
 const PublishPage: React.FC = () => {
   const { id } = useParams()
@@ -34,6 +36,21 @@ const PublishPage: React.FC = () => {
   const { componentList = [] } = useGetComponentInfo()
   const pageInfo = useGetPageInfo()
   const linkages = (pageInfo.linkages ?? []) as MaterialLinkageRule[]
+
+  const visibleComponents = useMemo(
+    () => componentList.filter((item: QuestionComponentType) => !item.isHidden),
+    [componentList]
+  )
+
+  const {
+    paginationEnabled,
+    itemsPerPage,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    displayItems,
+  } = useQuestionnairePagination(visibleComponents, pageInfo)
+
   const { username } = useGetUserInfo()
   const t = useManageTheme()
   const { primaryColor } = useTheme()
@@ -330,7 +347,7 @@ const PublishPage: React.FC = () => {
             values={answerValues}
             onValuesChange={handleAnswerValuesChange}
           >
-            {componentList.map((item: QuestionComponentType) => (
+            {displayItems.map((item: QuestionComponentType) => (
               <div key={item.fe_id} className="m-[12px]">
                 <LinkedComponentRenderer
                   component={item}
@@ -343,6 +360,15 @@ const PublishPage: React.FC = () => {
               </div>
             ))}
           </MaterialLinkageProvider>
+
+          {paginationEnabled && visibleComponents.length > 0 && (
+            <QuestionnairePagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={itemsPerPage}
+              onChange={setCurrentPage}
+            />
+          )}
 
           {/* 答题模式下的提交按钮 */}
           {isAnswerMode && (

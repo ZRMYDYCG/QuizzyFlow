@@ -52,6 +52,8 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
           bgPosition: pageInfo.bgPosition,
           parallaxEffect: pageInfo.parallaxEffect,
           borderRadius: pageInfo.borderRadius,
+          paginationEnabled: pageInfo.paginationEnabled,
+          itemsPerPage: pageInfo.itemsPerPage,
         },
       }
 

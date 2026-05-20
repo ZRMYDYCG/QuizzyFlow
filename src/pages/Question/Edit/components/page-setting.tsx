@@ -1,6 +1,6 @@
 import React from 'react'
 import { useEffect } from 'react'
-import { Form, Input, Button, Radio, Switch, Select, Slider } from 'antd'
+import { Form, Input, Radio, Switch, Select, InputNumber } from 'antd'
 import { useDispatch } from 'react-redux'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
 import {
@@ -14,6 +14,8 @@ import {
   setParallaxEffect,
   setBorderRadius,
   setType,
+  setPaginationEnabled,
+  setItemsPerPage,
 } from '@/store/modules/pageinfo-reducer'
 import { useTheme } from '@/contexts/ThemeContext'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
@@ -65,6 +67,12 @@ const PageSetting: React.FC = () => {
     }
     if (changedValues.borderRadius !== undefined) {
       dispatch(setBorderRadius(changedValues.borderRadius))
+    }
+    if (changedValues.paginationEnabled !== undefined) {
+      dispatch(setPaginationEnabled(changedValues.paginationEnabled))
+    }
+    if (changedValues.itemsPerPage !== undefined) {
+      dispatch(setItemsPerPage(changedValues.itemsPerPage))
     }
 
     dispatch(resetPageInfo(values))
@@ -197,6 +205,35 @@ const PageSetting: React.FC = () => {
             tooltip="设置组件的圆角大小"
           >
             <Input placeholder="8px 或 16px" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className={labelClass}>分页显示</span>}
+            name="paginationEnabled"
+            valuePropName="checked"
+            tooltip="开启后按每页题数拆分画布列表，分页按钮显示在列表底部"
+          >
+            <Switch />
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) =>
+              prev.paginationEnabled !== curr.paginationEnabled
+            }
+          >
+            {({ getFieldValue }) =>
+              getFieldValue('paginationEnabled') ? (
+                <Form.Item
+                  label={<span className={labelClass}>每页题数</span>}
+                  name="itemsPerPage"
+                  rules={[{ required: true, message: '请设置每页题数' }]}
+                  tooltip="每页显示的组件数量（1-50）"
+                >
+                  <InputNumber min={1} max={50} className="w-full" />
+                </Form.Item>
+              ) : null
+            }
           </Form.Item>
         </div>
 

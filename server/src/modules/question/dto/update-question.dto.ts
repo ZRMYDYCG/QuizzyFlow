@@ -3,6 +3,9 @@ import {
   IsBoolean,
   IsArray,
   IsOptional,
+  IsNumber,
+  Min,
+  Max,
   ValidateNested,
 } from 'class-validator'
 import { Type } from 'class-transformer'
@@ -104,5 +107,23 @@ export class UpdateQuestionDto {
   @IsArray()
   @IsOptional()
   linkages?: Record<string, any>[]
+
+  @ApiPropertyOptional({
+    description: '是否开启分页显示',
+    example: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  paginationEnabled?: boolean
+
+  @ApiPropertyOptional({
+    description: '每页显示的组件数量',
+    example: 5,
+  })
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  @IsOptional()
+  itemsPerPage?: number
 }
 

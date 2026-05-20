@@ -17,6 +17,10 @@ export interface IPageInfo {
   bgPosition?: 'top' | 'center' | 'bottom' | 'left' | 'right' // 背景位置
   parallaxEffect?: boolean // 视差滚动效果
   borderRadius?: string // 组件圆角
+  /** 是否开启分页 */
+  paginationEnabled?: boolean
+  /** 每页显示的组件数量 */
+  itemsPerPage?: number
   /** 物料联动规则 */
   linkages?: MaterialLinkageRule[]
 }
@@ -35,6 +39,8 @@ export const pageInfoDefaultData: IPageInfo = {
   bgPosition: 'center',
   parallaxEffect: false,
   borderRadius: '8px',
+  paginationEnabled: false,
+  itemsPerPage: 5,
   linkages: [],
 }
 
@@ -84,6 +90,12 @@ const pageInfoSlice = createSlice({
     setBorderRadius: (state, action: PayloadAction<string>) => {
       state.borderRadius = action.payload
     },
+    setPaginationEnabled: (state, action: PayloadAction<boolean>) => {
+      state.paginationEnabled = action.payload
+    },
+    setItemsPerPage: (state, action: PayloadAction<number>) => {
+      state.itemsPerPage = Math.max(1, Math.min(50, action.payload))
+    },
     setLinkages: (state, action: PayloadAction<MaterialLinkageRule[]>) => {
       state.linkages = action.payload
     },
@@ -102,6 +114,8 @@ export const {
   setBgPosition,
   setParallaxEffect,
   setBorderRadius,
+  setPaginationEnabled,
+  setItemsPerPage,
   setLinkages,
 } = pageInfoSlice.actions
 

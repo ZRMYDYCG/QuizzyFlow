@@ -83,6 +83,12 @@ export class Question {
 
   @Prop({ type: Array, default: [] })
   linkages: Record<string, any>[]
+
+  @Prop({ default: false })
+  paginationEnabled: boolean
+
+  @Prop({ default: 5 })
+  itemsPerPage: number
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question)

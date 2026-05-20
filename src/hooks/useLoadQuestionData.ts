@@ -35,6 +35,17 @@ export const useLoadQuestionData = () => {
       isPublished = false,
       author = '',
       linkages = [],
+      paginationEnabled = false,
+      itemsPerPage = 5,
+      type,
+      padding,
+      layout,
+      maxWidth,
+      bgImage,
+      bgRepeat,
+      bgPosition,
+      parallaxEffect,
+      borderRadius,
     } = data
 
     const validComponentList = componentList.filter((item) =>
@@ -71,6 +82,17 @@ export const useLoadQuestionData = () => {
         isPublished,
         author,
         linkages: Array.isArray(linkages) ? linkages : [],
+        type,
+        padding,
+        layout,
+        maxWidth,
+        bgImage,
+        bgRepeat,
+        bgPosition,
+        parallaxEffect,
+        borderRadius,
+        paginationEnabled: Boolean(paginationEnabled),
+        itemsPerPage: Number(itemsPerPage) || 5,
       })
     )
   }, [data])

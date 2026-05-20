@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Modal } from 'antd'
 import { QuestionComponentType } from '@/store/modules/question-component'
 import { IPageInfo } from '@/store/modules/pageinfo-reducer'
@@ -7,6 +7,8 @@ import {
   LinkedComponentRenderer,
 } from '@/features/material-linkage'
 import type { MaterialLinkageRule } from '@/features/material-linkage'
+import { useQuestionnairePagination } from '@/hooks/useQuestionnairePagination'
+import QuestionnairePagination from '@/components/questionnaire/questionnaire-pagination'
 
 interface IPreviewModalProps {
   isOpen: boolean
@@ -24,6 +26,20 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
   pageInfo,
 }) => {
   const linkages = (pageInfo.linkages ?? []) as MaterialLinkageRule[]
+
+  const visibleComponents = useMemo(
+    () => componentList.filter((item) => !item.isHidden),
+    [componentList]
+  )
+
+  const {
+    paginationEnabled,
+    itemsPerPage,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    displayItems,
+  } = useQuestionnairePagination(visibleComponents, pageInfo)
 
   const getLayoutMargin = () => {
     switch (pageInfo.layout) {
@@ -84,12 +100,20 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
             linkages={linkages}
             isAnswerMode
           >
-            {componentList.map((item: QuestionComponentType) => (
+            {displayItems.map((item: QuestionComponentType) => (
               <div key={item.fe_id} className="m-[12px]">
                 <LinkedComponentRenderer component={item} isAnswerMode />
               </div>
             ))}
           </MaterialLinkageProvider>
+          {paginationEnabled && visibleComponents.length > 0 && (
+            <QuestionnairePagination
+              current={currentPage}
+              total={totalItems}
+              pageSize={itemsPerPage}
+              onChange={setCurrentPage}
+            />
+          )}
         </div>
       </div>
     </Modal>
