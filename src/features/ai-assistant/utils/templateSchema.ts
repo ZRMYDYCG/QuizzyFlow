@@ -147,30 +147,6 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     ],
   },
   {
-    type: 'question-slider',
-    label: '滑动条',
-    category: 'advanced',
-    description: '用于在范围内选择数值',
-    defaultProps: {
-      title: '滑动条',
-      min: 0,
-      max: 100,
-      step: 1,
-    },
-    requiredProps: ['title'],
-    examples: [
-      {
-        scenario: '价格预算调查',
-        config: {
-          title: '您的预算范围是？',
-          min: 0,
-          max: 10000,
-          step: 100,
-        },
-      },
-    ],
-  },
-  {
     type: 'question-rate',
     label: '评分',
     category: 'advanced',
