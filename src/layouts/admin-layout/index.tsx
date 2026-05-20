@@ -34,18 +34,18 @@ const AdminLayout: React.FC = () => {
   // 根据主题选择 Ant Design 配置
   const currentTheme = theme === 'dark' ? editorDarkTheme : editorLightTheme
 
-  // 未登录，重定向到登录页
-  if (!token) {
-    return <Navigate to="/login" replace />
-  }
-
-  // 等待用户数据加载
+  // 刷新时 Redux token 尚未恢复，须先等待 useLoadUserData，避免误跳登录页
   if (waitingUserData) {
     return (
       <div className={`flex items-center justify-center min-h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
         <Spin size="large" tip="加载用户数据..." />
       </div>
     )
+  }
+
+  // 未登录，重定向到登录页
+  if (!token) {
+    return <Navigate to="/login" replace />
   }
 
   // 不是管理员，重定向到 403 页面
