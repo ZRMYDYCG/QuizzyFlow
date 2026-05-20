@@ -27,12 +27,15 @@ export const useTabNav = (currentPath: string) => {
     if (!hasHome) {
       storedTabs.unshift({
         path: '/admin/dashboard',
-        title: '仪表板',
+        title: getPageTitle('/admin/dashboard'),
         closable: false,
       })
     }
-    
-    return storedTabs
+
+    return storedTabs.map((tab) => ({
+      ...tab,
+      title: getPageTitle(tab.path),
+    }))
   })
   
   const prevPathRef = useRef(currentPath)
@@ -48,21 +51,34 @@ export const useTabNav = (currentPath: string) => {
     // 只处理 admin 路径
     if (!currentPath?.startsWith('/admin/')) return
     
-    // 检查标签是否已存在
-    const exists = tabs.some(tab => tab.path === currentPath)
-    if (exists) return
-    
-    // 添加新标签
-    const newTab: TabItem = {
-      path: currentPath,
-      title: getPageTitle(currentPath),
-      closable: !isHomePath(currentPath),
-    }
-    
-    const newTabs = [...tabs, newTab]
-    setTabs(newTabs)
-    saveTabsToStorage(newTabs)
-  }, [currentPath, tabs])
+    setTabs((prevTabs) => {
+      const syncedTabs = prevTabs.map((tab) => ({
+        ...tab,
+        title: getPageTitle(tab.path),
+      }))
+
+      const exists = syncedTabs.some((tab) => tab.path === currentPath)
+      if (exists) {
+        const titlesChanged = syncedTabs.some(
+          (tab, index) => tab.title !== prevTabs[index]?.title
+        )
+        if (titlesChanged) {
+          saveTabsToStorage(syncedTabs)
+        }
+        return titlesChanged ? syncedTabs : prevTabs
+      }
+
+      const newTab: TabItem = {
+        path: currentPath,
+        title: getPageTitle(currentPath),
+        closable: !isHomePath(currentPath),
+      }
+
+      const newTabs = [...syncedTabs, newTab]
+      saveTabsToStorage(newTabs)
+      return newTabs
+    })
+  }, [currentPath])
 
   /**
    * 核心函数：更新标签列表并处理导航

@@ -3,6 +3,7 @@ import { useLocation, Link } from 'react-router-dom'
 import { ChevronRight, Home } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
+import { adminBreadcrumbTitleMap } from '../route-titles'
 
 /**
  * 面包屑项配置
@@ -11,24 +12,6 @@ export interface BreadcrumbItem {
   path: string
   title: string
   icon?: React.ReactNode
-}
-
-/**
- * 面包屑路由映射配置
- * 支持无限层级嵌套
- */
-const breadcrumbNameMap: Record<string, string> = {
-  '/admin': '管理后台',
-  '/admin/dashboard': '数据大盘',
-  '/admin/users': '用户管理',
-  '/admin/roles': '角色管理',
-  '/admin/permissions': '权限管理',
-  '/admin/questions': '问卷管理',
-  '/admin/logs': '操作日志',
-  '/admin/settings': '系统设置',
-  '/admin/settings/basic': '基本设置',
-  '/admin/settings/security': '安全设置',
-  '/admin/settings/notification': '通知设置',
 }
 
 /**
@@ -63,12 +46,12 @@ const AdminBreadcrumb: React.FC = () => {
       currentPath += `/${snippet}`
       
       // 如果当前路径在配置中，则添加到面包屑
-      if (breadcrumbNameMap[currentPath]) {
+      if (adminBreadcrumbTitleMap[currentPath]) {
         // 跳过第一个 /admin，因为已经有首页了
         if (currentPath !== '/admin') {
           items.push({
             path: currentPath,
-            title: breadcrumbNameMap[currentPath],
+            title: adminBreadcrumbTitleMap[currentPath],
           })
         }
       }
