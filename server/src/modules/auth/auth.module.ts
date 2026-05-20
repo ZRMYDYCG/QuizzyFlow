@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { UserModule } from '../user/user.module'
@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { AuthGuard } from './auth.guard'
 import { JwtStrategy } from './jwt.strategy'
 
+@Global()
 @Module({
   imports: [
     UserModule,
@@ -21,12 +22,14 @@ import { JwtStrategy } from './jwt.strategy'
   ],
   providers: [
     AuthService,
-    JwtStrategy, // ← 注册 Passport JWT Strategy
+    AuthGuard,
+    JwtStrategy,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
   ],
+  exports: [AuthService, AuthGuard, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -74,6 +75,10 @@ export class UserService {
       return null
     }
 
+    if (user.isBanned) {
+      throw new BadRequestException('账户已被封禁')
+    }
+
     // 检查账户是否激活
     if (!user.isActive) {
       throw new BadRequestException('账户已被禁用')
@@ -84,6 +89,45 @@ export class UserService {
     await user.save()
 
     return user
+  }
+
+  /**
+   * 校验用户是否仍可访问系统（用于 JWT 鉴权）
+   */
+  async assertUserCanAccess(userId: string): Promise<UserDocument> {
+    if (!userId) {
+      throw new UnauthorizedException('无效的登录状态')
+    }
+
+    const user = await this.userModel.findById(userId).exec()
+
+    if (!user) {
+      throw new UnauthorizedException('用户不存在或已被删除')
+    }
+
+    if (user.isBanned) {
+      throw new UnauthorizedException('账户已被封禁')
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('账户已被禁用')
+    }
+
+    return user
+  }
+
+  /**
+   * 将用户文档转换为 request.user 结构
+   */
+  toRequestUser(user: UserDocument) {
+    return {
+      sub: user._id.toString(),
+      userId: user._id.toString(),
+      username: user.username,
+      nickname: user.nickname,
+      role: user.role || 'user',
+      customPermissions: user.customPermissions || [],
+    }
   }
 
   /**

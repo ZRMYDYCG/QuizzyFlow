@@ -2,10 +2,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PassportStrategy } from '@nestjs/passport'
 import { Injectable } from '@nestjs/common'
 import { JwtConstants } from './auth.constants'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly userService: UserService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,15 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(payload: any) {
-    // 这里的 payload 是 JWT token 解码后的内容
-    // 返回的对象会被附加到 request.user
-    return {
-      userId: payload.userId,
-      username: payload.username,
-      role: payload.role,
-      customPermissions: payload.customPermissions || [],
-    }
+  async validate(payload: { sub: string }) {
+    const user = await this.userService.assertUserCanAccess(payload.sub)
+    return this.userService.toRequestUser(user)
   }
 }
 

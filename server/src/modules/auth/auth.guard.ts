@@ -9,12 +9,14 @@ import { JwtConstants } from './auth.constants'
 import { Request } from 'express'
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator'
 import { Reflector } from '@nestjs/core'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,
+    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -37,8 +39,13 @@ export class AuthGuard implements CanActivate {
         secret: JwtConstants.secret,
       })
 
-      request['user'] = payload // 将用户信息存入request对象中
-    } catch {
+      const userId = payload.sub as string
+      const user = await this.userService.assertUserCanAccess(userId)
+      request['user'] = this.userService.toRequestUser(user)
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error
+      }
       throw new UnauthorizedException('Token 无效或已过期')
     }
     return true

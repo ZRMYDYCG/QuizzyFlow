@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { UserService } from './user.service'
 import { UserStatisticsService } from './user-statistics.service'
 import { UserController } from './user.controller'
@@ -8,6 +8,7 @@ import { User, UserSchema } from './schemas/user.schema'
 import { Question, QuestionSchema } from '../question/schemas/question.schema'
 import { Answer, AnswerSchema } from '../answer/schemas/answer.schema'
 
+@Global()
 @Module({
   imports: [
     MongooseModule.forFeature([

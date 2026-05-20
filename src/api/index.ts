@@ -39,8 +39,19 @@ instance.interceptors.response.use(
   async (error) => {
     // 处理 HTTP 错误
     if (error.response) {
-      const { data } = error.response
+      const { status, data } = error.response
       const errorMsg = data?.msg || data?.message || '请求失败'
+
+      // 登录失效：用户被删除、封禁或 token 过期
+      if (status === 401) {
+        localStorage.removeItem('token')
+        if (!window.location.pathname.startsWith('/login')) {
+          await message.error(errorMsg)
+          window.location.href = '/login'
+        }
+        return Promise.reject(new Error(errorMsg))
+      }
+
       await message.error(errorMsg)
       return Promise.reject(new Error(errorMsg))
     }

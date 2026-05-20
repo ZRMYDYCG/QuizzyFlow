@@ -67,10 +67,13 @@ export const useLoadUserData = () => {
           )
         }
       },
-      onError: () => {
-        // Token 无效，清除登录状态
+      onError: (error: Error) => {
+        // Token 无效或用户已被删除/封禁，清除登录状态
         localStorage.removeItem('token')
         dispatch(logoutReducer())
+        if (error.message && !window.location.pathname.startsWith('/login')) {
+          console.warn('用户会话已失效:', error.message)
+        }
       },
     }
   )
