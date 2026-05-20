@@ -31,6 +31,7 @@ import {
   FileTextOutlined,
   FormOutlined,
   BarChartOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useRequest } from 'ahooks'
@@ -42,6 +43,7 @@ import {
   getAdminQuestionDetailAPI,
   updateQuestionStatusAPI,
   deleteQuestionAPI,
+  batchDeleteQuestionsAPI,
   setQuestionRecommendedAPI,
   getQuestionStatisticsAPI,
 } from '@/api/modules/admin'
@@ -75,6 +77,7 @@ const QuestionsManagement: React.FC = () => {
   const [questionDetail, setQuestionDetail] = useState<any>(null)
   
   const [statistics, setStatistics] = useState<any>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
   // 加载问卷列表
   const { run: loadQuestions, loading } = useRequest(
@@ -169,6 +172,34 @@ const QuestionsManagement: React.FC = () => {
     } catch (error: any) {
       message.error(error.response?.data?.message || '发布失败')
     }
+  }
+
+  // 批量删除
+  const handleBatchDelete = () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请先选择要删除的问卷')
+      return
+    }
+
+    Modal.confirm({
+      title: '确认批量删除',
+      content: `确定要删除选中的 ${selectedRowKeys.length} 份问卷吗？此操作不可恢复，相关答卷也将一并删除。`,
+      icon: <ExclamationCircleOutlined />,
+      okText: '确定',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          const result = await batchDeleteQuestionsAPI(selectedRowKeys as string[])
+          message.success(`成功删除 ${result.deletedCount} 份问卷`)
+          setSelectedRowKeys([])
+          loadQuestions()
+          loadStatistics()
+        } catch (error: any) {
+          message.error(error.response?.data?.message || '批量删除失败')
+        }
+      },
+    })
   }
 
   // 删除问卷
@@ -372,6 +403,11 @@ const QuestionsManagement: React.FC = () => {
     },
   ]
 
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -501,12 +537,29 @@ const QuestionsManagement: React.FC = () => {
         </Button>
       </div>
 
+      {selectedRowKeys.length > 0 && (
+        <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <span className="text-blue-700 font-medium">
+            已选择 {selectedRowKeys.length} 项
+          </span>
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleBatchDelete}
+          >
+            批量删除
+          </Button>
+          <Button onClick={() => setSelectedRowKeys([])}>取消选择</Button>
+        </div>
+      )}
+
       {/* 问卷表格 */}
       <Table
         columns={columns}
         dataSource={questions}
         rowKey="_id"
         loading={loading}
+        rowSelection={rowSelection}
         scroll={{ x: 1400 }}
         pagination={{
           current: page,

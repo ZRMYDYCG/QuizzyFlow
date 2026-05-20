@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import { User, UserDocument } from '../user/schemas/user.schema'
 import { Question, QuestionDocument } from '../question/schemas/question.schema'
@@ -535,6 +535,24 @@ export class AdminService {
     return {
       message: isPublished ? '问卷已发布' : '问卷已下架',
       question,
+    }
+  }
+
+  /**
+   * 批量删除问卷（管理员）
+   */
+  async batchDeleteQuestions(ids: string[]) {
+    const invalidIds = ids.filter((id) => !Types.ObjectId.isValid(id))
+    if (invalidIds.length > 0) {
+      throw new BadRequestException(`无效的问卷ID: ${invalidIds.join(', ')}`)
+    }
+
+    const result = await this.questionModel.deleteMany({ _id: { $in: ids } })
+    await this.answerModel.deleteMany({ questionId: { $in: ids } })
+
+    return {
+      deletedCount: result.deletedCount,
+      message: `成功删除 ${result.deletedCount} 个问卷`,
     }
   }
 

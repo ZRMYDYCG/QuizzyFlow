@@ -328,6 +328,18 @@ export async function deleteQuestionAPI(id: string): Promise<ResDataType> {
 }
 
 /**
+ * 批量删除问卷（管理员）
+ */
+export async function batchDeleteQuestionsAPI(ids: string[]): Promise<{
+  message: string
+  deletedCount: number
+}> {
+  return instance.delete('/api/admin/questions/batch-delete', {
+    data: { ids },
+  })
+}
+
+/**
  * 设置问卷为推荐
  */
 export async function setQuestionRecommendedAPI(

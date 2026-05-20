@@ -24,6 +24,7 @@ import { QueryUsersDto } from './dto/query-users.dto'
 import { UpdateUserRoleDto } from './dto/update-user-role.dto'
 import { BanUserDto } from './dto/ban-user.dto'
 import { CreateAdminUserDto } from './dto/create-admin-user.dto'
+import { BatchDeleteDto } from '../question/dto/batch-delete.dto'
 import { RolesGuard } from '../../common/guards/roles.guard'
 import { PermissionsGuard } from '../../common/guards/permissions.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
@@ -268,6 +269,24 @@ export class AdminController {
       updateDto,
       req.user.username,
     )
+  }
+
+  /**
+   * 批量删除问卷（管理员）
+   */
+  @ApiOperation({ summary: '批量删除问卷', description: '管理员批量永久删除问卷' })
+  @ApiResponse({ status: 200, description: '删除成功' })
+  @Delete('questions/batch-delete')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.QUESTION_DELETE)
+  @LogOperation({
+    module: 'question',
+    action: 'delete',
+    resource: 'question',
+    description: '批量删除问卷',
+  })
+  async batchDeleteQuestions(@Body() batchDeleteDto: BatchDeleteDto) {
+    return await this.adminService.batchDeleteQuestions(batchDeleteDto.ids)
   }
 
   /**
