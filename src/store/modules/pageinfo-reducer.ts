@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { MaterialLinkageRule } from '@/features/material-linkage'
 
 export interface IPageInfo {
   title: string
@@ -16,6 +17,8 @@ export interface IPageInfo {
   bgPosition?: 'top' | 'center' | 'bottom' | 'left' | 'right' // 背景位置
   parallaxEffect?: boolean // 视差滚动效果
   borderRadius?: string // 组件圆角
+  /** 物料联动规则 */
+  linkages?: MaterialLinkageRule[]
 }
 
 export const pageInfoDefaultData: IPageInfo = {
@@ -32,6 +35,7 @@ export const pageInfoDefaultData: IPageInfo = {
   bgPosition: 'center',
   parallaxEffect: false,
   borderRadius: '8px',
+  linkages: [],
 }
 
 const pageInfoSlice = createSlice({
@@ -80,6 +84,9 @@ const pageInfoSlice = createSlice({
     setBorderRadius: (state, action: PayloadAction<string>) => {
       state.borderRadius = action.payload
     },
+    setLinkages: (state, action: PayloadAction<MaterialLinkageRule[]>) => {
+      state.linkages = action.payload
+    },
   },
 })
 
@@ -95,6 +102,7 @@ export const {
   setBgPosition,
   setParallaxEffect,
   setBorderRadius,
+  setLinkages,
 } = pageInfoSlice.actions
 
 export default pageInfoSlice.reducer

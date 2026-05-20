@@ -96,5 +96,13 @@ export class UpdateQuestionDto {
   })
   @IsOptional()
   copiedComponent?: Record<string, any> | null
+
+  @ApiPropertyOptional({
+    description: '物料联动规则列表',
+    example: [],
+  })
+  @IsArray()
+  @IsOptional()
+  linkages?: Record<string, any>[]
 }
 

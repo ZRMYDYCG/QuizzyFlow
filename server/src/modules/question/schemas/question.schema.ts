@@ -80,6 +80,9 @@ export class Question {
 
   @Prop({ type: Object, default: null })
   copiedComponent: Record<string, any> | null
+
+  @Prop({ type: Array, default: [] })
+  linkages: Record<string, any>[]
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question)

@@ -8,8 +8,14 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getComponentConfigByType } from '@/components/material'
 import { QuestionComponentType } from '@/store/modules/question-component'
+import {
+  MaterialLinkageProvider,
+  LinkedComponentRenderer,
+  isInteractiveComponent,
+} from '@/features/material-linkage'
+import type { MaterialLinkageRule } from '@/features/material-linkage'
+import { computeLinkageRuntimeState } from '@/features/material-linkage'
 import useLoadQuestionData from '@/hooks/useLoadQuestionData'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
@@ -21,82 +27,13 @@ import { useTheme } from '@/contexts/ThemeContext'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
 import { QuestionnaireType } from '@/constants/questionnaire-types'
 
-// 生成组件 - 区分预览模式和答题模式
-function genComponent(
-  componentInfo: QuestionComponentType,
-  isAnswerMode: boolean,
-  answerValues: Record<string, any>,
-  onAnswerChange: (componentId: string, value: any) => void
-) {
-  const { type, props, fe_id } = componentInfo
-  const componentConfig = getComponentConfigByType(type)
-
-  if (!componentConfig) return null
-
-  const { component: Component } = componentConfig
-
-  // 如果是答题模式，需要处理交互组件
-  if (isAnswerMode && isInteractiveComponent(type)) {
-    const ComponentToRender = Component as any
-    const currentValue = answerValues[fe_id]
-    return (
-      <div key={fe_id}>
-        <ComponentToRender
-          {...props}
-          value={currentValue}
-          onChange={(value: any) => onAnswerChange(fe_id, value)}
-        />
-      </div>
-    )
-  }
-
-  // 预览模式或展示组件，只渲染不可交互
-  const ComponentToRender = Component as any
-  return (
-    <div key={fe_id}>
-      <ComponentToRender {...props} disabled={!isAnswerMode} />
-    </div>
-  )
-}
-
-// 判断是否是交互组件（需要收集答案的组件）
-function isInteractiveComponent(type: string): boolean {
-  const interactiveTypes = [
-    // 基础表单组件
-    'question-input',
-    'question-textarea',
-    'question-radio',
-    'question-checkbox',
-    'question-select',
-    'question-rate',
-    'question-date',
-    'question-cascader',
-    'question-autocomplete',
-    'question-tree-select',
-    'question-time-picker',
-    'question-number-input',
-    'question-password-input',
-    'question-email-input',
-    'question-phone-input',
-    'question-url-input',
-    'question-range-picker',
-    'question-time-range-picker',
-    // 扩展输入组件（第二批）
-    'question-mentions',
-    'question-week-picker',
-    'question-month-picker',
-    'question-year-picker',
-    'question-mention-textarea',
-  ]
-  return interactiveTypes.includes(type)
-}
-
 const PublishPage: React.FC = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { loading } = useLoadQuestionData()
   const { componentList = [] } = useGetComponentInfo()
   const pageInfo = useGetPageInfo()
+  const linkages = (pageInfo.linkages ?? []) as MaterialLinkageRule[]
   const { username } = useGetUserInfo()
   const t = useManageTheme()
   const { primaryColor } = useTheme()
@@ -128,9 +65,16 @@ const PublishPage: React.FC = () => {
       }
 
       // 收集所有交互组件的答案
+      const submitRuntime = computeLinkageRuntimeState(
+        componentList,
+        linkages,
+        answerValues
+      )
       const answerList: AnswerItem[] = componentList
-        .filter((item: QuestionComponentType) => 
-          !item.isHidden && isInteractiveComponent(item.type)
+        .filter(
+          (item: QuestionComponentType) =>
+            !submitRuntime.hiddenById[item.fe_id] &&
+            isInteractiveComponent(item.type)
         )
         .map((item: QuestionComponentType) => {
           const value = answerValues[item.fe_id]
@@ -212,18 +156,20 @@ const PublishPage: React.FC = () => {
   }
 
   // 答案变更
-  const handleAnswerChange = (componentId: string, value: any) => {
-    setAnswerValues(prev => ({
-      ...prev,
-      [componentId]: value,
-    }))
+  const handleAnswerValuesChange = (values: Record<string, unknown>) => {
+    setAnswerValues(values as Record<string, any>)
   }
 
   // 验证是否所有必填项都已填写
+  const linkageRuntime = useMemo(
+    () => computeLinkageRuntimeState(componentList, linkages, answerValues),
+    [componentList, linkages, answerValues]
+  )
+
   const canSubmit = useMemo(() => {
     const requiredComponents = componentList.filter(
-      (item: QuestionComponentType) => 
-        !item.isHidden && 
+      (item: QuestionComponentType) =>
+        !linkageRuntime.hiddenById[item.fe_id] &&
         isInteractiveComponent(item.type) &&
         item.props?.required
     )
@@ -235,7 +181,7 @@ const PublishPage: React.FC = () => {
       }
       return value !== undefined && value !== null && value !== ''
     })
-  }, [componentList, answerValues])
+  }, [componentList, answerValues, linkageRuntime])
 
   // 计算布局方向对应的margin
   const getLayoutMargin = () => {
@@ -377,15 +323,26 @@ const PublishPage: React.FC = () => {
             transition: 'all 0.3s ease',
           }}
         >
-          {componentList
-            .filter((item: QuestionComponentType) => !item.isHidden)
-            .map((item: QuestionComponentType) => {
-              return (
-                <div key={item.fe_id} className="m-[12px]">
-                  {genComponent(item, isAnswerMode, answerValues, handleAnswerChange)}
-                </div>
-              )
-            })}
+          <MaterialLinkageProvider
+            componentList={componentList}
+            linkages={linkages}
+            isAnswerMode={isAnswerMode}
+            values={answerValues}
+            onValuesChange={handleAnswerValuesChange}
+          >
+            {componentList.map((item: QuestionComponentType) => (
+              <div key={item.fe_id} className="m-[12px]">
+                <LinkedComponentRenderer
+                  component={item}
+                  isAnswerMode={isAnswerMode}
+                  answerValues={answerValues}
+                  onAnswerChange={(id, value) =>
+                    handleAnswerValuesChange({ ...answerValues, [id]: value })
+                  }
+                />
+              </div>
+            ))}
+          </MaterialLinkageProvider>
 
           {/* 答题模式下的提交按钮 */}
           {isAnswerMode && (

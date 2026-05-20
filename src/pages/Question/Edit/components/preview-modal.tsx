@@ -1,9 +1,12 @@
 import React from 'react'
 import { Modal } from 'antd'
-import { getComponentConfigByType } from '@/components/material'
-import UnsupportedComponent from '@/components/material/unsupported-component'
 import { QuestionComponentType } from '@/store/modules/question-component'
 import { IPageInfo } from '@/store/modules/pageinfo-reducer'
+import {
+  MaterialLinkageProvider,
+  LinkedComponentRenderer,
+} from '@/features/material-linkage'
+import type { MaterialLinkageRule } from '@/features/material-linkage'
 
 interface IPreviewModalProps {
   isOpen: boolean
@@ -13,27 +16,6 @@ interface IPreviewModalProps {
   pageInfo: IPageInfo
 }
 
-function genComponent(componentInfo: QuestionComponentType) {
-  const { type, props, title, fe_id } = componentInfo
-  const componentConfig = getComponentConfigByType(type)
-
-  if (!componentConfig) {
-    return (
-      <div key={fe_id}>
-        <UnsupportedComponent type={type} title={title} />
-      </div>
-    )
-  }
-
-  const { component: Component } = componentConfig
-
-  return (
-    <div key={fe_id}>
-      <Component {...props} />
-    </div>
-  )
-}
-
 const PreviewModal: React.FC<IPreviewModalProps> = ({
   isOpen,
   onOk,
@@ -41,7 +23,8 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
   componentList,
   pageInfo,
 }) => {
-  // 计算布局方向对应的margin
+  const linkages = (pageInfo.linkages ?? []) as MaterialLinkageRule[]
+
   const getLayoutMargin = () => {
     switch (pageInfo.layout) {
       case 'left':
@@ -54,7 +37,6 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
     }
   }
 
-  // 视差滚动效果
   const parallaxStyle = pageInfo.parallaxEffect
     ? {
         backgroundAttachment: 'fixed',
@@ -97,15 +79,17 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
             transition: 'all 0.3s ease',
           }}
         >
-          {componentList
-            .filter((item: any) => !item.isHidden)
-            .map((item: QuestionComponentType) => {
-              return (
-                <div key={item.fe_id} className="m-[12px]">
-                  {genComponent(item)}
-                </div>
-              )
-            })}
+          <MaterialLinkageProvider
+            componentList={componentList}
+            linkages={linkages}
+            isAnswerMode
+          >
+            {componentList.map((item: QuestionComponentType) => (
+              <div key={item.fe_id} className="m-[12px]">
+                <LinkedComponentRenderer component={item} isAnswerMode />
+              </div>
+            ))}
+          </MaterialLinkageProvider>
         </div>
       </div>
     </Modal>

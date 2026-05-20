@@ -66,6 +66,29 @@ export const questionComponentSlice = createSlice({
         ]
       }
     },
+    // 批量新增控件（物料组合）
+    addComponents(
+      state: QuestionComponentStateType,
+      action: PayloadAction<QuestionComponentType[]>
+    ) {
+      const newComponents = action.payload
+      if (newComponents.length === 0) return
+
+      const { selectedId, componentList } = state
+      const index = componentList.findIndex((item) => item.fe_id === selectedId)
+
+      if (index < 0) {
+        state.componentList = [...state.componentList, ...newComponents]
+      } else {
+        state.componentList = [
+          ...state.componentList.slice(0, index + 1),
+          ...newComponents,
+          ...state.componentList.slice(index + 1),
+        ]
+      }
+
+      state.selectedId = newComponents[newComponents.length - 1].fe_id
+    },
     // 修改组件属性
     changeComponentProps(
       state: QuestionComponentStateType,
@@ -234,6 +257,7 @@ export const {
   resetComponents,
   changeSelectedId,
   addComponent,
+  addComponents,
   changeComponentProps,
   extraComponents,
   changeComponentsVisible,

@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { Tabs } from 'antd'
-import { FileTextOutlined, SettingOutlined } from '@ant-design/icons'
+import { FileTextOutlined, SettingOutlined, LinkOutlined } from '@ant-design/icons'
 import ComponentProp from './components-prop'
 import PageSetting from './page-setting'
+import LinkagePanel from './linkage-panel'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import TextAIProvider from '@/features/ai-assistant/components/TextAIProvider'
 
@@ -26,6 +27,16 @@ const RightPanel: React.FC = () => {
         </span>
       ),
       children: <ComponentProp />,
+    },
+    {
+      key: 'linkage',
+      label: (
+        <span className="flex items-center gap-2">
+          <LinkOutlined />
+          <span>联动</span>
+        </span>
+      ),
+      children: <LinkagePanel />,
     },
     {
       key: 'setting',

@@ -34,6 +34,7 @@ export const useLoadQuestionData = () => {
       js = '',
       isPublished = false,
       author = '',
+      linkages = [],
     } = data
 
     const validComponentList = componentList.filter((item) =>
@@ -61,7 +62,17 @@ export const useLoadQuestionData = () => {
       })
     )
     // pageInfo存储，包含作者信息
-    dispatch(resetPageInfo({ title, desc, css, js, isPublished, author }))
+    dispatch(
+      resetPageInfo({
+        title,
+        desc,
+        css,
+        js,
+        isPublished,
+        author,
+        linkages: Array.isArray(linkages) ? linkages : [],
+      })
+    )
   }, [data])
 
   useEffect(() => {
