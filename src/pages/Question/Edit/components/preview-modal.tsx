@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal } from 'antd'
 import { getComponentConfigByType } from '@/components/material'
+import UnsupportedComponent from '@/components/material/unsupported-component'
 import { QuestionComponentType } from '@/store/modules/question-component'
 import { IPageInfo } from '@/store/modules/pageinfo-reducer'
 
@@ -13,15 +14,21 @@ interface IPreviewModalProps {
 }
 
 function genComponent(componentInfo: QuestionComponentType) {
-  const { type, props } = componentInfo
+  const { type, props, title, fe_id } = componentInfo
   const componentConfig = getComponentConfigByType(type)
 
-  if (componentConfig === null) return null
+  if (!componentConfig) {
+    return (
+      <div key={fe_id}>
+        <UnsupportedComponent type={type} title={title} />
+      </div>
+    )
+  }
 
   const { component: Component } = componentConfig
 
   return (
-    <div key={componentInfo.fe_id}>
+    <div key={fe_id}>
       <Component {...props} />
     </div>
   )

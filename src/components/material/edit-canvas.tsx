@@ -1,6 +1,7 @@
 import React from 'react'
 import { Spin } from 'antd'
 import { getComponentConfigByType } from './index.ts'
+import UnsupportedComponent from './unsupported-component.tsx'
 import { useDispatch, useSelector } from 'react-redux'
 import { swapComponent } from '../../store/modules/question-component.ts'
 import SortableContainer from '../drag-sort/sort-container.tsx'
@@ -19,18 +20,16 @@ interface IPopsEditCanvas {
 }
 
 function genComponent(componentInfo: QuestionComponentType) {
-  const { type, props } = componentInfo
+  const { type, props, title } = componentInfo
   const componentConfig = getComponentConfigByType(type)
 
-  if (componentConfig === null) return null
+  if (!componentConfig) {
+    return <UnsupportedComponent type={type} title={title} />
+  }
 
   const { component: Component } = componentConfig
 
-  return (
-    <>
-      <Component {...props} />
-    </>
-  )
+  return <Component {...props} />
 }
 
 const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {

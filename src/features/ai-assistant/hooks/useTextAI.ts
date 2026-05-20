@@ -130,7 +130,7 @@ export const useTextAI = () => {
             })
           )
         } else if (propName === 'text') {
-          // text 字段（如 question-title, question-paragraph）
+          // props.title 为表单题目标题
           dispatch(
             changeComponentProps({
               fe_id: selectedComponent.fe_id,

@@ -1,14 +1,17 @@
 import { useParams } from 'react-router-dom'
 import { getQuestion } from '../api/modules/question.ts'
 import { useRequest } from 'ahooks'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
+import { message } from 'antd'
+import { isComponentTypeSupported } from '@/components/material'
 import { resetComponents } from '../store/modules/question-component.ts'
 import { resetPageInfo } from '../store/modules/pageinfo-reducer.ts'
 
 export const useLoadQuestionData = () => {
   const { id = '' } = useParams()
   const dispatch = useDispatch()
+  const warnedRemovedRef = useRef(false)
 
   const { data, loading, error, run } = useRequest(
     async (id: string) => {
@@ -33,17 +36,27 @@ export const useLoadQuestionData = () => {
       author = '',
     } = data
 
-    // 获取默认的 selectedId
-    let selectedId = ''
-    if (componentList.length > 0) {
-      selectedId = componentList[0].fe_id
+    const validComponentList = componentList.filter((item) =>
+      isComponentTypeSupported(item.type)
+    )
+    const removedCount = componentList.length - validComponentList.length
+
+    if (removedCount > 0 && !warnedRemovedRef.current) {
+      warnedRemovedRef.current = true
+      message.warning(
+        `已忽略 ${removedCount} 个已下线组件，请删除画布中的占位项后保存问卷`
+      )
     }
 
-    // 组件列表存储
+    let selectedId = ''
+    if (validComponentList.length > 0) {
+      selectedId = validComponentList[0].fe_id
+    }
+
     dispatch(
       resetComponents({
-        componentList,
-        selectedId: selectedId,
+        componentList: validComponentList,
+        selectedId,
         copiedComponent: null,
       })
     )
@@ -51,8 +64,8 @@ export const useLoadQuestionData = () => {
     dispatch(resetPageInfo({ title, desc, css, js, isPublished, author }))
   }, [data])
 
-  // 判断 id 变化
   useEffect(() => {
+    warnedRemovedRef.current = false
     run(id)
   }, [id])
 

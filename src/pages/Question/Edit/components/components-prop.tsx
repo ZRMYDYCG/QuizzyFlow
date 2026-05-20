@@ -26,7 +26,13 @@ const ComponentProp: React.FC = () => {
     const { props, type, isLocked } = selectedComponent || ({} as any)
     const ComponentConfig = getComponentConfigByType(type)
 
-    if (ComponentConfig === null) return <NoSelectedComponent />
+    if (!ComponentConfig) {
+      return (
+        <div className="flex items-center justify-center h-full p-8">
+          <Empty description="该组件类型已下线，请删除后重新添加表单组件" />
+        </div>
+      )
+    }
 
     function changeProps(newProps: ComponentPropsType) {
       if (selectedComponent === null) return

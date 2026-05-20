@@ -45,9 +45,7 @@ ${getComponentLibraryJSON()}
 4. **选项格式**：
    - question-radio 使用 options 数组：[{ text: "选项", value: "value" }]
    - question-checkbox 使用 list 数组：[{ text: "选项", value: "value", checked: false }]
-5. **特殊字段**：
-   - question-title 和 question-paragraph 使用 text 字段，不是 title
-   - 其他组件使用 title 字段
+5. **特殊字段**：表单类组件在 props 中使用 title 字段作为题目标题
 
 # 回答格式
 当用户要求添加、修改或删除组件时，请使用以下格式：

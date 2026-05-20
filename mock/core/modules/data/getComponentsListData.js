@@ -6,25 +6,15 @@ const Random = Mock.Random
 
 function getComponentsListData() {
   return [
-    // Title
     {
       fe_id: 'c1',
-      type: 'question-title',
-      title: '标题',
+      type: 'question-input',
+      title: '问卷名称',
       isHidden: false,
       isLocked: false,
       props: {
-        text: '个人信息调研问卷',
-        level: 1,
-        isCenter: false,
-        animateType: 'none',
-        typewriter: {
-          isOpen: true,
-          config: {
-            speed: 50,
-            cursor: '⎟',
-          },
-        },
+        title: '个人信息调研问卷',
+        placeholder: '问卷标题',
       },
     },
     // Input
@@ -75,13 +65,13 @@ function getComponentsListData() {
     },
     {
       fe_id: 'c6',
-      type: 'question-paragraph',
-      title: '',
+      type: 'question-textarea',
+      title: '结束语',
       isHidden: false,
       isLocked: false,
       props: {
-        text: '感谢你参与本次调研，我们将会根据调研结果及时向您反馈。',
-        isCenter: true,
+        title: '感谢你参与本次调研，我们将会根据调研结果及时向您反馈。',
+        placeholder: '请输入结束语...',
       },
     },
     {

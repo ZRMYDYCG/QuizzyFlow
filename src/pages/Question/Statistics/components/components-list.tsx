@@ -38,7 +38,7 @@ const ComponentsList = memo(
         const { fe_id, props, type } = component
 
         const componentConfig = getComponentConfigByType(type)
-        if (componentConfig === null) return null
+        if (!componentConfig) return null
 
         const { component: Component } = componentConfig
 

@@ -31,7 +31,7 @@ function genComponent(
   const { type, props, fe_id } = componentInfo
   const componentConfig = getComponentConfigByType(type)
 
-  if (componentConfig === null) return null
+  if (!componentConfig) return null
 
   const { component: Component } = componentConfig
 
@@ -70,24 +70,12 @@ function isInteractiveComponent(type: string): boolean {
     'question-select',
     'question-rate',
     'question-slider',
+    'question-range-slider',
     'question-date',
-    'question-upload',
-    // 高级选择组件
     'question-cascader',
     'question-autocomplete',
-    'question-transfer',
     'question-tree-select',
-    // 高级交互组件
-    'question-ranking',
-    'question-matrix',
-    'question-nps',
-    'question-image-choice',
-    'question-star-rating',
-    'question-signature',
-    'question-color-picker',
-    'question-emoji-picker',
-    // 扩展输入组件（第一批）
-    'question-switch',
+    'question-segmented',
     'question-time-picker',
     'question-number-input',
     'question-password-input',
@@ -104,9 +92,7 @@ function isInteractiveComponent(type: string): boolean {
     'question-week-picker',
     'question-month-picker',
     'question-year-picker',
-    'question-range-slider',
     'question-mention-textarea',
-    'question-segmented',
   ]
   return interactiveTypes.includes(type)
 }

@@ -82,11 +82,6 @@ export const validateComponentData = (data: any): {
       }
       break
 
-    case 'question-image':
-      if (!data.props?.src) {
-        errors.push('question-image 必须包含 props.src')
-      }
-      break
   }
 
   return {
@@ -138,31 +133,6 @@ export const normalizeComponentData = (data: any): ComponentData => {
     case 'question-checkbox':
       if (!data.props.list) {
         data.props.list = []
-      }
-      break
-
-    case 'question-title':
-      data.props = {
-        level: 1,
-        isCenter: false,
-        ...data.props,
-      }
-      // question-title 使用 text 而不是 title
-      if (data.title && !data.text) {
-        data.text = data.title
-        delete data.title
-      }
-      break
-
-    case 'question-paragraph':
-      data.props = {
-        isCenter: false,
-        ...data.props,
-      }
-      // question-paragraph 使用 text 而不是 title
-      if (data.title && !data.text) {
-        data.text = data.title
-        delete data.title
       }
       break
   }
