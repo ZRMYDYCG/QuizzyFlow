@@ -9,19 +9,19 @@ import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useQuestionnairePagination } from '@/hooks/useQuestionnairePagination'
-import {
-  computeLinkageRuntimeState,
-  isInteractiveComponent,
-} from '@/features/material-linkage'
+import { isInteractiveComponent } from '@/features/material-linkage'
 import type { MaterialLinkageRule } from '@/features/material-linkage'
 import type { QuestionComponentType } from '@/store/modules/question-component'
 import { submitAnswer } from '@/api/modules/answer'
 import PublishQuestionBody from './publish-question-body'
 import RespondentIdentityCard from './components/respondent-identity-card'
 import AuthorPreviewBar from './components/author-preview-bar'
+import AnswerProgressBar from './components/answer-progress-bar'
 import SubmitSuccessView from './components/submit-success-view'
 import { useRespondentIdentity } from './hooks/use-respondent-identity'
+import { useAnswerProgress } from './hooks/use-answer-progress'
 import { buildAnswerList } from './utils/build-answer-list'
+import { isAnswerFilled } from './utils/is-answer-filled'
 import { cn } from '@/utils'
 
 const { Title, Paragraph } = Typography
@@ -85,16 +85,15 @@ const PublishPage: React.FC = () => {
     currentPage,
     setCurrentPage,
     totalItems,
+    totalPages,
     displayItems,
   } = useQuestionnairePagination<QuestionComponentType>(
     visibleComponents,
     pageInfo
   )
 
-  const linkageRuntime = useMemo(
-    () => computeLinkageRuntimeState(componentList, linkages, answerValues),
-    [componentList, linkages, answerValues]
-  )
+  const { total: progressTotal, done: progressDone, percent: progressPercent, linkageRuntime } =
+    useAnswerProgress(componentList, linkages, answerValues)
 
   const answersComplete = useMemo(() => {
     const required = componentList.filter(
@@ -103,11 +102,7 @@ const PublishPage: React.FC = () => {
         isInteractiveComponent(item.type) &&
         Boolean((item.props as { required?: boolean })?.required)
     )
-    return required.every((item) => {
-      const value = answerValues[item.fe_id]
-      if (Array.isArray(value)) return value.length > 0
-      return value !== undefined && value !== null && value !== ''
-    })
+    return required.every((item) => isAnswerFilled(answerValues[item.fe_id]))
   }, [componentList, answerValues, linkageRuntime])
 
   const canSubmit = isAnswerMode && identityValid && answersComplete
@@ -297,6 +292,19 @@ const PublishPage: React.FC = () => {
           onBack={() => navigate(-1)}
           onCopyLink={handleCopyLink}
           onEdit={() => navigate(`/question/edit/${id}`)}
+        />
+      ) : null}
+
+      {isAnswerMode && progressTotal > 0 ? (
+        <AnswerProgressBar
+          percent={progressPercent}
+          answered={progressDone}
+          total={progressTotal}
+          primaryColor={primaryColor}
+          isDark={t.isDark}
+          paginationLabel={
+            paginationEnabled ? `第 ${currentPage} / ${totalPages} 页` : undefined
+          }
         />
       ) : null}
 
