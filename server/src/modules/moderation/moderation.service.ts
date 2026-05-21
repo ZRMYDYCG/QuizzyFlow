@@ -19,6 +19,7 @@ import { QueryModerationDto } from './dto/query-moderation.dto'
 import { ReviewContentDto } from './dto/review-content.dto'
 import { BatchReviewDto } from './dto/batch-review.dto'
 import { CreateSensitiveWordDto } from './dto/create-sensitive-word.dto'
+import { buildModerationScanText } from './utils/extract-moderation-text'
 
 @Injectable()
 export class ModerationService {
@@ -44,6 +45,7 @@ export class ModerationService {
       title: string
       description?: string
       author: string
+      scanText?: string
     },
   ) {
     // 1. 获取所有活跃的敏感词
@@ -52,8 +54,9 @@ export class ModerationService {
       .lean()
       .exec()
 
-    // 2. 检测敏感词
-    const textToCheck = `${content.title} ${content.description || ''}`.toLowerCase()
+    // 2. 检测敏感词（标题、描述 + 组件正文等）
+    const textToCheck = `${content.title} ${content.description || ''} ${content.scanText || ''}`
+      .toLowerCase()
     const detectedKeywords: string[] = []
     let maxSeverity = 'low'
 
@@ -93,10 +96,14 @@ export class ModerationService {
       status = 'pending'
     }
 
-    // 6. 创建审核记录
-    const record = new this.moderationModel({
+    if (status === 'pending') {
+      await this.markContentPending(contentType, contentId)
+    }
+
+    // 6. 写入审核记录（同一问卷/模板仅保留最新一条待审记录）
+    await this.saveModerationRecord({
       contentType,
-      contentId: new Types.ObjectId(contentId),
+      contentId,
       contentTitle: content.title,
       author: content.author,
       status,
@@ -106,8 +113,6 @@ export class ModerationService {
       isAutoReviewed,
     })
 
-    await record.save()
-
     return {
       status,
       riskLevel,
@@ -115,6 +120,64 @@ export class ModerationService {
       detectedKeywords,
       needsReview: status === 'pending',
     }
+  }
+
+  /**
+   * 保存审核记录：待审时覆盖同内容旧记录；通过时清理遗留待审记录
+   */
+  private async saveModerationRecord(data: {
+    contentType: 'question' | 'template'
+    contentId: string
+    contentTitle: string
+    author: string
+    status: string
+    riskLevel: string
+    detectedKeywords: string[]
+    riskScore: number
+    isAutoReviewed: boolean
+  }) {
+    const contentObjectId = new Types.ObjectId(data.contentId)
+    const pendingFilter = {
+      contentType: data.contentType,
+      contentId: contentObjectId,
+      status: 'pending',
+    }
+
+    if (data.status === 'pending') {
+      // 清理历史重复待审（兼容旧数据），再 upsert 为最新一次提交
+      await this.moderationModel.deleteMany(pendingFilter).exec()
+
+      const record = new this.moderationModel({
+        contentType: data.contentType,
+        contentId: contentObjectId,
+        contentTitle: data.contentTitle,
+        author: data.author,
+        status: data.status,
+        riskLevel: data.riskLevel,
+        detectedKeywords: data.detectedKeywords,
+        riskScore: data.riskScore,
+        isAutoReviewed: data.isAutoReviewed,
+      })
+      await record.save()
+      return record
+    }
+
+    // 已通过/自动通过：移除该内容下所有遗留待审，避免队列重复
+    await this.moderationModel.deleteMany(pendingFilter).exec()
+
+    const record = new this.moderationModel({
+      contentType: data.contentType,
+      contentId: contentObjectId,
+      contentTitle: data.contentTitle,
+      author: data.author,
+      status: data.status,
+      riskLevel: data.riskLevel,
+      detectedKeywords: data.detectedKeywords,
+      riskScore: data.riskScore,
+      isAutoReviewed: data.isAutoReviewed,
+    })
+    await record.save()
+    return record
   }
 
   /**
@@ -152,6 +215,76 @@ export class ModerationService {
   }
 
   /**
+   * 对模板/问卷执行自动审核（供创建、更新后调用）
+   */
+  async reviewTemplateContent(
+    templateId: string,
+    payload: {
+      name: string
+      description?: string
+      author: string
+      templateData?: {
+        title?: string
+        desc?: string
+        componentList?: unknown[]
+      }
+    },
+  ) {
+    const scanText = buildModerationScanText({
+      templateData: payload.templateData,
+    })
+
+    return this.autoReviewContent('template', templateId, {
+      title: payload.name,
+      description: payload.description,
+      author: payload.author,
+      scanText,
+    })
+  }
+
+  /**
+   * 对问卷执行自动审核（发布时调用）
+   */
+  async reviewQuestionContent(
+    questionId: string,
+    payload: {
+      title: string
+      description?: string
+      author: string
+      componentList?: unknown[]
+    },
+  ) {
+    const scanText = buildModerationScanText({
+      title: payload.title,
+      desc: payload.description,
+      componentList: payload.componentList,
+    })
+
+    return this.autoReviewContent('question', questionId, {
+      title: payload.title,
+      description: payload.description,
+      author: payload.author,
+      scanText,
+    })
+  }
+
+  /**
+   * 标记内容为待审核
+   */
+  private async markContentPending(contentType: string, contentId: string) {
+    if (contentType === 'question') {
+      await this.questionModel.findByIdAndUpdate(contentId, {
+        isPublished: false,
+      })
+    } else if (contentType === 'template') {
+      await this.templateModel.findByIdAndUpdate(contentId, {
+        approvalStatus: 'pending',
+        isPublic: false,
+      })
+    }
+  }
+
+  /**
    * 自动通过内容
    */
   private async approveContent(contentType: string, contentId: string) {
@@ -168,6 +301,40 @@ export class ModerationService {
   }
 
   /**
+   * 合并同一内容的重复待审记录，仅保留 updatedAt 最新的一条
+   */
+  private async deduplicatePendingRecords() {
+    const duplicateGroups = await this.moderationModel.aggregate([
+      { $match: { status: 'pending' } },
+      {
+        $group: {
+          _id: { contentType: '$contentType', contentId: '$contentId' },
+          ids: { $push: '$_id' },
+          updatedAts: { $push: '$updatedAt' },
+          count: { $sum: 1 },
+        },
+      },
+      { $match: { count: { $gt: 1 } } },
+    ])
+
+    for (const group of duplicateGroups) {
+      const entries = group.ids.map((id: Types.ObjectId, index: number) => ({
+        id,
+        updatedAt: group.updatedAts[index] ?? new Date(0),
+      }))
+      entries.sort(
+        (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+      )
+      const [, ...staleIds] = entries.map((e) => e.id)
+      if (staleIds.length > 0) {
+        await this.moderationModel
+          .deleteMany({ _id: { $in: staleIds } })
+          .exec()
+      }
+    }
+  }
+
+  /**
    * 获取待审核队列
    */
   async getPendingQueue(query: QueryModerationDto) {
@@ -179,6 +346,10 @@ export class ModerationService {
       page = 1,
       pageSize = 20,
     } = query
+
+    if (!status || status === 'pending' || status === 'all') {
+      await this.deduplicatePendingRecords()
+    }
 
     const filter: any = {}
 
@@ -265,6 +436,7 @@ export class ModerationService {
       } else if (record.contentType === 'template') {
         await this.templateModel.findByIdAndUpdate(record.contentId, {
           approvalStatus: 'rejected',
+          isPublic: false,
           rejectionReason: reviewDto.reason,
         })
       }
@@ -321,6 +493,7 @@ export class ModerationService {
         } else if (record.contentType === 'template') {
           await this.templateModel.findByIdAndUpdate(record.contentId, {
             approvalStatus: 'rejected',
+            isPublic: false,
             rejectionReason: reason,
           })
         }

@@ -4,6 +4,7 @@ import { QuestionController } from './question.controller'
 import { QuestionService } from './question.service'
 import { Question, QuestionSchema } from './schemas/question.schema'
 import { TemplateModule } from '../template/template.module'
+import { ModerationModule } from '../moderation/moderation.module'
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TemplateModule } from '../template/template.module'
       { name: Question.name, schema: QuestionSchema },
     ]),
     forwardRef(() => TemplateModule),
+    ModerationModule,
   ],
   controllers: [QuestionController],
   providers: [QuestionService],

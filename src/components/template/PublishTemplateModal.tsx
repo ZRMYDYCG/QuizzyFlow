@@ -68,15 +68,21 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
         isPublic: values.isPublic ?? true,
       })
 
-      message.success('模板发布成功！')
+      message.success(
+        '模板已提交！若无敏感词将自动公开，含敏感词则需管理员审核通过后才会出现在模板市场。',
+      )
       form.resetFields()
       onClose()
     },
     {
       manual: true,
-      onError: () => {
-        message.error('发布失败，请稍后重试')
-      }
+      onError: (error: any) => {
+        const msg =
+          error?.response?.data?.message ||
+          error?.message ||
+          '发布失败，请稍后重试'
+        message.error(msg)
+      },
     }
   )
 

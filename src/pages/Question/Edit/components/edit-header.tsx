@@ -131,6 +131,13 @@ const PublishButton: FC = () => {
         message.success('发布成功')
         navigate('/question/statistics/' + id)
       },
+      onError: (error: any) => {
+        const msg =
+          error?.response?.data?.message ||
+          error?.message ||
+          '发布失败，请稍后重试'
+        message.error(msg)
+      },
     }
   )
   return (
@@ -257,6 +264,13 @@ const MobileMoreMenu: FC = () => {
       onSuccess() {
         message.success('发布成功')
         navigate('/question/statistics/' + id)
+      },
+      onError: (error: any) => {
+        const msg =
+          error?.response?.data?.message ||
+          error?.message ||
+          '发布失败，请稍后重试'
+        message.error(msg)
       },
     }
   )

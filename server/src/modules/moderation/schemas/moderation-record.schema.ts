@@ -70,4 +70,9 @@ export const ModerationRecordSchema = SchemaFactory.createForClass(ModerationRec
 ModerationRecordSchema.index({ status: 1, riskLevel: -1, createdAt: -1 })
 ModerationRecordSchema.index({ author: 1, status: 1 })
 ModerationRecordSchema.index({ contentType: 1, contentId: 1 })
+// 同一内容仅允许一条待审核记录（以最后一次提交为准）
+ModerationRecordSchema.index(
+  { contentType: 1, contentId: 1 },
+  { unique: true, partialFilterExpression: { status: 'pending' } },
+)
 

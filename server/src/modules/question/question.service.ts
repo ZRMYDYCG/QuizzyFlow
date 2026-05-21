@@ -14,6 +14,7 @@ import { CreateQuestionDto } from './dto/create-question.dto'
 import { UpdateQuestionDto } from './dto/update-question.dto'
 import { QueryQuestionDto } from './dto/query-question.dto'
 import { TemplateService } from '../template/template.service'
+import { ModerationService } from '../moderation/moderation.service'
 
 @Injectable()
 export class QuestionService {
@@ -22,6 +23,7 @@ export class QuestionService {
     private readonly questionModel: Model<QuestionDocument>,
     @Inject(forwardRef(() => TemplateService))
     private readonly templateService: TemplateService,
+    private readonly moderationService: ModerationService,
   ) {}
 
   /**
@@ -175,10 +177,37 @@ export class QuestionService {
     }
 
     const sanitized = this.sanitizeUpdateDto(updateDto)
+    const wantsPublish = sanitized.isPublished === true
 
-    // 更新问卷
+    // 发布前先保存最新内容（保持草稿状态），再跑敏感词审核
+    if (wantsPublish) {
+      delete sanitized.isPublished
+    }
+
     Object.assign(question, sanitized)
     await question.save()
+
+    if (wantsPublish) {
+      const reviewResult = await this.moderationService.reviewQuestionContent(
+        id,
+        {
+          title: question.title,
+          description: question.desc,
+          author: username,
+          componentList: question.componentList,
+        },
+      )
+
+      if (reviewResult.needsReview) {
+        const keywords = reviewResult.detectedKeywords?.join('、') || '敏感内容'
+        throw new BadRequestException(
+          `内容包含敏感词（${keywords}），已提交人工审核，暂无法发布`,
+        )
+      }
+
+      question.isPublished = true
+      await question.save()
+    }
 
     return question
   }

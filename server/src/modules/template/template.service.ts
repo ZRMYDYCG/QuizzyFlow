@@ -4,12 +4,14 @@ import { Model } from 'mongoose'
 import { Template } from './schemas/template.schema'
 import { CreateTemplateDto } from './dto/create-template.dto'
 import { User, UserDocument } from '../user/schemas/user.schema'
+import { ModerationService } from '../moderation/moderation.service'
 
 @Injectable()
 export class TemplateService {
   constructor(
     @InjectModel(Template.name) private templateModel: Model<Template>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly moderationService: ModerationService,
   ) {}
 
   // 获取模板列表
@@ -25,7 +27,16 @@ export class TemplateService {
       isFeatured,
     } = query
 
-    const filter: any = { isPublic: true }
+    // 市场仅展示：审核通过且已公开
+    const filter: any = { isPublic: true, approvalStatus: 'approved' }
+
+    // 兼容历史数据：已通过审核但 isPublic 未同步的模板
+    await this.templateModel
+      .updateMany(
+        { approvalStatus: 'approved', isPublic: false },
+        { $set: { isPublic: true } },
+      )
+      .exec()
 
     if (category && category !== 'all') {
       filter.category = category
@@ -90,7 +101,7 @@ export class TemplateService {
   // 获取精选模板
   async getFeaturedTemplates(limit: number = 6) {
     return await this.templateModel
-      .find({ isPublic: true, isFeatured: true })
+      .find({ isPublic: true, isFeatured: true, approvalStatus: 'approved' })
       .sort({ likeCount: -1 })
       .limit(limit)
       .exec()
@@ -99,7 +110,7 @@ export class TemplateService {
   // 获取最新模板
   async getLatestTemplates(limit: number = 6) {
     return await this.templateModel
-      .find({ isPublic: true })
+      .find({ isPublic: true, approvalStatus: 'approved' })
       .sort({ createdAt: -1 })
       .limit(limit)
       .exec()
@@ -156,9 +167,18 @@ export class TemplateService {
       likeCount: 0,
       viewCount: 0,
       rating: 5,
+      approvalStatus: 'pending',
+      isPublic: false,
     })
 
-    return template
+    await this.moderationService.reviewTemplateContent(String(template._id), {
+      name: template.name,
+      description: template.description,
+      author: username,
+      templateData: template.templateData as CreateTemplateDto['templateData'],
+    })
+
+    return (await this.templateModel.findById(template._id)) ?? template
   }
 
   // 更新模板
@@ -175,7 +195,14 @@ export class TemplateService {
     Object.assign(template, updateData)
     await template.save()
 
-    return template
+    await this.moderationService.reviewTemplateContent(String(template._id), {
+      name: template.name,
+      description: template.description,
+      author: username,
+      templateData: template.templateData as CreateTemplateDto['templateData'],
+    })
+
+    return (await this.templateModel.findById(template._id)) ?? template
   }
 
   // 删除模板
@@ -301,11 +328,13 @@ export class TemplateService {
 
     if (action === 'approve') {
       template.approvalStatus = 'approved'
+      template.isPublic = true
       template.approvedAt = new Date()
       template.approvedBy = adminUsername
       template.rejectionReason = ''
     } else {
       template.approvalStatus = 'rejected'
+      template.isPublic = false
       template.rejectionReason = reason || '不符合规范'
       template.approvedAt = undefined
       template.approvedBy = undefined
