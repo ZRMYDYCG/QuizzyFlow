@@ -30,6 +30,9 @@ export interface IUserState {
   preferences: UserPreferences
   role: string
   customPermissions: string[]
+  grantedRoutes: string[]
+  grantedButtons: string[]
+  rolePermissions: string[]
   isBanned: boolean
 }
 
@@ -61,6 +64,9 @@ const initialState: IUserState = {
   preferences: defaultPreferences,
   role: 'user',
   customPermissions: [],
+  grantedRoutes: [],
+  grantedButtons: [],
+  rolePermissions: [],
   isBanned: false,
 }
 

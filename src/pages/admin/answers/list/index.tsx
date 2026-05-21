@@ -37,6 +37,8 @@ import {
   type AdminAnswerListParams,
 } from '@/api/modules/admin-answer'
 import AnswerDetailDrawer from '../components/answer-detail-drawer'
+import { PermissionControl } from '@/components/permission-guard'
+import { PERMISSIONS } from '@/constants/permissions'
 import * as XLSX from 'xlsx'
 
 const { RangePicker } = DatePicker
@@ -288,15 +290,17 @@ const AnswerListPage: React.FC = () => {
               标记正常
             </Button>
           )}
-          <Button
-            type="link"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            删除
-          </Button>
+          <PermissionControl permission={PERMISSIONS.ANSWER_DELETE}>
+            <Button
+              type="link"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record)}
+            >
+              删除
+            </Button>
+          </PermissionControl>
         </Space>
       ),
     },
@@ -361,14 +365,16 @@ const AnswerListPage: React.FC = () => {
           刷新
         </Button>
 
-        <Button
-          type="primary"
-          icon={<ExportOutlined />}
-          onClick={handleExport}
-          ghost
-        >
-          导出数据
-        </Button>
+        <PermissionControl permission={PERMISSIONS.ANSWER_EXPORT}>
+          <Button
+            type="primary"
+            icon={<ExportOutlined />}
+            onClick={handleExport}
+            ghost
+          >
+            导出数据
+          </Button>
+        </PermissionControl>
       </div>
 
       {/* 批量操作 */}
@@ -377,13 +383,15 @@ const AnswerListPage: React.FC = () => {
           <span className="text-blue-700 font-medium">
             已选择 {selectedRowKeys.length} 项
           </span>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={handleBatchDelete}
-          >
-            批量删除
-          </Button>
+          <PermissionControl permission={PERMISSIONS.ANSWER_DELETE}>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleBatchDelete}
+            >
+              批量删除
+            </Button>
+          </PermissionControl>
           <Button onClick={() => setSelectedRowKeys([])}>取消选择</Button>
         </div>
       )}

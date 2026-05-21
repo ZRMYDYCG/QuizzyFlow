@@ -7,6 +7,11 @@ import {
   PermissionDocument,
 } from '../permission/schemas/permission.schema'
 import { User, UserDocument } from '../user/schemas/user.schema'
+import {
+  clampToRolePermissions,
+  isStaffRole,
+  resolveRolePermissionCeiling,
+} from '../../common/utils/permission-bounds'
 
 /**
  * RBAC 服务
@@ -54,22 +59,29 @@ export class RbacService {
         return allPermissions
       }
 
-      // 获取角色权限
       const role = await this.roleModel
         .findOne({ name: user.role, isActive: true })
         .lean()
         .exec()
+      const rolePermissions = resolveRolePermissionCeiling(
+        user.role,
+        role?.permissions || [],
+      )
 
-      const rolePermissions = role?.permissions || []
+      // 管理后台员工：仅使用已分配且不超过角色上限的操作权限
+      if (isStaffRole(user.role)) {
+        const granted =
+          user.grantedButtons?.length > 0
+            ? user.grantedButtons
+            : user.customPermissions || []
+        const effective = clampToRolePermissions(granted, rolePermissions)
+        this.setCache(userId, effective)
+        return effective
+      }
 
-      // 合并用户自定义权限
-      const customPermissions = user.customPermissions || []
-      const allPermissions = [...new Set([...rolePermissions, ...customPermissions])]
-
-      // 缓存结果
-      this.setCache(userId, allPermissions)
-
-      return allPermissions
+      // 普通用户：使用角色预置权限
+      this.setCache(userId, rolePermissions)
+      return rolePermissions
     } catch (error) {
       this.logger.error(`获取用户权限失败: ${error.message}`, error.stack)
       return []

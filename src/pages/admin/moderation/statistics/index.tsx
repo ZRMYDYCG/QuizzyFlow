@@ -16,6 +16,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  ExclamationCircleOutlined,
   SafetyOutlined,
   RobotOutlined,
   WarningOutlined,

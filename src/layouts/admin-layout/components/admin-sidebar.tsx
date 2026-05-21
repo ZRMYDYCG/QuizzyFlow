@@ -3,6 +3,7 @@ import { Layout, Menu } from 'antd'
 import Logo from '@/components/Logo'
 import { useTheme } from '@/contexts/ThemeContext'
 import { sideMenuItems } from '../config'
+import { useAdminMenu } from '@/hooks/useAdminMenu'
 import type { AdminSidebarProps } from '../types'
 
 const { Sider } = Layout
@@ -16,7 +17,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onMenuClick,
 }) => {
   const { theme } = useTheme()
-  
+  const filteredMenuItems = useAdminMenu(sideMenuItems)
+
   const handleMenuClick = ({ key }: { key: string }) => {
     onMenuClick(key)
   }
@@ -45,7 +47,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         theme={theme === 'dark' ? 'dark' : 'light'}
         mode="inline"
         selectedKeys={[currentPath]}
-        items={sideMenuItems}
+        items={filteredMenuItems}
         onClick={handleMenuClick}
         className="border-r-0"
       />

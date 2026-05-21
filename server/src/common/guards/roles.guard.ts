@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core'
 import { ROLES_KEY } from '../decorators/roles.decorator'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
+import { isStaffRole } from '../utils/permission-bounds'
 
 /**
  * 角色守卫
@@ -53,8 +54,10 @@ export class RolesGuard implements CanActivate {
       return true
     }
 
-    // 检查是否拥有所需角色之一
-    const hasRole = requiredRoles.includes(userRole)
+    // 自定义管理后台角色视为满足 @Roles('admin', ...)
+    const hasRole =
+      requiredRoles.includes(userRole) ||
+      (requiredRoles.includes('admin') && isStaffRole(userRole))
 
     if (!hasRole) {
       throw new ForbiddenException(

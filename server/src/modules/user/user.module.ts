@@ -5,14 +5,15 @@ import { UserController } from './user.controller'
 import { UploadController } from './upload.controller'
 import { MongooseModule } from '@nestjs/mongoose'
 import { User, UserSchema } from './schemas/user.schema'
+import { Role, RoleSchema } from '../role/schemas/role.schema'
 import { Question, QuestionSchema } from '../question/schemas/question.schema'
 import { Answer, AnswerSchema } from '../answer/schemas/answer.schema'
-
 @Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
+      { name: Role.name, schema: RoleSchema },
       { name: Question.name, schema: QuestionSchema },
       { name: Answer.name, schema: AnswerSchema },
     ]),

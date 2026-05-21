@@ -54,8 +54,9 @@ export class AuthService {
 
     const token = await this.jwtService.signAsync(payload)
 
-    // 返回不包含密码的用户信息
-    const userResponse = new UserResponseDto(user.toObject())
+    const userResponse = await this.userService.enrichUserResponse(
+      user.toObject(),
+    )
 
     return {
       token,
@@ -79,6 +80,6 @@ export class AuthService {
    * 获取当前用户信息
    */
   async getProfile(userId: string): Promise<UserResponseDto> {
-    return await this.userService.findById(userId)
+    return await this.userService.getProfile(userId)
   }
 }

@@ -29,7 +29,10 @@ import { BatchDeleteAnswerDto } from './dto/batch-delete-answer.dto'
 import { MarkAnswerDto } from './dto/mark-answer.dto'
 import { AuthGuard } from '../auth/auth.guard'
 import { RolesGuard } from '../../common/guards/roles.guard'
+import { PermissionsGuard } from '../../common/guards/permissions.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
+import { RequirePermissions } from '../../common/decorators/permissions.decorator'
+import { PERMISSIONS } from '../../common/constants/permissions'
 import { Public } from '@/common/decorators/public.decorator'
 
 @ApiTags('答卷')
@@ -166,8 +169,9 @@ export class AnswerController {
     description: '管理员查看所有答卷，支持多种筛选条件',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_VIEW_ALL)
   @Get('admin/list')
   async findAllAdmin(@Query() query: QueryAnswerAdminDto) {
     return await this.answerService.findAllAdmin(query)
@@ -186,8 +190,9 @@ export class AnswerController {
     description: '答卷ID',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_VIEW_ALL)
   @Patch('admin/:id/mark')
   async markAnswer(@Param('id') id: string, @Body() markDto: MarkAnswerDto) {
     return await this.answerService.markAnswer(id, markDto)
@@ -196,18 +201,39 @@ export class AnswerController {
   /**
    * 批量删除答卷（管理员）
    * DELETE /api/answer/admin/batch-delete
+   * 须在 admin/:id 之前注册，避免 batch-delete 被当作 id
    */
   @ApiOperation({
     summary: '批量删除答卷',
     description: '管理员批量删除答卷',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_DELETE)
   @Delete('admin/batch-delete')
   @HttpCode(HttpStatus.OK)
   async batchDeleteAnswers(@Body() batchDeleteDto: BatchDeleteAnswerDto) {
     return await this.answerService.batchDeleteAnswers(batchDeleteDto)
+  }
+
+  /**
+   * 删除单个答卷（管理员）
+   * DELETE /api/answer/admin/:id
+   */
+  @ApiOperation({
+    summary: '删除答卷（管理员）',
+    description: '管理员删除任意答卷，需 answer:delete 权限',
+  })
+  @ApiParam({ name: 'id', description: '答卷ID' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_DELETE)
+  @Delete('admin/:id')
+  @HttpCode(HttpStatus.OK)
+  async removeAdmin(@Param('id') id: string) {
+    return await this.answerService.removeAdmin(id)
   }
 
   /**
@@ -219,8 +245,9 @@ export class AnswerController {
     description: '管理员查看答卷统计数据',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_VIEW_ALL)
   @Get('admin/statistics')
   async getStatistics() {
     return await this.answerService.getStatistics()
@@ -235,8 +262,9 @@ export class AnswerController {
     description: '管理员导出答卷数据（返回JSON格式，前端处理成Excel）',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.ANSWER_EXPORT)
   @Get('admin/export')
   async exportAnswers(@Query() query: QueryAnswerAdminDto) {
     return await this.answerService.exportAnswers(query)

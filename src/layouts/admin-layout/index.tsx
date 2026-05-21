@@ -5,6 +5,7 @@ import { SettingOutlined } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
 import { ROLES } from '@/constants/roles'
+import { isStaffRole } from '@/utils/permission-bounds'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
 import LayoutSettings from './components/layout-settings'
@@ -28,7 +29,7 @@ const AdminLayout: React.FC = () => {
   const [settingsVisible, setSettingsVisible] = useState(false)
 
   // 权限检查
-  const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
+  const isAdmin = role === ROLES.SUPER_ADMIN || isStaffRole(role)
 
   // 刷新时 Redux token 尚未恢复，须先等待 useLoadUserData，避免误跳登录页
   if (waitingUserData) {

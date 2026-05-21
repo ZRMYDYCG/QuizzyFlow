@@ -93,7 +93,19 @@ export class User {
     type: [String],
     default: [],
   })
-  customPermissions: string[] // 自定义权限（补充角色权限）
+  customPermissions: string[] // 已授权按钮权限（与 grantedButtons 同步，供 API 守卫使用）
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  grantedRoutes: string[] // 已授权管理后台路由，如 /admin/users
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  grantedButtons: string[] // 已授权按钮权限码，如 user:create
 
   @Prop({ default: false })
   isBanned: boolean // 是否被封禁

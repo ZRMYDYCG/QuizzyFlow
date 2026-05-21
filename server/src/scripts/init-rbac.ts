@@ -87,8 +87,8 @@ async function bootstrap() {
     console.log('\n下一步:')
     console.log('  1. 使用 admin@quizzyflow.com / admin123456 登录系统')
     console.log('  2. 访问 http://localhost:8000/admin/dashboard')
-    console.log('  3. 在"用户管理"中创建其他管理员账户')
-    console.log('  4. 在"角色管理"中自定义角色和权限\n')
+    console.log('  3. 在「用户管理 → 分配权限」中为员工分配路由与按钮权限')
+    console.log('  4. 系统仅允许一名超级管理员，不可删除或降级\n')
 
   } catch (error) {
     console.error('❌ 初始化失败:', error)

@@ -36,7 +36,7 @@ export const sideMenuItems: MenuProps['items'] = [
   {
     key: '/admin/permissions',
     icon: <SafetyOutlined />,
-    label: '权限管理',
+    label: '权限目录',
   },
   {
     key: '/admin/questions',
@@ -145,7 +145,7 @@ export const horizontalMenuItems: MenuProps['items'] = [
   },
   {
     key: '/admin/permissions',
-    label: '权限管理',
+    label: '权限目录',
   },
   {
     key: '/admin/questions',

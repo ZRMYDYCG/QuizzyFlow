@@ -21,6 +21,8 @@ import {
 import dayjs from 'dayjs'
 import type { Answer } from '@/api/modules/admin-answer'
 import { markAnswer, deleteAnswer } from '@/api/modules/admin-answer'
+import { PermissionControl } from '@/components/permission-guard'
+import { PERMISSIONS } from '@/constants/permissions'
 
 interface AnswerDetailDrawerProps {
   open: boolean
@@ -187,14 +189,16 @@ const AnswerDetailDrawer: React.FC<AnswerDetailDrawerProps> = ({
           >
             {answer.isValid ? '标记为异常' : '标记为正常'}
           </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            block
-            onClick={handleDelete}
-          >
-            删除答卷
-          </Button>
+          <PermissionControl permission={PERMISSIONS.ANSWER_DELETE}>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              block
+              onClick={handleDelete}
+            >
+              删除答卷
+            </Button>
+          </PermissionControl>
         </div>
       </div>
     </Drawer>

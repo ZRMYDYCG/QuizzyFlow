@@ -13,6 +13,7 @@ import { useTabNav } from '../../hooks/useTabNav'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLogout } from '@/hooks/useLogout'
 import { horizontalMenuItems, sideMenuItems } from '../../config'
+import { useAdminMenu } from '@/hooks/useAdminMenu'
 
 const { Header, Sider, Content } = Layout
 
@@ -38,6 +39,7 @@ const MixedLayout: React.FC = () => {
   const [notificationVisible, setNotificationVisible] = useState(false)
   const [isReloading, setIsReloading] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const filteredSideMenu = useAdminMenu(sideMenuItems)
 
   // 标签页导航
   const {
@@ -145,7 +147,7 @@ const MixedLayout: React.FC = () => {
             mode="inline"
             selectedKeys={[location.pathname]}
             onClick={handleMenuClick}
-            items={sideMenuItems}
+            items={filteredSideMenu}
             className={theme === 'dark' ? 'bg-[#1e1e23]' : 'bg-white'}
           />
         </Sider>

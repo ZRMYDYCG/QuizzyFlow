@@ -7,7 +7,9 @@ import {
   UnlockOutlined,
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import { ROLE_NAMES, ROLE_COLORS } from '@/constants/roles'
+import { ROLE_NAMES, ROLE_COLORS, ROLES } from '@/constants/roles'
+import { PermissionControl } from '@/components/permission-guard'
+import { PERMISSIONS } from '@/constants/permissions'
 
 interface UserTableProps {
   loading: boolean
@@ -17,7 +19,9 @@ interface UserTableProps {
   pageSize: number
   onPageChange: (page: number, pageSize: number) => void
   onViewDetail: (record: any) => void
-  onEditRole: (record: any) => void
+  onAssignAccess: (record: any) => void
+  canAssignAccess?: boolean
+  onEditUser: (record: any) => void
   onBanUser: (record: any) => void
   onResetPassword: (record: any) => void
   onDeleteUser: (record: any) => void
@@ -32,12 +36,15 @@ const UserTable: React.FC<UserTableProps> = ({
   pageSize,
   onPageChange,
   onViewDetail,
-  onEditRole,
+  onAssignAccess,
+  onEditUser,
   onBanUser,
   onResetPassword,
   onDeleteUser,
   currentUserId,
+  canAssignAccess = false,
 }) => {
+  const isProtectedUser = (record: any) => record.role === ROLES.SUPER_ADMIN
   const columns: ColumnsType<any> = [
     {
       title: '用户名',
@@ -59,6 +66,32 @@ const UserTable: React.FC<UserTableProps> = ({
           {ROLE_NAMES[role as keyof typeof ROLE_NAMES] || role}
         </Tag>
       ),
+    },
+    {
+      title: '页面 / 权限',
+      key: 'grantedAccess',
+      width: 140,
+      render: (_, record) => {
+        if (record.role === ROLES.SUPER_ADMIN) {
+          return <Tag color="red">全部</Tag>
+        }
+        if (record.role === ROLES.USER) {
+          return <span className="text-gray-400">—</span>
+        }
+        const routeCount = record.grantedRoutes?.length ?? 0
+        const permCount =
+          record.grantedButtons?.length ?? record.customPermissions?.length ?? 0
+        return (
+          <Space size={4}>
+            <Tag color={routeCount > 0 ? 'blue' : 'default'}>
+              {routeCount > 0 ? `${routeCount} 页` : '0 页'}
+            </Tag>
+            <Tag color={permCount > 0 ? 'green' : 'default'}>
+              {permCount > 0 ? `${permCount} 权` : '0 权'}
+            </Tag>
+          </Space>
+        )
+      },
     },
     {
       title: '状态',
@@ -89,9 +122,9 @@ const UserTable: React.FC<UserTableProps> = ({
       title: '操作',
       key: 'actions',
       fixed: 'right' as const,
-      width: 250,
+      width: 360,
       render: (_, record) => (
-        <Space size="small">
+        <Space size="small" wrap>
           <Button
             type="link"
             size="small"
@@ -99,47 +132,73 @@ const UserTable: React.FC<UserTableProps> = ({
           >
             详情
           </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => onEditRole(record)}
-          >
-            角色
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={record.isBanned ? <UnlockOutlined /> : <LockOutlined />}
-            danger={!record.isBanned}
-            onClick={() => onBanUser(record)}
-          >
-            {record.isBanned ? '解封' : '封禁'}
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => onResetPassword(record)}
-          >
-            重置密码
-          </Button>
-          <Popconfirm
-            title="确定删除该用户吗？"
-            onConfirm={() => onDeleteUser(record)}
-            okText="确定"
-            cancelText="取消"
-            disabled={record._id === currentUserId}
-          >
+          <PermissionControl permission={PERMISSIONS.USER_UPDATE}>
             <Button
               type="link"
               size="small"
-              danger
-              icon={<DeleteOutlined />}
-              disabled={record._id === currentUserId}
+              icon={<EditOutlined />}
+              disabled={isProtectedUser(record)}
+              onClick={() => onEditUser(record)}
             >
-              删除
+              编辑
             </Button>
-          </Popconfirm>
+          </PermissionControl>
+          {canAssignAccess && record.role !== ROLES.SUPER_ADMIN && (
+            <Button
+              type="primary"
+              size="small"
+              ghost
+              icon={<EditOutlined />}
+              onClick={() => onAssignAccess(record)}
+            >
+              分配权限
+            </Button>
+          )}
+          <PermissionControl permission={PERMISSIONS.USER_BAN}>
+            <Button
+              type="link"
+              size="small"
+              icon={record.isBanned ? <UnlockOutlined /> : <LockOutlined />}
+              danger={!record.isBanned}
+              disabled={isProtectedUser(record)}
+              onClick={() => onBanUser(record)}
+            >
+              {record.isBanned ? '解封' : '封禁'}
+            </Button>
+          </PermissionControl>
+          <PermissionControl permission={PERMISSIONS.USER_RESET_PASSWORD}>
+            <Button
+              type="link"
+              size="small"
+              disabled={isProtectedUser(record)}
+              onClick={() => onResetPassword(record)}
+            >
+              重置密码
+            </Button>
+          </PermissionControl>
+          <PermissionControl permission={PERMISSIONS.USER_DELETE}>
+            <Popconfirm
+              title="确定删除该用户吗？"
+              onConfirm={() => onDeleteUser(record)}
+              okText="确定"
+              cancelText="取消"
+              disabled={
+                record._id === currentUserId || isProtectedUser(record)
+              }
+            >
+              <Button
+                type="link"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                disabled={
+                  record._id === currentUserId || isProtectedUser(record)
+                }
+              >
+                删除
+              </Button>
+            </Popconfirm>
+          </PermissionControl>
         </Space>
       ),
     },

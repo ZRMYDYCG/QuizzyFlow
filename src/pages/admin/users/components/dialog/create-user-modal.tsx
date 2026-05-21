@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Modal, Form, Input, Select, message } from 'antd'
 import { createAdminUserAPI } from '@/api/modules/admin'
+import { ROLES } from '@/constants/roles'
 
 interface CreateUserModalProps {
   open: boolean
@@ -43,7 +44,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   return (
     <Modal
-      title="创建用户"
+      title="创建管理后台员工"
       open={open}
       onCancel={handleCancel}
       onOk={handleOk}
@@ -85,11 +86,16 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
         >
           <Select placeholder="选择角色">
             {Array.isArray(roles) &&
-              roles.map((role) => (
-                <Select.Option key={role.name} value={role.name}>
-                  {role.displayName}
-                </Select.Option>
-              ))}
+              roles
+                .filter(
+                  (role) =>
+                    role.name !== ROLES.SUPER_ADMIN && role.name !== ROLES.USER
+                )
+                .map((role) => (
+                  <Select.Option key={role.name} value={role.name}>
+                    {role.displayName}
+                  </Select.Option>
+                ))}
           </Select>
         </Form.Item>
         <Form.Item label="手机号" name="phone">

@@ -13,6 +13,7 @@ import { useTabNav } from '../../hooks/useTabNav'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLogout } from '@/hooks/useLogout'
 import { horizontalMenuItems } from '../../config'
+import { useAdminMenu } from '@/hooks/useAdminMenu'
 
 const { Header, Content } = Layout
 
@@ -37,6 +38,7 @@ const HorizontalLayout: React.FC = () => {
   const { logout } = useLogout()
   const [notificationVisible, setNotificationVisible] = useState(false)
   const [isReloading, setIsReloading] = useState(false)
+  const filteredHorizontalMenu = useAdminMenu(horizontalMenuItems)
 
   // 标签页导航
   const {
@@ -92,7 +94,7 @@ const HorizontalLayout: React.FC = () => {
             mode="horizontal"
             selectedKeys={[location.pathname]}
             onClick={handleMenuClick}
-            items={horizontalMenuItems}
+            items={filteredHorizontalMenu}
             className={`
               flex-1 border-none
               ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-white'}

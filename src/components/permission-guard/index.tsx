@@ -1,11 +1,14 @@
 import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { usePermission } from '@/hooks/usePermission'
 import type { Permission } from '@/constants/permissions'
 import { Empty } from 'antd'
 
 interface PermissionGuardProps {
+  /** 按钮级权限码 */
   permission?: Permission | Permission[]
+  /** 管理后台路由路径，如 /admin/users */
+  route?: string
   role?: string | string[]
   fallback?: React.ReactNode
   redirect?: string
@@ -13,26 +16,38 @@ interface PermissionGuardProps {
 }
 
 /**
- * 权限守卫组件
- * 用于控制页面或组件的访问权限
+ * 页面守卫：仅校验 grantedRoutes（与操作权限无关）
+ * 操作权限（grantedButtons）请用 PermissionControl 控制按钮显隐
  */
 export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   permission,
+  route,
   role,
   fallback,
   redirect,
   children,
 }) => {
-  const { hasPermission, hasRole } = usePermission()
+  const { hasPermission, hasRoute, hasRole } = usePermission()
+  const location = useLocation()
 
-  // 检查权限
+  const routePath =
+    route ?? (location.pathname.startsWith('/admin') ? location.pathname : undefined)
+
+  if (routePath && !hasRoute(routePath)) {
+    if (redirect) return <Navigate to={redirect} replace />
+    if (fallback) return <>{fallback}</>
+    return (
+      <Empty
+        description="您没有权限访问此页面"
+        style={{ marginTop: '100px' }}
+      />
+    )
+  }
+
+  // 可选：整页级按钮要求（管理后台路由请勿使用，改由 PermissionControl 控制按钮）
   if (permission && !hasPermission(permission)) {
-    if (redirect) {
-      return <Navigate to={redirect} replace />
-    }
-    if (fallback) {
-      return <>{fallback}</>
-    }
+    if (redirect) return <Navigate to={redirect} replace />
+    if (fallback) return <>{fallback}</>
     return (
       <Empty
         description="您没有权限访问此内容"
@@ -41,14 +56,9 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
     )
   }
 
-  // 检查角色
   if (role && !hasRole(role)) {
-    if (redirect) {
-      return <Navigate to={redirect} replace />
-    }
-    if (fallback) {
-      return <>{fallback}</>
-    }
+    if (redirect) return <Navigate to={redirect} replace />
+    if (fallback) return <>{fallback}</>
     return (
       <Empty
         description="您的角色无权访问此内容"
@@ -60,32 +70,27 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   return <>{children}</>
 }
 
-/**
- * 权限控制组件（不显示fallback，直接隐藏）
- */
 interface PermissionControlProps {
   permission?: Permission | Permission[]
+  route?: string
   role?: string | string[]
   children: React.ReactNode
 }
 
+/**
+ * 按钮级权限控制（无权限时不渲染子节点）
+ */
 export const PermissionControl: React.FC<PermissionControlProps> = ({
   permission,
+  route,
   role,
   children,
 }) => {
-  const { hasPermission, hasRole } = usePermission()
+  const { hasPermission, hasRoute, hasRole } = usePermission()
 
-  // 检查权限
-  if (permission && !hasPermission(permission)) {
-    return null
-  }
-
-  // 检查角色
-  if (role && !hasRole(role)) {
-    return null
-  }
+  if (route && !hasRoute(route)) return null
+  if (permission && !hasPermission(permission)) return null
+  if (role && !hasRole(role)) return null
 
   return <>{children}</>
 }
-

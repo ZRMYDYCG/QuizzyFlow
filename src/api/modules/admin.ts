@@ -30,9 +30,22 @@ export interface UpdateUserRoleData {
   customPermissions?: string[]
 }
 
+export interface UpdateUserAccessData {
+  role?: 'admin' | 'user'
+  grantedRoutes?: string[]
+  grantedButtons?: string[]
+}
+
 export interface BanUserData {
   isBanned: boolean
   reason: string
+}
+
+export interface UpdateAdminUserData {
+  nickname?: string
+  phone?: string
+  bio?: string
+  isActive?: boolean
 }
 
 /**
@@ -71,6 +84,45 @@ export async function updateUserRoleAPI(
 }
 
 /**
+ * 获取分配目录（页面路由 + 操作权限，分离）
+ */
+export async function getAccessRegistryAPI(): Promise<ResDataType> {
+  return await instance.get(`${BASE_URL}/access-registry`)
+}
+
+export interface UserAccessBounds {
+  userId: string
+  role: string
+  roleDisplayName: string
+  rolePermissions: string[]
+  rolePermissionCount?: number
+  grantedRoutes: string[]
+  grantedButtons: string[]
+  grantedButtonCount?: number
+  routes: unknown[]
+  permissions: unknown[]
+}
+
+/**
+ * 获取用户可分配权限上限（按所属角色实时读库）
+ */
+export async function getUserAccessBoundsAPI(
+  userId: string
+): Promise<UserAccessBounds> {
+  return await instance.get(`${BASE_URL}/users/${userId}/access-bounds`)
+}
+
+/**
+ * 分配用户页面路由与操作权限（仅超级管理员）
+ */
+export async function updateUserAccessAPI(
+  id: string,
+  data: UpdateUserAccessData
+): Promise<ResDataType> {
+  return await instance.patch(`${BASE_URL}/users/${id}/access`, data)
+}
+
+/**
  * 封禁/解封用户
  */
 export async function banUserAPI(
@@ -90,6 +142,25 @@ export async function resetUserPasswordAPI(
   return await instance.patch(`${BASE_URL}/users/${id}/reset-password`, {
     newPassword,
   })
+}
+
+/**
+ * 更新用户基本信息
+ */
+export async function updateAdminUserAPI(
+  id: string,
+  data: UpdateAdminUserData
+): Promise<ResDataType> {
+  return await instance.patch(`${BASE_URL}/users/${id}`, data)
+}
+
+/**
+ * 导出用户数据
+ */
+export async function exportUsersAPI(
+  params: Omit<QueryUsersParams, 'page' | 'pageSize'> = {}
+): Promise<Record<string, string | number>[]> {
+  return await instance.get(`${BASE_URL}/users/export`, { params })
 }
 
 /**

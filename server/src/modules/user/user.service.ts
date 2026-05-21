@@ -9,6 +9,12 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import { User, UserDocument } from './schemas/user.schema'
+import { Role, RoleDocument } from '../role/schemas/role.schema'
+import {
+  clampToRolePermissions,
+  isStaffRole,
+  resolveRolePermissionCeiling,
+} from '../../common/utils/permission-bounds'
 import { RegisterDto } from './dto/register.dto'
 import { UserResponseDto } from './dto/user-response.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
@@ -19,6 +25,8 @@ export class UserService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Role.name)
+    private readonly roleModel: Model<RoleDocument>,
   ) {}
 
   /**
@@ -126,7 +134,10 @@ export class UserService {
       username: user.username,
       nickname: user.nickname,
       role: user.role || 'user',
-      customPermissions: user.customPermissions || [],
+      customPermissions:
+        user.grantedButtons || user.customPermissions || [],
+      grantedRoutes: user.grantedRoutes || [],
+      grantedButtons: user.grantedButtons || user.customPermissions || [],
     }
   }
 
@@ -147,7 +158,52 @@ export class UserService {
       throw new NotFoundException('用户不存在')
     }
 
-    return new UserResponseDto(user)
+    return this.enrichUserResponse(user)
+  }
+
+  /**
+   * 附加角色权限上限，并裁剪用户已授权操作权限
+   */
+  async enrichUserResponse(user: Record<string, any>): Promise<UserResponseDto> {
+    const dto = new UserResponseDto(user)
+
+    if (!user.role || user.role === 'super_admin') {
+      return dto
+    }
+
+    const role = await this.roleModel
+      .findOne({ name: user.role, isActive: true, deletedAt: null })
+      .lean()
+      .exec()
+
+    const rolePermissions = resolveRolePermissionCeiling(
+      user.role,
+      role?.permissions || [],
+    )
+    dto.rolePermissions = rolePermissions
+
+    if (isStaffRole(user.role)) {
+      const granted =
+        user.grantedButtons?.length > 0
+          ? user.grantedButtons
+          : user.customPermissions || []
+      const bounded = clampToRolePermissions(granted, rolePermissions)
+      dto.grantedButtons = bounded
+      dto.customPermissions = bounded
+
+      const stored = user.grantedButtons || user.customPermissions || []
+      if (
+        bounded.length !== stored.length ||
+        bounded.some((p, i) => p !== stored[i])
+      ) {
+        await this.userModel.updateOne(
+          { _id: user._id },
+          { $set: { grantedButtons: bounded, customPermissions: bounded } },
+        )
+      }
+    }
+
+    return dto
   }
 
   /**
@@ -297,6 +353,6 @@ export class UserService {
       throw new NotFoundException('用户不存在')
     }
 
-    return new UserResponseDto(user)
+    return this.enrichUserResponse(user)
   }
 }

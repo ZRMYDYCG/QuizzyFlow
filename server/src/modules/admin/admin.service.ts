@@ -12,6 +12,16 @@ import { Question, QuestionDocument } from '../question/schemas/question.schema'
 import { Answer, AnswerDocument } from '../answer/schemas/answer.schema'
 import { QueryUsersDto } from './dto/query-users.dto'
 import { UpdateUserRoleDto } from './dto/update-user-role.dto'
+import { UpdateUserAccessDto } from './dto/update-user-access.dto'
+import { UpdateAdminUserDto } from './dto/update-admin-user.dto'
+import { ADMIN_ROUTE_REGISTRY, validateGrantedAccess } from '../../common/constants/access-registry'
+import { getAdminPermissionCatalog } from '../../common/constants/admin-assignable'
+import {
+  clampToRolePermissions,
+  isStaffRole,
+  resolveRolePermissionCeiling,
+} from '../../common/utils/permission-bounds'
+import { RbacService } from '../rbac/rbac.service'
 import { BanUserDto } from './dto/ban-user.dto'
 import { CreateAdminUserDto } from './dto/create-admin-user.dto'
 import { RoleService } from '../role/role.service'
@@ -27,25 +37,145 @@ export class AdminService {
     @InjectModel(Question.name) private questionModel: Model<QuestionDocument>,
     @InjectModel(Answer.name) private answerModel: Model<AnswerDocument>,
     private roleService: RoleService,
+    private rbacService: RbacService,
   ) {}
 
   /**
-   * 获取用户列表（分页）
+   * 获取管理后台分配目录：页面路由 + 操作权限（分离）
    */
-  async getUsers(queryDto: QueryUsersDto) {
-    const {
-      page = 1,
-      pageSize = 20,
-      keyword,
-      role,
-      isActive,
-      isBanned,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-    } = queryDto
+  getAccessRegistry() {
+    return {
+      routes: ADMIN_ROUTE_REGISTRY,
+      permissions: getAdminPermissionCatalog(),
+    }
+  }
 
-    // 构建查询条件
-    const filter: any = {}
+  /**
+   * 获取某用户可分配权限上限（以其当前所属角色为准，实时读库）
+   */
+  async getUserAccessBounds(userId: string) {
+    const user = await this.userModel.findById(userId).lean().exec()
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    const roleDoc = user.role
+      ? await this.roleService.findByName(user.role)
+      : null
+    const rolePermissions = resolveRolePermissionCeiling(
+      user.role,
+      roleDoc?.permissions || [],
+    )
+
+    const grantedRaw =
+      user.grantedButtons?.length > 0
+        ? user.grantedButtons
+        : user.customPermissions || []
+    const grantedButtons = clampToRolePermissions(grantedRaw, rolePermissions)
+
+    const catalog = getAdminPermissionCatalog()
+    const assignableInCatalog = rolePermissions.filter((code) =>
+      catalog.some((g) => g.items.some((i) => i.code === code)),
+    )
+
+    return {
+      userId: user._id.toString(),
+      role: user.role,
+      roleDisplayName: roleDoc?.displayName || user.role,
+      /** 与角色管理、分配弹窗一致的权限上限（已剔除普通用户侧权限） */
+      rolePermissions: assignableInCatalog,
+      rolePermissionCount: assignableInCatalog.length,
+      grantedRoutes: user.grantedRoutes || [],
+      grantedButtons,
+      grantedButtonCount: grantedButtons.length,
+      routes: ADMIN_ROUTE_REGISTRY,
+      permissions: catalog,
+    }
+  }
+
+  /**
+   * 超级管理员为用户分配页面路由与操作权限
+   */
+  async updateUserAccess(
+    userId: string,
+    updateDto: UpdateUserAccessDto,
+  ): Promise<any> {
+    const user = await this.userModel.findById(userId)
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    if (user.role === 'super_admin') {
+      throw new BadRequestException('不能修改超级管理员的权限')
+    }
+
+    if (updateDto.role) {
+      if (updateDto.role === 'admin') {
+        const oldRole = user.role
+        user.role = 'admin'
+        if (oldRole !== 'admin') {
+          await this.roleService.updateUserCount(oldRole)
+          await this.roleService.updateUserCount('admin')
+        }
+      } else if (updateDto.role === 'user') {
+        const oldRole = user.role
+        user.role = 'user'
+        user.grantedRoutes = []
+        user.grantedButtons = []
+        user.customPermissions = []
+        if (oldRole !== 'user') {
+          await this.roleService.updateUserCount(oldRole)
+          await this.roleService.updateUserCount('user')
+        }
+      }
+    }
+
+    if (
+      updateDto.grantedRoutes !== undefined ||
+      updateDto.grantedButtons !== undefined
+    ) {
+      if (!isStaffRole(user.role)) {
+        throw new BadRequestException(
+          '仅管理后台员工可分配页面路由与操作权限',
+        )
+      }
+
+      const roleDoc = await this.roleService.findByName(user.role)
+      const rolePermissions = resolveRolePermissionCeiling(
+      user.role,
+      roleDoc?.permissions || [],
+    )
+
+      const validated = validateGrantedAccess(
+        updateDto.grantedRoutes ?? user.grantedRoutes ?? [],
+        updateDto.grantedButtons ?? user.grantedButtons ?? [],
+      )
+      const boundedButtons = clampToRolePermissions(
+        validated.buttons,
+        rolePermissions,
+      )
+      const rejected = validated.buttons.filter((p) => !boundedButtons.includes(p))
+      if (rejected.length > 0) {
+        throw new BadRequestException(
+          `以下操作权限不在角色「${roleDoc?.displayName || user.role}」的权限范围内：${rejected.join(', ')}`,
+        )
+      }
+
+      user.grantedRoutes = validated.routes
+      user.grantedButtons = boundedButtons
+      user.customPermissions = boundedButtons
+    }
+
+    await user.save()
+    this.rbacService.clearUserCache(userId)
+
+    const { password, ...userWithoutPassword } = user.toObject()
+    return userWithoutPassword
+  }
+
+  private buildUsersFilter(queryDto: QueryUsersDto): Record<string, unknown> {
+    const { keyword, role, isActive, isBanned } = queryDto
+    const filter: Record<string, unknown> = {}
 
     if (keyword) {
       filter.$or = [
@@ -54,18 +184,25 @@ export class AdminService {
         { phone: { $regex: keyword, $options: 'i' } },
       ]
     }
+    if (role) filter.role = role
+    if (isActive !== undefined) filter.isActive = isActive
+    if (isBanned !== undefined) filter.isBanned = isBanned
 
-    if (role) {
-      filter.role = role
-    }
+    return filter
+  }
 
-    if (isActive !== undefined) {
-      filter.isActive = isActive
-    }
+  /**
+   * 获取用户列表（分页）
+   */
+  async getUsers(queryDto: QueryUsersDto) {
+    const {
+      page = 1,
+      pageSize = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = queryDto
 
-    if (isBanned !== undefined) {
-      filter.isBanned = isBanned
-    }
+    const filter = this.buildUsersFilter(queryDto)
 
     // 排序
     const sortOptions: any = {}
@@ -123,6 +260,94 @@ export class AdminService {
   }
 
   /**
+   * 更新用户基本信息（管理员）
+   */
+  async updateUser(userId: string, updateDto: UpdateAdminUserDto): Promise<any> {
+    const user = await this.userModel.findById(userId)
+    if (!user) {
+      throw new NotFoundException('用户不存在')
+    }
+
+    if (user.role === 'super_admin') {
+      throw new BadRequestException('不能修改超级管理员信息')
+    }
+
+    if (updateDto.nickname !== undefined) {
+      user.nickname = updateDto.nickname.trim()
+    }
+    if (updateDto.phone !== undefined) {
+      user.phone = updateDto.phone.trim()
+    }
+    if (updateDto.bio !== undefined) {
+      user.bio = updateDto.bio.trim()
+    }
+    if (updateDto.isActive !== undefined) {
+      user.isActive = updateDto.isActive
+      if (updateDto.isActive) {
+        user.isBanned = false
+        user.bannedReason = ''
+        user.bannedAt = null
+        user.bannedBy = ''
+      }
+    }
+
+    await user.save()
+
+    const { password, ...userWithoutPassword } = user.toObject()
+    return userWithoutPassword
+  }
+
+  /**
+   * 导出用户数据（JSON 行，供前端生成 Excel）
+   */
+  async exportUsers(queryDto: QueryUsersDto) {
+    const { sortBy = 'createdAt', sortOrder = 'desc' } = queryDto
+    const filter = this.buildUsersFilter(queryDto)
+    const sortOptions: Record<string, 1 | -1> = {}
+    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1
+
+    const users = await this.userModel
+      .find(filter)
+      .select('-password')
+      .sort(sortOptions)
+      .limit(10000)
+      .lean()
+      .exec()
+
+    const roleDocs = await this.roleService.findAll({})
+    const roleNameMap = new Map(
+      roleDocs.map((r) => [r.name, r.displayName || r.name]),
+    )
+
+    return users.map((u) => {
+      const row = u as typeof u & { createdAt?: Date; updatedAt?: Date }
+      return {
+        用户名: row.username,
+        昵称: row.nickname,
+        角色: roleNameMap.get(row.role) || row.role,
+        角色标识: row.role,
+        手机号: row.phone || '',
+        个人简介: row.bio || '',
+        账号状态: row.isActive ? '正常' : '已停用',
+        封禁状态: row.isBanned ? '已封禁' : '正常',
+        封禁原因: row.bannedReason || '',
+        已授权页面数:
+          row.role === 'admin' ? (row.grantedRoutes?.length ?? 0) : '—',
+        已授权操作权限数:
+          row.role === 'admin'
+            ? (row.grantedButtons?.length ?? row.customPermissions?.length ?? 0)
+            : '—',
+        最后登录: row.lastLoginAt
+          ? new Date(row.lastLoginAt).toLocaleString('zh-CN')
+          : '',
+        注册时间: row.createdAt
+          ? new Date(row.createdAt).toLocaleString('zh-CN')
+          : '',
+      }
+    })
+  }
+
+  /**
    * 创建管理员用户
    */
   async createAdminUser(
@@ -135,6 +360,10 @@ export class AdminService {
     })
     if (existing) {
       throw new ConflictException('该邮箱已被注册')
+    }
+
+    if (createDto.role === 'super_admin') {
+      throw new BadRequestException('不能创建超级管理员账号')
     }
 
     // 验证角色是否存在
@@ -188,23 +417,38 @@ export class AdminService {
       throw new BadRequestException('角色不存在')
     }
 
-    // 防止降级最后一个超级管理员
-    if (user.role === 'super_admin' && updateDto.role !== 'super_admin') {
-      const superAdminCount = await this.userModel.countDocuments({
-        role: 'super_admin',
-      })
-      if (superAdminCount <= 1) {
-        throw new BadRequestException('不能降级最后一个超级管理员')
-      }
+    if (user.role === 'super_admin') {
+      throw new BadRequestException('不能修改超级管理员的角色或权限')
+    }
+
+    if (updateDto.role === 'super_admin') {
+      throw new BadRequestException('不能将用户设置为超级管理员')
     }
 
     const oldRole = user.role
     user.role = updateDto.role
+
+    const newRoleDoc = await this.roleService.findByName(updateDto.role)
+    const newRolePermissions = resolveRolePermissionCeiling(
+      updateDto.role,
+      newRoleDoc?.permissions || [],
+    )
+
     if (updateDto.customPermissions) {
-      user.customPermissions = updateDto.customPermissions
+      user.customPermissions = clampToRolePermissions(
+        updateDto.customPermissions,
+        newRolePermissions,
+      )
     }
 
+    const granted = user.grantedButtons?.length
+      ? user.grantedButtons
+      : user.customPermissions || []
+    user.grantedButtons = clampToRolePermissions(granted, newRolePermissions)
+    user.customPermissions = user.grantedButtons
+
     await user.save()
+    this.rbacService.clearUserCache(userId)
 
     // 更新角色用户计数
     await this.roleService.updateUserCount(oldRole)
@@ -272,14 +516,8 @@ export class AdminService {
       throw new NotFoundException('用户不存在')
     }
 
-    // 不能删除超级管理员
     if (user.role === 'super_admin') {
-      const superAdminCount = await this.userModel.countDocuments({
-        role: 'super_admin',
-      })
-      if (superAdminCount <= 1) {
-        throw new BadRequestException('不能删除最后一个超级管理员')
-      }
+      throw new BadRequestException('不能删除超级管理员')
     }
 
     // 删除用户的所有问卷和答卷（可选，根据业务需求）

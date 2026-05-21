@@ -22,6 +22,8 @@ import { AuthGuard } from '@nestjs/passport'
 import { AdminService } from './admin.service'
 import { QueryUsersDto } from './dto/query-users.dto'
 import { UpdateUserRoleDto } from './dto/update-user-role.dto'
+import { UpdateUserAccessDto } from './dto/update-user-access.dto'
+import { UpdateAdminUserDto } from './dto/update-admin-user.dto'
 import { BanUserDto } from './dto/ban-user.dto'
 import { CreateAdminUserDto } from './dto/create-admin-user.dto'
 import { BatchDeleteDto } from '../question/dto/batch-delete.dto'
@@ -83,6 +85,17 @@ export class AdminController {
   }
 
   /**
+   * 导出用户数据
+   */
+  @ApiOperation({ summary: '导出用户数据', description: '按筛选条件导出用户列表' })
+  @Get('users/export')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.USER_EXPORT)
+  async exportUsers(@Query() queryDto: QueryUsersDto) {
+    return await this.adminService.exportUsers(queryDto)
+  }
+
+  /**
    * 获取用户详情
    */
   @ApiOperation({ summary: '获取用户详情', description: '获取单个用户的详细信息' })
@@ -93,6 +106,27 @@ export class AdminController {
   @RequirePermissions(PERMISSIONS.USER_VIEW_ALL)
   async getUserDetail(@Param('id') id: string): Promise<any> {
     return await this.adminService.getUserDetail(id)
+  }
+
+  /**
+   * 更新用户基本信息
+   */
+  @ApiOperation({ summary: '更新用户', description: '更新昵称、手机号、简介、账号状态' })
+  @ApiParam({ name: 'id', description: '用户ID' })
+  @Patch('users/:id')
+  @Roles('admin', 'super_admin')
+  @RequirePermissions(PERMISSIONS.USER_UPDATE)
+  @LogOperation({
+    module: 'user',
+    action: 'update',
+    resource: 'user',
+    description: '更新用户信息',
+  })
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateAdminUserDto,
+  ) {
+    return await this.adminService.updateUser(id, updateDto)
   }
 
   /**
@@ -114,6 +148,56 @@ export class AdminController {
       createDto,
       req.user.username,
     )
+  }
+
+  /**
+   * 获取分配目录（页面路由 + 操作权限，分离）
+   */
+  @ApiOperation({
+    summary: '获取分配目录',
+    description: '页面路由与操作权限分开展示，供超级管理员分配',
+  })
+  @Get('access-registry')
+  @Roles('super_admin')
+  async getAccessRegistry() {
+    return this.adminService.getAccessRegistry()
+  }
+
+  /**
+   * 获取用户可分配权限上限（按所属角色实时计算）
+   */
+  @ApiOperation({
+    summary: '获取用户分配上限',
+    description: '返回该用户所属角色的操作权限上限及当前已分配项',
+  })
+  @Get('users/:id/access-bounds')
+  @Roles('super_admin')
+  @RequirePermissions(PERMISSIONS.USER_MANAGE_ROLE)
+  async getUserAccessBounds(@Param('id') id: string) {
+    return await this.adminService.getUserAccessBounds(id)
+  }
+
+  /**
+   * 为用户分配页面路由与操作权限
+   */
+  @ApiOperation({
+    summary: '分配用户访问',
+    description: '超级管理员分配页面路由（grantedRoutes）与操作权限（grantedButtons）',
+  })
+  @Patch('users/:id/access')
+  @Roles('super_admin')
+  @RequirePermissions(PERMISSIONS.USER_MANAGE_ROLE)
+  @LogOperation({
+    module: 'user',
+    action: 'assign_access',
+    resource: 'user',
+    description: '分配用户页面路由与操作权限',
+  })
+  async updateUserAccess(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateUserAccessDto,
+  ) {
+    return await this.adminService.updateUserAccess(id, updateDto)
   }
 
   /**

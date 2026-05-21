@@ -4,6 +4,7 @@ import { useRequest } from 'ahooks'
 import { getUserProfile } from '@/api/modules/user'
 import { loginReducer, logoutReducer } from '@/store/modules/user'
 import { setUserPermissions } from '@/store/modules/admin'
+import { isStaffRole } from '@/utils/permission-bounds'
 import { useGetUserInfo } from './useGetUserInfo'
 
 /**
@@ -51,18 +52,25 @@ export const useLoadUserData = () => {
             },
             role: userInfo.role || 'user',
             customPermissions: userInfo.customPermissions || [],
+            grantedRoutes: userInfo.grantedRoutes || [],
+            grantedButtons:
+              userInfo.grantedButtons || userInfo.customPermissions || [],
+            rolePermissions: userInfo.rolePermissions || [],
             isBanned: userInfo.isBanned || false,
             token,
           })
         )
-        
-        // 如果是管理员，加载权限信息到 admin store
-        if (userInfo.role === 'admin' || userInfo.role === 'super_admin') {
+
+        if (isStaffRole(userInfo.role) || userInfo.role === 'super_admin') {
           dispatch(
             setUserPermissions({
               role: userInfo.role,
               permissions: [],
               customPermissions: userInfo.customPermissions || [],
+              grantedRoutes: userInfo.grantedRoutes || [],
+              grantedButtons:
+                userInfo.grantedButtons || userInfo.customPermissions || [],
+              rolePermissions: userInfo.rolePermissions || [],
             })
           )
         }

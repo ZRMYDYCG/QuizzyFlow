@@ -1,6 +1,8 @@
 import React from 'react'
 import { Input, Select, Button } from 'antd'
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { SearchOutlined, ReloadOutlined, ExportOutlined } from '@ant-design/icons'
+import { PermissionControl } from '@/components/permission-guard'
+import { PERMISSIONS } from '@/constants/permissions'
 
 const { Search } = Input
 
@@ -14,6 +16,8 @@ interface UserFilterProps {
   roles: any[]
   onFilterChange: (values: FilterValue) => void
   onRefresh: () => void
+  onExport?: () => void
+  exportLoading?: boolean
   initialValues?: FilterValue
 }
 
@@ -30,6 +34,8 @@ const UserFilter: React.FC<UserFilterProps> = ({
   roles,
   onFilterChange,
   onRefresh,
+  onExport,
+  exportLoading = false,
   initialValues = {},
 }) => {
   const handleChange = (key: keyof FilterValue, value: any) => {
@@ -110,6 +116,19 @@ const UserFilter: React.FC<UserFilterProps> = ({
       <Button icon={<ReloadOutlined />} onClick={onRefresh}>
         刷新
       </Button>
+      {onExport && (
+        <PermissionControl permission={PERMISSIONS.USER_EXPORT}>
+          <Button
+            type="primary"
+            ghost
+            icon={<ExportOutlined />}
+            loading={exportLoading}
+            onClick={onExport}
+          >
+            导出用户
+          </Button>
+        </PermissionControl>
+      )}
     </div>
   )
 }

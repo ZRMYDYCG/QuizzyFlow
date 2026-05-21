@@ -10,6 +10,9 @@ export interface IAdminState {
   role: UserRole
   permissions: Permission[]
   customPermissions: string[]
+  grantedRoutes: string[]
+  grantedButtons: string[]
+  rolePermissions: string[]
   
   // 用户列表
   users: {
@@ -67,6 +70,9 @@ const initialState: IAdminState = {
   role: 'user' as UserRole,
   permissions: [],
   customPermissions: [],
+  grantedRoutes: [],
+  grantedButtons: [],
+  rolePermissions: [],
   
   users: {
     list: [],
@@ -109,11 +115,18 @@ export const adminSlice = createSlice({
         role: UserRole
         permissions: Permission[]
         customPermissions: string[]
+        grantedRoutes?: string[]
+        grantedButtons?: string[]
+        rolePermissions?: string[]
       }>
     ) => {
       state.role = action.payload.role
       state.permissions = action.payload.permissions
       state.customPermissions = action.payload.customPermissions
+      state.grantedRoutes = action.payload.grantedRoutes ?? []
+      state.grantedButtons =
+        action.payload.grantedButtons ?? action.payload.customPermissions
+      state.rolePermissions = action.payload.rolePermissions ?? []
     },
     
     // 用户列表相关

@@ -30,10 +30,13 @@ import {
   setRolePermissionsAPI,
   getRoleStatisticsAPI,
 } from '@/api/modules/admin'
-import { getGroupedPermissionsAPI } from '@/api/modules/admin'
+import { getAccessRegistryAPI } from '@/api/modules/admin'
+import type { AdminPermissionGroup } from '@/constants/admin-assignable'
+import { normalizeStaffRolePermissions } from '@/constants/admin-assignable'
 import type { ColumnsType } from 'antd/es/table'
 import type { DataNode } from 'antd/es/tree'
 import { useRequest } from 'ahooks'
+import { isStaffRole } from '@/utils/permission-bounds'
 
 const { Search } = Input
 
@@ -50,7 +53,9 @@ const RolesManagement: React.FC = () => {
   const [editingRole, setEditingRole] = useState<any>(null)
   const [selectedRole, setSelectedRole] = useState<any>(null)
   
-  const [groupedPermissions, setGroupedPermissions] = useState<any>({})
+  const [permissionCatalog, setPermissionCatalog] = useState<AdminPermissionGroup[]>(
+    []
+  )
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
   
   const [form] = Form.useForm()
@@ -91,12 +96,13 @@ const RolesManagement: React.FC = () => {
 
   const { run: loadPermissions, loading: permissionsLoading } = useRequest(
     async () => {
-      return await getGroupedPermissionsAPI()
+      const data = await getAccessRegistryAPI()
+      return Array.isArray(data?.permissions) ? data.permissions : []
     },
     {
       manual: true,
       onSuccess: (result) => {
-        setGroupedPermissions(result || {})
+        setPermissionCatalog(result as AdminPermissionGroup[])
       },
       onError: () => {
         message.error('加载权限列表失败')
@@ -152,15 +158,33 @@ const RolesManagement: React.FC = () => {
 
   const handleManagePermissions = async (role: any) => {
     setSelectedRole(role)
-    setSelectedPermissions(role.permissions || [])
+    const stored = role.permissions || []
+    setSelectedPermissions(
+      isStaffRole(role.name) ? normalizeStaffRolePermissions(stored) : stored.filter((c: string) => c.includes(':'))
+    )
     await loadPermissions()
     setPermissionModalVisible(true)
+  }
+
+  const normalizePermissionKeys = (keys: string[] | React.Key[]): string[] => {
+    const codes = keys.map(String).filter((k) => k.includes(':'))
+    return selectedRole && isStaffRole(selectedRole.name)
+      ? normalizeStaffRolePermissions(codes)
+      : codes
+  }
+
+  const countRolePermissions = (role: { name: string; permissions?: string[] }) => {
+    const stored = role.permissions || []
+    return isStaffRole(role.name)
+      ? normalizeStaffRolePermissions(stored).length
+      : stored.filter((c: string) => c.includes(':')).length
   }
 
   const handleSavePermissions = async () => {
     if (!selectedRole) return
     try {
-      await setRolePermissionsAPI(selectedRole._id, selectedPermissions)
+      const codes = normalizePermissionKeys(selectedPermissions)
+      await setRolePermissionsAPI(selectedRole._id, codes)
       message.success('权限设置成功')
       setPermissionModalVisible(false)
       loadRoles()
@@ -169,14 +193,13 @@ const RolesManagement: React.FC = () => {
     }
   }
 
-  // 将权限转换为树形结构
   const permissionsToTreeData = (): DataNode[] => {
-    return Object.entries(groupedPermissions).map(([module, permissions]: [string, any]) => ({
-      title: module.toUpperCase(),
-      key: module,
-      children: permissions.map((perm: any) => ({
-        title: `${perm.name} (${perm.code})`,
-        key: perm.code,
+    return permissionCatalog.map((group) => ({
+      title: group.moduleName,
+      key: group.module,
+      children: group.items.map((item) => ({
+        title: `${item.name} (${item.code})`,
+        key: item.code,
       })),
     }))
   }
@@ -203,8 +226,8 @@ const RolesManagement: React.FC = () => {
       title: '权限数量',
       dataIndex: 'permissions',
       key: 'permissionsCount',
-      render: (permissions) => (
-        <Tag color="blue">{permissions?.length || 0} 个权限</Tag>
+      render: (permissions, record) => (
+        <Tag color="blue">{countRolePermissions(record)} 个权限</Tag>
       ),
     },
     {
@@ -421,7 +444,11 @@ const RolesManagement: React.FC = () => {
         <Spin spinning={permissionsLoading}>
           <div className="mb-4">
             <div className="text-sm text-gray-600 mb-2">
-              已选择 <span className="font-bold text-blue-500">{selectedPermissions.length}</span> 个权限
+              已选择{' '}
+              <span className="font-bold text-blue-500">
+                {normalizePermissionKeys(selectedPermissions).length}
+              </span>{' '}
+              个权限（与「用户管理 → 分配权限」同一目录）
             </div>
           </div>
           <Tree
@@ -429,7 +456,10 @@ const RolesManagement: React.FC = () => {
             defaultExpandAll
             checkedKeys={selectedPermissions}
             onCheck={(checkedKeys: any) => {
-              setSelectedPermissions(checkedKeys)
+              const list = Array.isArray(checkedKeys)
+                ? checkedKeys
+                : checkedKeys.checked
+              setSelectedPermissions(normalizePermissionKeys(list))
             }}
             treeData={permissionsToTreeData()}
           />

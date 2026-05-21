@@ -18,6 +18,7 @@ import TabNav from '../tab-nav'
 import PageTransition from '../page-transition'
 import { useTabNav } from '../../hooks/useTabNav'
 import { sideMenuItems } from '../../config'
+import { useAdminMenu } from '@/hooks/useAdminMenu'
 
 const { Content } = Layout
 
@@ -51,6 +52,7 @@ const ColumnsLayout: React.FC = () => {
   const [selectedMenu, setSelectedMenu] = useState('/admin/dashboard')
   const [notificationVisible, setNotificationVisible] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const filteredSideMenu = useAdminMenu(sideMenuItems)
 
   // 标签页导航
   const {
@@ -119,7 +121,7 @@ const ColumnsLayout: React.FC = () => {
             mode="inline"
             selectedKeys={[location.pathname]}
             onClick={({ key }) => handleMenuClick(key)}
-            items={sideMenuItems}
+            items={filteredSideMenu}
             className={theme === 'dark' ? 'bg-[#1e1e23]' : 'bg-white'}
             style={{ borderRight: 0, height: '100%' }}
           />

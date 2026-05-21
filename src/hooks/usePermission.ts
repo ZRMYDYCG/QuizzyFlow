@@ -2,80 +2,78 @@ import { useSelector } from 'react-redux'
 import type { stateType } from '@/store'
 import type { Permission } from '@/constants/permissions'
 import { ROLES } from '@/constants/roles'
+import { resolveAccessibleRoutes } from '@/constants/access-registry'
+import { clampToRolePermissions, isStaffRole } from '@/utils/permission-bounds'
 
 /**
- * 权限检查 Hook
+ * 权限检查：hasRoute → 页面路由；hasPermission → 操作权限（API/按钮）
  */
 export const usePermission = () => {
   const user = useSelector((state: stateType) => state.user)
   const admin = useSelector((state: stateType) => state.admin)
 
+  const isSuperAdmin = user.role === ROLES.SUPER_ADMIN
+  const isStaffAdmin = isStaffRole(user.role)
+
+  const accessibleRoutes = isSuperAdmin
+    ? null
+    : resolveAccessibleRoutes(admin.grantedRoutes)
+
+  const roleCeiling = user.rolePermissions || []
+  const rawButtons = isStaffAdmin
+    ? [...new Set([...admin.grantedButtons, ...admin.customPermissions])]
+    : []
+  const buttonSet = new Set(
+    isSuperAdmin
+      ? []
+      : clampToRolePermissions(rawButtons, roleCeiling)
+  )
+
   /**
-   * 检查是否拥有指定权限
+   * 是否可访问管理后台路由
+   */
+  const hasRoute = (path: string): boolean => {
+    if (isSuperAdmin) return true
+    if (!isStaffAdmin) return false
+    return accessibleRoutes?.has(path) ?? false
+  }
+
+  /**
+   * 是否拥有按钮级权限（与后端 API 权限码一致）
    */
   const hasPermission = (permission: Permission | Permission[]): boolean => {
-    // 超级管理员拥有所有权限
-    if (user.role === ROLES.SUPER_ADMIN) {
-      return true
-    }
-
-    const permissions = admin.permissions
-    const customPermissions = admin.customPermissions
-
-    const allPermissions = [...permissions, ...customPermissions]
+    if (isSuperAdmin) return true
+    if (!isStaffAdmin) return false
 
     if (Array.isArray(permission)) {
-      // 检查是否拥有任一权限
-      return permission.some((p) => allPermissions.includes(p))
-    } else {
-      // 检查是否拥有指定权限
-      return allPermissions.includes(permission)
+      return permission.some((p) => buttonSet.has(p))
     }
+    return buttonSet.has(permission)
   }
 
-  /**
-   * 检查是否拥有所有指定权限
-   */
   const hasAllPermissions = (permissions: Permission[]): boolean => {
-    if (user.role === ROLES.SUPER_ADMIN) {
-      return true
-    }
-
-    const userPermissions = [...admin.permissions, ...admin.customPermissions]
-    return permissions.every((p) => userPermissions.includes(p))
+    if (isSuperAdmin) return true
+    if (!isStaffAdmin) return false
+    return permissions.every((p) => buttonSet.has(p))
   }
 
-  /**
-   * 检查是否拥有指定角色
-   */
   const hasRole = (role: string | string[]): boolean => {
     if (Array.isArray(role)) {
       return role.includes(user.role)
-    } else {
-      return user.role === role
     }
+    return user.role === role
   }
 
-  /**
-   * 是否为管理员（admin 或 super_admin）
-   */
-  const isAdmin = (): boolean => {
-    return user.role === ROLES.ADMIN || user.role === ROLES.SUPER_ADMIN
-  }
-
-  /**
-   * 是否为超级管理员
-   */
-  const isSuperAdmin = (): boolean => {
-    return user.role === ROLES.SUPER_ADMIN
-  }
+  const isAdmin = (): boolean => isSuperAdmin || isStaffAdmin
 
   return {
+    hasRoute,
     hasPermission,
     hasAllPermissions,
     hasRole,
     isAdmin,
-    isSuperAdmin,
+    isSuperAdmin: () => isSuperAdmin,
+    grantedRoutes: admin.grantedRoutes,
+    grantedButtons: admin.grantedButtons,
   }
 }
-

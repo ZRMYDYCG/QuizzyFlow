@@ -10,13 +10,18 @@ import {
   message,
   Collapse,
   Badge,
+  Alert,
 } from 'antd'
 import {
   SafetyOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
   SyncOutlined,
+  UserOutlined,
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
+import { useGetUserInfo } from '@/hooks/useGetUserInfo'
+import { ROLES } from '@/constants/roles'
 import {
   getPermissionsAPI,
   getGroupedPermissionsAPI,
@@ -32,6 +37,8 @@ const { Panel } = Collapse
  * 管理后台 - 权限管理
  */
 const PermissionsManagement: React.FC = () => {
+  const navigate = useNavigate()
+  const { role } = useGetUserInfo()
   const [permissions, setPermissions] = useState<any[]>([])
   const [groupedPermissions, setGroupedPermissions] = useState<any>({})
   const [moduleFilter, setModuleFilter] = useState<string>()
@@ -142,10 +149,21 @@ const PermissionsManagement: React.FC = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold mb-2">权限管理</h1>
-          <p className="text-gray-600">管理系统权限列表</p>
+          <h1 className="text-2xl font-bold mb-2">权限目录</h1>
+          <p className="text-gray-600">
+            系统预置的路由与按钮权限清单；实际分配请在「用户管理 → 分配权限」中由超级管理员操作
+          </p>
         </div>
         <Space>
+          {role === ROLES.SUPER_ADMIN && (
+            <Button
+              type="primary"
+              icon={<UserOutlined />}
+              onClick={() => navigate('/admin/users')}
+            >
+              去用户管理分配权限
+            </Button>
+          )}
           <Button
             icon={<SyncOutlined />}
             onClick={handleInitialize}
@@ -166,6 +184,14 @@ const PermissionsManagement: React.FC = () => {
           </Button>
         </Space>
       </div>
+
+      <Alert
+        type="info"
+        showIcon
+        className="mb-4"
+        message="本页是权限目录（只读）"
+        description="要给员工分配能访问哪些后台页面、能点哪些按钮，请到左侧「用户管理」，在对应用户操作列点击「分配权限」。"
+      />
 
       {/* 统计卡片 */}
       <Card>

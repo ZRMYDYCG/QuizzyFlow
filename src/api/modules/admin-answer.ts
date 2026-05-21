@@ -95,9 +95,9 @@ export async function batchDeleteAnswers(ids: string[]): Promise<{
   })
 }
 
-// 删除单个答卷
+// 删除单个答卷（管理员）
 export async function deleteAnswer(id: string): Promise<{ message: string }> {
-  return instance.delete(`/api/answer/${id}`)
+  return instance.delete(`/api/answer/admin/${id}`)
 }
 
 // 获取答卷统计

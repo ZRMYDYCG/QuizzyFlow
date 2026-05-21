@@ -40,8 +40,21 @@ export class UserResponseDto {
   @ApiProperty({ description: '用户角色', example: 'user', required: false })
   role?: string
 
-  @ApiProperty({ description: '自定义权限', example: [], required: false })
+  @ApiProperty({ description: '已授权按钮权限', example: [], required: false })
   customPermissions?: string[]
+
+  @ApiProperty({ description: '已授权管理后台路由', example: [], required: false })
+  grantedRoutes?: string[]
+
+  @ApiProperty({ description: '已授权按钮权限码', example: [], required: false })
+  grantedButtons?: string[]
+
+  @ApiProperty({
+    description: '所属角色允许的操作权限上限',
+    example: [],
+    required: false,
+  })
+  rolePermissions?: string[]
 
   @ApiProperty({ description: '是否被封禁', example: false, required: false })
   isBanned?: boolean
@@ -62,7 +75,11 @@ export class UserResponseDto {
     this.phone = user.phone || ''
     this.preferences = user.preferences || {}
     this.role = user.role || 'user'
-    this.customPermissions = user.customPermissions || []
+    this.customPermissions =
+      user.grantedButtons || user.customPermissions || []
+    this.grantedRoutes = user.grantedRoutes || []
+    this.grantedButtons = user.grantedButtons || user.customPermissions || []
+    this.rolePermissions = user.rolePermissions || []
     this.isBanned = user.isBanned || false
     this.bannedReason = user.bannedReason || ''
   }

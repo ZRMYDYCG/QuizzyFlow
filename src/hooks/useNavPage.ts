@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGetUserInfo } from './useGetUserInfo'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ROLES } from '@/constants/roles'
+import { isStaffRole } from '@/utils/permission-bounds'
 
 /**
  * 路由导航守卫 Hook
@@ -53,7 +54,7 @@ export const useNavPage = (waitingUserData: boolean) => {
     const isAdminPath = pathname.startsWith('/admin')
     
     // 判断是否为管理员
-    const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
+    const isAdmin = role === ROLES.SUPER_ADMIN || isStaffRole(role)
 
     // ========== 公开路径，直接放行 ==========
     if (isPublicPath || isPublishPath) {

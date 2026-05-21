@@ -314,6 +314,13 @@ export class AnswerService {
   }
 
   /**
+   * 删除单个答卷（管理员，不校验问卷作者）
+   */
+  async removeAdmin(id: string) {
+    return this.batchDeleteAnswers({ ids: [id] })
+  }
+
+  /**
    * 批量删除答卷（管理员）
    */
   async batchDeleteAnswers(batchDeleteDto: BatchDeleteAnswerDto) {
