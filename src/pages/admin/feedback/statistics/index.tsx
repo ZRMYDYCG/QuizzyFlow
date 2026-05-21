@@ -182,10 +182,10 @@ const FeedbackStatisticsPage: React.FC = () => {
   ]
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">反馈统计</h1>
-        <p className="text-gray-500 mt-1">
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">反馈统计</h1>
+        <p className="mt-1 text-gray-600 dark:text-slate-400">
           查看反馈的整体统计数据和趋势分析
         </p>
       </div>
@@ -254,7 +254,7 @@ const FeedbackStatisticsPage: React.FC = () => {
                         {getStatusText(item.status)}
                       </Tag>
                     </div>
-                    <span className="font-medium text-lg">{item.count}</span>
+                    <span className="text-lg font-medium text-gray-900 dark:text-slate-200">{item.count}</span>
                   </div>
                 ))}
               </div>
@@ -280,7 +280,7 @@ const FeedbackStatisticsPage: React.FC = () => {
                         {getPriorityText(item.priority)}
                       </Tag>
                     </div>
-                    <span className="font-medium text-lg">{item.count}</span>
+                    <span className="text-lg font-medium text-gray-900 dark:text-slate-200">{item.count}</span>
                   </div>
                 ))}
               </div>

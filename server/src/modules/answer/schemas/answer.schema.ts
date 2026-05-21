@@ -44,6 +44,18 @@ export class Answer {
   @Prop()
   duration?: number // 答题用时（秒）
 
+  /** 填写者展示名（匿名时为「匿名用户」） */
+  @Prop()
+  respondentName?: string
+
+  /** 是否匿名提交 */
+  @Prop({ default: false })
+  isAnonymous?: boolean
+
+  /** 已登录填写者的用户名（可选） */
+  @Prop()
+  respondentUsername?: string
+
   @Prop({ default: false })
   isValid: boolean // 是否有效（用于标记垃圾答卷）
 

@@ -9,6 +9,10 @@ import { useState } from 'react'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
 import { QuestionnaireType } from '@/constants/questionnaire-types'
+import {
+  getQuestionOpenPath,
+  getQuestionStatisticsPath,
+} from '@/utils/question-routes'
 
 const { confirm } = Modal
 
@@ -87,7 +91,7 @@ const QuestionListItem: FC<any> = (props) => {
           </button>
           
           <Link
-            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={getQuestionOpenPath(_id, isPublished)}
             className={`text-sm md:text-base font-medium hover:text-blue-400 transition-colors truncate flex-1 ${t.text.primary}`}
           >
             {title}
@@ -140,7 +144,7 @@ const QuestionListItem: FC<any> = (props) => {
         
         <button
           disabled={!isPublished}
-          onClick={() => navigate(`/question/star/${_id}`)}
+          onClick={() => navigate(getQuestionStatisticsPath(_id))}
           className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed hidden sm:flex"
           title="统计"
         >

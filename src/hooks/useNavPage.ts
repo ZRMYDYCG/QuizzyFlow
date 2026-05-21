@@ -41,8 +41,13 @@ export const useNavPage = (waitingUserData: boolean) => {
     // 检查是否为公开路径
     const isPublicPath = publicPaths.includes(pathname)
     
-    // 发布页面路径（允许公开访问）
-    const isPublishPath = pathname.startsWith('/question/publish/')
+    // 发布页面路径（允许公开访问，含旧版 /question/:id 短链）
+    const legacyPublishMatch = pathname.match(/^\/question\/([^/]+)$/)
+    const isLegacyPublishPath =
+      legacyPublishMatch !== null &&
+      !['edit', 'statistics', 'publish', 'static'].includes(legacyPublishMatch[1])
+    const isPublishPath =
+      pathname.startsWith('/question/publish/') || isLegacyPublishPath
     
     // admin 路径（需要管理员权限）
     const isAdminPath = pathname.startsWith('/admin')

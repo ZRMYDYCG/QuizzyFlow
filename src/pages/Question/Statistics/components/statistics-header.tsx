@@ -4,6 +4,8 @@ import { Space, Button, Input, Tooltip, message, Popover, Dropdown, Modal } from
 import { LeftOutlined, CopyOutlined, QrcodeOutlined, ShareAltOutlined, EllipsisOutlined } from '@ant-design/icons'
 import { useResponsive } from 'ahooks'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
+import { useManageTheme } from '@/hooks/useManageTheme'
+import { cn } from '@/utils'
 import QRCodePopover from './qrcode-popover'
 
 const StatisticsHeader = memo(() => {
@@ -12,9 +14,10 @@ const StatisticsHeader = memo(() => {
   const { title, isPublished } = useGetPageInfo()
   const responsive = useResponsive()
   const isMobile = !responsive.md
+  const t = useManageTheme()
 
   const questionUrl = useMemo(
-    () => `${window.location.origin}/question/${id}`,
+    () => `${window.location.origin}/question/publish/${id}`,
     [id]
   )
 
@@ -52,7 +55,7 @@ const StatisticsHeader = memo(() => {
           <Button type="link" onClick={handleGoBack} icon={<LeftOutlined />}>
             返回
           </Button>
-          <h2 className="text-xl font-bold">{title}</h2>
+          <h2 className={cn('text-xl font-bold', t.text.primary)}>{title}</h2>
         </Space>
       </div>
       <div className="flex-1 text-center">
@@ -74,7 +77,7 @@ const StatisticsHeader = memo(() => {
         </Button>
       </div>
     </div>
-  ), [title, isPublished, questionUrl, copyLink, handleGoBack, handleEdit])
+  ), [title, isPublished, questionUrl, copyLink, handleGoBack, handleEdit, t.text.primary])
 
   // 移动端：紧凑布局
   const mobileMenuItems = useMemo(() => [
@@ -109,7 +112,9 @@ const StatisticsHeader = memo(() => {
             icon={<LeftOutlined />}
             size="small"
           />
-          <h2 className="text-base font-bold truncate max-w-[200px]">{title}</h2>
+          <h2 className={cn('text-base font-bold truncate max-w-[200px]', t.text.primary)}>
+            {title}
+          </h2>
         </Space>
         <Space size="small">
           {isPublished && (
@@ -123,10 +128,15 @@ const StatisticsHeader = memo(() => {
         </Space>
       </div>
     </div>
-  ), [title, isPublished, handleGoBack, handleEdit, mobileMenuItems])
+  ), [title, isPublished, handleGoBack, handleEdit, mobileMenuItems, t.text.primary])
 
   return (
-    <div className="bg-white border-b border-gray-200 py-2 md:py-[12px]">
+    <div
+      className={cn(
+        'border-b py-2 md:py-[12px]',
+        t.isDark ? 'bg-[#1e1e23] border-white/10' : 'bg-white border-gray-200'
+      )}
+    >
       <div className="px-2 md:mx-[24px]">
         {isMobile ? renderMobileLayout : renderDesktopLayout}
       </div>

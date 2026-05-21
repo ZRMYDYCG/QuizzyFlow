@@ -17,6 +17,11 @@ export interface SubmitAnswerData {
   questionId: string
   answerList: AnswerItem[]
   duration?: number // 答题用时（秒）
+  /** 填写者展示名（匿名时由后端记为「匿名用户」） */
+  respondentName?: string
+  isAnonymous?: boolean
+  /** 已登录用户的用户名 */
+  respondentUsername?: string
 }
 
 /**

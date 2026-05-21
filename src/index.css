@@ -10,6 +10,9 @@
 /* 导入中国风主题工具类 */
 @import './styles/theme-utilities.css';
 
+/* Ant Design 表单选中/聚焦态文字可读性修正 */
+@import './styles/antd-theme-fix.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

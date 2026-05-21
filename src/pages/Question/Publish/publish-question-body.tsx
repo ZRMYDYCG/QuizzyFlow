@@ -1,33 +1,15 @@
 import React from 'react'
 import { Button } from 'antd'
 import { SendOutlined } from '@ant-design/icons'
-import { QuestionComponentType } from '@/store/modules/question-component'
 import {
   MaterialLinkageProvider,
   LinkedComponentRenderer,
 } from '@/features/material-linkage'
-import type { MaterialLinkageRule } from '@/features/material-linkage'
 import QuestionnairePagination from '@/components/questionnaire/questionnaire-pagination'
+import { cn } from '@/utils'
+import type { PublishQuestionBodyProps } from './publish-question-body.types'
 
-export interface PublishQuestionBodyProps {
-  componentList: QuestionComponentType[]
-  linkages: MaterialLinkageRule[]
-  displayItems: QuestionComponentType[]
-  isAnswerMode: boolean
-  answerValues: Record<string, any>
-  onAnswerValuesChange: (values: Record<string, unknown>) => void
-  paginationEnabled: boolean
-  visibleCount: number
-  currentPage: number
-  totalItems: number
-  itemsPerPage: number
-  onPageChange: (page: number) => void
-  canSubmit: boolean
-  submitting: boolean
-  onSubmit: () => void
-}
-
-const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
+const PublishQuestionBody = ({
   componentList,
   linkages,
   displayItems,
@@ -43,9 +25,21 @@ const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
   canSubmit,
   submitting,
   onSubmit,
-}) => {
+  identitySection,
+  headerSection,
+  isDark = false,
+}: PublishQuestionBodyProps) => {
+  const itemShellClass = cn(
+    'm-[12px] p-4 rounded-xl transition-colors',
+    isDark
+      ? 'bg-slate-800/70 border border-slate-700/60 shadow-none'
+      : 'bg-white/90 border border-gray-100 shadow-sm'
+  )
+
   return (
-    <>
+    <div className="publish-question-body">
+      {headerSection}
+      {isAnswerMode ? identitySection : null}
       <MaterialLinkageProvider
         componentList={componentList}
         linkages={linkages}
@@ -54,7 +48,7 @@ const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
         onValuesChange={onAnswerValuesChange}
       >
         {displayItems.map((item) => (
-          <div key={item.fe_id} className="m-[12px]">
+          <div key={item.fe_id} className={itemShellClass}>
             <LinkedComponentRenderer
               component={item}
               isAnswerMode={isAnswerMode}
@@ -70,7 +64,7 @@ const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
         ))}
       </MaterialLinkageProvider>
 
-      {paginationEnabled && visibleCount > 0 ? (
+      {paginationEnabled && visibleCount !== 0 ? (
         <QuestionnairePagination
           current={currentPage}
           total={totalItems}
@@ -86,7 +80,7 @@ const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
             size="large"
             icon={<SendOutlined />}
             loading={submitting}
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
             onClick={onSubmit}
             className="px-12 h-12 text-base font-medium"
           >
@@ -94,8 +88,9 @@ const PublishQuestionBody: React.FC<PublishQuestionBodyProps> = ({
           </Button>
         </div>
       ) : null}
-    </>
+    </div>
   )
 }
 
 export default PublishQuestionBody
+export type { PublishQuestionBodyProps } from './publish-question-body.types'

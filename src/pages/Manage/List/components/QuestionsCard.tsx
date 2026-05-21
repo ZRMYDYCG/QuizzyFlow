@@ -13,6 +13,10 @@ import { useManageTheme } from '@/hooks/useManageTheme'
 import { useTheme } from '@/contexts/ThemeContext'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
 import { QuestionnaireType } from '@/constants/questionnaire-types'
+import {
+  getQuestionOpenPath,
+  getQuestionStatisticsPath,
+} from '@/utils/question-routes'
 
 const { confirm } = Modal
 
@@ -138,7 +142,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
               
               <div className="flex-1 min-w-0">
                 <Link
-                  to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+                  to={getQuestionOpenPath(_id, isPublished)}
                   className={`text-base md:text-lg font-semibold transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
                   style={{ color: t.text.primary }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = primaryColor }}
@@ -215,7 +219,7 @@ const QuestionsCard: FC<QuestionCardProps> = (props: QuestionCardProps) => {
             
             <button
               disabled={!isPublished}
-              onClick={() => navigate(`/question/star/${_id}`)}
+              onClick={() => navigate(getQuestionStatisticsPath(_id))}
               className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:flex"
               title="查看统计"
             >

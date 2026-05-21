@@ -11,6 +11,7 @@ import Register from '@/pages/register'
 import ForgotPassword from '@/pages/forgot-password'
 import Terms from '@/pages/terms'
 import Privacy from '@/pages/privacy'
+import Feedback from '@/pages/feedback'
 import NotFound from '@/pages/not-found'
 import Forbidden from '@/pages/forbidden'
 import Dashboard from '@/pages/manage/dashboard'
@@ -20,6 +21,8 @@ import Star from '@/pages/manage/star'
 import Edit from '@/pages/question/edit'
 import Statistics from '@/pages/question/statistics'
 import Publish from '@/pages/question/publish'
+import LegacyPublishRedirect from '@/pages/question/legacy-publish-redirect'
+import LegacyStaticRedirect from '@/pages/question/legacy-static-redirect'
 import TemplateMarket from '@/pages/template/market'
 import TemplateDetail from '@/pages/template/detail'
 import ProfileOverview from '@/pages/profile/overview'
@@ -61,6 +64,10 @@ const router = createBrowserRouter([
         path: 'privacy',
         element: <Privacy />,
       },
+      {
+        path: 'feedback',
+        element: <Feedback />,
+      },
     ],
   },
   {
@@ -72,12 +79,20 @@ const router = createBrowserRouter([
         element: <Edit />,
       },
       {
+        path: 'static/:id',
+        element: <LegacyStaticRedirect />,
+      },
+      {
         path: 'statistics/:id',
         element: <Statistics />,
       },
       {
         path: 'publish/:id',
         element: <Publish />,
+      },
+      {
+        path: ':id',
+        element: <LegacyPublishRedirect />,
       },
     ],
   },

@@ -1,26 +1,74 @@
-import { memo, useState, useMemo, useCallback } from 'react'
+import { memo, useState, useMemo, useCallback, useEffect } from 'react'
 import { useRequest, useResponsive } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import { Typography, Spin, Table, Pagination, Tooltip, Image, Tag, Rate } from 'antd'
+import {
+  Typography,
+  Spin,
+  Table,
+  Pagination,
+  Tooltip,
+  Image,
+  Tag,
+  Rate,
+  Button,
+  Space,
+  Input,
+  message,
+} from 'antd'
+import {
+  DownloadOutlined,
+  ReloadOutlined,
+  FileExcelOutlined,
+} from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import { getQuestionsStatistics } from '@/api/modules/statistics'
+import dayjs from 'dayjs'
+import {
+  getQuestionsStatistics,
+  exportQuestionsStatistics,
+} from '@/api/modules/statistics'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
+import useGetPageInfo from '@/hooks/useGetPageInfo'
 import { cn } from '@/utils/index'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useManageTheme } from '@/hooks/useManageTheme'
 import type { ComponentSelectionProps, StatisticsAnswer } from '../types'
+import { STATS_META, META_COLUMN_LABELS, CHART_STAT_TYPES } from '../constants'
+import StatisticsOverview from './statistics-overview'
+import ComponentStatPanel from './component-stat-panel'
+import {
+  buildExportColumns,
+  downloadAnswersExcel,
+} from '../utils/export-answers-excel'
+
+const cellText = {
+  muted: (isDark: boolean) => (isDark ? 'text-slate-500' : 'text-gray-400'),
+  secondary: (isDark: boolean) => (isDark ? 'text-slate-400' : 'text-gray-600'),
+  label: (isDark: boolean) => (isDark ? 'text-slate-300' : 'text-gray-700'),
+  hint: (isDark: boolean) => (isDark ? 'text-slate-500' : 'text-gray-500'),
+}
 
 interface ComponentData {
   fe_id: string
   title: string
   type: string
+  isHidden?: boolean
   props?: Record<string, any>
 }
 
 // 根据组件类型渲染不同的单元格内容
-const renderCellByType = (type: string, value: any, props?: any, isMobile?: boolean, primaryColor?: string) => {
+const renderCellByType = (
+  type: string,
+  value: any,
+  props?: any,
+  isMobile?: boolean,
+  primaryColor?: string,
+  isDark = false
+) => {
   // 空值处理
   if (value === null || value === undefined || value === '') {
-    return <span className="text-gray-400 text-xs md:text-sm">-</span>
+    return (
+      <span className={cn(cellText.muted(isDark), 'text-xs md:text-sm')}>-</span>
+    )
   }
 
   switch (type) {
@@ -42,7 +90,7 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
           </div>
         )
       }
-      return <span className="text-gray-400 text-xs">无签名</span>
+      return <span className={cn(cellText.muted(isDark), 'text-xs')}>无签名</span>
 
     // ========== 颜色选择器 - 显示色块 ==========
     case 'question-color-picker':
@@ -50,7 +98,10 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
         return (
           <div className="flex items-center gap-1 md:gap-2">
             <div 
-              className="w-6 h-6 md:w-8 md:h-8 rounded border-2 border-gray-300 shadow-sm flex-shrink-0"
+              className={cn(
+                'w-6 h-6 md:w-8 md:h-8 rounded border-2 shadow-sm flex-shrink-0',
+                isDark ? 'border-slate-600' : 'border-gray-300'
+              )}
               style={{ backgroundColor: value }}
             />
             {!isMobile && <span className="font-mono text-xs md:text-sm">{value}</span>}
@@ -72,7 +123,9 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
               allowHalf 
               style={{ fontSize: isMobile ? 12 : 20 }}
             />
-            <span className="text-xs md:text-sm text-gray-600">({ratingValue})</span>
+            <span className={cn('text-xs md:text-sm', cellText.secondary(isDark))}>
+              ({ratingValue})
+            </span>
           </div>
         )
       }
@@ -94,7 +147,9 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
         return (
           <div className="flex items-center gap-1 md:gap-2">
             <Tag color={color} className="m-0">{npsValue} 分</Tag>
-            {!isMobile && <span className="text-xs text-gray-500">{label}</span>}
+            {!isMobile && (
+              <span className={cn('text-xs', cellText.hint(isDark))}>{label}</span>
+            )}
           </div>
         )
       }
@@ -104,20 +159,26 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
     case 'question-matrix':
       if (typeof value === 'object' && !Array.isArray(value)) {
         const entries = Object.entries(value)
-        if (entries.length === 0) return <span className="text-gray-400 text-xs">未填写</span>
+        if (entries.length === 0) {
+          return <span className={cn(cellText.muted(isDark), 'text-xs')}>未填写</span>
+        }
         
         return (
           <div className="space-y-0.5 md:space-y-1">
             {entries.slice(0, isMobile ? 2 : undefined).map(([key, val], idx) => (
               <div key={idx} className="text-xs">
-                <span className="font-medium text-gray-700">{isMobile ? key.substring(0, 4) : key}:</span>{' '}
-                <span className="text-gray-600">
+                <span className={cn('font-medium', cellText.label(isDark))}>
+                  {isMobile ? key.substring(0, 4) : key}:
+                </span>{' '}
+                <span className={cellText.secondary(isDark)}>
                   {Array.isArray(val) ? val.join(', ') : String(val)}
                 </span>
               </div>
             ))}
             {isMobile && entries.length > 2 && (
-              <div className="text-xs text-gray-400">+{entries.length - 2}项</div>
+              <div className={cn('text-xs', cellText.muted(isDark))}>
+                +{entries.length - 2}项
+              </div>
             )}
           </div>
         )
@@ -200,7 +261,7 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
           </span>
         )
       }
-      return <span className="text-gray-400 text-xs">未填写</span>
+      return <span className={cn(cellText.muted(isDark), 'text-xs')}>未填写</span>
 
     // ========== 邮箱输入框 - 邮箱显示 ==========
     case 'question-email-input':
@@ -266,7 +327,7 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
           </div>
         )
       }
-      return <span className="text-gray-400 text-xs">无标签</span>
+      return <span className={cn(cellText.muted(isDark), 'text-xs')}>无标签</span>
 
     // ========== 日期范围选择器 - 日期范围显示 ==========
     case 'question-range-picker':
@@ -277,18 +338,18 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
           return (
             <div className="text-xs md:text-sm space-y-1">
               <div className="flex items-center gap-1">
-                <span className="text-gray-500 text-xs">起:</span>
+                <span className={cn(cellText.hint(isDark), 'text-xs')}>起:</span>
                 <span className="font-mono">{start}</span>
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-gray-500 text-xs">止:</span>
+                <span className={cn(cellText.hint(isDark), 'text-xs')}>止:</span>
                 <span className="font-mono">{end}</span>
               </div>
             </div>
           )
         }
       }
-      return <span className="text-gray-400 text-xs">未选择</span>
+      return <span className={cn(cellText.muted(isDark), 'text-xs')}>未选择</span>
 
     // ========== 时间范围选择器 - 时间范围显示 ==========
     case 'question-time-range-picker':
@@ -300,14 +361,14 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
             <div className="text-xs md:text-sm font-mono">
               <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1">
                 <span>{start}</span>
-                <span className="text-gray-400">~</span>
+                <span className={cellText.muted(isDark)}>~</span>
                 <span>{end}</span>
               </div>
             </div>
           )
         }
       }
-      return <span className="text-gray-400 text-xs">未选择</span>
+      return <span className={cn(cellText.muted(isDark), 'text-xs')}>未选择</span>
 
     // ========== 搜索输入框 - 普通文本显示 ==========
     case 'question-search-input':
@@ -393,7 +454,7 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
         return (
           <div className="flex items-center gap-1 md:gap-2">
             <Tag color="blue" className="text-xs m-0 font-mono">{value[0]}</Tag>
-            <span className="text-gray-400 text-xs">~</span>
+            <span className={cn(cellText.muted(isDark), 'text-xs')}>~</span>
             <Tag color="blue" className="text-xs m-0 font-mono">{value[1]}</Tag>
           </div>
         )
@@ -461,19 +522,40 @@ const renderCellByType = (type: string, value: any, props?: any, isMobile?: bool
 }
 
 const StatisticsTable = memo(
-  ({ selectedComponentId, setSelectedComponent }: ComponentSelectionProps) => {
+  ({ selectedComponentId, selectedComponentType, setSelectedComponent }: ComponentSelectionProps) => {
     const [total, setTotal] = useState<number>(0)
     const [list, setList] = useState<StatisticsAnswer[]>([])
     const [page, setPage] = useState(1)
     const [pageSize, setPageSize] = useState(10)
+    const [keyword, setKeyword] = useState('')
+    const [exporting, setExporting] = useState(false)
 
     const { componentList } = useGetComponentInfo()
+    const { title: questionTitle } = useGetPageInfo()
     const { id = '' } = useParams()
     const responsive = useResponsive()
     const isMobile = !responsive.md
     const { primaryColor } = useTheme()
+    const t = useManageTheme()
 
-    const { loading } = useRequest(
+    const visibleComponents = useMemo(
+      () => componentList.filter((c: ComponentData) => !c.isHidden),
+      [componentList]
+    )
+
+    const exportColumns = useMemo(
+      () => buildExportColumns(visibleComponents),
+      [visibleComponents]
+    )
+
+    const selectedComponentTitle = useMemo(() => {
+      const c = visibleComponents.find(
+        (item: ComponentData) => item.fe_id === selectedComponentId
+      )
+      return c?.props?.title || c?.title || ''
+    }, [visibleComponents, selectedComponentId])
+
+    const { loading, refresh } = useRequest(
       async () => {
         return await getQuestionsStatistics(id, {
           page,
@@ -490,6 +572,63 @@ const StatisticsTable = memo(
       }
     )
 
+    const filteredList = useMemo(() => {
+      const q = keyword.trim().toLowerCase()
+      if (!q) return list
+      return list.filter((row) =>
+        Object.entries(row).some(([key, val]) => {
+          if (key === '_id') return false
+          return String(val ?? '').toLowerCase().includes(q)
+        })
+      )
+    }, [list, keyword])
+
+    const handleExportAll = useCallback(async () => {
+      try {
+        setExporting(true)
+        message.loading({ content: '正在导出全量数据...', key: 'stat-export', duration: 0 })
+        const { list: allList, total: exportTotal } = await exportQuestionsStatistics(id)
+        if (!allList?.length) {
+          message.warning({ content: '没有可导出的数据', key: 'stat-export' })
+          return
+        }
+        const prefix = (questionTitle || '问卷统计').replace(/[\\/:*?"<>|]/g, '_')
+        downloadAnswersExcel(allList, exportColumns, prefix)
+        message.success({
+          content: `已导出全部 ${exportTotal} 条答卷`,
+          key: 'stat-export',
+        })
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : '导出失败'
+        message.error({ content: msg, key: 'stat-export' })
+      } finally {
+        setExporting(false)
+      }
+    }, [id, exportColumns, questionTitle])
+
+    const handleExportCurrentPage = useCallback(() => {
+      try {
+        if (!filteredList.length) {
+          message.warning('当前页没有可导出的数据')
+          return
+        }
+        const prefix = `${(questionTitle || '问卷统计').replace(/[\\/:*?"<>|]/g, '_')}_第${page}页`
+        downloadAnswersExcel(filteredList, exportColumns, prefix)
+        message.success(`已导出当前页 ${filteredList.length} 条`)
+      } catch (err: unknown) {
+        message.error(err instanceof Error ? err.message : '导出失败')
+      }
+    }, [filteredList, exportColumns, questionTitle, page])
+
+    useEffect(() => {
+      if (selectedComponentId || !visibleComponents.length) return
+      const first =
+        visibleComponents.find((c: ComponentData) =>
+          CHART_STAT_TYPES.has(c.type)
+        ) || visibleComponents[0]
+      setSelectedComponent(first.fe_id, first.type)
+    }, [visibleComponents, selectedComponentId, setSelectedComponent])
+
     const handleColumnClick = useCallback(
       (fe_id: string, type: string) => {
         setSelectedComponent(fe_id, type)
@@ -497,9 +636,48 @@ const StatisticsTable = memo(
       [setSelectedComponent]
     )
 
-    const columns: ColumnsType<StatisticsAnswer> = useMemo(
+    const metaColumns: ColumnsType<StatisticsAnswer> = useMemo(
+      () => [
+        {
+          title: META_COLUMN_LABELS[STATS_META.submittedAt],
+          dataIndex: STATS_META.submittedAt,
+          key: STATS_META.submittedAt,
+          width: isMobile ? 140 : 170,
+          fixed: isMobile ? 'left' : undefined,
+          render: (val: string) =>
+            val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '—',
+        },
+        {
+          title: META_COLUMN_LABELS[STATS_META.respondentName],
+          dataIndex: STATS_META.respondentName,
+          key: STATS_META.respondentName,
+          width: isMobile ? 90 : 120,
+          ellipsis: true,
+        },
+        {
+          title: META_COLUMN_LABELS[STATS_META.duration],
+          dataIndex: STATS_META.duration,
+          key: STATS_META.duration,
+          width: isMobile ? 80 : 100,
+        },
+        {
+          title: META_COLUMN_LABELS[STATS_META.isAnonymous],
+          dataIndex: STATS_META.isAnonymous,
+          key: STATS_META.isAnonymous,
+          width: 64,
+          render: (val: string) => (
+            <Tag color={val === '是' ? 'default' : 'blue'} className="m-0 text-xs">
+              {val || '—'}
+            </Tag>
+          ),
+        },
+      ],
+      [isMobile]
+    )
+
+    const questionColumns: ColumnsType<StatisticsAnswer> = useMemo(
       () =>
-        componentList.map((c: ComponentData, index: number) => {
+        visibleComponents.map((c: ComponentData, index: number) => {
           const { fe_id, title, props = {}, type } = c
           const columnTitle = props.title || title
 
@@ -550,17 +728,30 @@ const StatisticsTable = memo(
               150
             ),
             ellipsis: false,
-            render: (value: any) => renderCellByType(type, value, props, isMobile, primaryColor),
+            render: (value: any) =>
+              renderCellByType(type, value, props, isMobile, primaryColor, t.isDark),
             // 移动端固定第一列
-            fixed: isMobile && index === 0 ? 'left' : undefined,
+            fixed: undefined,
           }
         }),
-      [componentList, selectedComponentId, handleColumnClick, isMobile, primaryColor]
+      [
+        visibleComponents,
+        selectedComponentId,
+        handleColumnClick,
+        isMobile,
+        primaryColor,
+        t.isDark,
+      ]
+    )
+
+    const columns = useMemo(
+      () => [...metaColumns, ...questionColumns],
+      [metaColumns, questionColumns]
     )
 
     const dataSource = useMemo(
-      () => list.map((item) => ({ ...item, key: item._id })),
-      [list]
+      () => filteredList.map((item) => ({ ...item, key: item._id })),
+      [filteredList]
     )
 
     const handlePageChange = useCallback((newPage: number) => {
@@ -584,22 +775,72 @@ const StatisticsTable = memo(
     }
 
     return (
-      <div className="w-full h-full flex flex-col">
-        <Typography.Title 
-          level={isMobile ? 4 : 3} 
-          className="flex-shrink-0 mb-2 md:mb-4"
-        >
-          答卷数量：{total}
-        </Typography.Title>
+      <div className="w-full h-full flex flex-col overflow-hidden">
+        <StatisticsOverview />
+
+        <ComponentStatPanel
+          componentId={selectedComponentId}
+          componentType={selectedComponentType}
+          componentTitle={selectedComponentTitle}
+        />
+
+        <div className="flex-shrink-0 flex flex-col gap-2 md:gap-3 mb-2 md:mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Typography.Title level={isMobile ? 4 : 3} className="!mb-0">
+              答卷数量：{total}
+              {keyword.trim() && (
+                <span className={cn('text-sm font-normal ml-2', t.text.secondary)}>
+                  （当前页筛选 {filteredList.length} 条）
+                </span>
+              )}
+            </Typography.Title>
+            <Space wrap size={isMobile ? 'small' : 'middle'}>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => refresh()}
+                loading={loading}
+                size={isMobile ? 'small' : 'middle'}
+              >
+                刷新
+              </Button>
+              <Button
+                icon={<FileExcelOutlined />}
+                onClick={handleExportCurrentPage}
+                disabled={!filteredList.length}
+                size={isMobile ? 'small' : 'middle'}
+              >
+                导出本页
+              </Button>
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={handleExportAll}
+                loading={exporting}
+                size={isMobile ? 'small' : 'middle'}
+              >
+                全量导出 Excel
+              </Button>
+            </Space>
+          </div>
+          <Input.Search
+            allowClear
+            placeholder="搜索当前页（填写者、答案内容等）"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            size={isMobile ? 'small' : 'middle'}
+            className="max-w-md"
+          />
+        </div>
+
         <div className="flex-1 min-h-0 mb-2 md:mb-4">
           <Table
             columns={columns}
             dataSource={dataSource}
             pagination={false}
             bordered
-            scroll={{ 
-              x: isMobile ? 800 : 'max-content', 
-              y: isMobile ? 'calc(100vh - 280px)' : 'calc(100vh - 320px)' 
+            scroll={{
+              x: isMobile ? 960 : 'max-content',
+              y: isMobile ? 'calc(100vh - 420px)' : 'calc(100vh - 480px)',
             }}
             size={isMobile ? 'small' : 'middle'}
           />

@@ -2,6 +2,7 @@ import { FC, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Star, BarChart3, Calendar } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useManageTheme } from '@/hooks/useManageTheme'
+import { getQuestionOpenPath } from '@/utils/question-routes'
 
 interface RecentStarredProps {
   questions: any[]
@@ -13,7 +14,7 @@ const RecentStarredCard: FC<{ question: any }> = ({ question }) => {
 
   return (
     <Link
-      to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+      to={getQuestionOpenPath(_id, isPublished)}
       className="group relative flex-shrink-0 w-[280px] md:w-[320px]"
     >
       <div className={`p-4 rounded-xl border hover:border-yellow-500/50 hover:shadow-lg transition-all duration-300 h-full ${

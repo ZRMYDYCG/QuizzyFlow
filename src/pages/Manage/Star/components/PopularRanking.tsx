@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { TrendingUp, BarChart3, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { getQuestionOpenPath } from '@/utils/question-routes'
 import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface PopularRankingProps {
@@ -59,7 +60,7 @@ const PopularRanking: FC<PopularRankingProps> = ({ questions }) => {
           return (
             <Link
               key={_id}
-              to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+              to={getQuestionOpenPath(_id, isPublished)}
               className="group block"
             >
               <div className={`flex items-center gap-3 p-3 rounded-lg transition-all ${

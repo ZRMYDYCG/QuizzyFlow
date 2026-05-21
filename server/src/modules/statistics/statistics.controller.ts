@@ -53,6 +53,23 @@ export class StatisticsController {
     status: 200,
     description: '获取成功',
   })
+  @Get(':questionId/overview')
+  @ApiOperation({ summary: '获取问卷答卷概览统计' })
+  async getOverview(@Param('questionId') questionId: string, @Request() req) {
+    const { username } = req.user
+    return await this.statisticsService.getOverview(questionId, username)
+  }
+
+  @Get(':questionId/export')
+  @ApiOperation({ summary: '全量导出问卷答卷数据' })
+  async exportAnswerList(
+    @Param('questionId') questionId: string,
+    @Request() req,
+  ) {
+    const { username } = req.user
+    return await this.statisticsService.exportAnswerList(questionId, username)
+  }
+
   @Get(':questionId')
   async getAnswerList(
     @Param('questionId') questionId: string,

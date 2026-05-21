@@ -30,6 +30,7 @@ import { MarkAnswerDto } from './dto/mark-answer.dto'
 import { AuthGuard } from '../auth/auth.guard'
 import { RolesGuard } from '../../common/guards/roles.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
+import { Public } from '@/common/decorators/public.decorator'
 
 @ApiTags('答卷')
 @Controller('answer')
@@ -52,6 +53,7 @@ export class AnswerController {
     status: HttpStatus.BAD_REQUEST,
     description: '问卷未发布或数据验证失败',
   })
+  @Public()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(

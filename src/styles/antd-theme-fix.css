@@ -1,0 +1,82 @@
+/**
+ * Ant Design 主题修正：选中/聚焦态保持正文可读，避免主题色盖住表单文字
+ */
+
+.ant-input,
+.ant-input-affix-wrapper > input.ant-input,
+.ant-input-number-input,
+.ant-select-selection-item,
+.ant-select-selection-placeholder,
+.ant-select-selection-search-input,
+.ant-picker-input > input {
+  color: var(--ant-color-text) !important;
+}
+
+.ant-input::placeholder,
+.ant-input-number-input::placeholder,
+.ant-select-selection-placeholder,
+.ant-picker-input > input::placeholder {
+  color: var(--ant-color-text-placeholder) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused .ant-picker-input {
+  color: var(--ant-color-text) !important;
+  background-color: var(--ant-color-bg-container) !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: var(--ant-color-text) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--ant-color-primary) 12%,
+    var(--ant-color-bg-elevated, var(--ant-color-bg-container))
+  ) !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled):not(.ant-select-item-option-selected) {
+  background-color: var(--ant-color-fill-tertiary) !important;
+}
+
+.ant-select-dropdown .ant-select-item-option-selected .ant-select-item-option-state {
+  color: var(--ant-color-primary) !important;
+}
+
+.ant-cascader-menu-item-active:not(.ant-cascader-menu-item-disabled),
+.ant-cascader-menu-item[data-path-key].ant-cascader-menu-item-active {
+  background-color: color-mix(
+    in srgb,
+    var(--ant-color-primary) 12%,
+    var(--ant-color-bg-elevated, var(--ant-color-bg-container))
+  ) !important;
+  color: var(--ant-color-text) !important;
+}
+
+.ant-tree-select-dropdown .ant-select-tree-node-selected .ant-select-tree-title,
+.ant-tree .ant-tree-node-selected .ant-tree-title {
+  color: var(--ant-color-text) !important;
+}
+
+.ant-radio-wrapper,
+.ant-checkbox-wrapper {
+  color: var(--ant-color-text);
+}
+
+.ant-form-item-label > label {
+  color: var(--ant-color-text);
+}
+
+.ant-table-tbody > tr.ant-table-row-selected > td {
+  color: var(--ant-color-text);
+}
+
+.ant-input::selection,
+.ant-input-number-input::selection,
+textarea.ant-input::selection {
+  background: color-mix(in srgb, var(--ant-color-primary) 28%, transparent);
+  color: var(--ant-color-text);
+}

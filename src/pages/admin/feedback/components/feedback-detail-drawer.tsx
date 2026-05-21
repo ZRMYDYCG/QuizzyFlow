@@ -224,7 +224,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
       <div className="space-y-6">
         {/* 基本信息 */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">基本信息</h3>
+          <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">基本信息</h3>
           <Descriptions column={1} bordered>
             <Descriptions.Item label="标题">
               {feedback.title}
@@ -235,7 +235,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="描述">
-              <div className="whitespace-pre-wrap">{feedback.description}</div>
+              <div className="whitespace-pre-wrap text-gray-700 dark:text-slate-300">{feedback.description}</div>
             </Descriptions.Item>
             <Descriptions.Item label="提交者">
               {feedback.author}
@@ -263,7 +263,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
 
         {/* 状态管理 */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">状态管理</h3>
+          <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">状态管理</h3>
           {isEditing ? (
             <Form
               form={form}
@@ -332,7 +332,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
         {/* 环境信息 */}
         {(feedback.browserInfo || feedback.osInfo) && (
           <div>
-            <h3 className="text-lg font-semibold mb-3">环境信息</h3>
+            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">环境信息</h3>
             <Descriptions column={1} bordered>
               {feedback.browserInfo && (
                 <Descriptions.Item label="浏览器">
@@ -351,14 +351,14 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
         {/* 截图 */}
         {feedback.screenshots && feedback.screenshots.length > 0 && (
           <div>
-            <h3 className="text-lg font-semibold mb-3">截图</h3>
+            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">截图</h3>
             <div className="grid grid-cols-2 gap-3">
               {feedback.screenshots.map((url, index) => (
                 <img
                   key={index}
                   src={url}
                   alt={`截图 ${index + 1}`}
-                  className="rounded border w-full h-auto cursor-pointer hover:opacity-80"
+                  className="h-auto w-full cursor-pointer rounded border border-gray-200 hover:opacity-80 dark:border-slate-600"
                   onClick={() => window.open(url, '_blank')}
                 />
               ))}
@@ -370,7 +370,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
 
         {/* 回复列表 */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">回复记录</h3>
+          <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">回复记录</h3>
           {feedback.replies && feedback.replies.length > 0 ? (
             <Timeline>
               {feedback.replies.map((reply, index) => (
@@ -379,13 +379,13 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
                   dot={<Avatar size="small" icon={<UserOutlined />} />}
                 >
                   <div className="mb-2">
-                    <span className="font-medium">{reply.author}</span>
-                    <span className="text-gray-400 text-sm ml-2">
+                    <span className="font-medium text-gray-900 dark:text-slate-200">{reply.author}</span>
+                    <span className="ml-2 text-sm text-gray-400 dark:text-slate-500">
                       <ClockCircleOutlined className="mr-1" />
                       {dayjs(reply.createdAt).format('YYYY-MM-DD HH:mm')}
                     </span>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  <div className="whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700 dark:bg-slate-800/60 dark:text-slate-300">
                     {reply.content}
                   </div>
                 </Timeline.Item>
@@ -398,7 +398,7 @@ const FeedbackDetailDrawer: React.FC<FeedbackDetailDrawerProps> = ({
 
         {/* 添加回复 */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">添加回复</h3>
+          <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-slate-100">添加回复</h3>
           <Form form={replyForm} onFinish={handleReply}>
             <Form.Item
               name="content"

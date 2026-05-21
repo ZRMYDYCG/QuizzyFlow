@@ -45,7 +45,10 @@ instance.interceptors.response.use(
       // 登录失效：用户被删除、封禁或 token 过期
       if (status === 401) {
         localStorage.removeItem('token')
-        if (!window.location.pathname.startsWith('/login')) {
+        const isPublishFillPage = window.location.pathname.startsWith(
+          '/question/publish/'
+        )
+        if (!window.location.pathname.startsWith('/login') && !isPublishFillPage) {
           await message.error(errorMsg)
           window.location.href = '/login'
         }

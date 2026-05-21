@@ -214,7 +214,7 @@ const FeedbackListPage: React.FC = () => {
       render: (text, record) => (
         <div className="flex items-center gap-2">
           {getTypeIcon(record.type)}
-          <span className="font-medium">{text}</span>
+          <span className="font-medium text-gray-900 dark:text-slate-200">{text}</span>
         </div>
       ),
     },
@@ -268,7 +268,7 @@ const FeedbackListPage: React.FC = () => {
       align: 'center',
       render: (votes) => (
         <Badge count={votes} showZero overflowCount={999}>
-          <LikeOutlined className="text-lg" />
+          <LikeOutlined className="text-lg text-gray-500 dark:text-slate-400" />
         </Badge>
       ),
     },
@@ -280,7 +280,7 @@ const FeedbackListPage: React.FC = () => {
       align: 'center',
       render: (replies) => (
         <Badge count={replies?.length || 0} showZero overflowCount={999}>
-          <CommentOutlined className="text-lg" />
+          <CommentOutlined className="text-lg text-gray-500 dark:text-slate-400" />
         </Badge>
       ),
     },
@@ -329,16 +329,16 @@ const FeedbackListPage: React.FC = () => {
   ]
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">反馈列表</h1>
-        <p className="text-gray-500 mt-1">
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">反馈列表</h1>
+        <p className="mt-1 text-gray-600 dark:text-slate-400">
           查看和管理用户提交的Bug报告、功能请求和改进建议
         </p>
       </div>
 
       {/* 筛选区 */}
-      <div className="bg-white rounded-lg p-4 mb-4">
+      <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-slate-700/50 dark:bg-slate-800/40">
         <Space wrap size="middle">
           <Input
             placeholder="搜索标题、描述、提交者"
@@ -398,7 +398,7 @@ const FeedbackListPage: React.FC = () => {
       </div>
 
       {/* 表格 */}
-      <div className="bg-white rounded-lg">
+      <div className="rounded-lg border border-gray-200 dark:border-slate-700/50 [&_.ant-table]:bg-transparent">
         <Table
           columns={columns}
           dataSource={feedbacks}

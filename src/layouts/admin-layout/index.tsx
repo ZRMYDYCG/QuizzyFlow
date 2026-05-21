@@ -1,13 +1,12 @@
 import React, { useState, Suspense, lazy } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Spin, ConfigProvider, FloatButton } from 'antd'
+import { Spin, FloatButton } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
 import { ROLES } from '@/constants/roles'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
-import { editorDarkTheme, editorLightTheme } from '@/config/theme.config'
 import LayoutSettings from './components/layout-settings'
 import ProgressBar from './components/progress-bar'
 
@@ -30,9 +29,6 @@ const AdminLayout: React.FC = () => {
 
   // 权限检查
   const isAdmin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN
-
-  // 根据主题选择 Ant Design 配置
-  const currentTheme = theme === 'dark' ? editorDarkTheme : editorLightTheme
 
   // 刷新时 Redux token 尚未恢复，须先等待 useLoadUserData，避免误跳登录页
   if (waitingUserData) {
@@ -83,20 +79,13 @@ const AdminLayout: React.FC = () => {
   }
 
   return (
-    <ConfigProvider theme={currentTheme}>
-      {/* 顶部进度条 */}
+    <>
       <ProgressBar />
-      
-      {/* 渲染选中的布局 */}
       {renderLayout()}
-
-      {/* 布局设置抽屉 */}
       <LayoutSettings
         visible={settingsVisible}
         onClose={() => setSettingsVisible(false)}
       />
-
-      {/* 布局设置浮动按钮 */}
       <FloatButton
         icon={<SettingOutlined />}
         type="primary"
@@ -104,7 +93,7 @@ const AdminLayout: React.FC = () => {
         tooltip="布局设置"
         style={{ right: 24, bottom: 24 }}
       />
-    </ConfigProvider>
+    </>
   )
 }
 

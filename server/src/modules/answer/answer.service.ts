@@ -30,7 +30,14 @@ export class AnswerService {
     ip?: string,
     userAgent?: string,
   ) {
-    const { questionId, answerList, duration } = createDto
+    const {
+      questionId,
+      answerList,
+      duration,
+      respondentName,
+      isAnonymous = false,
+      respondentUsername,
+    } = createDto
 
     // 验证问卷ID格式
     if (!Types.ObjectId.isValid(questionId)) {
@@ -48,6 +55,10 @@ export class AnswerService {
       throw new BadRequestException('问卷未发布，无法提交答卷')
     }
 
+    const resolvedName = isAnonymous
+      ? '匿名用户'
+      : (respondentName?.trim() || '访客')
+
     // 创建答卷
     const answer = new this.answerModel({
       questionId: new Types.ObjectId(questionId),
@@ -55,6 +66,9 @@ export class AnswerService {
       ip,
       userAgent,
       duration,
+      respondentName: resolvedName,
+      isAnonymous,
+      respondentUsername: isAnonymous ? undefined : respondentUsername,
       isValid: true,
     })
 

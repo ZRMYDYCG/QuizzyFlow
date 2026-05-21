@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { AlertCircle, TrendingDown, Clock, Eye } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { getQuestionOpenPath } from '@/utils/question-routes'
 import { useManageTheme } from '@/hooks/useManageTheme'
 
 interface AttentionNeededProps {
@@ -74,7 +75,7 @@ const AttentionNeeded: FC<AttentionNeededProps> = ({ questions }) => {
           return (
             <Link
               key={_id}
-              to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+              to={getQuestionOpenPath(_id, isPublished)}
               className="block group"
             >
               <div className={`p-4 rounded-lg border hover:border-orange-500/50 transition-all ${

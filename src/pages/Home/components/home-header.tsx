@@ -17,6 +17,15 @@ const HomeHeader = ({ onLoginClick, onRegisterClick }: HomeHeaderProps) => {
       </Link>
 
       <nav className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase">
+        <Link
+          to="/feedback"
+          className={cn(
+            'px-4 py-2 text-zinc-500 no-underline transition-colors',
+            'hover:text-[var(--cyber-accent)]'
+          )}
+        >
+          反馈
+        </Link>
         <button
           type="button"
           onClick={onLoginClick}

@@ -11,6 +11,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -26,6 +27,7 @@ import { QueryFeedbackDto } from './dto/query-feedback.dto'
 import { AuthGuard } from '../auth/auth.guard'
 import { RolesGuard } from '../../common/guards/roles.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
+import { Public } from '../../common/decorators/public.decorator'
 
 @ApiTags('反馈管理')
 @Controller('feedback')
@@ -33,19 +35,25 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   /**
-   * 创建反馈（需要登录）
+   * 创建反馈（无需登录，登录后记录用户名）
    * POST /api/feedback
    */
   @ApiOperation({
     summary: '提交反馈',
-    description: '用户提交Bug报告、功能请求或其他反馈',
+    description: '用户提交Bug报告、功能请求或其他反馈，无需登录',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @Public()
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createDto: CreateFeedbackDto, @Request() req) {
-    const { username } = req.user
-    return await this.feedbackService.create(createDto, username)
+    const username = req.user?.username as string | undefined
+    if (!username && !createDto.authorEmail?.trim()) {
+      throw new BadRequestException('未登录时请填写联系邮箱')
+    }
+    const author = username
+      ? username
+      : `访客(${createDto.authorEmail!.trim()})`
+    return await this.feedbackService.create(createDto, author)
   }
 
   /**

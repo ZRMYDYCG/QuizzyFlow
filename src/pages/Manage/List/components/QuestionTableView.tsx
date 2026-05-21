@@ -10,6 +10,10 @@ import { Check } from 'lucide-react'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import QuestionnaireTypeTag from '@/components/questionnaire-type-tag'
 import { QuestionnaireType } from '@/constants/questionnaire-types'
+import {
+  getQuestionOpenPath,
+  getQuestionStatisticsPath,
+} from '@/utils/question-routes'
 
 const { confirm } = Modal
 
@@ -108,7 +112,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
       <td className="p-4">
         <div className="flex flex-col gap-1">
           <Link
-            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={getQuestionOpenPath(_id, isPublished)}
             className={`font-medium hover:text-blue-400 transition-colors ${t.text.primary}`}
           >
             {title}
@@ -150,7 +154,7 @@ const QuestionTableRow: FC<QuestionTableRowProps> = ({ question, isSelected, onS
           
           <button
             disabled={!isPublished}
-            onClick={() => navigate(`/question/star/${_id}`)}
+            onClick={() => navigate(getQuestionStatisticsPath(_id))}
             className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             title="统计"
           >
@@ -297,7 +301,7 @@ const MobileQuestionCard: FC<{ question: any; isSelected: boolean; onSelect: (id
 
         <div className="flex-1 min-w-0">
           <Link
-            to={isPublished ? `/question/static/${_id}` : `/question/edit/${_id}`}
+            to={getQuestionOpenPath(_id, isPublished)}
             className={`text-sm font-medium hover:text-blue-400 transition-colors line-clamp-2 block mb-2 ${t.text.primary}`}
           >
             {title}

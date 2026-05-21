@@ -9,6 +9,8 @@ import StatisticsHeader from './components/statistics-header'
 import ComponentsList from './components/components-list'
 import StatisticsTable from './components/statistics-table'
 import { useStatisticsState } from './hooks/useStatisticsState'
+import { useManageTheme } from '@/hooks/useManageTheme'
+import { cn } from '@/utils'
 
 const Statistics = () => {
   const { loading } = useLoadQuestionData()
@@ -24,6 +26,8 @@ const Statistics = () => {
     selectedComponentType,
     setSelectedComponent,
   } = useStatisticsState()
+
+  const t = useManageTheme()
 
   useTitle('问卷统计')
 
@@ -63,12 +67,22 @@ const Statistics = () => {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gray-50">
+    <div
+      className={cn(
+        'h-screen w-full flex flex-col',
+        t.isDark ? 'bg-[#1a1a1f]' : 'bg-gray-50'
+      )}
+    >
       <StatisticsHeader />
       
       {/* 移动端：组件列表菜单按钮 */}
       {isMobile && (
-        <div className="bg-white border-b border-gray-200 px-4 py-2">
+        <div
+          className={cn(
+            'border-b px-4 py-2',
+            t.isDark ? 'bg-[#1e1e23] border-white/10' : 'bg-white border-gray-200'
+          )}
+        >
           <Button 
             icon={<MenuOutlined />} 
             onClick={() => setDrawerVisible(true)}
@@ -113,7 +127,12 @@ const Statistics = () => {
           )}
 
           {/* 主内容区 */}
-          <main className="flex-1 min-w-0 h-full bg-white py-3 px-2 md:py-[12px] md:px-[18px] rounded-lg shadow-sm overflow-hidden">
+          <main
+            className={cn(
+              'flex-1 min-w-0 h-full py-3 px-2 md:py-[12px] md:px-[18px] rounded-lg shadow-sm overflow-hidden',
+              t.isDark ? 'bg-[#1e1e23]' : 'bg-white'
+            )}
+          >
             <StatisticsTable
               selectedComponentId={selectedComponentId}
               selectedComponentType={selectedComponentType}

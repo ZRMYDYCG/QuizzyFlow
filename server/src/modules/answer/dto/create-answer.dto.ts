@@ -1,4 +1,13 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator'
 import { Type } from 'class-transformer'
 
 /**
@@ -33,5 +42,18 @@ export class CreateAnswerDto {
   @IsNumber()
   @IsOptional()
   duration?: number
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  respondentName?: string
+
+  @IsBoolean()
+  @IsOptional()
+  isAnonymous?: boolean
+
+  @IsString()
+  @IsOptional()
+  respondentUsername?: string
 }
 

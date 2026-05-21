@@ -3,6 +3,7 @@ import { getComponentConfigByType } from '@/components/material'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { cn } from '@/utils'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useManageTheme } from '@/hooks/useManageTheme'
 import type { ComponentSelectionProps } from '../types'
 
 interface ComponentData {
@@ -16,6 +17,7 @@ const ComponentsList = memo(
   ({ selectedComponentId, setSelectedComponent }: ComponentSelectionProps) => {
     const { componentList } = useGetComponentInfo()
     const { primaryColor } = useTheme()
+    const t = useManageTheme()
 
     const visibleComponents = useMemo(
       () =>
@@ -33,7 +35,12 @@ const ComponentsList = memo(
     )
 
   return (
-    <div className="min-h-full overflow-y-auto bg-white p-2 md:p-[12px]">
+    <div
+      className={cn(
+        'min-h-full overflow-y-auto p-2 md:p-[12px]',
+        t.isDark ? 'bg-[#1e1e23]' : 'bg-white'
+      )}
+    >
       {visibleComponents.map((component: ComponentData) => {
         const { fe_id, props, type } = component
 
@@ -55,9 +62,11 @@ const ComponentsList = memo(
             onClick={() => handleComponentClick(fe_id, type)}
             className={cn(
               'w-full p-2 md:p-[12px] cursor-pointer border rounded-md transition-all mb-2',
-              isSelected 
-                ? '' 
-                : 'border-white hover:bg-gray-50'
+              isSelected
+                ? ''
+                : t.isDark
+                  ? 'border-slate-700/50 hover:bg-slate-800/40'
+                  : 'border-white hover:bg-gray-50'
             )}
             style={isSelected ? {
               borderColor: primaryColor,

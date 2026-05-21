@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { cn } from '@/utils'
 
 interface HomeHeroProps {
@@ -45,6 +46,13 @@ const HomeHero = ({ onLoginClick, onRegisterClick }: HomeHeroProps) => {
           Sign in
         </button>
       </div>
+
+      <Link
+        to="/feedback"
+        className="mt-8 font-mono text-[10px] tracking-[0.35em] text-zinc-600 uppercase no-underline transition-colors hover:text-[var(--cyber-accent)]"
+      >
+        意见反馈
+      </Link>
     </section>
   )
 }

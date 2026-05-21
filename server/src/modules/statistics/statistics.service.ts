@@ -8,6 +8,16 @@ import { Model, Types } from 'mongoose'
 import { Answer, AnswerDocument, AnswerItem } from '../answer/schemas/answer.schema'
 import { Question, QuestionDocument } from '../question/schemas/question.schema'
 
+/** 表格元数据列（与前端约定，勿与组件 fe_id 冲突） */
+export const STATS_META = {
+  submittedAt: '__submittedAt',
+  respondentName: '__respondentName',
+  duration: '__duration',
+  isAnonymous: '__isAnonymous',
+} as const
+
+const EXPORT_MAX_ROWS = 10000
+
 @Injectable()
 export class StatisticsService {
   constructor(
@@ -16,6 +26,61 @@ export class StatisticsService {
     @InjectModel(Question.name)
     private readonly questionModel: Model<QuestionDocument>,
   ) {}
+
+  private async assertQuestionOwner(questionId: string, username: string) {
+    if (!Types.ObjectId.isValid(questionId)) {
+      throw new BadRequestException('无效的问卷ID')
+    }
+
+    const question = await this.questionModel.findById(questionId).exec()
+    if (!question) {
+      throw new NotFoundException('问卷不存在')
+    }
+    if (question.author !== username) {
+      throw new BadRequestException('无权查看此问卷的统计数据')
+    }
+
+    return question
+  }
+
+  private mapAnswerToRow(
+    answer: any,
+    componentList: any[],
+    forExport = false,
+  ): Record<string, any> {
+    const row: Record<string, any> = {
+      _id: answer._id,
+      [STATS_META.submittedAt]: answer.createdAt
+        ? new Date(answer.createdAt).toISOString()
+        : '',
+      [STATS_META.respondentName]:
+        answer.respondentName ||
+        (answer.isAnonymous ? '匿名用户' : '未填写'),
+      [STATS_META.duration]:
+        answer.duration != null ? `${answer.duration} 秒` : '',
+      [STATS_META.isAnonymous]: answer.isAnonymous ? '是' : '否',
+    }
+
+    componentList.forEach((component: any) => {
+      const { fe_id, type, props } = component
+      const answerItem = answer.answerList?.find(
+        (item: AnswerItem) => item.componentId === fe_id,
+      )
+
+      if (answerItem) {
+        row[fe_id] = this.formatAnswerValue(
+          type,
+          answerItem.value,
+          props,
+          forExport,
+        )
+      } else {
+        row[fe_id] = ''
+      }
+    })
+
+    return row
+  }
 
   /**
    * 获取问卷的答卷统计列表（表格格式）
@@ -26,68 +91,97 @@ export class StatisticsService {
     page: number = 1,
     pageSize: number = 10,
   ) {
-    // 验证问卷ID
-    if (!Types.ObjectId.isValid(questionId)) {
-      throw new BadRequestException('无效的问卷ID')
-    }
-
-    // 验证问卷所有权
-    const question = await this.questionModel.findById(questionId).exec()
-    if (!question) {
-      throw new NotFoundException('问卷不存在')
-    }
-    if (question.author !== username) {
-      throw new BadRequestException('无权查看此问卷的统计数据')
-    }
-
-    // 获取问卷的组件列表
+    const question = await this.assertQuestionOwner(questionId, username)
     const componentList = question.componentList || []
+    const qid = new Types.ObjectId(questionId)
 
-    // 获取答卷列表
     const [answers, total] = await Promise.all([
       this.answerModel
-        .find({ questionId: new Types.ObjectId(questionId) })
+        .find({ questionId: qid })
         .sort({ createdAt: -1 })
         .skip((page - 1) * pageSize)
         .limit(pageSize)
         .lean()
         .exec(),
+      this.answerModel.countDocuments({ questionId: qid }).exec(),
+    ])
+
+    const list = answers.map((answer) =>
+      this.mapAnswerToRow(answer, componentList),
+    )
+
+    return { total, list }
+  }
+
+  /**
+   * 全量导出答卷（表格行，最多 EXPORT_MAX_ROWS 条）
+   */
+  async exportAnswerList(questionId: string, username: string) {
+    const question = await this.assertQuestionOwner(questionId, username)
+    const componentList = question.componentList || []
+    const qid = new Types.ObjectId(questionId)
+
+    const total = await this.answerModel.countDocuments({ questionId: qid }).exec()
+
+    if (total > EXPORT_MAX_ROWS) {
+      throw new BadRequestException(
+        `答卷数量超过 ${EXPORT_MAX_ROWS} 条，请联系管理员分批导出`,
+      )
+    }
+
+    const answers = await this.answerModel
+      .find({ questionId: qid })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec()
+
+    const list = answers.map((answer) =>
+      this.mapAnswerToRow(answer, componentList, true),
+    )
+
+    return { total, list }
+  }
+
+  /**
+   * 问卷答卷概览统计
+   */
+  async getOverview(questionId: string, username: string) {
+    await this.assertQuestionOwner(questionId, username)
+    const qid = new Types.ObjectId(questionId)
+
+    const [total, agg] = await Promise.all([
+      this.answerModel.countDocuments({ questionId: qid }).exec(),
       this.answerModel
-        .countDocuments({ questionId: new Types.ObjectId(questionId) })
+        .aggregate([
+          { $match: { questionId: qid } },
+          {
+            $group: {
+              _id: null,
+              avgDuration: { $avg: '$duration' },
+              anonymousCount: {
+                $sum: { $cond: [{ $eq: ['$isAnonymous', true] }, 1, 0] },
+              },
+              lastSubmittedAt: { $max: '$createdAt' },
+              firstSubmittedAt: { $min: '$createdAt' },
+            },
+          },
+        ])
         .exec(),
     ])
 
-    // 将答卷数据转换为表格格式
-    const list = answers.map((answer) => {
-      const row: any = {
-        _id: answer._id,
-      }
-
-      // 遍历问卷的所有组件
-      componentList.forEach((component: any) => {
-        const { fe_id, type, props } = component
-
-        // 在答卷中查找对应组件的答案
-        const answerItem = answer.answerList.find(
-          (item: AnswerItem) => item.componentId === fe_id
-        )
-
-        if (answerItem) {
-          const { value } = answerItem
-
-          // 根据组件类型格式化显示值
-          row[fe_id] = this.formatAnswerValue(type, value, props)
-        } else {
-          row[fe_id] = ''
-        }
-      })
-
-      return row
-    })
+    const summary = agg[0] || {}
+    const anonymousCount = summary.anonymousCount || 0
 
     return {
       total,
-      list,
+      avgDurationSeconds:
+        summary.avgDuration != null
+          ? Math.round(summary.avgDuration)
+          : null,
+      anonymousCount,
+      namedCount: total - anonymousCount,
+      lastSubmittedAt: summary.lastSubmittedAt || null,
+      firstSubmittedAt: summary.firstSubmittedAt || null,
     }
   }
 
@@ -99,19 +193,7 @@ export class StatisticsService {
     componentId: string,
     username: string,
   ) {
-    // 验证问卷ID
-    if (!Types.ObjectId.isValid(questionId)) {
-      throw new BadRequestException('无效的问卷ID')
-    }
-
-    // 验证问卷所有权
-    const question = await this.questionModel.findById(questionId).exec()
-    if (!question) {
-      throw new NotFoundException('问卷不存在')
-    }
-    if (question.author !== username) {
-      throw new BadRequestException('无权查看此问卷的统计数据')
-    }
+    const question = await this.assertQuestionOwner(questionId, username)
 
     // 查找组件配置
     const component = question.componentList.find(
@@ -141,7 +223,12 @@ export class StatisticsService {
   /**
    * 格式化答案值用于表格显示
    */
-  private formatAnswerValue(type: string, value: any, props: any): any {
+  private formatAnswerValue(
+    type: string,
+    value: any,
+    props: any,
+    forExport = false,
+  ): any {
     if (value === null || value === undefined || value === '') {
       return ''
     }
@@ -250,7 +337,11 @@ export class StatisticsService {
         return String(value)
 
       case 'question-matrix':
-        // 矩阵组件，返回对象格式 - 前端会特殊处理
+        if (forExport && typeof value === 'object' && value !== null) {
+          return Object.entries(value)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join('; ')
+        }
         return value
 
       case 'question-nps':
@@ -265,7 +356,11 @@ export class StatisticsService {
         return String(value)
 
       case 'question-signature':
-        // 签名组件，返回 base64 数据 - 前端会渲染为图片
+        if (forExport) {
+          return typeof value === 'string' && value.startsWith('data:image')
+            ? '[已签名]'
+            : ''
+        }
         return value
 
       case 'question-color-picker':
@@ -280,8 +375,10 @@ export class StatisticsService {
         return String(value)
 
       default:
-        // 其他类型直接返回字符串
         if (typeof value === 'object') {
+          if (forExport) {
+            return JSON.stringify(value)
+          }
           return JSON.stringify(value)
         }
         return String(value)
