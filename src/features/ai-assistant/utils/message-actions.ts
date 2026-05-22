@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid'
 import { AIAction, AIContext, Message } from '../types'
 import {
   attachFallbackFollowUp,
+  applyContentParsedFollowUp,
   mergeFollowUpIntoActions,
   splitFollowUpFromActions,
 } from './follow-up'
@@ -88,14 +89,16 @@ export function mapDbMessageToLocal(msg: {
       }))
     : undefined
 
-  return enrichMessageWithFollowUp({
-    id: msg.id,
-    role: msg.role as Message['role'],
-    content: msg.content,
-    reasoning: msg.reasoning || undefined,
-    timestamp: msg.timestamp,
-    actions,
-  })
+  return applyContentParsedFollowUp(
+    enrichMessageWithFollowUp({
+      id: msg.id,
+      role: msg.role as Message['role'],
+      content: msg.content,
+      reasoning: msg.reasoning || undefined,
+      timestamp: msg.timestamp,
+      actions,
+    }),
+  )
 }
 
 export function dbMessagesToUIMessages(messages: Message[]): UIMessage[] {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Modal, Form, Select, message } from 'antd'
+import { Modal, Form, Select } from 'antd'
+import { message } from '@/utils/app-message'
 import { updateUserRoleAPI } from '@/api/modules/admin'
 
 interface UpdateRoleModalProps {

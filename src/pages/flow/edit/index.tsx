@@ -1,7 +1,8 @@
 import { FC, useEffect, useCallback, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Input, message, Spin, Tooltip, Dropdown, Badge } from 'antd'
+import { Button, Input, Spin, Tooltip, Dropdown, Badge } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SaveOutlined,
   ArrowLeftOutlined,

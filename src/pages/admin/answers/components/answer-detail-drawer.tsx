@@ -2,16 +2,8 @@
  * 答卷详情抽屉组件
  */
 import React from 'react'
-import {
-  Drawer,
-  Descriptions,
-  Card,
-  Tag,
-  Space,
-  Button,
-  Divider,
-  message,
-} from 'antd'
+import { Drawer, Descriptions, Card, Tag, Space, Button, Divider } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,

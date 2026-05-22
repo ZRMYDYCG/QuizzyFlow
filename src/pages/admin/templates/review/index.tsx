@@ -2,21 +2,8 @@
  * 管理后台 - 模板审核中心
  */
 import React, { useState, useEffect } from 'react'
-import { 
-  Table, 
-  Button, 
-  Input, 
-  Space, 
-  Tag, 
-  Modal, 
-  Form,
-  message,
-  Badge,
-  Image,
-  Card,
-  Radio,
-  Tooltip,
-} from 'antd'
+import { Table, Button, Input, Space, Tag, Modal, Form, Badge, Image, Card, Radio, Tooltip } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SearchOutlined,
   EyeOutlined,

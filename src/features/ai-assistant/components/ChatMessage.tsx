@@ -4,13 +4,13 @@
  */
 
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 import { Message, AIAction } from '../types'
-import { Sparkles } from 'lucide-react'
+import { resolveAssistantDisplayContent } from '../utils/follow-up'
 import ThinkingBlock from './ThinkingBlock'
 import ToolCallsBlock from './ToolCallsBlock'
 import ActionProposalPanel from './ActionProposalPanel'
 import UserChatAvatar from './UserChatAvatar'
+import AssistantStreamMarkdown from './AssistantStreamMarkdown'
 
 interface ChatMessageProps {
   message: Message
@@ -37,48 +37,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     })
   }
 
-  // 移除 action 代码块的内容（用于显示）
-  const getDisplayContent = (content: string) => {
-    return content.replace(/```action\s*[\s\S]*?```/g, '').trim()
-  }
-
-  const markdownComponents = {
-    p: ({ children }: { children?: React.ReactNode }) => (
-      <p className="mb-2 last:mb-0">{children}</p>
-    ),
-    ul: ({ children }: { children?: React.ReactNode }) => (
-      <ul className="mb-2 list-disc pl-4 last:mb-0">{children}</ul>
-    ),
-    ol: ({ children }: { children?: React.ReactNode }) => (
-      <ol className="mb-2 list-decimal pl-4 last:mb-0">{children}</ol>
-    ),
-    li: ({ children }: { children?: React.ReactNode }) => (
-      <li className="mb-0.5">{children}</li>
-    ),
-    code({ className, children, ...props }: React.ComponentProps<'code'> & { className?: string }) {
-      const match = /language-(\w+)/.exec(className || '')
-      const isInline = !match
-
-      if (isInline) {
-        return (
-          <code
-            className="rounded bg-black/[0.06] px-1 py-0.5 text-[11px] dark:bg-white/10"
-            {...props}
-          >
-            {children}
-          </code>
-        )
-      }
-
-      return (
-        <pre className="my-2 overflow-x-auto rounded-lg bg-gray-900 p-3 text-[11px] text-gray-100">
-          <code className={className} {...props}>
-            {String(children).replace(/\n$/, '')}
-          </code>
-        </pre>
-      )
-    },
-  }
+  // 移除 action 代码块；引导追问段落会从正文中剥离到 FollowUpGuideForm
+  const displayContent = resolveAssistantDisplayContent(message)
 
   return (
     <div
@@ -116,32 +76,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             />
           )}
 
-          {/* 正文流式指示 */}
-          {message.isStreaming && !message.isReasoningStreaming && (
-            <div className="mb-2 flex items-center gap-2 text-purple-500">
-              <Sparkles className="h-4 w-4 animate-pulse" />
-              <span className="text-xs">AI 正在回复...</span>
-            </div>
-          )}
-
-          {/* AI 正文：react-markdown + Tailwind typography */}
+          {/* AI 正文：Streamdown 流式 Markdown + 打字机动画 */}
           <div
             className={
               isUser
                 ? 'overflow-hidden break-words'
-                : 'prose prose-xs max-w-none overflow-hidden break-words text-xs leading-relaxed text-gray-600 dark:prose-invert dark:text-gray-400'
+                : 'max-w-none overflow-hidden break-words'
             }
           >
             {isUser ? (
               <p className="mb-0 text-sm">{message.content}</p>
-            ) : !getDisplayContent(message.content) && message.actions?.length ? (
+            ) : !displayContent && message.actions?.length ? (
               <p className="mb-0 text-xs text-gray-500 dark:text-gray-400">
                 已生成 {message.actions.length} 项操作提案，请在下方确认应用。
               </p>
             ) : (
-              <ReactMarkdown components={markdownComponents}>
-                {getDisplayContent(message.content)}
-              </ReactMarkdown>
+              <AssistantStreamMarkdown
+                content={displayContent}
+                isStreaming={!!message.isStreaming && !message.isReasoningStreaming}
+              />
             )}
           </div>
         </div>

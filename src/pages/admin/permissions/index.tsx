@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Space,
-  Tag,
-  Card,
-  message,
-  Collapse,
-  Badge,
-  Alert,
-} from 'antd'
+import { Table, Button, Input, Select, Space, Tag, Card, Collapse, Badge, Alert } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SafetyOutlined,
   ReloadOutlined,

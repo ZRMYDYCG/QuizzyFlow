@@ -63,6 +63,8 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   const pendingSaveAfterStreamRef = useRef(false)
   const prevQuestionIdRef = useRef(context?.questionId)
   const chatMessagesRef = useRef<Message[]>([])
+  const contextRef = useRef(context)
+  contextRef.current = context
 
   const chatSessionIdRefForAgent = useRef<string | null>(null)
   chatSessionIdRefForAgent.current = chatSessionId
@@ -100,8 +102,39 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   // 将 Agent UI 流合并为带 actions 的展示消息
   useEffect(() => {
     if (isLoadingHistory || isSwitchingSession) return
-    setChatMessages((prev) => mergeUiIntoChatMessages(uiMessages, prev, isLoading, context))
-  }, [uiMessages, isLoading, isLoadingHistory, isSwitchingSession, context])
+    setChatMessages((prev) => {
+      const next = mergeUiIntoChatMessages(
+        uiMessages,
+        prev,
+        isLoading,
+        contextRef.current,
+      )
+      if (next.length === prev.length) {
+        let unchanged = true
+        for (let i = 0; i < next.length; i += 1) {
+          const a = next[i]
+          const b = prev[i]
+          if (
+            a.id !== b.id ||
+            a.content !== b.content ||
+            a.reasoning !== b.reasoning ||
+            a.isStreaming !== b.isStreaming ||
+            a.isReasoningStreaming !== b.isReasoningStreaming ||
+            a.followUpUsed !== b.followUpUsed ||
+            a.followUpActionId !== b.followUpActionId ||
+            a.contentDisplay !== b.contentDisplay ||
+            (a.actions?.length ?? 0) !== (b.actions?.length ?? 0) ||
+            (a.toolCalls?.length ?? 0) !== (b.toolCalls?.length ?? 0)
+          ) {
+            unchanged = false
+            break
+          }
+        }
+        if (unchanged) return prev
+      }
+      return next
+    })
+  }, [uiMessages, isLoading, isLoadingHistory, isSwitchingSession])
 
   const persistActiveSession = useCallback(
     async (sessionId: string) => {

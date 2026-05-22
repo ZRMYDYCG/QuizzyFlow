@@ -1,6 +1,5 @@
 import axios from 'axios'
-import { message } from 'antd'
-
+import { message } from '@/utils/app-message'
 export interface ResType {
   errno: number
   data?: ResDataType

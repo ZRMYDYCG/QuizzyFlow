@@ -5,7 +5,7 @@
 
 import { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { message } from 'antd'
+import { message } from '@/utils/app-message'
 import { AIAction, ComponentData, UseAIActionsReturn } from '../types'
 import { executeAIAction, previewAction as previewActionUtil } from '../services/actionExecutor'
 import {

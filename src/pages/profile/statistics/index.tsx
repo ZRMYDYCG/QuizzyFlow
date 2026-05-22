@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Spin, Typography, Row, Col, Statistic, Empty } from 'antd'
+import { Card, Typography, Row, Col, Statistic, Empty } from 'antd'
 import {
   FileTextOutlined,
   CheckCircleOutlined,
@@ -53,7 +53,7 @@ const ProfileStatistics: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Spin size="large" tip="加载统计数据..." />
+        <LoadingSpin tip="加载统计数据..." />
       </div>
     )
   }

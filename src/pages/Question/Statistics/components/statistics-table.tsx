@@ -1,20 +1,8 @@
 import { memo, useState, useMemo, useCallback, useEffect } from 'react'
 import { useRequest, useResponsive } from 'ahooks'
 import { useParams } from 'react-router-dom'
-import {
-  Typography,
-  Spin,
-  Table,
-  Pagination,
-  Tooltip,
-  Image,
-  Tag,
-  Rate,
-  Button,
-  Space,
-  Input,
-  message,
-} from 'antd'
+import { Typography, Spin, Table, Pagination, Tooltip, Image, Tag, Rate, Button, Space, Input } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   DownloadOutlined,
   ReloadOutlined,

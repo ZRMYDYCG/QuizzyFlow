@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { Modal, Radio, Checkbox, Slider, Button, message } from 'antd'
+import { Modal, Radio, Checkbox, Slider, Button } from 'antd'
+import { message } from '@/utils/app-message'
 import { DownloadOutlined } from '@ant-design/icons'
 import { toPng, toSvg } from 'html-to-image'
 import type { Node, Edge } from 'reactflow'

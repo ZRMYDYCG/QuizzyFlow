@@ -1,5 +1,6 @@
 import { FC, ChangeEvent } from 'react'
-import { message, Input, Button } from 'antd'
+import { Input, Button } from 'antd'
+import { message } from '@/utils/app-message'
 import { useDispatch } from 'react-redux'
 import { swapComponent } from '@/store/modules/question-component'
 import { EyeInvisibleOutlined, LockOutlined } from '@ant-design/icons'

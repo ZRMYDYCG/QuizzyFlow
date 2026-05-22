@@ -10,6 +10,128 @@ export function isLocalFollowUpActionId(actionId?: string): boolean {
   return !!actionId?.startsWith('local-')
 }
 
+const FOLLOW_UP_TRIGGER =
+  /需要我(?:立即)?执行|您可以告诉我|您可以选择|接下来(?:可以|您)|需要我继续|请告诉我|是否(?:需要|要)|或其他具体需求/i
+
+const FOLLOW_UP_SECTION_START =
+  /(?:^|\n)\s*(?:需要我(?:立即)?执行哪些操作|您可以告诉我|您可以选择以下|接下来(?:可以|您)|请(?:选择|告诉我))/i
+
+function normalizeOptionLabel(raw: string): string {
+  return raw
+    .replace(/^[\s\-*•·\d.)、]+/, '')
+    .replace(/^[「『"'""]|["'""」』]$/g, '')
+    .trim()
+}
+
+function toFollowUpPrompt(label: string): string {
+  if (/^(请|帮我|帮忙)/.test(label)) return label
+  if (/删除|移除|去掉/.test(label)) return `请${label}`
+  if (/新增|添加|加上|补充/.test(label)) return `请${label}`
+  return `请帮我${label}`
+}
+
+/**
+ * 从 AI 正文中解析「引号选项 / 列表」式引导追问（未调用 suggest_follow_up 时的兜底）
+ */
+export function parseFollowUpFromContent(content: string): {
+  guide: FollowUpGuide
+  cleanedContent: string
+} | null {
+  const text = content.trim()
+  if (!text || !FOLLOW_UP_TRIGGER.test(text)) return null
+
+  const options: Array<{ label: string; value: string }> = []
+  const seen = new Set<string>()
+
+  const quotePatterns = [
+    /[""「『]([^""」』\n]{2,80})[""」』]/g,
+    /"([^"\n]{2,80})"/g,
+  ]
+
+  for (const pattern of quotePatterns) {
+    pattern.lastIndex = 0
+    let match: RegExpExecArray | null
+    while ((match = pattern.exec(text)) !== null) {
+      const label = normalizeOptionLabel(match[1])
+      if (!label || seen.has(label)) continue
+      seen.add(label)
+      options.push({ label, value: toFollowUpPrompt(label) })
+    }
+  }
+
+  if (options.length < 2) {
+    const linePattern = /(?:^|\n)\s*(?:[-*•·]|\d+[.)、])\s*([^\n]{2,80})/g
+    let match: RegExpExecArray | null
+    while ((match = linePattern.exec(text)) !== null) {
+      const label = normalizeOptionLabel(match[1])
+      if (!label || /或其他|具体需求/.test(label) || seen.has(label)) continue
+      seen.add(label)
+      options.push({ label, value: toFollowUpPrompt(label) })
+    }
+  }
+
+  if (options.length < 2) return null
+
+  const sectionMatch = text.match(FOLLOW_UP_SECTION_START)
+  let cleanedContent = text
+  if (sectionMatch?.index != null) {
+    cleanedContent = text.slice(0, sectionMatch.index).trim()
+  }
+
+  const titleLine = text.slice(sectionMatch?.index ?? 0).split('\n')[0]?.trim()
+  const title =
+    titleLine && titleLine.length <= 60
+      ? titleLine.replace(/[：:]\s*$/, '')
+      : '还可以继续帮你'
+
+  return {
+    guide: {
+      title,
+      description: '点选下方选项，或直接输入你的需求',
+      fields: [
+        {
+          id: 'next',
+          type: 'chips',
+          label: '选择一个操作',
+          options: options.slice(0, 6),
+        },
+      ],
+      dismissLabel: '暂不需要',
+    },
+    cleanedContent,
+  }
+}
+
+export function resolveAssistantDisplayContent(message: Message): string {
+  const base = message.contentDisplay ?? message.content
+  const withoutActionBlocks = base.replace(/```action\s*[\s\S]*?```/g, '').trim()
+
+  if (message.contentDisplay != null) return withoutActionBlocks
+
+  if (message.followUp && !message.followUpUsed) {
+    const parsed = parseFollowUpFromContent(message.content)
+    if (parsed) return parsed.cleanedContent.replace(/```action\s*[\s\S]*?```/g, '').trim()
+  }
+
+  return withoutActionBlocks
+}
+
+export function applyContentParsedFollowUp(message: Message): Message {
+  if (message.role !== 'assistant' || message.followUpUsed || message.followUp) {
+    return message
+  }
+
+  const parsed = parseFollowUpFromContent(message.content)
+  if (!parsed) return message
+
+  return {
+    ...message,
+    contentDisplay: parsed.cleanedContent,
+    followUp: parsed.guide,
+    followUpActionId: `local-parsed-${message.id}`,
+  }
+}
+
 export function splitFollowUpFromActions(actions?: AIAction[]): {
   actions?: AIAction[]
   followUp?: FollowUpGuide
@@ -40,7 +162,6 @@ export function mergeFollowUpIntoActions(message: Message): AIAction[] | undefin
     return base.length ? base : undefined
   }
 
-  // 客户端兜底引导不落库
   if (isLocalFollowUpActionId(message.followUpActionId)) {
     return base.length ? base : undefined
   }
@@ -137,13 +258,17 @@ const FALLBACK_OPTIONS: FallbackOption[] = [
   },
 ]
 
-function shuffle<T>(items: T[]): T[] {
-  const copy = [...items]
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+/** 按消息 id 稳定选取，避免每次 merge 随机打乱触发多余 setState */
+function pickStableOptions(items: FallbackOption[], seed: string, count: number): FallbackOption[] {
+  if (items.length <= count) return items
+  const sorted = [...items].sort((a, b) => a.label.localeCompare(b.label, 'zh-CN'))
+  const offset =
+    seed.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % sorted.length
+  const picked: FallbackOption[] = []
+  for (let i = 0; i < count; i += 1) {
+    picked.push(sorted[(offset + i) % sorted.length])
   }
-  return copy
+  return picked
 }
 
 function shouldOfferFallback(last: Message): boolean {
@@ -161,7 +286,6 @@ function shouldOfferFallback(last: Message): boolean {
   return false
 }
 
-/** AI 未调用 suggest_follow_up 时的客户端兜底引导 */
 export function generateFallbackFollowUp(
   context: AIContext,
   messages: Message[],
@@ -177,7 +301,7 @@ export function generateFallbackFollowUp(
   )
   if (candidates.length === 0) return null
 
-  const picked = shuffle(candidates).slice(0, 3)
+  const picked = pickStableOptions(candidates, last.id, 3)
 
   return {
     title: '还可以继续帮你优化',
@@ -200,7 +324,7 @@ export function attachFallbackFollowUp(
   context?: AIContext,
   isStreaming?: boolean,
 ): Message[] {
-  if (isStreaming || !context || messages.length === 0) return messages
+  if (isStreaming || messages.length === 0) return messages
 
   const lastIdx = messages.length - 1
   const last = messages[lastIdx]
@@ -212,7 +336,7 @@ export function attachFallbackFollowUp(
 
   if (last.followUp) return messages
 
-  // 保持已生成的兜底引导，避免每次 merge 重新随机
+  // 保持已生成的本地引导
   if (
     prev?.followUp &&
     !prev.followUpUsed &&
@@ -223,9 +347,25 @@ export function attachFallbackFollowUp(
       ...last,
       followUp: prev.followUp,
       followUpActionId: prev.followUpActionId,
+      contentDisplay: prev.contentDisplay,
     }
     return updated
   }
+
+  // 优先：从 AI 正文解析引号/列表式引导
+  const parsed = parseFollowUpFromContent(last.content)
+  if (parsed) {
+    const updated = [...messages]
+    updated[lastIdx] = {
+      ...last,
+      contentDisplay: parsed.cleanedContent,
+      followUp: parsed.guide,
+      followUpActionId: `local-parsed-${last.id}`,
+    }
+    return updated
+  }
+
+  if (!context) return messages
 
   const guide = generateFallbackFollowUp(context, messages)
   if (!guide) return messages

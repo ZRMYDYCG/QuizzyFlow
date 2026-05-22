@@ -49,6 +49,8 @@ export function useAgentChat(
 
   const chat = useChat<UIMessage>({
     transport,
+    // 流式时节流 UI 更新，避免每 token 触发重渲染导致内存暴涨
+    experimental_throttle: 50,
   })
 
   const isLoading =

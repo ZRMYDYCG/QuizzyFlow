@@ -2,16 +2,7 @@
  * 管理后台 - 答卷统计分析
  */
 import React from 'react'
-import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Table,
-  Tag,
-  Spin,
-  Empty,
-} from 'antd'
+import { Card, Row, Col, Statistic, Table, Tag, Empty } from 'antd'
 import {
   FileTextOutlined,
   CheckCircleOutlined,
@@ -74,7 +65,7 @@ const AnswerStatisticsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="加载统计数据中..." />
+        <LoadingSpin tip="加载统计数据中..." />
       </div>
     )
   }

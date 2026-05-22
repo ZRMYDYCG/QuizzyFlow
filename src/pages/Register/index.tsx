@@ -1,5 +1,6 @@
 import { type FC } from 'react'
-import { Form, Input, Button, message } from 'antd'
+import { Form, Input, Button } from 'antd'
+import { message } from '@/utils/app-message'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
 import { registerUser } from '@/api/modules/user'

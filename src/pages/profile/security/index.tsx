@@ -1,5 +1,6 @@
 import React from 'react'
-import { Card, Form, Input, Button, message, Typography, Alert } from 'antd'
+import { Card, Form, Input, Button, Typography, Alert } from 'antd'
+import { message } from '@/utils/app-message'
 import { LockOutlined, SafetyOutlined } from '@ant-design/icons'
 import { changePassword } from '@/api/modules/user'
 import { useRequest } from 'ahooks'

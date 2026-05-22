@@ -1,6 +1,6 @@
 import React, { useState, Suspense, lazy } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Spin, FloatButton } from 'antd'
+import { FloatButton } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
@@ -35,7 +35,7 @@ const AdminLayout: React.FC = () => {
   if (waitingUserData) {
     return (
       <div className={`flex items-center justify-center min-h-screen ${theme === 'dark' ? 'bg-[#1a1a1f]' : 'bg-gray-50'}`}>
-        <Spin size="large" tip="加载用户数据..." />
+        <LoadingSpin tip="加载用户数据..." />
       </div>
     )
   }
@@ -70,7 +70,7 @@ const AdminLayout: React.FC = () => {
       <Suspense
         fallback={
           <div className="flex items-center justify-center min-h-screen">
-            <Spin size="large" tip="加载布局中..." />
+            <LoadingSpin tip="加载布局中..." />
           </div>
         }
       >

@@ -96,7 +96,7 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
       width={520}
       okText="发布"
       cancelText="取消"
-      destroyOnClose
+      destroyOnHidden
     >
       <Typography.Paragraph type="secondary" className="!mb-4 text-sm">
         将当前问卷保存为模板，可在「我的模板」中管理。

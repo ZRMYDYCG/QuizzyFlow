@@ -1,23 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Space,
-  Tag,
-  Modal,
-  message,
-  Popconfirm,
-  Drawer,
-  Descriptions,
-  Card,
-  Row,
-  Col,
-  Badge,
-  Tooltip,
-  Switch,
-} from 'antd'
+import { Table, Button, Input, Select, Space, Tag, Modal, Popconfirm, Drawer, Descriptions, Card, Row, Col, Badge, Tooltip, Switch } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SearchOutlined,
   EyeOutlined,

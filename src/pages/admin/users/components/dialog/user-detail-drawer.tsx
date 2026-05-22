@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { Drawer, Descriptions, Tag, message, Spin } from 'antd'
+import { Drawer, Descriptions, Tag, Spin } from 'antd'
+import { message } from '@/utils/app-message'
 import { useRequest } from 'ahooks'
 import { getUserDetailAPI } from '@/api/modules/admin'
 import { ROLE_NAMES, ROLE_COLORS } from '@/constants/roles'

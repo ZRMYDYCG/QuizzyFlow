@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Space, Button, Input, Tooltip, message, Popover, Dropdown, Modal } from 'antd'
+import { Space, Button, Input, Tooltip, Popover, Dropdown, Modal } from 'antd'
+import { message } from '@/utils/app-message'
 import { LeftOutlined, CopyOutlined, QrcodeOutlined, ShareAltOutlined, EllipsisOutlined } from '@ant-design/icons'
 import { useResponsive } from 'ahooks'
 import useGetPageInfo from '@/hooks/useGetPageInfo'

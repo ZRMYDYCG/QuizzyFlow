@@ -2,21 +2,8 @@
  * 反馈详情抽屉
  */
 import React, { useState } from 'react'
-import {
-  Drawer,
-  Descriptions,
-  Tag,
-  Button,
-  Space,
-  Form,
-  Select,
-  Input,
-  message,
-  Timeline,
-  Empty,
-  Divider,
-  Avatar,
-} from 'antd'
+import { Drawer, Descriptions, Tag, Button, Space, Form, Select, Input, Timeline, Empty, Divider, Avatar } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   BugOutlined,
   BulbOutlined,

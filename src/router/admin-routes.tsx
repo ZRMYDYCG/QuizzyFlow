@@ -1,5 +1,4 @@
 import React, { lazy, Suspense } from 'react'
-import { Spin } from 'antd'
 import AdminLayout from '@/layouts/admin-layout'
 import { PermissionGuard } from '@/components/permission-guard'
 
@@ -33,7 +32,7 @@ const FeedbackStatistics = lazy(() => import('@/pages/admin/feedback/statistics'
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <Spin size="large" tip="加载中..." />
+    <LoadingSpin tip="加载中..." />
   </div>
 )
 

@@ -68,10 +68,12 @@ const PreviewModal: React.FC<IPreviewModalProps> = ({
       onCancel={onCancel}
       width="90%"
       height="90vh"
-      bodyStyle={{
-        height: 'calc(90vh - 110px)',
-        overflow: 'auto',
-        padding: 0,
+      styles={{
+        body: {
+          height: 'calc(90vh - 110px)',
+          overflow: 'auto',
+          padding: 0,
+        },
       }}
       centered
     >

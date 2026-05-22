@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRequest } from 'ahooks'
-import { message } from 'antd'
+import { message } from '@/utils/app-message'
 import { createQuestion } from '@/api/modules/question'
 import { useManageTheme } from '@/hooks/useManageTheme'
 import { 

@@ -3,7 +3,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Spin, message } from 'antd'
+import { Spin } from 'antd'
+import { message } from '@/utils/app-message'
 import { LoadingOutlined } from '@ant-design/icons'
 import { TextSelection } from '../hooks/useTextSelection'
 import {

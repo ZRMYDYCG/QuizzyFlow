@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Tabs, message, Button, Space, Alert } from 'antd'
+import { Tabs, Button, Space, Alert } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SettingOutlined,
   SafetyOutlined,

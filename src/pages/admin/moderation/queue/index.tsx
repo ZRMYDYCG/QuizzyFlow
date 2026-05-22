@@ -3,19 +3,8 @@
  * 智能审核系统 - 三层审核机制
  */
 import React, { useState } from 'react'
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Space,
-  Tag,
-  Modal,
-  message,
-  Badge,
-  Tooltip,
-  Form,
-} from 'antd'
+import { Table, Button, Input, Select, Space, Tag, Modal, Badge, Tooltip, Form } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SearchOutlined,
   ReloadOutlined,

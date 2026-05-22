@@ -2,19 +2,8 @@
  * 管理后台 - 反馈列表
  */
 import React, { useState } from 'react'
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  Space,
-  Tag,
-  Modal,
-  message,
-  Tooltip,
-  Badge,
-  Popconfirm,
-} from 'antd'
+import { Table, Button, Input, Select, Space, Tag, Modal, Tooltip, Badge, Popconfirm } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SearchOutlined,
   ReloadOutlined,

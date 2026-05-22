@@ -2,7 +2,7 @@
  * 管理后台 - 模板分类管理
  */
 import React, { useEffect, useState } from 'react'
-import { Table, Card, Tag, Space, Spin, Alert } from 'antd'
+import { Table, Card, Tag, Space, Alert } from 'antd'
 import { FolderOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useRequest } from 'ahooks'
@@ -208,7 +208,7 @@ const TemplateCategoriesPage: React.FC = () => {
       <Card title="分类列表" className="shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Spin size="large" tip="加载分类数据中..." />
+            <LoadingSpin tip="加载分类数据中..." />
           </div>
         ) : (
           <Table

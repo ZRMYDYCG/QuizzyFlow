@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Modal, Form, Input, Select, message } from 'antd'
+import { Modal, Form, Input, Select } from 'antd'
+import { message } from '@/utils/app-message'
 import { createAdminUserAPI } from '@/api/modules/admin'
 import { ROLES } from '@/constants/roles'
 

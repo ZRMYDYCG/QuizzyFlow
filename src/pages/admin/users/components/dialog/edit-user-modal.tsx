@@ -65,7 +65,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       onOk={handleOk}
       confirmLoading={loading}
       width={520}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical">
         <Form.Item label="用户名（邮箱）">

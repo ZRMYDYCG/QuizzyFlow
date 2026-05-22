@@ -2,18 +2,8 @@
  * 管理后台 - 答卷列表
  */
 import React, { useState, useEffect } from 'react'
-import {
-  Table,
-  Button,
-  Input,
-  Select,
-  DatePicker,
-  Space,
-  Tag,
-  Modal,
-  message,
-  Tooltip,
-} from 'antd'
+import { Table, Button, Input, Select, DatePicker, Space, Tag, Modal, Tooltip } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   SearchOutlined,
   ReloadOutlined,

@@ -5,8 +5,7 @@
 
 import { AIAction, ComponentData } from '../types'
 import { validateComponentData, normalizeComponentData } from './responseParser'
-import { message } from 'antd'
-
+import { message } from '@/utils/app-message'
 /**
  * 执行添加组件操作
  */

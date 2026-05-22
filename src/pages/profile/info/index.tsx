@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Upload,
-  Avatar,
-  message,
-  Typography,
-  Skeleton,
-} from 'antd'
+import { Card, Form, Input, Button, Upload, Avatar, Typography, Skeleton } from 'antd'
+import { message } from '@/utils/app-message'
 import { UserOutlined, UploadOutlined, SaveOutlined } from '@ant-design/icons'
 import { useDispatch, useSelector } from 'react-redux'
 import type { stateType } from '@/store'

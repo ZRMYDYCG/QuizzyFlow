@@ -1,15 +1,6 @@
 import React from 'react'
-import {
-  Card,
-  Form,
-  Switch,
-  InputNumber,
-  Radio,
-  Button,
-  message,
-  Typography,
-  Divider,
-} from 'antd'
+import { Card, Form, Switch, InputNumber, Radio, Button, Typography, Divider } from 'antd'
+import { message } from '@/utils/app-message'
 import { SettingOutlined, SaveOutlined } from '@ant-design/icons'
 import { useDispatch, useSelector } from 'react-redux'
 import type { stateType } from '@/store'

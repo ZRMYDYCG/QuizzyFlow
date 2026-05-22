@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Form, Input, InputNumber, Switch, Card, Button, Alert, message } from 'antd'
+import { Form, Input, InputNumber, Switch, Card, Button, Alert } from 'antd'
+import { message } from '@/utils/app-message'
 import { MailOutlined, SendOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import type { SystemConfigItem, ConfigFormValues } from '@/types/system-config'
 

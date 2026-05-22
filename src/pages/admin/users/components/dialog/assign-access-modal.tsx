@@ -188,7 +188,7 @@ const AssignAccessModal: React.FC<AssignAccessModalProps> = ({
       okButtonProps={{
         disabled: isSuperAdminUser || (accountType === 'staff' && !boundsReady),
       }}
-      destroyOnClose
+      destroyOnHidden
     >
       {isSuperAdminUser ? (
         <Alert

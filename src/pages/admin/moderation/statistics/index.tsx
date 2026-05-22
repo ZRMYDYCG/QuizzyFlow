@@ -2,16 +2,7 @@
  * 管理后台 - 审核统计
  */
 import React from 'react'
-import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Progress,
-  Empty,
-  Spin,
-  Tag,
-} from 'antd'
+import { Card, Row, Col, Statistic, Progress, Empty, Tag } from 'antd'
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -43,7 +34,7 @@ const ModerationStatisticsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="加载统计数据中..." />
+        <LoadingSpin tip="加载统计数据中..." />
       </div>
     )
   }

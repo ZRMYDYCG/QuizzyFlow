@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { Plus, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRequest } from 'ahooks'
-import { message } from 'antd'
+import { message } from '@/utils/app-message'
 import { useTheme } from '@/contexts/ThemeContext'
 import { createQuestion } from '@/api/modules/question'
 

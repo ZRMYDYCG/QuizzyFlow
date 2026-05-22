@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
-import { Alert, Button, Result, Spin, Typography, message, Modal } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
+import { Alert, Button, Result, Typography, Modal } from 'antd'
+import { message } from '@/utils/app-message'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTitle, useRequest } from 'ahooks'
 import useLoadQuestionData from '@/hooks/useLoadQuestionData'
@@ -182,7 +184,7 @@ const PublishPage: React.FC = () => {
   if (loading) {
     return (
       <div className={pageShellClass(t.isDark)}>
-        <Spin size="large" tip="加载问卷中..." />
+        <LoadingSpin tip="加载问卷中..." />
       </div>
     )
   }

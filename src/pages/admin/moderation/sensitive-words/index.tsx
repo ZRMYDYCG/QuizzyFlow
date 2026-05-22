@@ -2,19 +2,8 @@
  * 管理后台 - 敏感词管理
  */
 import React, { useState } from 'react'
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Space,
-  Tag,
-  message,
-  Upload,
-  Alert,
-} from 'antd'
+import { Table, Button, Modal, Form, Input, Select, Space, Tag, Upload, Alert } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   PlusOutlined,
   DeleteOutlined,

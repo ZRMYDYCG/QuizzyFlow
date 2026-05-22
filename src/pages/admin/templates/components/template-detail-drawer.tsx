@@ -2,19 +2,8 @@
  * 模板详情抽屉组件
  */
 import React from 'react'
-import { 
-  Drawer, 
-  Descriptions, 
-  Tag, 
-  Space, 
-  Button, 
-  Image, 
-  Card,
-  Badge,
-  Switch,
-  message,
-  Divider,
-} from 'antd'
+import { Drawer, Descriptions, Tag, Space, Button, Image, Card, Badge, Switch, Divider } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   StarFilled,
   StarOutlined,

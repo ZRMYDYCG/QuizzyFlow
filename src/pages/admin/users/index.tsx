@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Modal, message } from 'antd'
+import { Alert, Button, Modal } from 'antd'
+import { message } from '@/utils/app-message'
 import { PlusOutlined, SafetyOutlined } from '@ant-design/icons'
 import { ROLES } from '@/constants/roles'
 import {

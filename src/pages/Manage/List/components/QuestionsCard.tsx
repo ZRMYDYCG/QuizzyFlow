@@ -1,5 +1,6 @@
 import { FC, useState } from 'react'
-import { message, Modal } from 'antd'
+import { Modal } from 'antd'
+import { message } from '@/utils/app-message'
 import { Edit, BarChart3, Copy, Trash2, Star } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import {

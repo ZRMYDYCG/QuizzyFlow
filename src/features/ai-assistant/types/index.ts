@@ -16,6 +16,8 @@ export interface Message {
   followUp?: FollowUpGuide
   followUpActionId?: string
   followUpUsed?: boolean
+  /** 展示用正文（已剥离引导追问段落，不影响持久化 content） */
+  contentDisplay?: string
   isStreaming?: boolean
   isReasoningStreaming?: boolean
 }

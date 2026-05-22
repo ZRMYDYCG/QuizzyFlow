@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Form, Input, Button, message, Result } from 'antd'
+import { Form, Input, Button, Result } from 'antd'
+import { message } from '@/utils/app-message'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import Logo from '@/components/Logo'

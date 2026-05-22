@@ -8,9 +8,14 @@ import { useDispatch } from 'react-redux'
 import ClassifyTitle from './classify-title'
 import { useTheme } from '@/contexts/ThemeContext'
 
-function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light', primaryColor: string, themeColors: any) {
-  const { title, type, component: Component, defaultProps } = c
+interface ComponentLibItemProps {
+  config: ComponentConfigType
+}
+
+const ComponentLibItem: React.FC<ComponentLibItemProps> = ({ config }) => {
+  const { theme, primaryColor } = useTheme()
   const dispatch = useDispatch()
+  const { title, type, component: Component, defaultProps } = config
 
   function handleClick() {
     dispatch(
@@ -19,7 +24,7 @@ function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light', prim
         title: title,
         type: type,
         props: defaultProps,
-      } as any)
+      } as any),
     )
   }
 
@@ -30,7 +35,7 @@ function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light', prim
         'mb-3 cursor-pointer border rounded-lg p-3 transition-all duration-200 group',
         theme === 'dark'
           ? 'bg-[#2a2a2f] border-white/5 hover:bg-[#35353a] hover:shadow-lg'
-          : 'bg-white border-gray-200 hover:bg-gray-50 hover:shadow-md'
+          : 'bg-white border-gray-200 hover:bg-gray-50 hover:shadow-md',
       )}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = primaryColor + (theme === 'dark' ? '50' : '40')
@@ -53,17 +58,17 @@ function generateComponent(c: ComponentConfigType, theme: 'dark' | 'light', prim
 }
 
 const ComponentsLib: React.FC = () => {
-  const { theme, primaryColor, themeColors } = useTheme()
-  
   return (
     <div className="h-full overflow-y-auto px-3 py-4 custom-scrollbar">
       {componentConfigGroup.map((group, index) => {
         const { groupName, components } = group
         return (
-          <div key={index} className={cn(index > 0 && 'mt-6')}>
+          <div key={groupName} className={cn(index > 0 && 'mt-6')}>
             <ClassifyTitle groupName={groupName} />
             <div className="mt-3">
-              {components.map((c) => generateComponent(c, theme, primaryColor, themeColors))}
+              {components.map((c) => (
+                <ComponentLibItem key={c.type} config={c} />
+              ))}
             </div>
           </div>
         )

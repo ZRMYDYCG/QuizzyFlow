@@ -2,8 +2,7 @@ import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { logoutReducer } from '@/store/modules/user'
 import { resetAdminState } from '@/store/modules/admin'
-import { message } from 'antd'
-
+import { message } from '@/utils/app-message'
 /**
  * 退出登录 Hook
  * 统一处理所有退出登录逻辑

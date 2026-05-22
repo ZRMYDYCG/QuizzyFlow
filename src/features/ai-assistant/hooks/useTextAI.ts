@@ -4,7 +4,7 @@
 
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { message } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   changeComponentProps,
   changeComponentTitle,

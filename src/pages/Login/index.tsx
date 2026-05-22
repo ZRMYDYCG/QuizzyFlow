@@ -1,5 +1,6 @@
 import { useState, useEffect, type FC } from 'react'
-import { Form, Input, Button, Checkbox, message } from 'antd'
+import { Form, Input, Button, Checkbox } from 'antd'
+import { message } from '@/utils/app-message'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'

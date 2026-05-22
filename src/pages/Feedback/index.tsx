@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Select, Button, Alert, Result, message } from 'antd'
+import { Form, Input, Select, Button, Alert, Result } from 'antd'
+import { message } from '@/utils/app-message'
 import type { Rule } from 'antd/es/form'
 import {
   ArrowLeftOutlined,

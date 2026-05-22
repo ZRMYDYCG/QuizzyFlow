@@ -3,7 +3,7 @@ import { useTitle } from 'ahooks'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
 import { restoreQuestion, permanentDeleteQuestion } from '@/api/modules/question'
 import { useRequest } from 'ahooks'
-import { message } from 'antd'
+import { message } from '@/utils/app-message'
 import { 
   Loader2, 
   Trash2, 

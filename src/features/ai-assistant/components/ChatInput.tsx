@@ -54,10 +54,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-xl border p-3 transition-colors',
+        'flex flex-col gap-2 rounded-xl border p-3 transition-colors',
         theme === 'dark'
           ? 'border-white/10 bg-[#2a2a2f]'
-          : 'border-gray-200 bg-white'
+          : 'border-gray-200 bg-white',
       )}
     >
       <textarea
@@ -69,17 +69,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
         disabled={isLoading}
         rows={3}
         className={cn(
-          'block w-full resize-none border-0 bg-transparent pb-10 pl-11 text-sm outline-none',
+          'min-h-[4.5rem] w-full resize-none border-0 bg-transparent px-0 py-0 text-sm leading-relaxed outline-none',
           'placeholder:text-gray-400',
-          theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+          theme === 'dark' ? 'text-gray-100' : 'text-gray-900',
         )}
       />
 
-      <div className="absolute bottom-3 left-3">
+      <div className="flex items-center justify-between">
         <UserChatAvatar size={28} />
-      </div>
 
-      <div className="absolute bottom-3 right-3">
         {isLoading ? (
           <button
             type="button"
@@ -87,7 +85,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             aria-label="停止生成"
             className={cn(
               'flex h-8 w-8 items-center justify-center rounded-lg transition-opacity',
-              theme === 'dark' ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-900 hover:bg-gray-800'
+              theme === 'dark' ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-900 hover:bg-gray-800',
             )}
           >
             <Square className="h-3.5 w-3.5 fill-white text-white" />
@@ -103,7 +101,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
               'disabled:cursor-not-allowed disabled:opacity-30',
               theme === 'dark'
                 ? 'bg-white text-gray-900 hover:bg-gray-100'
-                : 'bg-gray-900 text-white hover:bg-gray-800'
+                : 'bg-gray-900 text-white hover:bg-gray-800',
             )}
           >
             <Send className="h-4 w-4" />

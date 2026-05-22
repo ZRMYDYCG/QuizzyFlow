@@ -2,7 +2,8 @@
  * 管理后台 - 模板统计数据
  */
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Statistic, Table, Tag, Progress, Empty, Spin, Space } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
+import { Card, Row, Col, Statistic, Table, Tag, Progress, Empty, Space } from 'antd'
 import {
   FileTextOutlined,
   CrownOutlined,
@@ -39,7 +40,7 @@ const TemplateStatisticsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Spin size="large" tip="加载统计数据中..." />
+        <LoadingSpin tip="加载统计数据中..." />
       </div>
     )
   }

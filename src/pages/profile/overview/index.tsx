@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Avatar, Tag, Button, Spin, Row, Col, Statistic } from 'antd'
+import { Card, Avatar, Tag, Button, Row, Col, Statistic } from 'antd'
 import {
   UserOutlined,
   EditOutlined,
@@ -42,7 +42,7 @@ const ProfileOverview: React.FC = () => {
 
   return loading ? (
     <div className="flex items-center justify-center min-h-[400px]">
-      <Spin size="large" tip="加载中..." />
+      <LoadingSpin tip="加载中..." />
     </div>
   ) : (
     <div className="space-y-4 md:space-y-6">

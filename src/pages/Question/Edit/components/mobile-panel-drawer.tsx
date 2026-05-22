@@ -43,7 +43,7 @@ const MobilePanelDrawer: React.FC = () => {
             padding: 0,
           },
         }}
-        destroyOnClose={false}
+        destroyOnHidden={false}
         maskClosable={true}
         keyboard={true}
       >
@@ -72,7 +72,7 @@ const MobilePanelDrawer: React.FC = () => {
             padding: 0,
           },
         }}
-        destroyOnClose={false}
+        destroyOnHidden={false}
         maskClosable={true}
         keyboard={true}
       >
@@ -101,7 +101,7 @@ const MobilePanelDrawer: React.FC = () => {
             padding: 0,
           },
         }}
-        destroyOnClose={false}
+        destroyOnHidden={false}
         maskClosable={true}
         keyboard={true}
       >

@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Input, Empty, Spin, message, Dropdown, Modal, Tooltip } from 'antd'
+import { Button, Input, Empty, Spin, Dropdown, Modal, Tooltip } from 'antd'
+import { message } from '@/utils/app-message'
 import {
   PlusOutlined,
   SearchOutlined,

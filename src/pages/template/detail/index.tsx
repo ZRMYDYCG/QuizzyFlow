@@ -3,7 +3,9 @@
  */
 import { useParams, useNavigate } from 'react-router-dom'
 import { useRequest, useTitle } from 'ahooks'
-import { Button, Spin, message, Modal } from 'antd'
+import { Button, Modal } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
+import { message } from '@/utils/app-message'
 import { motion } from 'framer-motion'
 import { 
   ArrowLeft, 
@@ -95,7 +97,7 @@ const TemplateDetailPage = () => {
   if (loading || !template) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spin size="large" tip="加载中..." />
+        <LoadingSpin tip="加载中..." />
       </div>
     )
   }

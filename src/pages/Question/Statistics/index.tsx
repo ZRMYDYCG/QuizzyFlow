@@ -1,4 +1,4 @@
-import { Spin, Result, Button, Drawer } from 'antd'
+import { Result, Button, Drawer } from 'antd'
 import { MenuOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTitle, useResponsive } from 'ahooks'
@@ -43,7 +43,7 @@ const Statistics = () => {
   if (loading) {
     return (
       <div className="h-full w-full flex justify-center items-center">
-        <Spin size="large" tip="加载中..." />
+        <LoadingSpin tip="加载中..." />
       </div>
     )
   }
