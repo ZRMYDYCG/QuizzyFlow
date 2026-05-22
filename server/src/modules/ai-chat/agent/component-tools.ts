@@ -1,7 +1,10 @@
 import { tool, stepCountIs, ToolLoopAgent } from 'ai'
 import { z } from 'zod'
-import { createOpenAI } from '@ai-sdk/openai'
 import { ConfigService } from '@nestjs/config'
+import {
+  createSiliconFlowProvider,
+  getSiliconFlowModelId,
+} from '../silicon-flow.provider'
 import {
   buildQuestionnaireAgentSystemPrompt,
   QuestionnaireAgentContext,
@@ -108,19 +111,8 @@ export function createQuestionnaireAgent(
   configService: ConfigService,
   context?: QuestionnaireAgentContext,
 ) {
-  const apiKey = configService.get<string>('SILICON_FLOW_API_KEY') || ''
-  const baseURL =
-    configService.get<string>('SILICON_FLOW_BASE_URL') ||
-    'https://api.siliconflow.cn/v1'
-  const modelId =
-    configService.get<string>('SILICON_FLOW_MODEL') ||
-    'Qwen/Qwen2.5-7B-Instruct'
-
-  // 硅基流动等 OpenAI 兼容网关仅支持 Chat Completions，不能用默认的 Responses API
-  const provider = createOpenAI({
-    apiKey,
-    baseURL,
-  })
+  const provider = createSiliconFlowProvider(configService)
+  const modelId = getSiliconFlowModelId(configService)
 
   return new ToolLoopAgent({
     model: provider.chat(modelId),

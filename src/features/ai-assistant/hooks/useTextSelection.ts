@@ -1,6 +1,5 @@
 /**
- * useTextSelection Hook
- * 监听文本选中事件
+ * 属性面板内可编辑输入框：聚焦即显示 AI 工具栏（有选区时用选区，否则用全文）
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -13,179 +12,196 @@ export interface TextSelection {
   inputElement: HTMLInputElement | HTMLTextAreaElement | null
   selectionStart: number
   selectionEnd: number
+  /** 是否为拖选片段（否则为全文） */
+  isPartialSelection: boolean
 }
 
 export interface UseTextSelectionOptions {
-  /**
-   * 选中文字的最小长度（默认 1）
-   */
-  minLength?: number
-  
-  /**
-   * 目标容器选择器（只监听特定容器内的选中）
-   */
+  /** 仅监听该容器内，如 [data-text-ai-panel] */
   containerSelector?: string
-  
-  /**
-   * 延迟显示工具栏的时间（ms，默认 100）
-   */
   delay?: number
 }
 
+const EDITABLE_INPUT_TYPES = new Set([
+  'checkbox',
+  'radio',
+  'hidden',
+  'button',
+  'submit',
+  'reset',
+  'file',
+  'image',
+  'color',
+  'range',
+])
+
+export function isEditableFormField(
+  el: Element | null,
+): el is HTMLInputElement | HTMLTextAreaElement {
+  if (!el || !(el instanceof HTMLElement)) return false
+
+  if (el instanceof HTMLTextAreaElement) {
+    return !el.disabled && !el.readOnly
+  }
+
+  if (el instanceof HTMLInputElement) {
+    const type = (el.type || 'text').toLowerCase()
+    if (EDITABLE_INPUT_TYPES.has(type)) return false
+    return !el.disabled && !el.readOnly
+  }
+
+  return false
+}
+
+function getTextRange(input: HTMLInputElement | HTMLTextAreaElement) {
+  const value = input.value
+  const start = input.selectionStart ?? 0
+  const end = input.selectionEnd ?? 0
+
+  if (start !== end) {
+    return {
+      text: value.substring(start, end),
+      selectionStart: start,
+      selectionEnd: end,
+      isPartialSelection: true,
+    }
+  }
+
+  return {
+    text: value,
+    selectionStart: 0,
+    selectionEnd: value.length,
+    isPartialSelection: false,
+  }
+}
+
+function buildActiveField(
+  input: HTMLInputElement | HTMLTextAreaElement,
+): TextSelection {
+  const { text, selectionStart, selectionEnd, isPartialSelection } =
+    getTextRange(input)
+
+  return {
+    text,
+    range: null,
+    rect: input.getBoundingClientRect(),
+    element: input,
+    inputElement: input,
+    selectionStart,
+    selectionEnd,
+    isPartialSelection,
+  }
+}
+
+function isToolbarTarget(node: Node | null): boolean {
+  if (!node || !(node instanceof HTMLElement)) return false
+  return !!node.closest('[data-text-ai-toolbar]')
+}
+
 export const useTextSelection = (options: UseTextSelectionOptions = {}) => {
-  const { minLength = 1, containerSelector, delay = 100 } = options
+  const { containerSelector, delay = 80 } = options
 
   const [selection, setSelection] = useState<TextSelection | null>(null)
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const activeInputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(
+    null,
+  )
 
-  /**
-   * 处理选中事件
-   */
-  const handleSelectionChange = useCallback(() => {
-    // 清除之前的延迟
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+  const resolveContainer = useCallback((): Element | null => {
+    if (!containerSelector) return document.body
+    return document.querySelector(containerSelector)
+  }, [containerSelector])
 
-    timeoutRef.current = setTimeout(() => {
-      const windowSelection = window.getSelection()
-
-      if (!windowSelection || windowSelection.rangeCount === 0) {
+  const readActiveField = useCallback(
+    (input?: HTMLInputElement | HTMLTextAreaElement | null) => {
+      const container = resolveContainer()
+      if (!container) {
         setSelection(null)
         return
       }
 
-      const selectedText = windowSelection.toString().trim()
+      const target =
+        input ??
+        activeInputRef.current ??
+        (document.activeElement as HTMLInputElement | HTMLTextAreaElement)
 
-      // 检查选中文字长度
-      if (!selectedText || selectedText.length < minLength) {
+      if (!isEditableFormField(target) || !container.contains(target)) {
         setSelection(null)
         return
       }
 
-      // 检查是否在目标容器内
-      if (containerSelector) {
-        const container = document.querySelector(containerSelector)
-        if (!container) {
-          setSelection(null)
-          return
-        }
+      activeInputRef.current = target
+      setSelection(buildActiveField(target))
+    },
+    [resolveContainer],
+  )
 
-        const range = windowSelection.getRangeAt(0)
-        const isInsideContainer = container.contains(range.commonAncestorContainer)
+  const scheduleRead = useCallback(
+    (input?: HTMLInputElement | HTMLTextAreaElement | null) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => readActiveField(input), delay)
+    },
+    [readActiveField, delay],
+  )
 
-        if (!isInsideContainer) {
-          setSelection(null)
-          return
-        }
-      }
-
-      // 获取选中范围和位置
-      const range = windowSelection.getRangeAt(0)
-      const rect = range.getBoundingClientRect()
-      const element = range.commonAncestorContainer.parentElement
-
-      // 查找输入框元素
-      let inputElement: HTMLElement | null = element
-      while (inputElement && 
-             !(inputElement instanceof HTMLInputElement) && 
-             !(inputElement instanceof HTMLTextAreaElement)) {
-        inputElement = inputElement.parentElement
-      }
-
-      setSelection({
-        text: selectedText,
-        range: range.cloneRange(),
-        rect,
-        element,
-        inputElement: inputElement as HTMLInputElement | HTMLTextAreaElement | null,
-        selectionStart: (inputElement as any)?.selectionStart || 0,
-        selectionEnd: (inputElement as any)?.selectionEnd || 0,
-      })
-    }, delay)
-  }, [minLength, containerSelector, delay])
-
-  /**
-   * 清除选中
-   */
   const clearSelection = useCallback(() => {
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+    activeInputRef.current = null
     setSelection(null)
-    window.getSelection()?.removeAllRanges()
   }, [])
 
-  /**
-   * 替换选中的文字（适配 React 受控组件）
-   */
-  const replaceSelection = useCallback((newText: string) => {
-    if (!selection?.element) return false
-
-    try {
-      // 查找最近的 input 或 textarea 元素
-      let inputElement: HTMLElement | null = selection.element
-      while (inputElement && 
-             !(inputElement instanceof HTMLInputElement) && 
-             !(inputElement instanceof HTMLTextAreaElement)) {
-        inputElement = inputElement.parentElement
-      }
-
-      if (!inputElement) {
-        console.error('未找到 input/textarea 元素')
-        return false
-      }
-
-      const element = inputElement as HTMLInputElement | HTMLTextAreaElement
-      const currentValue = element.value
-      const start = element.selectionStart || 0
-      const end = element.selectionEnd || 0
-
-      // 计算新值（替换选中部分）
-      const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end)
-
-      // 设置新值
-      element.value = newValue
-
-      // 触发 React 的 input 事件
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        element.constructor.prototype,
-        'value'
-      )?.set
-      nativeInputValueSetter?.call(element, newValue)
-
-      // 触发 input 和 change 事件
-      const inputEvent = new Event('input', { bubbles: true })
-      const changeEvent = new Event('change', { bubbles: true })
-      element.dispatchEvent(inputEvent)
-      element.dispatchEvent(changeEvent)
-
-      // 设置光标位置到替换文字的末尾
-      const newCursorPos = start + newText.length
-      element.setSelectionRange(newCursorPos, newCursorPos)
-      element.focus()
-
-      clearSelection()
-      return true
-    } catch (error) {
-      console.error('Replace selection error:', error)
-      return false
-    }
-  }, [selection, clearSelection])
-
   useEffect(() => {
-    // 监听选中变化
-    document.addEventListener('selectionchange', handleSelectionChange)
+    const container = resolveContainer()
+    if (!container) return
+
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target
+      if (!isEditableFormField(target) || !container.contains(target)) return
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+      activeInputRef.current = target
+      scheduleRead(target)
+    }
+
+    const onFocusOut = (e: FocusEvent) => {
+      const related = e.relatedTarget as Node | null
+      if (isToolbarTarget(related)) return
+
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+      blurTimeoutRef.current = setTimeout(() => {
+        const active = document.activeElement
+        if (isToolbarTarget(active)) return
+        if (isEditableFormField(active) && container.contains(active)) return
+        clearSelection()
+      }, 120)
+    }
+
+    const onSelectionUpdate = () => {
+      const input = activeInputRef.current
+      if (!input || !container.contains(input)) return
+      if (document.activeElement !== input && !container.contains(input)) return
+      scheduleRead(input)
+    }
+
+    container.addEventListener('focusin', onFocusIn, true)
+    container.addEventListener('focusout', onFocusOut, true)
+    container.addEventListener('mouseup', onSelectionUpdate)
+    container.addEventListener('keyup', onSelectionUpdate)
+    document.addEventListener('selectionchange', onSelectionUpdate)
 
     return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange)
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
+      container.removeEventListener('focusin', onFocusIn, true)
+      container.removeEventListener('focusout', onFocusOut, true)
+      container.removeEventListener('mouseup', onSelectionUpdate)
+      container.removeEventListener('keyup', onSelectionUpdate)
+      document.removeEventListener('selectionchange', onSelectionUpdate)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
     }
-  }, [handleSelectionChange])
+  }, [resolveContainer, scheduleRead, clearSelection])
 
   return {
     selection,
     clearSelection,
-    replaceSelection,
   }
 }
-

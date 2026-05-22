@@ -1,111 +1,128 @@
 /**
- * TextSelectionToolbar Component
- * 文本选中工具栏（类似 Cursor 编辑器）
+ * 输入框聚焦时显示的文本 AI 工具栏（简约样式）
  */
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, Space, Spin, Tooltip, message } from 'antd'
+import { Spin, message } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
-import { Sparkles, Languages, RefreshCw, Scissors, Maximize2, Type } from 'lucide-react'
 import { TextSelection } from '../hooks/useTextSelection'
-import { processTextWithAI, TextAIAction } from '../services/textAI'
+import {
+  TextAIAction,
+  TextAIApplyOptions,
+  getActionLabel,
+  TRANSLATE_LANGUAGE_OPTIONS,
+  type TranslateTargetLanguage,
+} from '../services/textAI'
 
 interface TextSelectionToolbarProps {
   selection: TextSelection | null
-  onReplaceWithRedux: (action: string, selectedText: string) => Promise<boolean>
+  onApply: (
+    action: string,
+    text: string,
+    options?: TextAIApplyOptions,
+  ) => Promise<boolean>
   onClose: () => void
 }
 
+const MAIN_ACTIONS: TextAIAction[] = [
+  'continue',
+  'polish',
+  'translate',
+  'rewrite',
+  'simplify',
+  'expand',
+]
+
 const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
   selection,
-  onReplaceWithRedux,
+  onApply,
   onClose,
 }) => {
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(
+    null,
+  )
   const [isProcessing, setIsProcessing] = useState(false)
-  const [currentAction, setCurrentAction] = useState<TextAIAction | null>(null)
+  const [showTranslateMenu, setShowTranslateMenu] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
-  // 计算工具栏位置（优化：紧贴选中文字）
+  useEffect(() => {
+    setShowTranslateMenu(false)
+  }, [selection?.inputElement])
+
   useEffect(() => {
     if (!selection?.rect) {
       setPosition(null)
       return
     }
 
-    const selectionRect = selection.rect
-    const toolbarHeight = 50 // 工具栏高度
-    const toolbarWidth = 400 // 工具栏宽度
-    const offset = 8 // 与选中文字的间距
+    const rect = selection.rect
+    const toolbarWidth = 320
+    const toolbarHeight = showTranslateMenu ? 68 : 36
+    const gap = 6
 
-    // 默认显示在选中文字上方，居中对齐
-    let top = selectionRect.top + window.scrollY - toolbarHeight - offset
-    let left = selectionRect.left + window.scrollX + (selectionRect.width - toolbarWidth) / 2
+    let top = rect.bottom + window.scrollY + gap
+    let left = rect.left + window.scrollX
 
-    // 如果上方空间不足（距离顶部小于工具栏高度+边距），显示在下方
-    if (selectionRect.top < toolbarHeight + offset + 20) {
-      top = selectionRect.bottom + window.scrollY + offset
+    if (top + toolbarHeight > window.innerHeight + window.scrollY - 8) {
+      top = rect.top + window.scrollY - toolbarHeight - gap
     }
 
-    // 左边界检查
-    if (left < 10) {
-      left = 10
-    }
-
-    // 右边界检查
-    const maxLeft = window.innerWidth - toolbarWidth - 10
-    if (left > maxLeft) {
-      left = maxLeft
-    }
-
-    console.log('📍 工具栏位置计算:', {
-      selectionRect: {
-        top: selectionRect.top,
-        left: selectionRect.left,
-        width: selectionRect.width,
-      },
-      toolbar: { top, left },
-    })
+    const maxLeft = window.innerWidth - toolbarWidth - 12
+    if (left > maxLeft) left = maxLeft
+    if (left < 12) left = 12
 
     setPosition({ top, left })
-  }, [selection])
+  }, [selection, showTranslateMenu])
 
-  // 处理 AI 操作
-  const handleAction = async (action: TextAIAction) => {
-    if (!selection?.text) return
+  const runAction = async (
+    action: TextAIAction,
+    applyOptions?: TextAIApplyOptions,
+  ) => {
+    if (!selection?.inputElement) return
 
     setIsProcessing(true)
-    setCurrentAction(action)
-
+    setShowTranslateMenu(false)
     try {
-      // 清除选中状态
-      window.getSelection()?.removeAllRanges()
-      
-      // 调用替换方法（会同时更新 Redux 和输入框）
-      const success = await onReplaceWithRedux(action, selection.text)
-      
+      const success = await onApply(action, selection.text, applyOptions)
       if (success) {
-        message.success('✨ 处理完成')
+        message.success('已完成')
       }
     } catch (error) {
       console.error('AI 处理失败:', error)
-      message.error('AI 处理失败，请重试')
+      message.error('处理失败，请重试')
     } finally {
       setIsProcessing(false)
-      setCurrentAction(null)
     }
   }
 
-  // 点击外部关闭
+  const handleMainAction = (action: TextAIAction) => {
+    if (action === 'translate') {
+      setShowTranslateMenu((open) => !open)
+      return
+    }
+    setShowTranslateMenu(false)
+    runAction(action)
+  }
+
+  const handleTranslateTo = (lang: TranslateTargetLanguage) => {
+    runAction('translate', { targetLanguage: lang })
+  }
+
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
-        onClose()
+    const handlePointerDown = (e: MouseEvent) => {
+      if (
+        toolbarRef.current &&
+        !toolbarRef.current.contains(e.target as Node)
+      ) {
+        const target = e.target as HTMLElement
+        if (!target.closest('input, textarea')) {
+          onClose()
+        }
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [onClose])
 
   if (!selection || !position) {
@@ -115,107 +132,55 @@ const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
   return (
     <div
       ref={toolbarRef}
-      className="fixed z-[99999] bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-2xl border border-purple-300 dark:border-purple-600 p-2"
-      style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        animation: 'fadeInScale 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
-      }}
+      data-text-ai-toolbar
+      className="fixed z-[9999] rounded-md border border-gray-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+      style={{ top: position.top, left: position.left }}
+      onMouseDown={(e) => e.preventDefault()}
     >
-      <style>{`
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: scale(0.9) translateY(-5px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-      `}</style>
-
-      {/* 小箭头指向选中文字 */}
-      <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 border-b border-r border-purple-300 dark:border-purple-600 rotate-45"></div>
-
-      {/* 加载状态 */}
-      {isProcessing ? (
-        <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg">
-          <Spin indicator={<LoadingOutlined spin className="text-purple-500" />} />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI 处理中...</span>
-        </div>
-      ) : (
-        <div className="space-y-1.5">
-          {/* 第一行：主要操作 */}
-          <Space size={4} wrap>
-            <Tooltip title="基于上下文继续写">
-              <Button
-                size="small"
-                type="primary"
-                icon={<Sparkles className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('continue')}
-                className="flex items-center gap-1"
+      <div className="flex items-center gap-0.5 px-1 py-0.5">
+        {isProcessing ? (
+          <span className="flex items-center gap-2 px-2 py-1 text-xs text-gray-500">
+            <Spin indicator={<LoadingOutlined spin style={{ fontSize: 12 }} />} />
+            处理中
+          </span>
+        ) : (
+          MAIN_ACTIONS.map((action, index) => (
+            <React.Fragment key={action}>
+              {index > 0 && (
+                <span className="mx-0.5 h-3 w-px bg-gray-200 dark:bg-zinc-700" />
+              )}
+              <button
+                type="button"
+                className={`rounded px-2 py-1 text-xs transition-colors hover:bg-gray-100 dark:hover:bg-zinc-800 ${
+                  action === 'translate' && showTranslateMenu
+                    ? 'bg-gray-100 text-gray-900 dark:bg-zinc-800 dark:text-zinc-100'
+                    : 'text-gray-600 dark:text-zinc-400'
+                }`}
+                disabled={isProcessing}
+                onClick={() => handleMainAction(action)}
               >
-                续写
-              </Button>
-            </Tooltip>
+                {getActionLabel(action)}
+              </button>
+            </React.Fragment>
+          ))
+        )}
+      </div>
 
-            <Tooltip title="优化表达，更专业">
-              <Button
-                size="small"
-                type="primary"
-                icon={<Type className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('polish')}
-                className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-blue-500"
+      {showTranslateMenu && !isProcessing && (
+        <div className="border-t border-gray-100 px-2 py-1.5 dark:border-zinc-800">
+          <span className="mb-1 block text-[11px] text-gray-400">翻译为</span>
+          <div className="flex flex-wrap gap-1">
+            {TRANSLATE_LANGUAGE_OPTIONS.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                className="rounded border border-gray-200 px-2 py-0.5 text-xs text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                onClick={() => handleTranslateTo(item.value)}
               >
-                润色
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="中英互译">
-              <Button
-                size="small"
-                icon={<Languages className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('translate')}
-                className="flex items-center gap-1"
-              >
-                翻译
-              </Button>
-            </Tooltip>
-          </Space>
-
-          {/* 第二行：辅助操作 */}
-          <Space size={4} wrap>
-            <Tooltip title="换一种说法">
-              <Button
-                size="small"
-                icon={<RefreshCw className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('rewrite')}
-              >
-                改写
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="让文字更简洁">
-              <Button
-                size="small"
-                icon={<Scissors className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('simplify')}
-              >
-                精简
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="让文字更详细">
-              <Button
-                size="small"
-                icon={<Maximize2 className="w-3.5 h-3.5" />}
-                onClick={() => handleAction('expand')}
-              >
-                扩写
-              </Button>
-            </Tooltip>
-          </Space>
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -223,4 +188,3 @@ const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
 }
 
 export default TextSelectionToolbar
-

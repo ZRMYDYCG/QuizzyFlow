@@ -85,6 +85,7 @@ const PageSetting: React.FC = () => {
   return (
     <div className="h-full overflow-y-auto px-3 py-4 custom-scrollbar">
       <Form
+        data-page-setting-form
         layout="vertical"
         initialValues={pageInfo}
         onValuesChange={handleValuesChange}

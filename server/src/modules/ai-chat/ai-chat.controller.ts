@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  BadRequestException,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
@@ -23,6 +24,8 @@ import { AddMessageDto } from './dto/add-message.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
 import { QueryChatDto } from './dto/query-chat.dto'
 import { AgentChatDto } from './dto/agent-chat.dto'
+import { ProcessTextDto } from './dto/process-text.dto'
+import { buildTextAIMessages } from './prompts/text-ai-prompt'
 import { getMaterialLibraryJSON } from './shared/material-library'
 import { QUESTION_COMPONENT_JSON_SCHEMA } from './shared/component-template.schema'
 
@@ -81,14 +84,26 @@ export class AIChatController {
    * POST /api/ai-chat/text
    */
   @Post('text')
-  async processText(
-    @Body() body: { messages: Array<{ role: string; content: string }> },
-  ) {
-    // 直接返回数据，TransformInterceptor 会自动包装成 { errno: 0, data: ... }
-    const result = await this.aiChatProxyService.chat(body.messages as any)
+  async processText(@Body() dto: ProcessTextDto) {
+    const text = dto.text?.trim()
+    if (!text) {
+      throw new BadRequestException('text 不能为空')
+    }
+
+    if (dto.action === 'translate' && !dto.targetLanguage) {
+      throw new BadRequestException('翻译需指定目标语言 targetLanguage')
+    }
+
+    const messages = buildTextAIMessages(
+      dto.action,
+      text,
+      dto.context,
+      dto.targetLanguage,
+    )
+    const result = await this.aiChatProxyService.chat(messages)
     return {
-      result,
-      content: result,
+      result: result.trim(),
+      content: result.trim(),
     }
   }
 

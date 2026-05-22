@@ -1,166 +1,189 @@
 /**
- * useTextAI Hook
- * 文本 AI 处理，并更新 Redux store
+ * 文本 AI：调用接口并写回 Redux / 表单
  */
 
 import { useCallback } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { message } from 'antd'
-import { changeComponentProps, changeComponentTitle } from '@/store/modules/question-component'
+import {
+  changeComponentProps,
+  changeComponentTitle,
+} from '@/store/modules/question-component'
+import { resetPageInfo } from '@/store/modules/pageinfo-reducer'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
-import { processTextWithAI, TextAIAction } from '../services/textAI'
+import type { stateType } from '@/store'
+import {
+  processTextWithAI,
+  TextAIAction,
+  type TextAIApplyOptions,
+} from '../services/textAI'
+import {
+  resolveFormField,
+  applyTextToValue,
+  type ResolvedField,
+} from '../utils/detect-form-field'
 
 export const useTextAI = () => {
   const dispatch = useDispatch()
   const { selectedComponent } = useGetComponentInfo()
+  const pageInfo = useSelector((state: stateType) => state.pageInfo)
 
-  /**
-   * 智能识别输入框对应的属性名
-   */
-  const detectPropName = useCallback(
-    (inputElement: HTMLInputElement | HTMLTextAreaElement): string | null => {
-      // 方法 1：从 data-prop-name 或 name 属性获取
-      const explicitPropName =
-        inputElement.getAttribute('data-prop-name') ||
-        inputElement.getAttribute('name') ||
-        inputElement.id
-
-      if (explicitPropName) {
-        return explicitPropName
-      }
-
-      // 方法 2：通过输入框的当前值推断
-      const currentValue = inputElement.value
-
-      // 检查 title
-      if (
-        selectedComponent?.title === currentValue ||
-        selectedComponent?.text === currentValue
-      ) {
-        return 'title'
-      }
-
-      // 检查 props 中的各个属性
-      if (selectedComponent?.props) {
-        for (const [key, value] of Object.entries(selectedComponent.props)) {
-          if (value === currentValue) {
-            return key
-          }
-        }
-      }
-
-      // 方法 3：通过 label 推断
-      const label = inputElement.closest('.ant-form-item')?.querySelector('label')?.textContent
-
-      const labelMap: Record<string, string> = {
-        标题: 'title',
-        占位符: 'placeholder',
-        Placeholder: 'placeholder',
-        描述: 'desc',
-        说明: 'desc',
-      }
-
-      if (label && labelMap[label]) {
-        return labelMap[label]
-      }
-
-      console.warn('⚠️ 无法识别属性名，将使用通用更新')
-      return null
+  const applyToPageField = useCallback(
+    (field: string, fullValue: string) => {
+      dispatch(resetPageInfo({ ...pageInfo, [field]: fullValue }))
     },
-    [selectedComponent]
+    [dispatch, pageInfo],
   )
 
-  /**
-   * 处理文本 AI 并更新组件属性
-   */
+  const applyToComponentField = useCallback(
+    (field: ResolvedField, fullValue: string) => {
+      if (!selectedComponent) return
+
+      const { fe_id } = selectedComponent
+      const props = { ...(selectedComponent.props as Record<string, unknown>) }
+
+      if (field.field === 'options' && field.optionIndex != null && field.optionKey) {
+        const options = [...((props.options as unknown[]) || [])] as Array<
+          Record<string, unknown>
+        >
+        if (options[field.optionIndex]) {
+          options[field.optionIndex] = {
+            ...options[field.optionIndex],
+            [field.optionKey]: fullValue,
+          }
+          props.options = options
+        }
+      } else if (field.field === 'list' && field.optionIndex != null) {
+        const list = [...((props.list as unknown[]) || [])] as Array<Record<string, unknown>>
+        if (list[field.optionIndex]) {
+          list[field.optionIndex] = { ...list[field.optionIndex], text: fullValue }
+          props.list = list
+        }
+      } else if (field.field === 'title') {
+        props.title = fullValue
+        dispatch(changeComponentTitle({ fe_id, title: fullValue }))
+      } else {
+        props[field.field] = fullValue
+      }
+
+      dispatch(changeComponentProps({ fe_id, props: props as never }))
+    },
+    [dispatch, selectedComponent],
+  )
+
   const processAndUpdate = useCallback(
     async (
       action: TextAIAction,
       selectedText: string,
-      inputElement: HTMLInputElement | HTMLTextAreaElement
+      inputElement: HTMLInputElement | HTMLTextAreaElement,
+      options?: { isPartialSelection?: boolean } & TextAIApplyOptions,
     ): Promise<string | null> => {
-      if (!selectedComponent) {
-        message.warning('请先选中一个组件')
+      if (action === 'translate' && !options?.targetLanguage) {
+        message.warning('请选择翻译目标语言')
         return null
+      }
+      const currentValue = inputElement.value
+      if (!currentValue.trim() && !selectedText.trim()) {
+        message.warning('请先输入内容')
+        return null
+      }
+
+      const selStart = inputElement.selectionStart ?? 0
+      const selEnd = inputElement.selectionEnd ?? 0
+      const hasPartial =
+        options?.isPartialSelection ??
+        (selStart !== selEnd)
+
+      let start: number
+      let end: number
+      let textForAI: string
+
+      if (hasPartial) {
+        start = selStart
+        end = selEnd
+        textForAI = currentValue.substring(start, end).trim()
+        if (!textForAI) {
+          message.warning('请先选中文字')
+          return null
+        }
+      } else if (action === 'continue') {
+        start = currentValue.length
+        end = currentValue.length
+        textForAI = currentValue.trim()
+        if (!textForAI) {
+          message.warning('请先输入内容')
+          return null
+        }
+      } else {
+        start = 0
+        end = currentValue.length
+        textForAI = currentValue.trim()
+        if (!textForAI) {
+          message.warning('请先输入内容')
+          return null
+        }
+      }
+
+      const resolved = resolveFormField(inputElement, {
+        selectedComponent: selectedComponent ?? null,
+        pageInfo,
+      })
+
+      if (!resolved) {
+        message.warning('无法识别当前输入框对应的字段')
+        return null
+      }
+
+      const contextParts: string[] = []
+      if (resolved.scope === 'page') {
+        contextParts.push('问卷页面设置')
+      } else if (selectedComponent) {
+        contextParts.push(`问卷组件类型：${selectedComponent.type}`)
       }
 
       try {
-        console.log('📡 准备调用 AI API:', {
+        const aiResult = await processTextWithAI(
           action,
-          selectedText,
-        })
+          textForAI,
+          contextParts.join('，'),
+          options?.targetLanguage,
+        )
 
-        // 调用 AI 处理文本
-        const result = await processTextWithAI(action, selectedText)
+        const fullNewValue = applyTextToValue(
+          currentValue,
+          start,
+          end,
+          aiResult,
+          action,
+        )
 
-        console.log('📡 AI API 返回:', result)
-
-        if (!result || !result.trim()) {
-          message.error('AI 返回为空')
-          return null
+        if (resolved.scope === 'page') {
+          applyToPageField(resolved.field, fullNewValue)
+        } else {
+          applyToComponentField(resolved, fullNewValue)
         }
 
-        const newText = result.trim()
-        const currentValue = inputElement.value
-
-        // 智能识别属性名
-        const propName = detectPropName(inputElement)
-
-        console.log('🔧 更新组件属性:', {
-          componentId: selectedComponent.fe_id,
-          componentType: selectedComponent.type,
-          propName,
-          oldValue: selectedText,
-          newValue: newText,
-          fullNewValue: currentValue.substring(0, inputElement.selectionStart || 0) + newText + currentValue.substring(inputElement.selectionEnd || 0),
+        const newCursor = start + aiResult.length
+        requestAnimationFrame(() => {
+          inputElement.setSelectionRange(newCursor, newCursor)
+          inputElement.focus()
         })
 
-        // 计算完整的新值（替换选中部分）
-        const start = inputElement.selectionStart || 0
-        const end = inputElement.selectionEnd || 0
-        const fullNewValue = currentValue.substring(0, start) + newText + currentValue.substring(end)
-
-        // 更新 Redux store
-        if (propName === 'title') {
-          // title 字段（顶层属性）
-          dispatch(
-            changeComponentTitle({
-              fe_id: selectedComponent.fe_id,
-              title: fullNewValue,
-            })
-          )
-        } else if (propName === 'text') {
-          // props.title 为表单题目标题
-          dispatch(
-            changeComponentProps({
-              fe_id: selectedComponent.fe_id,
-              props: {
-                ...selectedComponent.props,
-                text: fullNewValue,
-              } as any,
-            })
-          )
-        } else if (propName) {
-          // props 中的属性
-          dispatch(
-            changeComponentProps({
-              fe_id: selectedComponent.fe_id,
-              props: {
-                ...selectedComponent.props,
-                [propName]: fullNewValue,
-              } as any,
-            })
-          )
-        }
-
-        return newText
+        return aiResult
       } catch (error) {
-        console.error('AI 处理失败:', error)
-        message.error('AI 处理失败，请重试')
+        console.error('AI 文本处理失败:', error)
+        message.error(
+          error instanceof Error ? error.message : 'AI 处理失败，请检查网络或 API 配置',
+        )
         return null
       }
     },
-    [selectedComponent, dispatch, detectPropName]
+    [
+      selectedComponent,
+      pageInfo,
+      applyToPageField,
+      applyToComponentField,
+    ],
   )
 
   return {
@@ -168,4 +191,3 @@ export const useTextAI = () => {
     selectedComponent,
   }
 }
-

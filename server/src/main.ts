@@ -18,7 +18,12 @@ async function bootstrap() {
   // 路由全局前缀
   app.setGlobalPrefix('/api')
   // 全局验证管道
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  )
   // 全局拦截器
   app.useGlobalInterceptors(new TransformInterceptor())
   // 全局异常过滤器
