@@ -1,26 +1,58 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose'
 
 export type AIChatDocument = HydratedDocument<AIChat>
 
 /**
- * AI 对话消息接口
+ * 操作提案（禁用 Mongoose 子文档 _id，使用 actionId 字符串）
  */
+export interface ChatAction {
+  actionId: string
+  type: string
+  data: Record<string, unknown>
+  description?: string
+  applied?: boolean
+  appliedAt?: number
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  actions?: Array<{
-    type: string
-    data: any
-    description?: string
-  }>
+  actions?: ChatAction[]
 }
+
+/** 嵌套子文档必须 _id: false，且不可用字段名 id（会映射到 _id） */
+export const ChatActionSubSchema = new MongooseSchema(
+  {
+    actionId: { type: String, required: true },
+    type: { type: String, required: true },
+    data: { type: Object, required: true },
+    description: String,
+    applied: { type: Boolean, default: false },
+    appliedAt: { type: Number, default: null },
+  },
+  { _id: false },
+)
+
+export const ChatMessageSubSchema = new MongooseSchema(
+  {
+    id: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ['user', 'assistant', 'system'],
+      required: true,
+    },
+    content: { type: String, required: true },
+    timestamp: { type: Number, required: true },
+    actions: { type: [ChatActionSubSchema], default: [] },
+  },
+  { _id: false },
+)
 
 /**
  * AI 对话会话 Schema
- * 每个问卷可以有多个对话会话
  */
 @Schema({
   timestamps: true,
@@ -28,51 +60,29 @@ export interface ChatMessage {
 })
 export class AIChat {
   @Prop({ required: true, index: true })
-  questionId: string // 关联的问卷 ID
+  questionId: string
 
   @Prop({ required: true, index: true })
-  author: string // 对话创建者（用户名）
+  author: string
 
   @Prop({ required: true, trim: true })
-  title: string // 对话标题（自动生成或用户设置）
+  title: string
 
-  @Prop({
-    type: [
-      {
-        id: { type: String, required: true },
-        role: { type: String, enum: ['user', 'assistant', 'system'], required: true },
-        content: { type: String, required: true },
-        timestamp: { type: Number, required: true },
-        actions: {
-          type: [
-            {
-              type: { type: String, required: true },
-              data: { type: Object, required: true },
-              description: String,
-            },
-          ],
-          default: [],
-        },
-      },
-    ],
-    default: [],
-  })
+  @Prop({ type: [ChatMessageSubSchema], default: [] })
   messages: ChatMessage[]
 
   @Prop({ default: false })
-  isDeleted: boolean // 软删除标记
+  isDeleted: boolean
 
   @Prop({ type: Date, default: null })
   deletedAt: Date | null
 
   @Prop({ type: Date, default: () => new Date() })
-  lastMessageAt: Date // 最后一条消息的时间
+  lastMessageAt: Date
 }
 
 export const AIChatSchema = SchemaFactory.createForClass(AIChat)
 
-// 添加索引以优化查询性能
 AIChatSchema.index({ questionId: 1, author: 1, isDeleted: 1 })
 AIChatSchema.index({ author: 1, lastMessageAt: -1 })
 AIChatSchema.index({ questionId: 1, lastMessageAt: -1 })
-

@@ -31,7 +31,12 @@ export const useAIChatSession = () => {
           role: msg.role,
           content: msg.content,
           timestamp: msg.timestamp,
-          actions: msg.actions,
+          actions: msg.actions?.map((a: any) => ({
+            ...a,
+            id: a.id,
+            applied: !!a.applied,
+            appliedAt: a.appliedAt,
+          })),
         }))
 
         console.log(`✅ 已加载对话: ${chatData.title}，共 ${loadedMessages.length} 条消息`)

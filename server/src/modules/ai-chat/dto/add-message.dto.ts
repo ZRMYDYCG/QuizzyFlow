@@ -18,9 +18,14 @@ export class AddMessageDto {
   @IsArray()
   @IsOptional()
   actions?: Array<{
+    /** 前端字段，入库时转为 actionId */
+    id?: string
+    actionId?: string
     type: string
-    data: any
+    data: Record<string, unknown>
     description?: string
+    applied?: boolean
+    appliedAt?: number
   }>
 }
 

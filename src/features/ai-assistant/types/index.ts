@@ -61,9 +61,14 @@ export type AIActionType =
   | 'suggest_improvement'
 
 export interface AIAction {
+  /** 持久化 ID，与 toolCallId 或 nanoid 对应 */
+  id?: string
   type: AIActionType
   data: any
   description?: string
+  /** 是否已在画布应用 */
+  applied?: boolean
+  appliedAt?: number
 }
 
 // ==================== 对话会话 ====================
@@ -114,6 +119,7 @@ export interface UseAIChatReturn {
   loadLatestChat: () => Promise<void>
   createNewSession: () => Promise<string | null>
   setMessagesFromHistory: (messages: Message[], sessionId: string) => void
+  markActionApplied: (messageId: string, actionId: string) => Promise<void>
 }
 
 export interface UseAIActionsReturn {

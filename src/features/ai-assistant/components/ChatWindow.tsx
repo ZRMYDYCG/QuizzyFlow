@@ -11,8 +11,9 @@ import ChatMessage from './ChatMessage'
 
 interface ChatWindowProps {
   messages: Message[]
-  onExecuteAction?: (action: AIAction) => void
+  onExecuteAction?: (messageId: string, action: AIAction) => void
   isExecuting?: boolean
+  executingActionId?: string | null
   emptyText?: string
 }
 
@@ -20,6 +21,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   messages,
   onExecuteAction,
   isExecuting,
+  executingActionId,
   emptyText = '开始与 AI 对话，我会帮助你创建和优化问卷',
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -56,8 +58,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <ChatMessage
               key={message.id}
               message={message}
-              onExecuteAction={onExecuteAction}
+              onExecuteAction={
+                onExecuteAction
+                  ? (action) => onExecuteAction(message.id, action)
+                  : undefined
+              }
               isExecuting={isExecuting}
+              executingActionId={executingActionId}
             />
           ))}
           <div ref={messagesEndRef} />

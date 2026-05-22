@@ -25,6 +25,7 @@ interface AIDrawerProps {
 
 const AIDrawer: React.FC<AIDrawerProps> = ({ open, onClose, questionId }) => {
   const [activeTab, setActiveTab] = useState<string>('chat')
+  const [executingActionId, setExecutingActionId] = useState<string | null>(null)
 
   // 获取 AI 上下文
   const context = useAIContext({ questionId })
@@ -47,6 +48,7 @@ const AIDrawer: React.FC<AIDrawerProps> = ({ open, onClose, questionId }) => {
     loadLatestChat,
     createNewSession,
     setMessagesFromHistory,
+    markActionApplied,
   } = useAIChat({
     context,
     autoSave: true,
@@ -74,13 +76,21 @@ const AIDrawer: React.FC<AIDrawerProps> = ({ open, onClose, questionId }) => {
 
   // 处理执行 AI 操作
   const handleExecuteAction = useCallback(
-    async (action: AIAction) => {
-      const success = await executeAction(action)
-      if (success) {
-        console.log('Action executed successfully')
+    async (messageId: string, action: AIAction) => {
+      if (!action.id) {
+        return
+      }
+      setExecutingActionId(action.id)
+      try {
+        const success = await executeAction(action)
+        if (success) {
+          await markActionApplied(messageId, action.id)
+        }
+      } finally {
+        setExecutingActionId(null)
       }
     },
-    [executeAction]
+    [executeAction, markActionApplied],
   )
 
   // 加载指定对话（从历史列表）
@@ -180,6 +190,7 @@ const AIDrawer: React.FC<AIDrawerProps> = ({ open, onClose, questionId }) => {
                 messages={messages}
                 onExecuteAction={handleExecuteAction}
                 isExecuting={isExecuting}
+                executingActionId={executingActionId}
               />
             )}
           </div>

@@ -13,11 +13,16 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  actions?: Array<{
-    type: string
-    data: any
-    description?: string
-  }>
+  actions?: ChatAction[]
+}
+
+export interface ChatAction {
+  id: string
+  type: string
+  data: Record<string, unknown>
+  description?: string
+  applied?: boolean
+  appliedAt?: number
 }
 
 export interface ChatSession {
@@ -42,11 +47,7 @@ export interface AddMessageDto {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: number
-  actions?: Array<{
-    type: string
-    data: any
-    description?: string
-  }>
+  actions?: ChatAction[]
 }
 
 export interface QueryChatDto {
@@ -110,6 +111,19 @@ export async function batchAddMessages(
  */
 export async function syncMessages(id: string, messages: AddMessageDto[]): Promise<ResDataType> {
   return await instance.patch(`/api/ai-chat/${id}/messages/sync`, messages)
+}
+
+/**
+ * 标记某条消息下的操作为已应用
+ */
+export async function applyChatAction(
+  chatId: string,
+  messageId: string,
+  actionId: string,
+): Promise<ResDataType> {
+  return await instance.patch(
+    `/api/ai-chat/${chatId}/messages/${encodeURIComponent(messageId)}/actions/${encodeURIComponent(actionId)}/apply`,
+  )
 }
 
 /**

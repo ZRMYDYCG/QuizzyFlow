@@ -11,16 +11,20 @@ import {
   HttpCode,
   HttpStatus,
   Res,
-  Sse,
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
+import { pipeAgentUIStreamToResponse } from 'ai'
 import { AIChatService } from './ai-chat.service'
 import { AIChatProxyService } from './ai-chat-proxy.service'
+import { QuestionnaireAgentService } from './questionnaire-agent.service'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { AddMessageDto } from './dto/add-message.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
 import { QueryChatDto } from './dto/query-chat.dto'
+import { AgentChatDto } from './dto/agent-chat.dto'
+import { getMaterialLibraryJSON } from './shared/material-library'
+import { QUESTION_COMPONENT_JSON_SCHEMA } from './shared/component-template.schema'
 
 @ApiTags('AI 助手')
 @Controller('ai-chat')
@@ -28,7 +32,49 @@ export class AIChatController {
   constructor(
     private readonly aiChatService: AIChatService,
     private readonly aiChatProxyService: AIChatProxyService,
+    private readonly questionnaireAgentService: QuestionnaireAgentService,
   ) {}
+
+  /**
+   * 物料库与 JSON Schema（供前端/调试）
+   * GET /api/ai-chat/schema
+   */
+  @Get('schema')
+  getSchema() {
+    return {
+      componentJsonSchema: QUESTION_COMPONENT_JSON_SCHEMA,
+      materialLibrary: JSON.parse(getMaterialLibraryJSON()),
+    }
+  }
+
+  /**
+   * Vercel AI SDK Agent + AG-UI 流式对话
+   * POST /api/ai-chat/agent
+   */
+  @Post('agent')
+  async agentStream(
+    @Body() body: AgentChatDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const uiMessages = body.uiMessages ?? body.messages ?? []
+      const agent = this.questionnaireAgentService.getAgent(body.context)
+
+      await pipeAgentUIStreamToResponse({
+        response: res,
+        agent,
+        uiMessages,
+      })
+    } catch (error) {
+      console.error('AI agent stream error:', error)
+      if (!res.headersSent) {
+        res.status(500).json({
+          message: 'AI Agent 服务异常',
+          error: error.message,
+        })
+      }
+    }
+  }
 
   /**
    * 文本 AI 处理（续写、润色、翻译等）
@@ -167,8 +213,28 @@ export class AIChatController {
   }
 
   /**
+   * 标记操作为已应用（须在 :id/messages/sync 之前注册，避免路由冲突）
+   * PATCH /api/ai-chat/:id/messages/:messageId/actions/:actionId/apply
+   */
+  @Patch(':id/messages/:messageId/actions/:actionId/apply')
+  async applyAction(
+    @Request() req,
+    @Param('id') id: string,
+    @Param('messageId') messageId: string,
+    @Param('actionId') actionId: string,
+  ) {
+    const { username } = req.user
+    return await this.aiChatService.markActionApplied(
+      id,
+      username,
+      messageId,
+      actionId,
+    )
+  }
+
+  /**
    * 同步消息（覆盖式更新）
-   * PUT /api/ai-chat/:id/messages/sync
+   * PATCH /api/ai-chat/:id/messages/sync
    */
   @Patch(':id/messages/sync')
   async syncMessages(

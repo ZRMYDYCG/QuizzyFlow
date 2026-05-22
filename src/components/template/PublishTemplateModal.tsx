@@ -1,21 +1,15 @@
 /**
- * 发布模板弹窗组件
+ * 发布模板弹窗
  */
 import { FC } from 'react'
-import { Modal, Form, Input, Select, Switch, message, Upload, Button } from 'antd'
-import { Upload as UploadIcon } from 'lucide-react'
+import { Modal, Form, Input, Select, Switch, message, Typography } from 'antd'
 import { useRequest } from 'ahooks'
-import { 
-  TemplateCategory, 
-  TEMPLATE_CATEGORIES, 
+import {
+  TemplateCategory,
   getAllCategories,
-  POPULAR_TAGS 
+  POPULAR_TAGS,
 } from '@/constants/template-categories'
-import { 
-  QuestionnaireType, 
-  QUESTIONNAIRE_TYPES,
-  MVP_RECOMMENDED_TYPES 
-} from '@/constants/questionnaire-types'
+import { QuestionnaireType } from '@/constants/questionnaire-types'
 import { createTemplate } from '@/api/modules/template'
 import type { QuestionComponentType } from '@/store/modules/question-component'
 import type { IPageInfo } from '@/store/modules/pageinfo-reducer'
@@ -35,13 +29,12 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
 }) => {
   const [form] = Form.useForm()
 
-  // 发布模板
   const { loading, run: handlePublish } = useRequest(
     async (values) => {
       const templateData = {
         title: pageInfo.title || '未命名问卷',
         desc: pageInfo.desc || '',
-        type: pageInfo.type as QuestionnaireType || QuestionnaireType.FORM,
+        type: (pageInfo.type as QuestionnaireType) || QuestionnaireType.FORM,
         componentList,
         pageInfo: {
           layout: pageInfo.layout,
@@ -62,28 +55,26 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
         description: values.description,
         thumbnail: values.thumbnail || '',
         category: values.category,
-        type: pageInfo.type as QuestionnaireType || QuestionnaireType.FORM,
+        type: (pageInfo.type as QuestionnaireType) || QuestionnaireType.FORM,
         tags: values.tags || [],
         templateData,
         isPublic: values.isPublic ?? true,
       })
 
       message.success(
-        '模板已提交！若无敏感词将自动公开，含敏感词则需管理员审核通过后才会出现在模板市场。',
+        '已提交。无敏感词将自动公开，含敏感词需审核通过后才会出现在模板市场。',
       )
       form.resetFields()
       onClose()
     },
     {
       manual: true,
-      onError: (error: any) => {
-        const msg =
-          error?.response?.data?.message ||
-          error?.message ||
-          '发布失败，请稍后重试'
-        message.error(msg)
+      onError: (error: { response?: { data?: { message?: string } }; message?: string }) => {
+        message.error(
+          error?.response?.data?.message || error?.message || '发布失败，请稍后重试',
+        )
       },
-    }
+    },
   )
 
   const handleOk = () => {
@@ -97,123 +88,92 @@ const PublishTemplateModal: FC<PublishTemplateModalProps> = ({
 
   return (
     <Modal
-      title="📤 发布为模板"
+      title="发布为模板"
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={loading}
-      width={600}
-      okText="发布模板"
+      width={520}
+      okText="发布"
       cancelText="取消"
+      destroyOnClose
     >
+      <Typography.Paragraph type="secondary" className="!mb-4 text-sm">
+        将当前问卷保存为模板，可在「我的模板」中管理。
+      </Typography.Paragraph>
+
       <Form
         form={form}
         layout="vertical"
+        requiredMark="optional"
         initialValues={{
           category: TemplateCategory.CUSTOM,
           isPublic: true,
           tags: [],
         }}
       >
-        {/* 模板名称 */}
         <Form.Item
           name="name"
           label="模板名称"
           rules={[
             { required: true, message: '请输入模板名称' },
-            { max: 50, message: '名称不能超过50个字符' }
+            { max: 50, message: '不超过 50 字' },
           ]}
         >
-          <Input 
-            placeholder="为你的模板起个好听的名字"
-            size="large"
-          />
+          <Input placeholder="模板名称" maxLength={50} showCount />
         </Form.Item>
 
-        {/* 模板描述 */}
         <Form.Item
           name="description"
-          label="模板描述"
+          label="描述"
           rules={[
-            { required: true, message: '请输入模板描述' },
-            { max: 200, message: '描述不能超过200个字符' }
+            { required: true, message: '请输入描述' },
+            { max: 200, message: '不超过 200 字' },
           ]}
         >
           <Input.TextArea
-            placeholder="描述模板的用途和特点..."
+            placeholder="用途或适用场景"
             rows={3}
-            size="large"
+            maxLength={200}
+            showCount
           />
         </Form.Item>
 
-        {/* 分类选择 */}
-        <Form.Item
-          name="category"
-          label="模板分类"
-          rules={[{ required: true, message: '请选择模板分类' }]}
-        >
-          <Select size="large" placeholder="选择适合的分类">
-            {getAllCategories().map(cat => (
-              <Select.Option key={cat.key} value={cat.key}>
-                <div className="flex items-center gap-2">
-                  <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </div>
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <div className="grid grid-cols-2 gap-x-4">
+          <Form.Item
+            name="category"
+            label="分类"
+            rules={[{ required: true, message: '请选择分类' }]}
+          >
+            <Select
+              placeholder="选择分类"
+              options={getAllCategories().map((cat) => ({
+                label: cat.label,
+                value: cat.key,
+              }))}
+            />
+          </Form.Item>
 
-        {/* 标签 */}
-        <Form.Item
-          name="tags"
-          label="模板标签"
-          help="选择或输入标签，方便其他用户搜索"
-        >
+          <Form.Item name="isPublic" label="公开" valuePropName="checked">
+            <Switch checkedChildren="是" unCheckedChildren="否" />
+          </Form.Item>
+        </div>
+
+        <Form.Item name="tags" label="标签" extra="最多 5 个，便于搜索">
           <Select
             mode="tags"
-            size="large"
-            placeholder="选择或输入标签"
+            placeholder="选择或输入"
             maxTagCount={5}
-            options={POPULAR_TAGS.map(tag => ({ label: tag, value: tag }))}
+            options={POPULAR_TAGS.map((tag) => ({ label: tag, value: tag }))}
           />
         </Form.Item>
 
-        {/* 缩略图URL */}
-        <Form.Item
-          name="thumbnail"
-          label="缩略图链接（可选）"
-          help="提供一个模板预览图片的URL"
-        >
-          <Input
-            placeholder="https://example.com/image.jpg"
-            size="large"
-          />
+        <Form.Item name="thumbnail" label="缩略图" extra="可选，图片 URL">
+          <Input placeholder="https://" />
         </Form.Item>
-
-        {/* 是否公开 */}
-        <Form.Item
-          name="isPublic"
-          label="是否公开"
-          valuePropName="checked"
-          help="公开后其他用户可以在模板市场中看到并使用"
-        >
-          <Switch />
-        </Form.Item>
-
-        {/* 提示信息 */}
-        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 text-sm text-blue-600 dark:text-blue-400">
-          <p className="mb-2">📝 发布提示：</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>发布后的模板将包含当前问卷的所有组件和配置</li>
-            <li>其他用户可以使用你的模板快速创建问卷</li>
-            <li>你可以随时在"我的模板"中管理发布的模板</li>
-          </ul>
-        </div>
       </Form>
     </Modal>
   )
 }
 
 export default PublishTemplateModal
-

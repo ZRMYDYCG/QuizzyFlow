@@ -4,6 +4,7 @@
  */
 
 export { useAIChat } from './useAIChat'
+export { useAgentChat } from './useAgentChat'
 export { useAIActions } from './useAIActions'
 export { useAIContext } from './useAIContext'
 export { useAIChatSession } from './useAIChatSession'

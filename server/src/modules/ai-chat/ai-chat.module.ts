@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config'
 import { AIChatController } from './ai-chat.controller'
 import { AIChatService } from './ai-chat.service'
 import { AIChatProxyService } from './ai-chat-proxy.service'
+import { QuestionnaireAgentService } from './questionnaire-agent.service'
 import { AIChat, AIChatSchema } from './schemas/ai-chat.schema'
 
 @Module({
@@ -12,8 +13,8 @@ import { AIChat, AIChatSchema } from './schemas/ai-chat.schema'
     ConfigModule,
   ],
   controllers: [AIChatController],
-  providers: [AIChatService, AIChatProxyService],
-  exports: [AIChatService, AIChatProxyService],
+  providers: [AIChatService, AIChatProxyService, QuestionnaireAgentService],
+  exports: [AIChatService, AIChatProxyService, QuestionnaireAgentService],
 })
 export class AIChatModule {}
 

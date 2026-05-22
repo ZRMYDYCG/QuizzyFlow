@@ -15,9 +15,15 @@ interface ChatMessageProps {
   message: Message
   onExecuteAction?: (action: AIAction) => void
   isExecuting?: boolean
+  executingActionId?: string | null
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, onExecuteAction, isExecuting }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  onExecuteAction,
+  isExecuting,
+  executingActionId,
+}) => {
   const isUser = message.role === 'user'
   const isAssistant = message.role === 'assistant'
 
@@ -71,6 +77,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onExecuteAction, isE
           <div className="prose prose-sm max-w-none dark:prose-invert">
             {isUser ? (
               <p className="text-white mb-0">{message.content}</p>
+            ) : !getDisplayContent(message.content) && message.actions?.length ? (
+              <p className="text-gray-500 dark:text-gray-400 mb-0 text-sm">
+                已生成 {message.actions.length} 项操作提案，请在下方确认应用。
+              </p>
             ) : (
               <ReactMarkdown
                 components={{
@@ -106,25 +116,44 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onExecuteAction, isE
         {/* 操作按钮（如果有 actions） */}
         {isAssistant && message.actions && message.actions.length > 0 && (
           <div className="mt-2 space-y-2">
-            {message.actions.map((action, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
-              >
-                <Tag color="blue" className="m-0">
-                  {formatActionDescription(action)}
-                </Tag>
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<CheckOutlined />}
-                  loading={isExecuting}
-                  onClick={() => onExecuteAction?.(action)}
+            {message.actions.map((action) => {
+              const isSuggestion = action.type === 'suggest_improvement'
+              const isApplied = !!action.applied
+              const actionKey = action.id ?? `${action.type}-${action.description}`
+
+              return (
+                <div
+                  key={actionKey}
+                  className={`flex items-center gap-2 p-2 rounded-lg border ${
+                    isApplied
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                      : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                  }`}
                 >
-                  应用此操作
-                </Button>
-              </div>
-            ))}
+                  <Tag color={isApplied ? 'success' : 'blue'} className="m-0">
+                    {formatActionDescription(action)}
+                  </Tag>
+                  {isApplied ? (
+                    <Tag color="success" className="m-0">
+                      已应用
+                    </Tag>
+                  ) : isSuggestion ? (
+                    <span className="text-xs text-gray-500">仅供参考</span>
+                  ) : (
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<CheckOutlined />}
+                      loading={isExecuting && executingActionId === action.id}
+                      disabled={!action.id}
+                      onClick={() => onExecuteAction?.(action)}
+                    >
+                      应用此操作
+                    </Button>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 
