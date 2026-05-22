@@ -33,15 +33,34 @@ export function serializeActionForClient(action: ChatAction) {
 }
 
 export function normalizeMessagesForDb(messages: AddMessageDto[]): ChatMessage[] {
-  return messages.map((msg) => ({
-    id: msg.id,
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp,
-    actions: msg.actions?.map((a) =>
-      normalizeActionFromClient(a as Parameters<typeof normalizeActionFromClient>[0]),
-    ),
-  }))
+  return messages.map((msg) => {
+    const text = (msg.content ?? '').trim()
+    let content = msg.content ?? ''
+    if (!text) {
+      if (msg.actions?.length) {
+        const desc = msg.actions
+          .map((a) => a.description)
+          .filter(Boolean)
+          .join('；')
+        content = desc || '已生成操作提案'
+      } else if (msg.role === 'assistant') {
+        content = '（助手回复）'
+      } else {
+        content = msg.content ?? '（消息）'
+      }
+    }
+
+    return {
+      id: msg.id,
+      role: msg.role,
+      content,
+      reasoning: msg.reasoning?.trim() || '',
+      timestamp: msg.timestamp,
+      actions: msg.actions?.map((a) =>
+        normalizeActionFromClient(a as Parameters<typeof normalizeActionFromClient>[0]),
+      ),
+    }
+  })
 }
 
 export function serializeChatForClient(chat: {

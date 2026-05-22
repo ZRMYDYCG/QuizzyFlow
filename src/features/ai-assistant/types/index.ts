@@ -9,9 +9,37 @@ export interface Message {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  reasoning?: string
   timestamp: number
   actions?: AIAction[]
+  toolCalls?: ToolCallDisplay[]
+  followUp?: FollowUpGuide
+  followUpActionId?: string
+  followUpUsed?: boolean
   isStreaming?: boolean
+  isReasoningStreaming?: boolean
+}
+
+// ==================== Tool Call 展示 ====================
+
+export type ToolCallState =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'error'
+
+export type ToolCallKind = 'component' | 'skill' | 'unknown'
+
+export interface ToolCallDisplay {
+  id: string
+  toolName: string
+  displayName: string
+  kind: ToolCallKind
+  state: ToolCallState
+  input?: unknown
+  output?: unknown
+  summary?: string
+  error?: string
 }
 
 // ==================== AI 上下文 ====================
@@ -59,6 +87,31 @@ export type AIActionType =
   | 'reorder_components'
   | 'generate_title'
   | 'suggest_improvement'
+  | 'follow_up'
+
+export interface FollowUpOption {
+  label: string
+  value: string
+}
+
+export type FollowUpFieldType = 'chips' | 'single_choice' | 'multi_choice' | 'text'
+
+export interface FollowUpField {
+  id: string
+  type: FollowUpFieldType
+  label: string
+  placeholder?: string
+  options?: FollowUpOption[]
+  required?: boolean
+}
+
+export interface FollowUpGuide {
+  title?: string
+  description?: string
+  fields: FollowUpField[]
+  submitLabel?: string
+  dismissLabel?: string
+}
 
 export interface AIAction {
   /** 持久化 ID，与 toolCallId 或 nanoid 对应 */
@@ -116,11 +169,14 @@ export interface UseAIChatReturn {
   stopStreaming: () => void
   chatSessionId: string | null
   isLoadingHistory: boolean
+  isSwitchingSession: boolean
   loadLatestChat: () => Promise<void>
   createNewSession: () => Promise<string | null>
   updateChatTitle: (sessionId: string, title: string) => Promise<boolean>
+  switchToSession: (sessionId: string) => Promise<boolean>
   setMessagesFromHistory: (messages: Message[], sessionId: string) => void
   markActionApplied: (messageId: string, actionId: string) => Promise<void>
+  markFollowUpHandled: (messageId: string, actionId: string) => Promise<void>
 }
 
 export interface UseAIActionsReturn {

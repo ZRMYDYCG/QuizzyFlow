@@ -12,6 +12,10 @@ export class AddMessageDto {
   @IsNotEmpty()
   content: string
 
+  @IsString()
+  @IsOptional()
+  reasoning?: string
+
   @IsNumber()
   timestamp: number
 

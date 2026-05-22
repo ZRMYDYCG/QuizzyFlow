@@ -1,45 +1,32 @@
 /**
  * useAIChatSession Hook
- * 专门处理对话会话的加载和切换
+ * 加载指定对话会话（供外部按需使用）
  */
 
 import { useState, useCallback } from 'react'
 import { message } from 'antd'
-import { getChatDetail, type ChatSession } from '@/api/modules/ai-chat'
+import { getChatDetail } from '@/api/modules/ai-chat'
 import { Message } from '../types'
+import { mapDbMessageToLocal } from '../utils/message-actions'
 
 export const useAIChatSession = () => {
   const [isLoadingSession, setIsLoadingSession] = useState(false)
 
-  /**
-   * 加载指定的对话会话
-   */
   const loadChatSession = useCallback(
     async (chatId: string): Promise<{ messages: Message[]; sessionId: string } | null> => {
       setIsLoadingSession(true)
       try {
-        const chatData: any = await getChatDetail(chatId)
+        const chatData = (await getChatDetail(chatId)) as {
+          _id?: string
+          messages?: Message[]
+        }
 
-        if (!chatData || !chatData.messages) {
+        if (!chatData?._id || !chatData.messages) {
           message.error('对话数据格式错误')
           return null
         }
 
-        // 转换服务器消息格式为本地格式
-        const loadedMessages: Message[] = chatData.messages.map((msg: any) => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp,
-          actions: msg.actions?.map((a: any) => ({
-            ...a,
-            id: a.id,
-            applied: !!a.applied,
-            appliedAt: a.appliedAt,
-          })),
-        }))
-
-        console.log(`✅ 已加载对话: ${chatData.title}，共 ${loadedMessages.length} 条消息`)
+        const loadedMessages = chatData.messages.map(mapDbMessageToLocal)
 
         return {
           messages: loadedMessages,
@@ -53,7 +40,7 @@ export const useAIChatSession = () => {
         setIsLoadingSession(false)
       }
     },
-    []
+    [],
   )
 
   return {
@@ -61,4 +48,3 @@ export const useAIChatSession = () => {
     isLoadingSession,
   }
 }
-

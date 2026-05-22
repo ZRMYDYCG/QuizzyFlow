@@ -15,6 +15,7 @@ interface ChatHistoryProps {
   currentChatId?: string | null
   refreshKey?: number
   onSelectChat: (chatId: string) => void
+  onDeleteChat?: (deletedId: string) => void
 }
 
 const getPinStorageKey = (questionId: string) => `ai-chat-pins-${questionId}`
@@ -37,6 +38,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
   currentChatId,
   refreshKey = 0,
   onSelectChat,
+  onDeleteChat,
 }) => {
   const { theme } = useTheme()
   const [chats, setChats] = useState<ChatSession[]>([])
@@ -97,6 +99,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
             return next
           })
           loadChats()
+          onDeleteChat?.(id)
         } catch (error) {
           console.error('删除失败:', error)
           antdMessage.error('删除失败')

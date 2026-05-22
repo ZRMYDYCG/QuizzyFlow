@@ -7,6 +7,7 @@ import React, { useState, useRef, KeyboardEvent } from 'react'
 import { Send, Square } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/utils'
+import UserChatAvatar from './UserChatAvatar'
 
 interface ChatInputProps {
   onSend: (message: string) => void
@@ -68,11 +69,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
         disabled={isLoading}
         rows={3}
         className={cn(
-          'block w-full resize-none border-0 bg-transparent pb-10 text-sm outline-none',
+          'block w-full resize-none border-0 bg-transparent pb-10 pl-11 text-sm outline-none',
           'placeholder:text-gray-400',
           theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
         )}
       />
+
+      <div className="absolute bottom-3 left-3">
+        <UserChatAvatar size={28} />
+      </div>
 
       <div className="absolute bottom-3 right-3">
         {isLoading ? (

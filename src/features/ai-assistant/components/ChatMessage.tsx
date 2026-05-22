@@ -4,12 +4,13 @@
  */
 
 import React from 'react'
-import { Avatar, Button, Tag } from 'antd'
-import { UserOutlined, RobotOutlined, CheckOutlined } from '@ant-design/icons'
 import ReactMarkdown from 'react-markdown'
 import { Message, AIAction } from '../types'
-import { formatActionDescription } from '../services/responseParser'
 import { Sparkles } from 'lucide-react'
+import ThinkingBlock from './ThinkingBlock'
+import ToolCallsBlock from './ToolCallsBlock'
+import ActionProposalPanel from './ActionProposalPanel'
+import UserChatAvatar from './UserChatAvatar'
 
 interface ChatMessageProps {
   message: Message
@@ -41,129 +42,118 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return content.replace(/```action\s*[\s\S]*?```/g, '').trim()
   }
 
+  const markdownComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => (
+      <p className="mb-2 last:mb-0">{children}</p>
+    ),
+    ul: ({ children }: { children?: React.ReactNode }) => (
+      <ul className="mb-2 list-disc pl-4 last:mb-0">{children}</ul>
+    ),
+    ol: ({ children }: { children?: React.ReactNode }) => (
+      <ol className="mb-2 list-decimal pl-4 last:mb-0">{children}</ol>
+    ),
+    li: ({ children }: { children?: React.ReactNode }) => (
+      <li className="mb-0.5">{children}</li>
+    ),
+    code({ className, children, ...props }: React.ComponentProps<'code'> & { className?: string }) {
+      const match = /language-(\w+)/.exec(className || '')
+      const isInline = !match
+
+      if (isInline) {
+        return (
+          <code
+            className="rounded bg-black/[0.06] px-1 py-0.5 text-[11px] dark:bg-white/10"
+            {...props}
+          >
+            {children}
+          </code>
+        )
+      }
+
+      return (
+        <pre className="my-2 overflow-x-auto rounded-lg bg-gray-900 p-3 text-[11px] text-gray-100">
+          <code className={className} {...props}>
+            {String(children).replace(/\n$/, '')}
+          </code>
+        </pre>
+      )
+    },
+  }
+
   return (
     <div
-      className={`mb-4 flex min-w-0 gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`mb-4 flex min-w-0 ${isUser ? 'flex-row-reverse gap-3' : ''}`}
       data-message-id={message.id}
     >
-      {/* 头像 */}
-      <div className="shrink-0">
-        {isUser ? (
-          <Avatar icon={<UserOutlined />} className="bg-blue-500" />
-        ) : (
-          <Avatar icon={<RobotOutlined />} className="bg-purple-500" />
-        )}
-      </div>
+      {isUser && (
+        <div className="shrink-0">
+          <UserChatAvatar size={32} />
+        </div>
+      )}
 
       {/* 消息内容 */}
-      <div className={`min-w-0 flex-1 ${isUser ? 'flex flex-col items-end' : ''}`}>
-        {/* 消息气泡 */}
+      <div className={`min-w-0 flex-1 overflow-hidden ${isUser ? 'flex flex-col items-end' : ''}`}>
         <div
-          className={`max-w-full rounded-lg px-4 py-2 ${
+          className={
             isUser
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-          }`}
+              ? 'max-w-full rounded-lg bg-gray-100 px-4 py-2 text-gray-800 dark:bg-[#3a3a42] dark:text-gray-100'
+              : 'max-w-full'
+          }
         >
-          {/* 流式输出指示器 */}
-          {message.isStreaming && (
-            <div className="flex items-center gap-2 mb-2 text-purple-500">
-              <Sparkles className="w-4 h-4 animate-pulse" />
-              <span className="text-xs">AI 正在思考...</span>
+          {/* 思考过程（AG-UI reasoning） */}
+          {isAssistant && (message.reasoning || message.isReasoningStreaming) && (
+            <ThinkingBlock
+              content={message.reasoning}
+              isStreaming={message.isReasoningStreaming}
+            />
+          )}
+
+          {/* Tool Call 调用详情（AG-UI tool parts） */}
+          {isAssistant && message.toolCalls && message.toolCalls.length > 0 && (
+            <ToolCallsBlock
+              toolCalls={message.toolCalls}
+              isStreaming={message.isStreaming}
+            />
+          )}
+
+          {/* 正文流式指示 */}
+          {message.isStreaming && !message.isReasoningStreaming && (
+            <div className="mb-2 flex items-center gap-2 text-purple-500">
+              <Sparkles className="h-4 w-4 animate-pulse" />
+              <span className="text-xs">AI 正在回复...</span>
             </div>
           )}
 
-          {/* 消息内容（Markdown 渲染） */}
-          <div className="prose prose-sm max-w-none overflow-hidden break-words dark:prose-invert">
+          {/* AI 正文：react-markdown + Tailwind typography */}
+          <div
+            className={
+              isUser
+                ? 'overflow-hidden break-words'
+                : 'prose prose-xs max-w-none overflow-hidden break-words text-xs leading-relaxed text-gray-600 dark:prose-invert dark:text-gray-400'
+            }
+          >
             {isUser ? (
-              <p className="text-white mb-0">{message.content}</p>
+              <p className="mb-0 text-sm">{message.content}</p>
             ) : !getDisplayContent(message.content) && message.actions?.length ? (
-              <p className="text-gray-500 dark:text-gray-400 mb-0 text-sm">
+              <p className="mb-0 text-xs text-gray-500 dark:text-gray-400">
                 已生成 {message.actions.length} 项操作提案，请在下方确认应用。
               </p>
             ) : (
-              <ReactMarkdown
-                components={{
-                  code({ className, children, ...props }: any) {
-                    const match = /language-(\w+)/.exec(className || '')
-                    const isInline = !match
-                    
-                    if (isInline) {
-                      return (
-                        <code className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm" {...props}>
-                          {children}
-                        </code>
-                      )
-                    }
-                    
-                    // 代码块（不使用 SyntaxHighlighter 避免构建问题）
-                    return (
-                      <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
-                        <code className={className}>
-                          {String(children).replace(/\n$/, '')}
-                        </code>
-                      </pre>
-                    )
-                  },
-                }}
-              >
+              <ReactMarkdown components={markdownComponents}>
                 {getDisplayContent(message.content)}
               </ReactMarkdown>
             )}
           </div>
         </div>
 
-        {/* 操作按钮（如果有 actions） */}
-        {isAssistant && message.actions && message.actions.length > 0 && (
-          <div className="mt-2 w-full space-y-2">
-            {message.actions.map((action) => {
-              const isSuggestion = action.type === 'suggest_improvement'
-              const isApplied = !!action.applied
-              const actionKey = action.id ?? `${action.type}-${action.description}`
-
-              return (
-                <div
-                  key={actionKey}
-                  className={`w-full rounded-lg border p-2.5 ${
-                    isApplied
-                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
-                      : 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20'
-                  }`}
-                >
-                  <div className="mb-2">
-                    <Tag
-                      color={isApplied ? 'success' : 'blue'}
-                      className="m-0 max-w-full whitespace-normal break-words text-left leading-relaxed"
-                      style={{ height: 'auto', whiteSpace: 'normal' }}
-                    >
-                      {formatActionDescription(action)}
-                    </Tag>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {isApplied ? (
-                      <Tag color="success" className="m-0 shrink-0">
-                        已应用
-                      </Tag>
-                    ) : isSuggestion ? (
-                      <span className="text-xs text-gray-500">仅供参考</span>
-                    ) : (
-                      <Button
-                        type="primary"
-                        size="small"
-                        icon={<CheckOutlined />}
-                        loading={isExecuting && executingActionId === action.id}
-                        disabled={!action.id}
-                        onClick={() => onExecuteAction?.(action)}
-                        className="shrink-0"
-                      >
-                        应用此操作
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+        {/* 操作提案：折叠 + 表单预览 */}
+        {isAssistant && message.actions && message.actions.filter((a) => a.type !== 'follow_up').length > 0 && (
+          <ActionProposalPanel
+            actions={message.actions.filter((a) => a.type !== 'follow_up')}
+            onExecuteAction={onExecuteAction}
+            isExecuting={isExecuting}
+            executingActionId={executingActionId}
+          />
         )}
 
         {/* 时间戳 */}

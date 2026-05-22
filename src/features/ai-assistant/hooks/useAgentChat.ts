@@ -2,7 +2,7 @@
  * Vercel AI SDK + AG-UI 流式对话（DefaultChatTransport -> /api/ai-chat/agent）
  */
 
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, type RefObject } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import type { UIMessage } from 'ai'
@@ -25,7 +25,10 @@ function buildAgentContextBody(context?: AIContext) {
   }
 }
 
-export function useAgentChat(context?: AIContext) {
+export function useAgentChat(
+  context?: AIContext,
+  chatSessionIdRef?: RefObject<string | null>,
+) {
   const contextRef = useRef(context)
   contextRef.current = context
 
@@ -38,6 +41,7 @@ export function useAgentChat(context?: AIContext) {
         }),
         body: () => ({
           context: buildAgentContextBody(contextRef.current),
+          chatId: chatSessionIdRef?.current ?? undefined,
         }),
       }),
     [],

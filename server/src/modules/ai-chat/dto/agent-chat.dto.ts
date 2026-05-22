@@ -1,4 +1,4 @@
-import { IsArray, IsObject, IsOptional } from 'class-validator'
+import { IsArray, IsObject, IsOptional, IsString } from 'class-validator'
 
 export class AgentChatContextDto {
   @IsOptional()
@@ -35,4 +35,9 @@ export class AgentChatDto {
   @IsOptional()
   @IsObject()
   context?: AgentChatContextDto
+
+  /** 关联的 Mongo 会话 ID（可选，用于日志与后续扩展） */
+  @IsOptional()
+  @IsString()
+  chatId?: string
 }

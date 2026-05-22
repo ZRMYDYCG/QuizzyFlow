@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config'
 import { createOpenAI } from '@ai-sdk/openai'
+import { createSiliconFlowFetch } from './silicon-flow-reasoning-stream'
 
 /** 硅基流动 OpenAI 兼容 Chat Completions（勿用 Responses API） */
 export function createSiliconFlowProvider(configService: ConfigService) {
@@ -11,6 +12,7 @@ export function createSiliconFlowProvider(configService: ConfigService) {
   return createOpenAI({
     apiKey,
     baseURL,
+    fetch: createSiliconFlowFetch(),
   })
 }
 

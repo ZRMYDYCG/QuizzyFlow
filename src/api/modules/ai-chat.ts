@@ -12,6 +12,7 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  reasoning?: string
   timestamp: number
   actions?: ChatAction[]
 }
@@ -33,6 +34,7 @@ export interface ChatSession {
   messages: ChatMessage[]
   isDeleted: boolean
   lastMessageAt: string
+  lastOpenedAt?: string
   createdAt: string
   updatedAt: string
 }
@@ -46,6 +48,7 @@ export interface AddMessageDto {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  reasoning?: string
   timestamp: number
   actions?: ChatAction[]
 }
@@ -124,6 +127,13 @@ export async function applyChatAction(
   return await instance.patch(
     `/api/ai-chat/${chatId}/messages/${encodeURIComponent(messageId)}/actions/${encodeURIComponent(actionId)}/apply`,
   )
+}
+
+/**
+ * 标记会话为最近打开（切换 / 恢复时）
+ */
+export async function markChatOpened(id: string): Promise<ResDataType> {
+  return await instance.patch(`/api/ai-chat/${id}/open`)
 }
 
 /**

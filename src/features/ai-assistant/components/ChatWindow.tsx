@@ -4,8 +4,9 @@
  */
 
 import React, { useRef, useEffect, useState, useCallback } from 'react'
-import { Empty, Button } from 'antd'
+import { Empty } from 'antd'
 import { MessageSquare, ArrowDown } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Message, AIAction } from '../types'
 import ChatMessage from './ChatMessage'
 import { cn } from '@/utils'
@@ -27,6 +28,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   executingActionId,
   emptyText = '开始与 AI 对话，我会帮助你创建和优化问卷',
 }) => {
+  const { theme } = useTheme()
   const scrollRef = useRef<HTMLDivElement>(null)
   const isAtBottomRef = useRef(true)
   const [showScrollButton, setShowScrollButton] = useState(false)
@@ -117,18 +119,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {showScrollButton && messages.length > 0 && (
-        <Button
-          type="primary"
-          shape="circle"
-          size="small"
-          icon={<ArrowDown className="h-4 w-4" />}
+        <button
+          type="button"
           aria-label="回到底部"
           onClick={() => scrollToBottom('smooth')}
           className={cn(
-            'absolute bottom-3 right-3 z-10 shadow-lg',
-            'flex h-8 w-8 items-center justify-center'
+            'absolute bottom-3 right-3 z-10',
+            'flex h-8 w-8 items-center justify-center rounded-full shadow-lg transition-colors',
+            theme === 'dark'
+              ? 'bg-white text-gray-900 hover:bg-gray-100'
+              : 'bg-gray-900 text-white hover:bg-gray-800',
           )}
-        />
+        >
+          <ArrowDown className="h-4 w-4" />
+        </button>
       )}
     </div>
   )

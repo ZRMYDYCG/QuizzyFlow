@@ -55,6 +55,7 @@ export class AIChatService {
       title: chatTitle,
       messages: [],
       lastMessageAt: new Date(),
+      lastOpenedAt: new Date(),
     })
 
     return serializeChatForClient(chat)
@@ -178,7 +179,7 @@ export class AIChatService {
   }
 
   /**
-   * 获取最近的对话（用于自动恢复）
+   * 获取最近打开的对话（用于自动恢复 / 刷新续聊）
    */
   async getLatest(username: string, questionId: string) {
     const chat = await this.aiChatModel
@@ -187,10 +188,20 @@ export class AIChatService {
         questionId,
         isDeleted: false,
       })
-      .sort({ lastMessageAt: -1 })
+      .sort({ lastOpenedAt: -1, lastMessageAt: -1 })
       .exec()
 
     return chat ? serializeChatForClient(chat) : chat
+  }
+
+  /**
+   * 标记会话为最近打开（切换 / 新建 / 恢复时调用）
+   */
+  async markOpened(id: string, username: string) {
+    const chat = await this.findOneDocument(id, username)
+    chat.lastOpenedAt = new Date()
+    await chat.save()
+    return serializeChatForClient(chat)
   }
 
   /**
@@ -201,6 +212,14 @@ export class AIChatService {
 
     chat.messages = normalizeMessagesForDb(messages)
     chat.lastMessageAt = new Date()
+
+    if (chat.title === '未命名' && messages.length > 0) {
+      const firstUser = messages.find((m) => m.role === 'user')
+      const snippet = firstUser?.content?.trim().slice(0, 30)
+      if (snippet) {
+        chat.title = snippet
+      }
+    }
 
     await chat.save()
 

@@ -19,6 +19,7 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  reasoning?: string
   timestamp: number
   actions?: ChatAction[]
 }
@@ -45,6 +46,7 @@ export const ChatMessageSubSchema = new MongooseSchema(
       required: true,
     },
     content: { type: String, required: true },
+    reasoning: { type: String, default: '' },
     timestamp: { type: Number, required: true },
     actions: { type: [ChatActionSubSchema], default: [] },
   },
@@ -79,6 +81,10 @@ export class AIChat {
 
   @Prop({ type: Date, default: () => new Date() })
   lastMessageAt: Date
+
+  /** 最近一次打开/切换到此会话的时间（用于刷新后续聊） */
+  @Prop({ type: Date, default: () => new Date() })
+  lastOpenedAt: Date
 }
 
 export const AIChatSchema = SchemaFactory.createForClass(AIChat)
@@ -86,3 +92,4 @@ export const AIChatSchema = SchemaFactory.createForClass(AIChat)
 AIChatSchema.index({ questionId: 1, author: 1, isDeleted: 1 })
 AIChatSchema.index({ author: 1, lastMessageAt: -1 })
 AIChatSchema.index({ questionId: 1, lastMessageAt: -1 })
+AIChatSchema.index({ questionId: 1, author: 1, lastOpenedAt: -1 })

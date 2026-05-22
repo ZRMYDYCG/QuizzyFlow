@@ -314,3 +314,16 @@ export function getMaterialLibraryJSON(): string {
     2,
   )
 }
+
+/** Agent 提示词用精简物料表，减少输入 token */
+export function getCompactMaterialLibraryJSON(): string {
+  return JSON.stringify(
+    MATERIAL_LIBRARY.map(({ type, label, description, defaultProps, requiredProps }) => ({
+      type,
+      label,
+      description,
+      defaultProps,
+      requiredProps,
+    })),
+  )
+}

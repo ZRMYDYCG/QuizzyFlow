@@ -1,6 +1,6 @@
 /**
  * useAIChat Hook
- * AI 对话 + 操作提案持久化 + 应用状态同步
+ * AI 对话 + 多会话切换 + 刷新续聊 + 操作提案持久化
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react'
@@ -11,9 +11,11 @@ import { useAgentChat } from './useAgentChat'
 import {
   createChat,
   getLatestChat,
+  getChatDetail,
   syncMessages,
   applyChatAction,
   updateChat,
+  markChatOpened,
 } from '@/api/modules/ai-chat'
 import { useDebounceEffect } from 'ahooks'
 import {
@@ -22,6 +24,8 @@ import {
   dbMessagesToUIMessages,
   toSyncMessageDto,
 } from '../utils/message-actions'
+import { getActiveChatId, setActiveChatId } from '../utils/chat-session-storage'
+import { isLocalFollowUpActionId } from '../utils/follow-up'
 
 interface UseAIChatOptions {
   context?: AIContext
@@ -30,15 +34,38 @@ interface UseAIChatOptions {
   autoLoad?: boolean
 }
 
+type ChatDetail = {
+  _id?: string
+  isDeleted?: boolean
+  messages?: Array<{
+    id: string
+    role: string
+    content: string
+    timestamp: number
+    actions?: Message['actions']
+  }>
+}
+
 export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   const { context, onActionReceived, autoSave = true, autoLoad = true } = options
 
   const [chatSessionId, setChatSessionId] = useState<string | null>(null)
   const [chatMessages, setChatMessages] = useState<Message[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [isSwitchingSession, setIsSwitchingSession] = useState(false)
   const [historyLoaded, setHistoryLoaded] = useState(false)
+
+  const chatSessionIdRef = useRef<string | null>(null)
+  const saveGenerationRef = useRef(0)
   const isSavingRef = useRef(false)
   const lastNotifiedActionsRef = useRef<string>('')
+  const prevIsLoadingRef = useRef(false)
+  const pendingSaveAfterStreamRef = useRef(false)
+  const prevQuestionIdRef = useRef(context?.questionId)
+  const chatMessagesRef = useRef<Message[]>([])
+
+  const chatSessionIdRefForAgent = useRef<string | null>(null)
+  chatSessionIdRefForAgent.current = chatSessionId
 
   const {
     messages: uiMessages,
@@ -47,35 +74,89 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     streamingContent,
     sendUserMessage,
     stop,
-  } = useAgentChat(context)
+  } = useAgentChat(context, chatSessionIdRefForAgent)
+
+  useEffect(() => {
+    chatSessionIdRef.current = chatSessionId
+  }, [chatSessionId])
+
+  useEffect(() => {
+    chatMessagesRef.current = chatMessages
+  }, [chatMessages])
+
+  // 问卷切换时重置并重新加载
+  useEffect(() => {
+    if (prevQuestionIdRef.current === context?.questionId) return
+    prevQuestionIdRef.current = context?.questionId
+    saveGenerationRef.current += 1
+    setHistoryLoaded(false)
+    setChatSessionId(null)
+    chatSessionIdRef.current = null
+    setChatMessages([])
+    setUiMessages([])
+    lastNotifiedActionsRef.current = ''
+  }, [context?.questionId, setUiMessages])
 
   // 将 Agent UI 流合并为带 actions 的展示消息
   useEffect(() => {
-    if (isLoadingHistory) return
-    setChatMessages((prev) => mergeUiIntoChatMessages(uiMessages, prev, isLoading))
-  }, [uiMessages, isLoading, isLoadingHistory])
+    if (isLoadingHistory || isSwitchingSession) return
+    setChatMessages((prev) => mergeUiIntoChatMessages(uiMessages, prev, isLoading, context))
+  }, [uiMessages, isLoading, isLoadingHistory, isSwitchingSession, context])
 
-  const loadLatestChat = useCallback(async () => {
+  const persistActiveSession = useCallback(
+    async (sessionId: string) => {
+      if (!context?.questionId) return
+      setActiveChatId(context.questionId, sessionId)
+      try {
+        await markChatOpened(sessionId)
+      } catch {
+        // 非关键路径，localStorage 已足够用于续聊
+      }
+    },
+    [context?.questionId],
+  )
+
+  const applyChatData = useCallback(
+    (chatData: ChatDetail) => {
+      const sessionId = chatData._id ?? null
+      if (!sessionId) return
+
+      setChatSessionId(sessionId)
+      chatSessionIdRef.current = sessionId
+
+      const loaded = (chatData.messages ?? []).map(mapDbMessageToLocal)
+      setChatMessages(loaded)
+      setUiMessages(dbMessagesToUIMessages(loaded))
+      lastNotifiedActionsRef.current = ''
+    },
+    [setUiMessages],
+  )
+
+  const loadActiveChat = useCallback(async () => {
     if (!context?.questionId || !autoLoad) return
 
     setIsLoadingHistory(true)
     try {
-      const chatData: {
-        _id?: string
-        messages?: Array<{
-          id: string
-          role: string
-          content: string
-          timestamp: number
-          actions?: Message['actions']
-        }>
-      } = await getLatestChat(context.questionId)
+      const questionId = context.questionId
+      const storedId = getActiveChatId(questionId)
 
-      if (chatData?.messages?.length) {
-        const loaded = chatData.messages.map(mapDbMessageToLocal)
-        setChatMessages(loaded)
-        setUiMessages(dbMessagesToUIMessages(loaded))
-        setChatSessionId(chatData._id ?? null)
+      if (storedId) {
+        try {
+          const chatData = (await getChatDetail(storedId)) as ChatDetail
+          if (chatData?._id && !chatData.isDeleted) {
+            applyChatData(chatData)
+            await persistActiveSession(storedId)
+            return
+          }
+        } catch {
+          setActiveChatId(questionId, null)
+        }
+      }
+
+      const latest = (await getLatestChat(questionId)) as ChatDetail | null
+      if (latest?._id) {
+        applyChatData(latest)
+        await persistActiveSession(latest._id)
       }
     } catch (error) {
       console.error('加载对话历史失败:', error)
@@ -83,23 +164,32 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       setIsLoadingHistory(false)
       setHistoryLoaded(true)
     }
-  }, [context?.questionId, autoLoad, setUiMessages])
+  }, [context?.questionId, autoLoad, applyChatData, persistActiveSession])
 
   const createNewSession = useCallback(async () => {
     if (!context?.questionId) return null
 
+    stop()
+    saveGenerationRef.current += 1
+
     try {
-      const chatData: { _id: string } = await createChat({
+      const chatData = (await createChat({
         questionId: context.questionId,
         title: '未命名',
-      })
+      })) as { _id: string }
+
       setChatSessionId(chatData._id)
+      chatSessionIdRef.current = chatData._id
+      setChatMessages([])
+      setUiMessages([])
+      lastNotifiedActionsRef.current = ''
+      await persistActiveSession(chatData._id)
       return chatData._id
     } catch (error) {
       console.error('创建对话会话失败:', error)
       return null
     }
-  }, [context?.questionId])
+  }, [context?.questionId, stop, setUiMessages, persistActiveSession])
 
   const updateChatTitle = useCallback(async (sessionId: string, title: string) => {
     const trimmed = title.trim() || '未命名'
@@ -114,42 +204,80 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   }, [])
 
   const saveMessages = useCallback(
-    async (messagesToSave: Message[]) => {
-      if (!autoSave || !context?.questionId || isSavingRef.current) return
+    async (messagesToSave: Message[], forcedSessionId?: string | null) => {
+      const generation = saveGenerationRef.current
+      const sessionId = forcedSessionId ?? chatSessionIdRef.current
+
+      if (!autoSave || !context?.questionId || !sessionId || isSavingRef.current) return
+      if (messagesToSave.length === 0) return
+      if (messagesToSave.some((m) => m.isStreaming)) return
+
+      const payload = toSyncMessageDto(messagesToSave)
+      if (payload.length === 0) return
 
       isSavingRef.current = true
       try {
-        let sessionId = chatSessionId
-        if (!sessionId) {
-          sessionId = await createNewSession()
-          if (!sessionId) return
-        }
-
-        await syncMessages(sessionId, toSyncMessageDto(messagesToSave))
+        await syncMessages(sessionId, payload)
+        if (generation !== saveGenerationRef.current) return
       } catch (error) {
         console.error('保存对话失败:', error)
+        antdMessage.error('对话保存失败，刷新后可能丢失记录')
       } finally {
         isSavingRef.current = false
       }
     },
-    [autoSave, context?.questionId, chatSessionId, createNewSession],
+    [autoSave, context?.questionId],
   )
+
+  const tryFlushPendingSave = useCallback(() => {
+    if (!pendingSaveAfterStreamRef.current || isLoading) return
+    const messages = chatMessagesRef.current
+    if (messages.length === 0) return
+    if (messages.some((m) => m.isStreaming)) return
+
+    pendingSaveAfterStreamRef.current = false
+    void saveMessages(messages)
+  }, [isLoading, saveMessages])
+
+  // 合并完成后尝试保存（等 isStreaming 清除）
+  useEffect(() => {
+    tryFlushPendingSave()
+  }, [chatMessages, tryFlushPendingSave])
+
+  // 流式结束后标记待保存，等消息合并且 isStreaming 清除后再写入
+  useEffect(() => {
+    if (prevIsLoadingRef.current && !isLoading) {
+      pendingSaveAfterStreamRef.current = true
+    }
+    prevIsLoadingRef.current = isLoading
+  }, [isLoading])
+
+  // 用户发出消息后、AI 开始回复时先保存用户消息，避免刷新丢失
+  useEffect(() => {
+    if (isLoadingHistory || isSwitchingSession || !isLoading) return
+    const messages = chatMessagesRef.current
+    if (messages.length === 0 || messages.some((m) => m.isStreaming)) return
+    const last = messages[messages.length - 1]
+    if (last.role === 'user') {
+      void saveMessages(messages)
+    }
+  }, [isLoading, chatMessages, isLoadingHistory, isSwitchingSession, saveMessages])
 
   useDebounceEffect(
     () => {
-      if (chatMessages.length > 0 && !isLoading) {
+      if (chatMessages.length > 0 && !isLoading && !chatMessages.some((m) => m.isStreaming)) {
         saveMessages(chatMessages)
       }
     },
     [chatMessages, isLoading],
-    { wait: 2000 },
+    { wait: 800 },
   )
 
   useEffect(() => {
     if (context?.questionId && autoLoad && !historyLoaded) {
-      loadLatestChat()
+      loadActiveChat()
     }
-  }, [context?.questionId, autoLoad, historyLoaded, loadLatestChat])
+  }, [context?.questionId, autoLoad, historyLoaded, loadActiveChat])
 
   useEffect(() => {
     if (!onActionReceived || isLoading) return
@@ -181,20 +309,31 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       }
 
       try {
+        if (!chatSessionIdRef.current) {
+          const id = await createNewSession()
+          if (!id) return
+        }
         await sendUserMessage(content)
       } catch (error) {
         console.error('Send message error:', error)
         antdMessage.error('发送消息失败')
       }
     },
-    [isLoading, sendUserMessage],
+    [isLoading, sendUserMessage, createNewSession],
   )
 
   const clearMessages = useCallback(() => {
+    stop()
+    saveGenerationRef.current += 1
     setUiMessages([])
     setChatMessages([])
+    setChatSessionId(null)
+    chatSessionIdRef.current = null
+    if (context?.questionId) {
+      setActiveChatId(context.questionId, null)
+    }
     lastNotifiedActionsRef.current = ''
-  }, [setUiMessages])
+  }, [stop, setUiMessages, context?.questionId])
 
   const stopStreaming = useCallback(() => {
     stop()
@@ -206,9 +345,40 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       setChatMessages(loaded)
       setUiMessages(dbMessagesToUIMessages(loaded))
       setChatSessionId(sessionId)
+      chatSessionIdRef.current = sessionId
       lastNotifiedActionsRef.current = ''
+      void persistActiveSession(sessionId)
     },
-    [setUiMessages],
+    [setUiMessages, persistActiveSession],
+  )
+
+  const switchToSession = useCallback(
+    async (sessionId: string) => {
+      if (sessionId === chatSessionIdRef.current) return true
+
+      stop()
+      saveGenerationRef.current += 1
+      setIsSwitchingSession(true)
+
+      try {
+        const chatData = (await getChatDetail(sessionId)) as ChatDetail
+        if (!chatData?._id) {
+          antdMessage.error('对话不存在')
+          return false
+        }
+
+        applyChatData(chatData)
+        await persistActiveSession(sessionId)
+        return true
+      } catch (error) {
+        console.error('切换对话失败:', error)
+        antdMessage.error('加载对话失败，请重试')
+        return false
+      } finally {
+        setIsSwitchingSession(false)
+      }
+    },
+    [stop, applyChatData, persistActiveSession],
   )
 
   const markActionApplied = useCallback(
@@ -227,18 +397,47 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
         }),
       )
 
-      if (!chatSessionId) {
+      if (!chatSessionIdRef.current) {
         return
       }
 
       try {
-        await applyChatAction(chatSessionId, messageId, actionId)
+        await applyChatAction(chatSessionIdRef.current, messageId, actionId)
       } catch (error) {
         console.error('标记操作已应用失败:', error)
         antdMessage.error('保存应用状态失败')
       }
     },
-    [chatSessionId],
+    [],
+  )
+
+  const markFollowUpHandled = useCallback(
+    async (messageId: string, actionId: string) => {
+      setChatMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== messageId) return m
+          return {
+            ...m,
+            followUpUsed: true,
+            actions: m.actions?.map((a) =>
+              a.id === actionId || a.type === 'follow_up'
+                ? { ...a, applied: true, appliedAt: Date.now() }
+                : a,
+            ),
+          }
+        }),
+      )
+
+      if (!chatSessionIdRef.current) return
+      if (isLocalFollowUpActionId(actionId)) return
+
+      try {
+        await applyChatAction(chatSessionIdRef.current, messageId, actionId)
+      } catch (error) {
+        console.error('标记引导追问已处理失败:', error)
+      }
+    },
+    [],
   )
 
   return {
@@ -250,10 +449,13 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     stopStreaming,
     chatSessionId,
     isLoadingHistory,
-    loadLatestChat,
+    isSwitchingSession,
+    loadLatestChat: loadActiveChat,
     createNewSession,
     updateChatTitle,
+    switchToSession,
     setMessagesFromHistory,
     markActionApplied,
+    markFollowUpHandled,
   }
 }

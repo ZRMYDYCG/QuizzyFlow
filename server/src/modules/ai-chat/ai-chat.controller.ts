@@ -24,10 +24,12 @@ import { AddMessageDto } from './dto/add-message.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
 import { QueryChatDto } from './dto/query-chat.dto'
 import { AgentChatDto } from './dto/agent-chat.dto'
+import { SyncMessagesDto } from './dto/sync-messages.dto'
 import { ProcessTextDto } from './dto/process-text.dto'
 import { buildTextAIMessages } from './prompts/text-ai-prompt'
 import { getMaterialLibraryJSON } from './shared/material-library'
 import { QUESTION_COMPONENT_JSON_SCHEMA } from './shared/component-template.schema'
+import { listSkillCatalog } from './skills/skill-registry'
 
 @ApiTags('AI 助手')
 @Controller('ai-chat')
@@ -48,6 +50,15 @@ export class AIChatController {
       componentJsonSchema: QUESTION_COMPONENT_JSON_SCHEMA,
       materialLibrary: JSON.parse(getMaterialLibraryJSON()),
     }
+  }
+
+  /**
+   * Skill 目录（供前端展示 tool 名称映射）
+   * GET /api/ai-chat/skills
+   */
+  @Get('skills')
+  getSkills() {
+    return { skills: listSkillCatalog() }
   }
 
   /**
@@ -255,10 +266,21 @@ export class AIChatController {
   async syncMessages(
     @Request() req,
     @Param('id') id: string,
-    @Body() messages: AddMessageDto[],
+    @Body() body: SyncMessagesDto | AddMessageDto[],
   ) {
     const { username } = req.user
+    const messages = Array.isArray(body) ? body : body.messages
     return await this.aiChatService.syncMessages(id, username, messages)
+  }
+
+  /**
+   * 标记会话为最近打开
+   * PATCH /api/ai-chat/:id/open
+   */
+  @Patch(':id/open')
+  async markOpened(@Request() req, @Param('id') id: string) {
+    const { username } = req.user
+    return await this.aiChatService.markOpened(id, username)
   }
 
   /**

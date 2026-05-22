@@ -1,4 +1,4 @@
-import { tool, stepCountIs, ToolLoopAgent } from 'ai'
+import { tool, stepCountIs, ToolLoopAgent, extractReasoningMiddleware, wrapLanguageModel } from 'ai'
 import { z } from 'zod'
 import { ConfigService } from '@nestjs/config'
 import {
@@ -10,6 +10,7 @@ import {
   QuestionnaireAgentContext,
 } from '../prompts/system-prompt'
 import { normalizeProposedComponent } from './component-validator'
+import { createSkillTools } from './skill-tools'
 
 const componentInputSchema = z.object({
   type: z.string().describe('物料 type，如 question-input'),
@@ -104,6 +105,52 @@ export function createQuestionnaireTools() {
         })
       },
     }),
+
+    suggest_follow_up: tool({
+      description:
+        '在回复完成后，若用户仍有优化空间或需要澄清需求，调用此工具在对话底部展示引导追问表单。简单问答、需求已完全满足时不要调用。',
+      inputSchema: z.object({
+        title: z.string().optional().describe('引导标题，如「还可以继续帮你」'),
+        description: z.string().optional().describe('补充说明'),
+        fields: z
+          .array(
+            z.object({
+              id: z.string().describe('字段唯一 id'),
+              type: z
+                .enum(['chips', 'single_choice', 'multi_choice', 'text'])
+                .describe(
+                  'chips=快捷按钮一键发送；single_choice=单选；multi_choice=多选；text=文本补充',
+                ),
+              label: z.string().describe('字段标签/问题'),
+              placeholder: z.string().optional(),
+              options: z
+                .array(
+                  z.object({
+                    label: z.string().describe('展示文案'),
+                    value: z
+                      .string()
+                      .describe('用户选择后发送给 AI 的完整 prompt'),
+                  }),
+                )
+                .optional()
+                .describe('chips / single_choice / multi_choice 必填'),
+              required: z.boolean().optional(),
+            }),
+          )
+          .min(1)
+          .max(4)
+          .describe('1-4 个引导字段，优先用 chips 提供 2-4 个具体优化方向'),
+        submitLabel: z.string().optional().describe('提交按钮文案，默认「发送」'),
+        dismissLabel: z.string().optional().describe('跳过文案，默认「暂不需要」'),
+      }),
+      execute: async (input) => {
+        return JSON.stringify({
+          actionType: 'follow_up',
+          data: input,
+          status: 'info_only',
+        })
+      },
+    }),
   }
 }
 
@@ -113,13 +160,21 @@ export function createQuestionnaireAgent(
 ) {
   const provider = createSiliconFlowProvider(configService)
   const modelId = getSiliconFlowModelId(configService)
+  const baseModel = provider.chat(modelId)
+  const model = wrapLanguageModel({
+    model: baseModel,
+    middleware: extractReasoningMiddleware({ tagName: 'think' }),
+  })
 
   return new ToolLoopAgent({
-    model: provider.chat(modelId),
+    model,
     instructions: buildQuestionnaireAgentSystemPrompt(context),
-    tools: createQuestionnaireTools(),
+    tools: {
+      ...createQuestionnaireTools(),
+      ...createSkillTools(context),
+    },
     stopWhen: stepCountIs(12),
     temperature: 0.7,
-    maxOutputTokens: 4096,
+    maxOutputTokens: 8192,
   })
 }

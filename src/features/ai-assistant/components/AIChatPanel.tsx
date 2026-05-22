@@ -9,12 +9,13 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/utils'
 import ChatWindow from './ChatWindow'
 import ChatInput from './ChatInput'
+import FollowUpGuideForm from './FollowUpGuideForm'
 import ChatHistory from './ChatHistory'
 import { useAIChat } from '../hooks/useAIChat'
 import { useAIContext } from '../hooks/useAIContext'
 import { useAIActions } from '../hooks/useAIActions'
-import { useAIChatSession } from '../hooks/useAIChatSession'
 import { AIAction } from '../types'
+import { getActiveFollowUpMessage } from '../utils/follow-up'
 
 interface AIChatPanelProps {
   questionId?: string
@@ -37,19 +38,19 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
 
   const context = useAIContext({ questionId })
   const { executeAction, isExecuting } = useAIActions()
-  const { loadChatSession, isLoadingSession } = useAIChatSession()
 
   const {
     messages,
     isLoading,
     sendMessage,
-    clearMessages,
     stopStreaming,
     chatSessionId,
     isLoadingHistory,
+    isSwitchingSession,
     createNewSession,
-    setMessagesFromHistory,
+    switchToSession,
     markActionApplied,
+    markFollowUpHandled,
   } = useAIChat({
     context,
     autoSave: true,
@@ -71,11 +72,31 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
   }, [initialMessage, isLoadingHistory, isLoading, sendMessage, onInitialMessageSent])
 
   const handleSend = useCallback(
-    (message: string) => {
-      sendMessage(message)
+    async (message: string) => {
+      const activeFollowUp = getActiveFollowUpMessage(messages, isLoading)
+      if (activeFollowUp?.followUpActionId) {
+        await markFollowUpHandled(activeFollowUp.id, activeFollowUp.followUpActionId)
+      }
+      await sendMessage(message)
     },
-    [sendMessage]
+    [messages, isLoading, markFollowUpHandled, sendMessage],
   )
+
+  const activeFollowUp = getActiveFollowUpMessage(messages, isLoading)
+
+  const handleFollowUpSubmit = useCallback(
+    async (message: string) => {
+      if (!activeFollowUp?.followUpActionId) return
+      await markFollowUpHandled(activeFollowUp.id, activeFollowUp.followUpActionId)
+      await sendMessage(message)
+    },
+    [activeFollowUp, markFollowUpHandled, sendMessage],
+  )
+
+  const handleFollowUpDismiss = useCallback(async () => {
+    if (!activeFollowUp?.followUpActionId) return
+    await markFollowUpHandled(activeFollowUp.id, activeFollowUp.followUpActionId)
+  }, [activeFollowUp, markFollowUpHandled])
 
   const handleExecuteAction = useCallback(
     async (messageId: string, action: AIAction) => {
@@ -95,21 +116,32 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
 
   const handleSelectChat = useCallback(
     async (chatId: string) => {
-      const sessionData = await loadChatSession(chatId)
-      if (sessionData) {
-        setMessagesFromHistory(sessionData.messages, sessionData.sessionId)
+      stopStreaming()
+      const ok = await switchToSession(chatId)
+      if (ok) {
         setActiveTab('chat')
       }
     },
-    [loadChatSession, setMessagesFromHistory]
+    [stopStreaming, switchToSession]
   )
 
   const handleCreateNew = useCallback(async () => {
-    clearMessages()
+    stopStreaming()
     await createNewSession()
     setActiveTab('chat')
     setHistoryRefreshKey((key) => key + 1)
-  }, [clearMessages, createNewSession])
+  }, [stopStreaming, createNewSession])
+
+  const handleDeleteChat = useCallback(
+    async (deletedId: string) => {
+      if (deletedId !== chatSessionId) return
+      stopStreaming()
+      await createNewSession()
+      setActiveTab('chat')
+      setHistoryRefreshKey((key) => key + 1)
+    },
+    [chatSessionId, stopStreaming, createNewSession]
+  )
 
   return (
     <div className={`flex h-full flex-col ${className ?? ''}`}>
@@ -163,7 +195,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
       {activeTab === 'chat' && (
         <>
           <div className="relative min-h-0 flex-1 overflow-hidden">
-            {isLoadingSession ? (
+            {isSwitchingSession ? (
               <div className="flex h-full items-center justify-center">
                 <Spin tip="加载对话中..." />
               </div>
@@ -180,6 +212,14 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
           <Divider className="my-0" />
 
           <div className="shrink-0 p-3">
+            {activeFollowUp?.followUp && (
+              <FollowUpGuideForm
+                guide={activeFollowUp.followUp}
+                onSubmit={handleFollowUpSubmit}
+                onDismiss={handleFollowUpDismiss}
+                disabled={isLoading}
+              />
+            )}
             <ChatInput
               onSend={handleSend}
               onStop={stopStreaming}
@@ -197,6 +237,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
             currentChatId={chatSessionId}
             refreshKey={historyRefreshKey}
             onSelectChat={handleSelectChat}
+            onDeleteChat={handleDeleteChat}
           />
         </div>
       )}
