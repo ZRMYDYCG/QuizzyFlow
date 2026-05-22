@@ -5,7 +5,8 @@ import UnsupportedComponent from './unsupported-component.tsx'
 import { useDispatch, useSelector } from 'react-redux'
 import { swapComponent } from '../../store/modules/question-component.ts'
 import SortableContainer from '../drag-sort/sort-container.tsx'
-import SortableItem from '../drag-sort/sort-item.tsx'
+import SortableItem, { SortableDragHandle } from '../drag-sort/sort-item.tsx'
+import CanvasAiDragHandle from './canvas-ai-drag-handle.tsx'
 import useGetComponentInfo from '../../hooks/useGetComponentInfo.ts'
 import { QuestionComponentType } from '../../store/modules/question-component.ts'
 import { changeSelectedId } from '../../store/modules/question-component.ts'
@@ -13,7 +14,7 @@ import { cn } from '../../utils/index.ts'
 import useCanvasKeyPress from '../../hooks/useCanvasKeyPress.ts'
 import { IPageInfo } from '../../store/modules/pageinfo-reducer.ts'
 import { useTheme } from '../../contexts/ThemeContext'
-import { MousePointerClick } from 'lucide-react'
+import { MousePointerClick, GripVertical } from 'lucide-react'
 import { useQuestionnairePagination } from '@/hooks/useQuestionnairePagination'
 import QuestionnairePagination from '@/components/questionnaire/questionnaire-pagination'
 
@@ -186,7 +187,7 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
                 const { fe_id, isLocked } = item
                 const isActive = fe_id === selectedId
                 return (
-                  <SortableItem key={fe_id} id={fe_id}>
+                  <SortableItem key={fe_id} id={fe_id} useDragHandle>
                     <div
                       onClick={(e) => handleClick(e, fe_id)}
                       style={{ 
@@ -245,6 +246,24 @@ const EditCanvas: React.FC<IPopsEditCanvas> = ({ loading }) => {
                         </div>
                       )}
                       
+                      {!isLocked && (
+                        <>
+                          <CanvasAiDragHandle component={item} />
+                          <SortableDragHandle
+                            title="拖拽排序"
+                            className={cn(
+                              'absolute right-2 top-2 z-10 flex h-7 w-7 cursor-grab items-center justify-center rounded-md transition-opacity active:cursor-grabbing',
+                              'opacity-0 group-hover:opacity-100',
+                              theme === 'dark'
+                                ? 'bg-black/40 text-slate-300 hover:bg-black/55 hover:text-white'
+                                : 'bg-white/90 text-gray-500 shadow-sm hover:bg-white hover:text-gray-800',
+                            )}
+                          >
+                            <GripVertical className="h-3.5 w-3.5" />
+                          </SortableDragHandle>
+                        </>
+                      )}
+
                       <div className="pointer-events-none">
                         {genComponent(item)}
                       </div>

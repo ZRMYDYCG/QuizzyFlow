@@ -31,5 +31,14 @@ export class AddMessageDto {
     applied?: boolean
     appliedAt?: number
   }>
+
+  @IsArray()
+  @IsOptional()
+  attachedComponents?: Array<{
+    fe_id: string
+    type: string
+    title: string
+    props?: Record<string, unknown>
+  }>
 }
 

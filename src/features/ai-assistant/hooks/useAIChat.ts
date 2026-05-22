@@ -6,7 +6,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { message as antdMessage } from 'antd'
 import type { UIMessage } from 'ai'
-import { Message, AIContext, UseAIChatReturn } from '../types'
+import { Message, AIContext, UseAIChatReturn, AttachedComponentRef } from '../types'
 import { useAgentChat } from './useAgentChat'
 import {
   createChat,
@@ -43,6 +43,7 @@ type ChatDetail = {
     content: string
     timestamp: number
     actions?: Message['actions']
+    attachedComponents?: AttachedComponentRef[]
   }>
 }
 
@@ -69,6 +70,9 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   const chatSessionIdRefForAgent = useRef<string | null>(null)
   chatSessionIdRefForAgent.current = chatSessionId
 
+  const messageAttachmentsRef = useRef<Record<string, AttachedComponentRef[]>>({})
+  const pendingAttachmentsRef = useRef<AttachedComponentRef[] | null>(null)
+
   const {
     messages: uiMessages,
     setMessages: setUiMessages,
@@ -76,7 +80,12 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     streamingContent,
     sendUserMessage,
     stop,
-  } = useAgentChat(context, chatSessionIdRefForAgent)
+  } = useAgentChat(
+    context,
+    chatSessionIdRefForAgent,
+    messageAttachmentsRef,
+    pendingAttachmentsRef,
+  )
 
   useEffect(() => {
     chatSessionIdRef.current = chatSessionId
@@ -96,6 +105,8 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     chatSessionIdRef.current = null
     setChatMessages([])
     setUiMessages([])
+    messageAttachmentsRef.current = {}
+    pendingAttachmentsRef.current = null
     lastNotifiedActionsRef.current = ''
   }, [context?.questionId, setUiMessages])
 
@@ -108,7 +119,25 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
         prev,
         isLoading,
         contextRef.current,
+        {
+          pendingAttachments: pendingAttachmentsRef.current,
+          messageAttachmentsMap: messageAttachmentsRef.current,
+        },
       )
+
+      // 将 pending 引用写入 map，供后续请求与持久化
+      for (const msg of next) {
+        if (
+          msg.role === 'user' &&
+          msg.attachedComponents?.length &&
+          !messageAttachmentsRef.current[msg.id]
+        ) {
+          messageAttachmentsRef.current[msg.id] = msg.attachedComponents
+          if (pendingAttachmentsRef.current?.length) {
+            pendingAttachmentsRef.current = null
+          }
+        }
+      }
       if (next.length === prev.length) {
         let unchanged = true
         for (let i = 0; i < next.length; i += 1) {
@@ -123,6 +152,7 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
             a.followUpUsed !== b.followUpUsed ||
             a.followUpActionId !== b.followUpActionId ||
             a.contentDisplay !== b.contentDisplay ||
+            (a.attachedComponents?.length ?? 0) !== (b.attachedComponents?.length ?? 0) ||
             (a.actions?.length ?? 0) !== (b.actions?.length ?? 0) ||
             (a.toolCalls?.length ?? 0) !== (b.toolCalls?.length ?? 0)
           ) {
@@ -158,6 +188,13 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       chatSessionIdRef.current = sessionId
 
       const loaded = (chatData.messages ?? []).map(mapDbMessageToLocal)
+      const attachmentMap: Record<string, AttachedComponentRef[]> = {}
+      for (const msg of loaded) {
+        if (msg.attachedComponents?.length) {
+          attachmentMap[msg.id] = msg.attachedComponents
+        }
+      }
+      messageAttachmentsRef.current = attachmentMap
       setChatMessages(loaded)
       setUiMessages(dbMessagesToUIMessages(loaded))
       lastNotifiedActionsRef.current = ''
@@ -215,6 +252,8 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       chatSessionIdRef.current = chatData._id
       setChatMessages([])
       setUiMessages([])
+      messageAttachmentsRef.current = {}
+      pendingAttachmentsRef.current = null
       lastNotifiedActionsRef.current = ''
       await persistActiveSession(chatData._id)
       return chatData._id
@@ -331,9 +370,9 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   }, [chatMessages, isLoading, onActionReceived])
 
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim()) {
-        antdMessage.warning('请输入消息内容')
+    async (content: string, attachedComponents?: AttachedComponentRef[]) => {
+      if (!content.trim() && !attachedComponents?.length) {
+        antdMessage.warning('请输入消息内容或拖入问卷项')
         return
       }
       if (isLoading) {
@@ -346,8 +385,12 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
           const id = await createNewSession()
           if (!id) return
         }
-        await sendUserMessage(content)
+        pendingAttachmentsRef.current = attachedComponents?.length
+          ? attachedComponents
+          : null
+        await sendUserMessage(content.trim() || '请分析我引用的问卷组件')
       } catch (error) {
+        pendingAttachmentsRef.current = null
         console.error('Send message error:', error)
         antdMessage.error('发送消息失败')
       }
@@ -360,6 +403,8 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     saveGenerationRef.current += 1
     setUiMessages([])
     setChatMessages([])
+    messageAttachmentsRef.current = {}
+    pendingAttachmentsRef.current = null
     setChatSessionId(null)
     chatSessionIdRef.current = null
     if (context?.questionId) {
@@ -375,6 +420,14 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
   const setMessagesFromHistory = useCallback(
     (newMessages: Message[], sessionId: string) => {
       const loaded = newMessages.map(mapDbMessageToLocal)
+      const attachmentMap: Record<string, AttachedComponentRef[]> = {}
+      for (const msg of loaded) {
+        if (msg.attachedComponents?.length) {
+          attachmentMap[msg.id] = msg.attachedComponents
+        }
+      }
+      messageAttachmentsRef.current = attachmentMap
+      pendingAttachmentsRef.current = null
       setChatMessages(loaded)
       setUiMessages(dbMessagesToUIMessages(loaded))
       setChatSessionId(sessionId)

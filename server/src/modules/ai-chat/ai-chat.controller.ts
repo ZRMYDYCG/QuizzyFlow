@@ -27,6 +27,7 @@ import { AgentChatDto } from './dto/agent-chat.dto'
 import { SyncMessagesDto } from './dto/sync-messages.dto'
 import { ProcessTextDto } from './dto/process-text.dto'
 import { buildTextAIMessages } from './prompts/text-ai-prompt'
+import { augmentUiMessagesWithAttachments } from './utils/augment-messages'
 import { getMaterialLibraryJSON } from './shared/material-library'
 import { QUESTION_COMPONENT_JSON_SCHEMA } from './shared/component-template.schema'
 import { listSkillCatalog } from './skills/skill-registry'
@@ -71,7 +72,13 @@ export class AIChatController {
     @Res() res: Response,
   ) {
     try {
-      const uiMessages = body.uiMessages ?? body.messages ?? []
+      const uiMessages = augmentUiMessagesWithAttachments(
+        body.uiMessages ?? body.messages ?? [],
+        {
+          attachedComponents: body.attachedComponents,
+          messageAttachments: body.messageAttachments,
+        },
+      )
       const agent = this.questionnaireAgentService.getAgent(body.context)
 
       await pipeAgentUIStreamToResponse({

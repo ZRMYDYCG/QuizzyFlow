@@ -59,6 +59,9 @@ export function normalizeMessagesForDb(messages: AddMessageDto[]): ChatMessage[]
       actions: msg.actions?.map((a) =>
         normalizeActionFromClient(a as Parameters<typeof normalizeActionFromClient>[0]),
       ),
+      attachedComponents: msg.attachedComponents?.length
+        ? msg.attachedComponents
+        : undefined,
     }
   })
 }

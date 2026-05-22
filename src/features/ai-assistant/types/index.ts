@@ -5,12 +5,22 @@
 
 // ==================== 消息类型 ====================
 
+/** 用户消息引用的问卷组件（token 优化后的精简 JSON） */
+export interface AttachedComponentRef {
+  fe_id: string
+  type: string
+  title: string
+  props?: Record<string, unknown>
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant' | 'system'
   content: string
   reasoning?: string
   timestamp: number
+  /** 用户消息附带的问卷组件引用 */
+  attachedComponents?: AttachedComponentRef[]
   actions?: AIAction[]
   toolCalls?: ToolCallDisplay[]
   followUp?: FollowUpGuide
@@ -166,7 +176,7 @@ export interface UseAIChatReturn {
   messages: Message[]
   isLoading: boolean
   streamingContent: string
-  sendMessage: (content: string) => Promise<void>
+  sendMessage: (content: string, attachedComponents?: AttachedComponentRef[]) => Promise<void>
   clearMessages: () => void
   stopStreaming: () => void
   chatSessionId: string | null

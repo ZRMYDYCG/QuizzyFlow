@@ -11,6 +11,7 @@ import ToolCallsBlock from './ToolCallsBlock'
 import ActionProposalPanel from './ActionProposalPanel'
 import UserChatAvatar from './UserChatAvatar'
 import AssistantStreamMarkdown from './AssistantStreamMarkdown'
+import MessageAttachedComponents from './MessageAttachedComponents'
 
 interface ChatMessageProps {
   message: Message
@@ -98,6 +99,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </div>
         </div>
+
+        {isUser && message.attachedComponents && message.attachedComponents.length > 0 && (
+          <MessageAttachedComponents items={message.attachedComponents} />
+        )}
 
         {/* 操作提案：折叠 + 表单预览 */}
         {isAssistant && message.actions && message.actions.filter((a) => a.type !== 'follow_up').length > 0 && (

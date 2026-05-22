@@ -10,12 +10,16 @@ import { cn } from '@/utils'
 import ChatWindow from './ChatWindow'
 import ChatInput from './ChatInput'
 import FollowUpGuideForm from './FollowUpGuideForm'
+import AttachedComponentsBar from './AttachedComponentsBar'
 import ChatHistory from './ChatHistory'
 import { useAIChat } from '../hooks/useAIChat'
 import { useAIContext } from '../hooks/useAIContext'
 import { useAIActions } from '../hooks/useAIActions'
-import { AIAction } from '../types'
+import { useQuestionComponentDragState } from '../hooks/useQuestionComponentDragState'
+import { AIAction, AttachedComponentRef } from '../types'
 import { getActiveFollowUpMessage } from '../utils/follow-up'
+import { isQuestionComponentDragEvent, QUESTION_COMPONENT_DRAG_MIME } from '../constants/drag'
+import { parseDraggedComponent } from '../utils/component-compact'
 
 interface AIChatPanelProps {
   questionId?: string
@@ -34,7 +38,10 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
   const [activeTab, setActiveTab] = useState<string>('chat')
   const [executingActionId, setExecutingActionId] = useState<string | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  const [pendingAttachments, setPendingAttachments] = useState<AttachedComponentRef[]>([])
+  const [isDropOver, setIsDropOver] = useState(false)
   const initialMessageSentRef = useRef(false)
+  const isQuestionDragging = useQuestionComponentDragState()
 
   const context = useAIContext({ questionId })
   const { executeAction, isExecuting } = useAIActions()
@@ -57,6 +64,55 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
     autoLoad: true,
   })
 
+  const addAttachment = useCallback(
+    (item: AttachedComponentRef) => {
+      if (isLoading) return
+      setPendingAttachments((prev) => {
+        if (prev.some((i) => i.fe_id === item.fe_id)) return prev
+        return [...prev, item]
+      })
+    },
+    [isLoading],
+  )
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDropOver(false)
+      if (isLoading || activeTab !== 'chat') return
+
+      const raw =
+        e.dataTransfer.getData(QUESTION_COMPONENT_DRAG_MIME) ||
+        e.dataTransfer.getData('text/plain')
+      const parsed = parseDraggedComponent(raw)
+      if (parsed) addAttachment(parsed)
+    },
+    [isLoading, activeTab, addAttachment],
+  )
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      if (!isQuestionDragging || isLoading || activeTab !== 'chat') return
+      if (!isQuestionComponentDragEvent(e)) return
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'copy'
+      setIsDropOver(true)
+    },
+    [isQuestionDragging, isLoading, activeTab],
+  )
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDropOver(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isQuestionDragging) {
+      setIsDropOver(false)
+    }
+  }, [isQuestionDragging])
+
   useEffect(() => {
     if (
       !initialMessage?.trim() ||
@@ -77,9 +133,11 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
       if (activeFollowUp?.followUpActionId) {
         await markFollowUpHandled(activeFollowUp.id, activeFollowUp.followUpActionId)
       }
-      await sendMessage(message)
+      const attachments = pendingAttachments.length ? pendingAttachments : undefined
+      await sendMessage(message, attachments)
+      setPendingAttachments([])
     },
-    [messages, isLoading, markFollowUpHandled, sendMessage],
+    [messages, isLoading, markFollowUpHandled, sendMessage, pendingAttachments],
   )
 
   const activeFollowUp = getActiveFollowUpMessage(messages, isLoading)
@@ -111,7 +169,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
         setExecutingActionId(null)
       }
     },
-    [executeAction, markActionApplied]
+    [executeAction, markActionApplied],
   )
 
   const handleSelectChat = useCallback(
@@ -122,7 +180,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
         setActiveTab('chat')
       }
     },
-    [stopStreaming, switchToSession]
+    [stopStreaming, switchToSession],
   )
 
   const handleCreateNew = useCallback(async () => {
@@ -140,14 +198,53 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
       setActiveTab('chat')
       setHistoryRefreshKey((key) => key + 1)
     },
-    [chatSessionId, stopStreaming, createNewSession]
+    [chatSessionId, stopStreaming, createNewSession],
   )
 
+  const showDropHint = isQuestionDragging && activeTab === 'chat' && !isLoading
+
   return (
-    <div className={`flex h-full flex-col ${className ?? ''}`}>
+    <div
+      className={cn('relative flex h-full flex-col', className)}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {isLoadingHistory && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
           <Spin tip="加载对话历史中..." size="large" />
+        </div>
+      )}
+
+      {showDropHint && (
+        <div
+          className={cn(
+            'pointer-events-none absolute inset-0 z-40 transition-all duration-200',
+            isDropOver
+              ? theme === 'dark'
+                ? 'bg-violet-500/10 ring-2 ring-inset ring-violet-400/70'
+                : 'bg-violet-50/80 ring-2 ring-inset ring-violet-400/60'
+              : theme === 'dark'
+                ? 'bg-violet-500/[0.04] ring-1 ring-inset ring-violet-400/25'
+                : 'bg-violet-50/40 ring-1 ring-inset ring-violet-300/50',
+          )}
+        >
+          <div className="flex h-full items-center justify-center p-6">
+            <div
+              className={cn(
+                'rounded-xl px-4 py-2.5 text-center text-xs shadow-sm backdrop-blur-sm transition-all',
+                isDropOver
+                  ? theme === 'dark'
+                    ? 'bg-violet-500/20 text-violet-100 ring-1 ring-violet-400/40'
+                    : 'bg-white text-violet-700 ring-1 ring-violet-300/70'
+                  : theme === 'dark'
+                    ? 'bg-[#2a2a2f]/80 text-violet-200/90 ring-1 ring-violet-400/20'
+                    : 'bg-white/90 text-violet-600 ring-1 ring-violet-200/80',
+              )}
+            >
+              {isDropOver ? '松手引用到对话' : '可拖入问卷项'}
+            </div>
+          </div>
         </div>
       )}
 
@@ -184,7 +281,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
               theme === 'dark'
                 ? 'text-gray-400 hover:bg-white/10 hover:text-gray-200'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800',
             )}
           >
             <Plus className="h-4 w-4" />
@@ -220,6 +317,11 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
                 disabled={isLoading}
               />
             )}
+            <AttachedComponentsBar
+              items={pendingAttachments}
+              onChange={setPendingAttachments}
+              disabled={isLoading}
+            />
             <ChatInput
               onSend={handleSend}
               onStop={stopStreaming}

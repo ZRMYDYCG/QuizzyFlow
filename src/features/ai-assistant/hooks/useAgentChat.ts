@@ -6,7 +6,7 @@ import { useMemo, useRef, type RefObject } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import type { UIMessage } from 'ai'
-import { AIContext } from '../types'
+import { AIContext, AttachedComponentRef } from '../types'
 import { uiMessageToLocalMessage } from '../utils/tool-parts'
 
 function buildAgentContextBody(context?: AIContext) {
@@ -28,6 +28,8 @@ function buildAgentContextBody(context?: AIContext) {
 export function useAgentChat(
   context?: AIContext,
   chatSessionIdRef?: RefObject<string | null>,
+  messageAttachmentsRef?: RefObject<Record<string, AttachedComponentRef[]>>,
+  pendingAttachmentsRef?: RefObject<AttachedComponentRef[] | null>,
 ) {
   const contextRef = useRef(context)
   contextRef.current = context
@@ -42,6 +44,8 @@ export function useAgentChat(
         body: () => ({
           context: buildAgentContextBody(contextRef.current),
           chatId: chatSessionIdRef?.current ?? undefined,
+          attachedComponents: pendingAttachmentsRef?.current ?? undefined,
+          messageAttachments: messageAttachmentsRef?.current ?? undefined,
         }),
       }),
     [],

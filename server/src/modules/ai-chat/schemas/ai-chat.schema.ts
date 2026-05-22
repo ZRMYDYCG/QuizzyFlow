@@ -22,6 +22,12 @@ export interface ChatMessage {
   reasoning?: string
   timestamp: number
   actions?: ChatAction[]
+  attachedComponents?: Array<{
+    fe_id: string
+    type: string
+    title: string
+    props?: Record<string, unknown>
+  }>
 }
 
 /** 嵌套子文档必须 _id: false，且不可用字段名 id（会映射到 _id） */
@@ -49,6 +55,17 @@ export const ChatMessageSubSchema = new MongooseSchema(
     reasoning: { type: String, default: '' },
     timestamp: { type: Number, required: true },
     actions: { type: [ChatActionSubSchema], default: [] },
+    attachedComponents: {
+      type: [
+        {
+          fe_id: { type: String, required: true },
+          type: { type: String, required: true },
+          title: { type: String, required: true },
+          props: { type: Object, default: undefined },
+        },
+      ],
+      default: [],
+    },
   },
   { _id: false },
 )

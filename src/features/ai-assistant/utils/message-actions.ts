@@ -4,7 +4,7 @@
 
 import type { UIMessage } from 'ai'
 import { nanoid } from 'nanoid'
-import { AIAction, AIContext, Message } from '../types'
+import { AIAction, AIContext, AttachedComponentRef, Message } from '../types'
 import {
   attachFallbackFollowUp,
   applyContentParsedFollowUp,
@@ -80,6 +80,7 @@ export function mapDbMessageToLocal(msg: {
   reasoning?: string
   timestamp: number
   actions?: AIAction[]
+  attachedComponents?: AttachedComponentRef[]
 }): Message {
   const actions = msg.actions?.length
     ? msg.actions.map((a) => ({
@@ -96,6 +97,9 @@ export function mapDbMessageToLocal(msg: {
       content: msg.content,
       reasoning: msg.reasoning || undefined,
       timestamp: msg.timestamp,
+      attachedComponents: msg.attachedComponents?.length
+        ? msg.attachedComponents
+        : undefined,
       actions,
     }),
   )
@@ -121,8 +125,16 @@ export function mergeUiIntoChatMessages(
   previous: Message[],
   isStreaming: boolean,
   context?: AIContext,
+  options?: {
+    pendingAttachments?: AttachedComponentRef[] | null
+    messageAttachmentsMap?: Record<string, AttachedComponentRef[]>
+  },
 ): Message[] {
   const lastUiId = uiMessages[uiMessages.length - 1]?.id
+  const pending = options?.pendingAttachments
+  const attachmentMap = options?.messageAttachmentsMap ?? {}
+
+  const lastUserUiId = [...uiMessages].reverse().find((m) => m.role === 'user')?.id
 
   const merged = uiMessages.map((ui) => {
     const prev = previous.find((p) => p.id === ui.id)
@@ -147,6 +159,14 @@ export function mergeUiIntoChatMessages(
 
     const toolCalls = extractedToolCalls.length > 0 ? extractedToolCalls : prev?.toolCalls
 
+    let attachedComponents: AttachedComponentRef[] | undefined
+    if (ui.role === 'user') {
+      attachedComponents =
+        attachmentMap[ui.id] ??
+        prev?.attachedComponents ??
+        (ui.id === lastUserUiId && pending?.length ? pending : undefined)
+    }
+
     return enrichMessageWithFollowUp(
       {
         id: ui.id,
@@ -154,6 +174,7 @@ export function mergeUiIntoChatMessages(
         content: getTextFromUIMessage(ui) || prev?.content || '',
         reasoning: getReasoningFromUIMessage(ui) || prev?.reasoning || undefined,
         timestamp: prev?.timestamp ?? Date.now(),
+        attachedComponents,
         actions,
         toolCalls: toolCalls?.length ? toolCalls : undefined,
         isStreaming: streaming,
@@ -195,6 +216,9 @@ export function toSyncMessageDto(messages: Message[]) {
       content: resolvePersistContent(msg),
       reasoning: msg.reasoning?.trim() || undefined,
       timestamp: msg.timestamp,
+      attachedComponents: msg.attachedComponents?.length
+        ? msg.attachedComponents
+        : undefined,
       actions: mergeFollowUpIntoActions(msg)?.map((a) => ({
         id: a.id || (a as { actionId?: string }).actionId || nanoid(10),
         type: a.type,
