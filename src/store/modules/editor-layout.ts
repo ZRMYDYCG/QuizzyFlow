@@ -14,10 +14,14 @@ export interface EditorLayoutState {
   showLeftPanel: boolean
   // 右侧面板显示状态
   showRightPanel: boolean
+  // AI 助手面板显示状态
+  showAIPanel: boolean
   // 左侧面板宽度
   leftPanelWidth: number
   // 右侧面板宽度
   rightPanelWidth: number
+  // AI 面板宽度
+  aiPanelWidth: number
   // 画布缩放比例
   canvasScale: number
   // 工具栏是否显示
@@ -29,6 +33,7 @@ export interface EditorLayoutState {
 // 默认配置
 const DEFAULT_LEFT_WIDTH = 355
 const DEFAULT_RIGHT_WIDTH = 325
+const DEFAULT_AI_WIDTH = 400
 const DEFAULT_SCALE = 100
 
 // 从localStorage读取配置
@@ -53,8 +58,10 @@ export const initialState: EditorLayoutState = {
   viewMode: 'standard',
   showLeftPanel: true,
   showRightPanel: true,
+  showAIPanel: true,
   leftPanelWidth: DEFAULT_LEFT_WIDTH,
   rightPanelWidth: DEFAULT_RIGHT_WIDTH,
+  aiPanelWidth: DEFAULT_AI_WIDTH,
   canvasScale: DEFAULT_SCALE,
   showToolbar: false,
   mobileActivePanel: 'none',
@@ -107,6 +114,22 @@ export const editorLayoutSlice = createSlice({
       }
       saveToLocalStorage(state)
     },
+
+    // 切换 AI 面板
+    toggleAIPanel(state: EditorLayoutState) {
+      state.showAIPanel = !state.showAIPanel
+      saveToLocalStorage(state)
+    },
+
+    setShowAIPanel(state: EditorLayoutState, action: PayloadAction<boolean>) {
+      state.showAIPanel = action.payload
+      saveToLocalStorage(state)
+    },
+
+    setAIPanelWidth(state: EditorLayoutState, action: PayloadAction<number>) {
+      state.aiPanelWidth = Math.max(320, Math.min(600, action.payload))
+      saveToLocalStorage(state)
+    },
     
     // 设置左侧面板宽度
     setLeftPanelWidth(state: EditorLayoutState, action: PayloadAction<number>) {
@@ -136,8 +159,10 @@ export const editorLayoutSlice = createSlice({
       state.viewMode = 'standard'
       state.showLeftPanel = true
       state.showRightPanel = true
+      state.showAIPanel = true
       state.leftPanelWidth = DEFAULT_LEFT_WIDTH
       state.rightPanelWidth = DEFAULT_RIGHT_WIDTH
+      state.aiPanelWidth = DEFAULT_AI_WIDTH
       state.canvasScale = DEFAULT_SCALE
       saveToLocalStorage(state)
     },
@@ -165,8 +190,10 @@ const saveToLocalStorage = (state: EditorLayoutState) => {
       viewMode: state.viewMode,
       showLeftPanel: state.showLeftPanel,
       showRightPanel: state.showRightPanel,
+      showAIPanel: state.showAIPanel,
       leftPanelWidth: state.leftPanelWidth,
       rightPanelWidth: state.rightPanelWidth,
+      aiPanelWidth: state.aiPanelWidth,
       canvasScale: state.canvasScale,
     }
     localStorage.setItem('editor-layout-config', JSON.stringify(config))
@@ -180,6 +207,9 @@ export const {
   setViewMode,
   toggleLeftPanel,
   toggleRightPanel,
+  toggleAIPanel,
+  setShowAIPanel,
+  setAIPanelWidth,
   setLeftPanelWidth,
   setRightPanelWidth,
   setCanvasScale,

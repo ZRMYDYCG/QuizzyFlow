@@ -5,6 +5,8 @@
 
 // Components
 export { default as AIDrawer } from './components/AIDrawer'
+export { default as AISidePanel } from './components/AISidePanel'
+export { default as AIChatPanel } from './components/AIChatPanel'
 export { default as ChatWindow } from './components/ChatWindow'
 export { default as ChatMessage } from './components/ChatMessage'
 export { default as ChatInput } from './components/ChatInput'

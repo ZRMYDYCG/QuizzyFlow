@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { Avatar, Button, Space, Tag } from 'antd'
+import { Avatar, Button, Tag } from 'antd'
 import { UserOutlined, RobotOutlined, CheckOutlined } from '@ant-design/icons'
 import ReactMarkdown from 'react-markdown'
 import { Message, AIAction } from '../types'
@@ -43,11 +43,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div
-      className={`flex gap-3 mb-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`mb-4 flex min-w-0 gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
       data-message-id={message.id}
     >
       {/* 头像 */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {isUser ? (
           <Avatar icon={<UserOutlined />} className="bg-blue-500" />
         ) : (
@@ -56,13 +56,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
 
       {/* 消息内容 */}
-      <div className={`flex-1 max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`min-w-0 flex-1 ${isUser ? 'flex flex-col items-end' : ''}`}>
         {/* 消息气泡 */}
         <div
-          className={`rounded-lg px-4 py-2 ${
+          className={`max-w-full rounded-lg px-4 py-2 ${
             isUser
               ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+              : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
           }`}
         >
           {/* 流式输出指示器 */}
@@ -74,7 +74,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
 
           {/* 消息内容（Markdown 渲染） */}
-          <div className="prose prose-sm max-w-none dark:prose-invert">
+          <div className="prose prose-sm max-w-none overflow-hidden break-words dark:prose-invert">
             {isUser ? (
               <p className="text-white mb-0">{message.content}</p>
             ) : !getDisplayContent(message.content) && message.actions?.length ? (
@@ -115,7 +115,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
         {/* 操作按钮（如果有 actions） */}
         {isAssistant && message.actions && message.actions.length > 0 && (
-          <div className="mt-2 space-y-2">
+          <div className="mt-2 w-full space-y-2">
             {message.actions.map((action) => {
               const isSuggestion = action.type === 'suggest_improvement'
               const isApplied = !!action.applied
@@ -124,33 +124,42 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               return (
                 <div
                   key={actionKey}
-                  className={`flex items-center gap-2 p-2 rounded-lg border ${
+                  className={`w-full rounded-lg border p-2.5 ${
                     isApplied
-                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                      : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                      ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                      : 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20'
                   }`}
                 >
-                  <Tag color={isApplied ? 'success' : 'blue'} className="m-0">
-                    {formatActionDescription(action)}
-                  </Tag>
-                  {isApplied ? (
-                    <Tag color="success" className="m-0">
-                      已应用
-                    </Tag>
-                  ) : isSuggestion ? (
-                    <span className="text-xs text-gray-500">仅供参考</span>
-                  ) : (
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<CheckOutlined />}
-                      loading={isExecuting && executingActionId === action.id}
-                      disabled={!action.id}
-                      onClick={() => onExecuteAction?.(action)}
+                  <div className="mb-2">
+                    <Tag
+                      color={isApplied ? 'success' : 'blue'}
+                      className="m-0 max-w-full whitespace-normal break-words text-left leading-relaxed"
+                      style={{ height: 'auto', whiteSpace: 'normal' }}
                     >
-                      应用此操作
-                    </Button>
-                  )}
+                      {formatActionDescription(action)}
+                    </Tag>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isApplied ? (
+                      <Tag color="success" className="m-0 shrink-0">
+                        已应用
+                      </Tag>
+                    ) : isSuggestion ? (
+                      <span className="text-xs text-gray-500">仅供参考</span>
+                    ) : (
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<CheckOutlined />}
+                        loading={isExecuting && executingActionId === action.id}
+                        disabled={!action.id}
+                        onClick={() => onExecuteAction?.(action)}
+                        className="shrink-0"
+                      >
+                        应用此操作
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )
             })}

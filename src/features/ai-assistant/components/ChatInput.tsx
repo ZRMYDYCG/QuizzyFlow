@@ -4,122 +4,109 @@
  */
 
 import React, { useState, useRef, KeyboardEvent } from 'react'
-import { Button, Input } from 'antd'
-import { SendOutlined, StopOutlined } from '@ant-design/icons'
-import { Sparkles } from 'lucide-react'
-
-const { TextArea } = Input
+import { Send, Square } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
+import { cn } from '@/utils'
 
 interface ChatInputProps {
   onSend: (message: string) => void
   onStop?: () => void
   isLoading?: boolean
   placeholder?: string
-  quickActions?: Array<{
-    label: string
-    prompt: string
-  }>
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   onStop,
   isLoading = false,
-  placeholder = '输入您的问题，按 Enter 发送，Shift+Enter 换行...',
-  quickActions,
+  placeholder = '输入消息...',
 }) => {
+  const { theme } = useTheme()
   const [value, setValue] = useState('')
-  const textAreaRef = useRef<any>(null)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSend = () => {
     const trimmed = value.trim()
     if (trimmed && !isLoading) {
       onSend(trimmed)
       setValue('')
-      // 重置高度
       if (textAreaRef.current) {
-        textAreaRef.current.resizableTextArea?.textArea?.style.setProperty('height', 'auto')
+        textAreaRef.current.style.height = 'auto'
       }
     }
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Enter 发送，Shift+Enter 换行
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
     }
   }
 
-  const handleQuickAction = (prompt: string) => {
-    if (!isLoading) {
-      setValue(prompt)
-      // 自动聚焦到输入框
-      textAreaRef.current?.focus()
-    }
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value)
+    const el = e.target
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
   }
 
   return (
-    <div className="space-y-2">
-      {/* 快捷操作按钮 */}
-      {quickActions && quickActions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {quickActions.map((action, index) => (
-            <Button
-              key={index}
-              size="small"
-              icon={<Sparkles className="w-3 h-3" />}
-              onClick={() => handleQuickAction(action.prompt)}
-              disabled={isLoading}
-            >
-              {action.label}
-            </Button>
-          ))}
-        </div>
+    <div
+      className={cn(
+        'relative rounded-xl border p-3 transition-colors',
+        theme === 'dark'
+          ? 'border-white/10 bg-[#2a2a2f]'
+          : 'border-gray-200 bg-white'
       )}
+    >
+      <textarea
+        ref={textAreaRef}
+        value={value}
+        onChange={handleInput}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        disabled={isLoading}
+        rows={3}
+        className={cn(
+          'block w-full resize-none border-0 bg-transparent pb-10 text-sm outline-none',
+          'placeholder:text-gray-400',
+          theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+        )}
+      />
 
-      {/* 输入框和发送按钮 */}
-      <div className="flex gap-2">
-        <TextArea
-          ref={textAreaRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          autoSize={{ minRows: 1, maxRows: 6 }}
-          disabled={isLoading}
-          className="flex-1"
-        />
+      <div className="absolute bottom-3 right-3">
         {isLoading ? (
-          <Button
-            type="primary"
-            danger
-            icon={<StopOutlined />}
+          <button
+            type="button"
             onClick={onStop}
-            className="self-end"
+            aria-label="停止生成"
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg transition-opacity',
+              theme === 'dark' ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-900 hover:bg-gray-800'
+            )}
           >
-            停止
-          </Button>
+            <Square className="h-3.5 w-3.5 fill-white text-white" />
+          </button>
         ) : (
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
+          <button
+            type="button"
             onClick={handleSend}
             disabled={!value.trim()}
-            className="self-end"
+            aria-label="发送消息"
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg transition-all',
+              'disabled:cursor-not-allowed disabled:opacity-30',
+              theme === 'dark'
+                ? 'bg-white text-gray-900 hover:bg-gray-100'
+                : 'bg-gray-900 text-white hover:bg-gray-800'
+            )}
           >
-            发送
-          </Button>
+            <Send className="h-4 w-4" />
+          </button>
         )}
-      </div>
-
-      {/* 提示文字 */}
-      <div className="text-xs text-gray-400 text-center">
-        AI 助手基于大语言模型，回答仅供参考
       </div>
     </div>
   )
 }
 
 export default ChatInput
-

@@ -1,0 +1,330 @@
+[
+  {
+    "id": "tpl-spring-sale",
+    "title": "春季促销问卷",
+    "author": "QuizzyFlow 官方",
+    "cover": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "height": 320,
+    "tags": ["营销", "促销"],
+    "likes": 1280,
+    "views": 5600,
+    "description": "适合电商春季大促活动的用户调研与偏好收集。",
+    "schema": {
+      "title": "春季促销问卷",
+      "desc": "帮助我们了解您的购物偏好",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "春季大促 · 用户调研",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "春季大促 · 用户调研", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "radio_1",
+          "type": "radio",
+          "title": "您最关注的促销品类",
+          "isHidden": false,
+          "isLocked": false,
+          "props": {
+            "title": "您最关注的促销品类",
+            "options": [
+              { "value": "a", "text": "服饰鞋包" },
+              { "value": "b", "text": "数码家电" },
+              { "value": "c", "text": "美妆护肤" },
+              { "value": "d", "text": "食品生鲜" }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-employee-survey",
+    "title": "员工满意度调查",
+    "author": "HR 小助手",
+    "cover": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "height": 420,
+    "tags": ["HR", "企业"],
+    "likes": 890,
+    "views": 3200,
+    "description": "年度员工满意度与工作环境反馈模板。",
+    "schema": {
+      "title": "员工满意度调查",
+      "desc": "您的反馈对我们很重要",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "2026 员工满意度调查",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "2026 员工满意度调查", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "rate_1",
+          "type": "rate",
+          "title": "整体工作满意度",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "title": "整体工作满意度", "count": 5 }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-course-feedback",
+    "title": "课程反馈表",
+    "author": "教育达人",
+    "cover": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    "height": 280,
+    "tags": ["教育", "培训"],
+    "likes": 654,
+    "views": 2100,
+    "description": "培训结束后收集学员反馈的标准模板。",
+    "schema": {
+      "title": "课程反馈表",
+      "desc": "请对本次课程进行评价",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "课程反馈",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "课程反馈", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "textarea_1",
+          "type": "textarea",
+          "title": "您的建议",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "title": "您的建议", "placeholder": "请写下您的想法..." }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-event-register",
+    "title": "活动报名表",
+    "author": "活动策划",
+    "cover": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    "height": 360,
+    "tags": ["活动", "报名"],
+    "likes": 432,
+    "views": 1800,
+    "description": "线下活动、沙龙、发布会的快速报名收集。",
+    "schema": {
+      "title": "活动报名表",
+      "desc": "填写信息完成报名",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "活动报名",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "活动报名", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "input_1",
+          "type": "input",
+          "title": "姓名",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "title": "姓名", "placeholder": "请输入姓名" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-product-research",
+    "title": "产品需求调研",
+    "author": "产品经理",
+    "cover": "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
+    "height": 400,
+    "tags": ["产品", "调研"],
+    "likes": 756,
+    "views": 2900,
+    "description": "新产品上线前的用户需求与痛点调研。",
+    "schema": {
+      "title": "产品需求调研",
+      "desc": "帮助我们打造更好的产品",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "产品需求调研",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "产品需求调研", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "checkbox_1",
+          "type": "checkbox",
+          "title": "您常用的功能",
+          "isHidden": false,
+          "isLocked": false,
+          "props": {
+            "title": "您常用的功能",
+            "options": [
+              { "value": "a", "text": "数据分析" },
+              { "value": "b", "text": "表单设计" },
+              { "value": "c", "text": "协作分享" }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-health-check",
+    "title": "健康打卡问卷",
+    "author": "健康社区",
+    "cover": "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
+    "height": 300,
+    "tags": ["健康", "打卡"],
+    "likes": 321,
+    "views": 1500,
+    "description": "每日健康状态记录与打卡模板。",
+    "schema": {
+      "title": "健康打卡",
+      "desc": "记录今日健康状态",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "每日健康打卡",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "每日健康打卡", "level": 1, "align": "center" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-restaurant-review",
+    "title": "餐厅满意度",
+    "author": "美食探店",
+    "cover": "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
+    "height": 380,
+    "tags": ["餐饮", "评价"],
+    "likes": 567,
+    "views": 2400,
+    "description": "餐厅就餐体验与菜品评价收集。",
+    "schema": {
+      "title": "餐厅满意度",
+      "desc": "您的评价是我们进步的动力",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "就餐体验评价",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "就餐体验评价", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "rate_1",
+          "type": "rate",
+          "title": "整体评分",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "title": "整体评分", "count": 5 }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-travel-plan",
+    "title": "旅行偏好调查",
+    "author": "旅行家",
+    "cover": "linear-gradient(135deg, #30cfd0 0%, #330867 100%)",
+    "height": 340,
+    "tags": ["旅行", "偏好"],
+    "likes": 445,
+    "views": 1900,
+    "description": "了解用户旅行偏好，定制个性化行程。",
+    "schema": {
+      "title": "旅行偏好调查",
+      "desc": "告诉我们您的旅行梦想",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "旅行偏好调查",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "旅行偏好调查", "level": 1, "align": "center" }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-vote",
+    "title": "投票评选模板",
+    "author": "社区运营",
+    "cover": "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    "height": 260,
+    "tags": ["投票", "评选"],
+    "likes": 892,
+    "views": 4100,
+    "description": "社区作品投票、评选活动通用模板。",
+    "schema": {
+      "title": "投票评选",
+      "desc": "为您喜欢的作品投票",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "作品投票",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "作品投票", "level": 1, "align": "center" }
+        },
+        {
+          "fe_id": "radio_1",
+          "type": "radio",
+          "title": "选择您支持的作品",
+          "isHidden": false,
+          "isLocked": false,
+          "props": {
+            "title": "选择您支持的作品",
+            "options": [
+              { "value": "a", "text": "作品 A" },
+              { "value": "b", "text": "作品 B" },
+              { "value": "c", "text": "作品 C" }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "tpl-onboarding",
+    "title": "新人入职问卷",
+    "author": "QuizzyFlow 官方",
+    "cover": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "height": 450,
+    "tags": ["HR", "入职"],
+    "likes": 234,
+    "views": 980,
+    "description": "新员工入职信息收集与期望调研。",
+    "schema": {
+      "title": "新人入职问卷",
+      "desc": "欢迎加入我们的团队",
+      "componentList": [
+        {
+          "fe_id": "title_1",
+          "type": "title",
+          "title": "新人入职信息",
+          "isHidden": false,
+          "isLocked": false,
+          "props": { "text": "新人入职信息", "level": 1, "align": "center" }
+        }
+      ]
+    }
+  }
+]

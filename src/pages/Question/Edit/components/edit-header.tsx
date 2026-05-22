@@ -16,7 +16,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import EditToolbar from './edit-toolbar'
 import { setTitle } from '@/store/modules/pageinfo-reducer'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import useGetPageInfo from '@/hooks/useGetPageInfo'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
 import { updateQuestion } from '@/api/modules/question'
@@ -26,6 +26,8 @@ import PublishTemplateModal from '@/components/template/PublishTemplateModal'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useResponsive } from '@/hooks/useResponsive'
 import { AIDrawer } from '@/features/ai-assistant'
+import { toggleAIPanel } from '@/store/modules/editor-layout'
+import type { stateType } from '@/store'
 
 const TitleElem: FC = () => {
   const { theme } = useTheme()
@@ -224,24 +226,40 @@ const PublishTemplateButton: FC = () => {
 // AI 助手按钮
 const AIAssistantButton: FC = () => {
   const { id } = useParams()
+  const dispatch = useDispatch()
+  const { isMobile } = useResponsive()
+  const showAIPanel = useSelector((state: stateType) => state.editorLayout.showAIPanel)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
+  if (isMobile) {
+    return (
+      <>
+        <Button
+          type="default"
+          icon={<RobotOutlined />}
+          onClick={() => setIsDrawerOpen(true)}
+          className="flex items-center gap-1"
+        >
+          AI
+        </Button>
+        <AIDrawer
+          open={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          questionId={id}
+        />
+      </>
+    )
+  }
+
   return (
-    <>
-      <Button
-        type="default"
-        icon={<RobotOutlined />}
-        onClick={() => setIsDrawerOpen(true)}
-        className="flex items-center gap-1"
-      >
-        AI 助手
-      </Button>
-      <AIDrawer
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        questionId={id}
-      />
-    </>
+    <Button
+      type={showAIPanel ? 'primary' : 'default'}
+      icon={<RobotOutlined />}
+      onClick={() => dispatch(toggleAIPanel())}
+      className="flex items-center gap-1"
+    >
+      AI 助手
+    </Button>
   )
 }
 

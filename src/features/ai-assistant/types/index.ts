@@ -118,6 +118,7 @@ export interface UseAIChatReturn {
   isLoadingHistory: boolean
   loadLatestChat: () => Promise<void>
   createNewSession: () => Promise<string | null>
+  updateChatTitle: (sessionId: string, title: string) => Promise<boolean>
   setMessagesFromHistory: (messages: Message[], sessionId: string) => void
   markActionApplied: (messageId: string, actionId: string) => Promise<void>
 }

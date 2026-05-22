@@ -47,7 +47,7 @@ export class AIChatService {
    */
   async create(username: string, createChatDto: CreateChatDto) {
     const { questionId, title } = createChatDto
-    const chatTitle = title || `AI 对话 - ${new Date().toLocaleString('zh-CN')}`
+    const chatTitle = title?.trim() || '未命名'
 
     const chat = await this.aiChatModel.create({
       questionId,

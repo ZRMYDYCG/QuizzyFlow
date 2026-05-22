@@ -13,6 +13,7 @@ import {
   getLatestChat,
   syncMessages,
   applyChatAction,
+  updateChat,
 } from '@/api/modules/ai-chat'
 import { useDebounceEffect } from 'ahooks'
 import {
@@ -90,7 +91,7 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     try {
       const chatData: { _id: string } = await createChat({
         questionId: context.questionId,
-        title: `${context.questionTitle || '问卷'} - AI 对话`,
+        title: '未命名',
       })
       setChatSessionId(chatData._id)
       return chatData._id
@@ -98,7 +99,19 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
       console.error('创建对话会话失败:', error)
       return null
     }
-  }, [context?.questionId, context?.questionTitle])
+  }, [context?.questionId])
+
+  const updateChatTitle = useCallback(async (sessionId: string, title: string) => {
+    const trimmed = title.trim() || '未命名'
+    try {
+      await updateChat(sessionId, { title: trimmed })
+      return true
+    } catch (error) {
+      console.error('更新对话标题失败:', error)
+      antdMessage.error('更新标题失败')
+      return false
+    }
+  }, [])
 
   const saveMessages = useCallback(
     async (messagesToSave: Message[]) => {
@@ -239,6 +252,7 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     isLoadingHistory,
     loadLatestChat,
     createNewSession,
+    updateChatTitle,
     setMessagesFromHistory,
     markActionApplied,
   }
