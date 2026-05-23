@@ -3,7 +3,11 @@ import type { stateType } from '@/store'
 import type { Permission } from '@/constants/permissions'
 import { ROLES } from '@/constants/roles'
 import { resolveAccessibleRoutes } from '@/constants/access-registry'
-import { clampToRolePermissions, isStaffRole } from '@/utils/permission-bounds'
+import {
+  canAccessAdminPanel,
+  clampToRolePermissions,
+  isStaffRole,
+} from '@/utils/permission-bounds'
 
 /**
  * 权限检查：hasRoute → 页面路由；hasPermission → 操作权限（API/按钮）
@@ -14,10 +18,14 @@ export const usePermission = () => {
 
   const isSuperAdmin = user.role === ROLES.SUPER_ADMIN
   const isStaffAdmin = isStaffRole(user.role)
+  const effectiveGrantedRoutes =
+    admin.grantedRoutes.length > 0
+      ? admin.grantedRoutes
+      : user.grantedRoutes || []
 
   const accessibleRoutes = isSuperAdmin
     ? null
-    : resolveAccessibleRoutes(admin.grantedRoutes)
+    : resolveAccessibleRoutes(effectiveGrantedRoutes)
 
   const roleCeiling = user.rolePermissions || []
   const rawButtons = isStaffAdmin
@@ -64,7 +72,8 @@ export const usePermission = () => {
     return user.role === role
   }
 
-  const isAdmin = (): boolean => isSuperAdmin || isStaffAdmin
+  const isAdmin = (): boolean =>
+    canAccessAdminPanel(user.role, effectiveGrantedRoutes)
 
   return {
     hasRoute,

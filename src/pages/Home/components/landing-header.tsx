@@ -14,7 +14,7 @@ import { cn } from '@/utils'
 const LandingHeader: FC = () => {
   const navigate = useNavigate()
   const { theme, primaryColor, themeColors } = useTheme()
-  const { token, nickname, username } = useGetUserInfo()
+  const { token, nickname, username, role, grantedRoutes } = useGetUserInfo()
   const { logout } = useLogout()
   const { isAdmin } = usePermission()
   const [themeDialogOpen, setThemeDialogOpen] = useState(false)
@@ -67,7 +67,7 @@ const LandingHeader: FC = () => {
     )
 
     return items
-  }, [isAdmin, logout, navigate])
+  }, [isAdmin, logout, navigate, role, grantedRoutes])
 
   return (
     <>

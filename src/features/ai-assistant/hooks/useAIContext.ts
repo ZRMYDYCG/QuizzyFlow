@@ -30,7 +30,7 @@ export const useAIContext = (options: UseAIContextOptions = {}): AIContext => {
       currentComponents: componentList.map((comp: any) => ({
         fe_id: comp.fe_id,
         type: comp.type,
-        title: comp.title || comp.text || '',
+        title: comp.title || comp.props?.title || comp.text || '',
         props: comp.props || {},
       })),
       componentLibrary: COMPONENT_LIBRARY,

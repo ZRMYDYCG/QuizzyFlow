@@ -80,12 +80,13 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     streamingContent,
     sendUserMessage,
     stop,
-  } = useAgentChat(
-    context,
-    chatSessionIdRefForAgent,
+  } = useAgentChat({
+    questionId: context?.questionId,
+    contextRef,
+    chatSessionIdRef: chatSessionIdRefForAgent,
     messageAttachmentsRef,
     pendingAttachmentsRef,
-  )
+  })
 
   useEffect(() => {
     chatSessionIdRef.current = chatSessionId
@@ -333,7 +334,8 @@ export const useAIChat = (options: UseAIChatOptions = {}): UseAIChatReturn => {
     if (last.role === 'user') {
       void saveMessages(messages)
     }
-  }, [isLoading, chatMessages, isLoadingHistory, isSwitchingSession, saveMessages])
+    // 仅随 isLoading 变化触发，避免流式合并 chatMessages 时反复 save
+  }, [isLoading, isLoadingHistory, isSwitchingSession, saveMessages])
 
   useDebounceEffect(
     () => {

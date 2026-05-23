@@ -93,6 +93,17 @@ export function buildActionFormModel(action: AIAction, index: number): ActionFor
     },
   ]
 
+  if (action.type === 'add_component') {
+    const insertAfterFeId = data.insertAfterFeId as string | undefined
+    let positionLabel = '追加到末尾'
+    if (insertAfterFeId === '__start__') {
+      positionLabel = '问卷开头'
+    } else if (insertAfterFeId) {
+      positionLabel = `在 ${insertAfterFeId} 之后`
+    }
+    fields.push({ label: '插入位置', value: positionLabel })
+  }
+
   if (type === 'question-radio' && props.options) {
     fields.push({ label: '选项', value: formatOptions(props.options) })
   }

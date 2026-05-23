@@ -23,6 +23,8 @@ export interface Message {
   attachedComponents?: AttachedComponentRef[]
   actions?: AIAction[]
   toolCalls?: ToolCallDisplay[]
+  /** 联网搜索参考链接（展示在消息底部） */
+  webReferences?: WebReference[]
   followUp?: FollowUpGuide
   followUpActionId?: string
   followUpUsed?: boolean
@@ -40,7 +42,13 @@ export type ToolCallState =
   | 'completed'
   | 'error'
 
-export type ToolCallKind = 'component' | 'skill' | 'unknown'
+export type ToolCallKind = 'component' | 'skill' | 'search' | 'unknown'
+
+export interface WebReference {
+  title: string
+  url: string
+  snippet?: string
+}
 
 export interface ToolCallDisplay {
   id: string

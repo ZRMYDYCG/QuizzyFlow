@@ -50,21 +50,37 @@ export const questionComponentSlice = createSlice({
     // 组件列表新增控件
     addComponent(
       state: QuestionComponentStateType,
-      action: PayloadAction<QuestionComponentType>
+      action: PayloadAction<QuestionComponentType & { insertAfterFeId?: string }>
     ) {
+      const { insertAfterFeId, ...component } = action.payload
       const { selectedId, componentList } = state
-      const index = componentList.findIndex((item) => item.fe_id === selectedId)
-      // 如果没有选中控件，则新增到末尾
-      if (index < 0) {
-        state.componentList = [...state.componentList, action.payload]
+
+      let insertIndex = componentList.length
+
+      if (insertAfterFeId === '__start__') {
+        insertIndex = 0
+      } else if (insertAfterFeId) {
+        const anchorIndex = componentList.findIndex(
+          (item) => item.fe_id === insertAfterFeId,
+        )
+        if (anchorIndex >= 0) {
+          insertIndex = anchorIndex + 1
+        }
       } else {
-        // 如果选中控件，则插入到选中控件之后
-        state.componentList = [
-          ...state.componentList.slice(0, index + 1),
-          action.payload,
-          ...state.componentList.slice(index + 1),
-        ]
+        const selectedIndex = componentList.findIndex(
+          (item) => item.fe_id === selectedId,
+        )
+        if (selectedIndex >= 0) {
+          insertIndex = selectedIndex + 1
+        }
       }
+
+      state.componentList = [
+        ...componentList.slice(0, insertIndex),
+        component,
+        ...componentList.slice(insertIndex),
+      ]
+      state.selectedId = component.fe_id
     },
     // 批量新增控件（物料组合）
     addComponents(
@@ -105,6 +121,56 @@ export const questionComponentSlice = createSlice({
           ...props,
         }
       }
+    },
+    // 按 fe_id 更新组件（AI 提案应用）
+    updateComponentByFeId(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{
+        fe_id: string
+        type?: string
+        title?: string
+        props?: ComponentPropsType
+      }>
+    ) {
+      const { fe_id, type, title, props } = action.payload
+      const currentComponent = state.componentList.find(
+        (item) => item.fe_id === fe_id
+      )
+      if (!currentComponent) return
+
+      if (type) {
+        currentComponent.type = type
+      }
+      if (title) {
+        currentComponent.title = title
+      }
+      if (props) {
+        currentComponent.props = {
+          ...currentComponent.props,
+          ...props,
+        }
+      }
+      state.selectedId = fe_id
+    },
+    // 按 fe_id 删除组件（AI 提案应用）
+    removeComponentByFeId(
+      state: QuestionComponentStateType,
+      action: PayloadAction<{ fe_id: string }>
+    ) {
+      const { fe_id } = action.payload
+      const index = state.componentList.findIndex((item) => item.fe_id === fe_id)
+      if (index < 0) return
+
+      state.componentList = [
+        ...state.componentList.slice(0, index),
+        ...state.componentList.slice(index + 1),
+      ]
+
+      state.selectedId = getNextSelectedId(
+        fe_id,
+        state.componentList,
+        () => true
+      )
     },
     // 删除控件
     extraComponents(state: QuestionComponentStateType) {
@@ -259,6 +325,8 @@ export const {
   addComponent,
   addComponents,
   changeComponentProps,
+  updateComponentByFeId,
+  removeComponentByFeId,
   extraComponents,
   changeComponentsVisible,
   changeComponentsLock,

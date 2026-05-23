@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { useRequest } from 'ahooks'
 import { getUserProfile } from '@/api/modules/user'
 import { loginReducer, logoutReducer } from '@/store/modules/user'
-import { setUserPermissions } from '@/store/modules/admin'
+import { resetAdminState, setUserPermissions } from '@/store/modules/admin'
 import { isStaffRole } from '@/utils/permission-bounds'
 import { useGetUserInfo } from './useGetUserInfo'
 
@@ -73,6 +73,8 @@ export const useLoadUserData = () => {
               rolePermissions: userInfo.rolePermissions || [],
             })
           )
+        } else {
+          dispatch(resetAdminState())
         }
       },
       onError: (error: Error) => {

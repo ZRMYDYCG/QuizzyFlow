@@ -54,6 +54,7 @@ export class UserService {
       username,
       password: hashedPassword,
       nickname,
+      role: 'user',
       isActive: true,
       lastLoginAt: null,
     })

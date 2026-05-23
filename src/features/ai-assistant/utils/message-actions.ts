@@ -4,7 +4,7 @@
 
 import type { UIMessage } from 'ai'
 import { nanoid } from 'nanoid'
-import { AIAction, AIContext, AttachedComponentRef, Message } from '../types'
+import { AIAction, AIContext, AttachedComponentRef, Message, WebReference } from '../types'
 import {
   attachFallbackFollowUp,
   applyContentParsedFollowUp,
@@ -15,6 +15,7 @@ import {
   extractActionsFromUIMessage,
   extractFollowUpFromUIMessage,
   extractToolCallsFromUIMessage,
+  extractWebReferencesFromUIMessage,
   getTextFromUIMessage,
   getReasoningFromUIMessage,
   isReasoningStreamingPart,
@@ -81,6 +82,7 @@ export function mapDbMessageToLocal(msg: {
   timestamp: number
   actions?: AIAction[]
   attachedComponents?: AttachedComponentRef[]
+  webReferences?: WebReference[]
 }): Message {
   const actions = msg.actions?.length
     ? msg.actions.map((a) => ({
@@ -100,6 +102,7 @@ export function mapDbMessageToLocal(msg: {
       attachedComponents: msg.attachedComponents?.length
         ? msg.attachedComponents
         : undefined,
+      webReferences: msg.webReferences?.length ? msg.webReferences : undefined,
       actions,
     }),
   )
@@ -147,6 +150,9 @@ export function mergeUiIntoChatMessages(
     const extractedToolCalls =
       ui.role === 'assistant' ? extractToolCallsFromUIMessage(ui) : []
 
+    const extractedWebReferences =
+      ui.role === 'assistant' ? extractWebReferencesFromUIMessage(ui) : []
+
     const uiFollowUp =
       ui.role === 'assistant' ? extractFollowUpFromUIMessage(ui) : null
 
@@ -158,6 +164,11 @@ export function mergeUiIntoChatMessages(
     }
 
     const toolCalls = extractedToolCalls.length > 0 ? extractedToolCalls : prev?.toolCalls
+
+    const webReferences =
+      extractedWebReferences.length > 0
+        ? extractedWebReferences
+        : prev?.webReferences
 
     let attachedComponents: AttachedComponentRef[] | undefined
     if (ui.role === 'user') {
@@ -177,6 +188,7 @@ export function mergeUiIntoChatMessages(
         attachedComponents,
         actions,
         toolCalls: toolCalls?.length ? toolCalls : undefined,
+        webReferences: webReferences?.length ? webReferences : undefined,
         isStreaming: streaming,
         isReasoningStreaming:
           isStreaming && ui.role === 'assistant' && isReasoningStreamingPart(ui, isStreaming),
@@ -227,5 +239,6 @@ export function toSyncMessageDto(messages: Message[]) {
         applied: !!a.applied,
         appliedAt: a.appliedAt,
       })),
+      webReferences: msg.webReferences?.length ? msg.webReferences : undefined,
     }))
 }

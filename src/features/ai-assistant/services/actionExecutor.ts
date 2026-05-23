@@ -14,8 +14,11 @@ export const executeAddComponent = (
   addComponentAction: any
 ): { success: boolean; message: string } => {
   try {
+    const insertAfterFeId = action.data.insertAfterFeId as string | undefined
+    const { insertAfterFeId: _ignored, ...componentInput } = action.data
+
     // 验证数据
-    const validation = validateComponentData(action.data)
+    const validation = validateComponentData(componentInput)
     if (!validation.valid) {
       return {
         success: false,
@@ -24,13 +27,14 @@ export const executeAddComponent = (
     }
 
     // 标准化数据
-    const componentData = normalizeComponentData(action.data)
+    const componentData = normalizeComponentData(componentInput)
 
     // 添加必需的属性
     const fullComponent = {
       ...componentData,
       isLocked: false,
       isHidden: false,
+      ...(insertAfterFeId ? { insertAfterFeId } : {}),
     }
 
     // 返回 Redux action（不在这里 dispatch）
@@ -81,6 +85,8 @@ export const executeUpdateComponent = (
       message: action.description || `成功更新组件: ${componentData.title || componentData.text}`,
       action: updateComponentAction({
         fe_id: componentData.fe_id,
+        type: componentData.type,
+        title: componentData.title,
         props: componentData.props,
       }),
     } as any
@@ -101,12 +107,17 @@ export const executeDeleteComponent = (
   deleteComponentAction: any
 ): { success: boolean; message: string } => {
   try {
-    // QuizzyFlow 的删除是删除当前选中的组件
-    // 这里返回 action，让 Hook 来 dispatch
+    if (!action.data.fe_id) {
+      return {
+        success: false,
+        message: '缺少组件 ID (fe_id)，无法删除',
+      }
+    }
+
     return {
       success: true,
-      message: action.description || `成功删除组件`,
-      action: deleteComponentAction(),
+      message: action.description || `成功删除组件 ${action.data.fe_id}`,
+      action: deleteComponentAction({ fe_id: action.data.fe_id }),
     } as any
   } catch (error) {
     console.error('Execute delete component error:', error)

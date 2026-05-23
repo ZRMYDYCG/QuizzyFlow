@@ -2,7 +2,7 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import { changeComponentProps } from '@/store/modules/question-component'
 import useGetComponentInfo from '@/hooks/useGetComponentInfo'
-import { Empty } from 'antd'
+import { Empty, Form, Typography } from 'antd'
 import {
   getComponentConfigByType,
   ComponentPropsType,
@@ -41,9 +41,17 @@ const ComponentProp: React.FC = () => {
     }
 
     const { PropComponent } = ComponentConfig
+    const { fe_id } = selectedComponent
 
     return (
       <div className="h-full overflow-y-auto p-4 md:p-6">
+        <Form layout="vertical" className="mb-2">
+          <Form.Item label="物料 ID" className="mb-4">
+            <Typography.Text copyable={{ text: fe_id }} className="font-mono text-xs break-all">
+              {fe_id}
+            </Typography.Text>
+          </Form.Item>
+        </Form>
         <PropComponent {...props} onChange={changeProps} disabled={isLocked} />
       </div>
     )

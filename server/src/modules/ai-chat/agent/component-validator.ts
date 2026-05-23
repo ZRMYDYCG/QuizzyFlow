@@ -15,12 +15,15 @@ export interface ProposedComponentPayload {
   isHidden: boolean
 }
 
-export function normalizeProposedComponent(input: {
-  type: string
-  title: string
-  props?: Record<string, unknown>
-  fe_id?: string
-}): { ok: true; data: ProposedComponentPayload } | { ok: false; error: string } {
+export function normalizeProposedComponent(
+  input: {
+    type: string
+    title: string
+    props?: Record<string, unknown>
+    fe_id?: string
+  },
+  options?: { mode?: 'add' | 'update' },
+): { ok: true; data: ProposedComponentPayload } | { ok: false; error: string } {
   const material = getMaterialByType(input.type)
   if (!material) {
     return {
@@ -33,8 +36,17 @@ export function normalizeProposedComponent(input: {
     return { ok: false, error: '缺少 title' }
   }
 
-  const fe_id =
-    input.fe_id?.startsWith('c_') ? input.fe_id : `c_${generateFeId()}`
+  const mode = options?.mode ?? (input.fe_id?.trim() ? 'update' : 'add')
+  let fe_id: string
+
+  if (mode === 'update') {
+    if (!input.fe_id?.trim()) {
+      return { ok: false, error: '更新操作缺少 fe_id' }
+    }
+    fe_id = input.fe_id.trim()
+  } else {
+    fe_id = input.fe_id?.trim() ? input.fe_id.trim() : `c_${generateFeId()}`
+  }
 
   const props: Record<string, unknown> = {
     ...material.defaultProps,

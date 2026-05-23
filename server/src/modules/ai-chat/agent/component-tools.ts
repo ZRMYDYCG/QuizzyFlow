@@ -2,15 +2,21 @@ import { tool, stepCountIs, ToolLoopAgent, extractReasoningMiddleware, wrapLangu
 import { z } from 'zod'
 import { ConfigService } from '@nestjs/config'
 import {
-  createSiliconFlowProvider,
-  getSiliconFlowModelId,
-} from '../silicon-flow.provider'
+  createLlmProvider,
+  getLlmModelId,
+} from '../llm.provider'
 import {
   buildQuestionnaireAgentSystemPrompt,
   QuestionnaireAgentContext,
 } from '../prompts/system-prompt'
 import { normalizeProposedComponent } from './component-validator'
 import { createSkillTools } from './skill-tools'
+import { createSearchTools } from './search-tools'
+import { WebSearchService } from '../services/web-search.service'
+import {
+  formatKnownFeIds,
+  resolveFeIdInList,
+} from '../utils/resolve-fe-id'
 
 const componentInputSchema = z.object({
   type: z.string().describe('物料 type，如 question-input'),
@@ -23,6 +29,12 @@ const componentInputSchema = z.object({
     .string()
     .optional()
     .describe('更新/删除时必填；新增时可省略由系统生成'),
+  insertAfterFeId: z
+    .string()
+    .optional()
+    .describe(
+      '新增时的插入位置：已有题目的 fe_id，新题插入在该题之后。问卷开头用 __start__。用户引用/选中的题目应作为锚点。',
+    ),
   description: z.string().optional().describe('操作说明，展示给用户'),
 })
 
@@ -39,34 +51,85 @@ function toolResult(
   })
 }
 
-export function createQuestionnaireTools() {
+export function createQuestionnaireTools(context?: QuestionnaireAgentContext) {
+  const knownFeIds =
+    context?.currentComponents?.map((component) => component.fe_id) ?? []
+
+  function resolveContextFeId(
+    feId: string | undefined,
+    label: string,
+  ): { ok: true; feId: string } | { ok: false; error: string } {
+    if (!feId?.trim()) {
+      return { ok: false, error: `${label} 不能为空` }
+    }
+
+    const resolved = resolveFeIdInList(feId, knownFeIds)
+    if (knownFeIds.length > 0 && !resolved) {
+      return {
+        ok: false,
+        error: `${label} "${feId.trim()}" 不在当前问卷中。请使用上下文里的真实 ID：${formatKnownFeIds(knownFeIds)}`,
+      }
+    }
+
+    return { ok: true, feId: resolved ?? feId.trim() }
+  }
+
   return {
     propose_add_component: tool({
       description:
-        '向当前问卷添加一个新题目组件。生成符合 JSON Template 的完整配置，需用户在前端确认后才会写入画布。',
+        '向当前问卷添加一个新题目组件。必须指定 insertAfterFeId 决定插入位置。生成符合 JSON Template 的完整配置，需用户在前端确认后才会写入画布。',
       inputSchema: componentInputSchema,
-      execute: async ({ type, title, props, description }) => {
-        const result = normalizeProposedComponent({ type, title, props })
+      execute: async ({ type, title, props, description, insertAfterFeId }) => {
+        let resolvedInsertAfterFeId = insertAfterFeId
+        if (insertAfterFeId && insertAfterFeId !== '__start__') {
+          const resolved = resolveContextFeId(insertAfterFeId, 'insertAfterFeId')
+          if (resolved.ok === false) {
+            return JSON.stringify({ error: resolved.error })
+          }
+          resolvedInsertAfterFeId = resolved.feId
+        }
+
+        const result = normalizeProposedComponent(
+          { type, title, props },
+          { mode: 'add' },
+        )
         if (result.ok === false) {
           return JSON.stringify({ error: result.error })
         }
-        return toolResult('add_component', result.data, description)
+        return toolResult(
+          'add_component',
+          {
+            ...result.data,
+            ...(resolvedInsertAfterFeId ? { insertAfterFeId: resolvedInsertAfterFeId } : {}),
+          },
+          description,
+        )
       },
     }),
 
     propose_update_component: tool({
       description:
-        '更新已有组件（必须提供 fe_id）。合并 props 后返回完整组件配置提案。',
+        '更新已有组件（必须提供 fe_id，且必须与当前问卷上下文中的 ID 完全一致）。合并 props 后返回完整组件配置提案。',
       inputSchema: componentInputSchema.extend({
-        fe_id: z.string().describe('要更新的组件 fe_id'),
+        fe_id: z
+          .string()
+          .describe('要更新的组件 fe_id，必须从当前问卷上下文中逐字复制'),
       }),
       execute: async ({ fe_id, type, title, props, description }) => {
-        const result = normalizeProposedComponent({
-          type,
-          title,
-          props,
-          fe_id,
-        })
+        const resolved = resolveContextFeId(fe_id, 'fe_id')
+        if (resolved.ok === false) {
+          return JSON.stringify({ error: resolved.error })
+        }
+
+        const result = normalizeProposedComponent(
+          {
+            type,
+            title,
+            props,
+            fe_id: resolved.feId,
+          },
+          { mode: 'update' },
+        )
         if (result.ok === false) {
           return JSON.stringify({ error: result.error })
         }
@@ -75,16 +138,23 @@ export function createQuestionnaireTools() {
     }),
 
     propose_delete_component: tool({
-      description: '删除指定 fe_id 的组件（需用户确认）',
+      description: '删除指定 fe_id 的组件（fe_id 必须来自当前问卷上下文，需用户确认）',
       inputSchema: z.object({
-        fe_id: z.string().describe('要删除的组件 fe_id'),
+        fe_id: z
+          .string()
+          .describe('要删除的组件 fe_id，必须从当前问卷上下文中逐字复制'),
         description: z.string().optional(),
       }),
       execute: async ({ fe_id, description }) => {
+        const resolved = resolveContextFeId(fe_id, 'fe_id')
+        if (resolved.ok === false) {
+          return JSON.stringify({ error: resolved.error })
+        }
+
         return toolResult(
           'delete_component',
-          { fe_id },
-          description ?? `删除组件 ${fe_id}`,
+          { fe_id: resolved.feId },
+          description ?? `删除组件 ${resolved.feId}`,
         )
       },
     }),
@@ -157,9 +227,10 @@ export function createQuestionnaireTools() {
 export function createQuestionnaireAgent(
   configService: ConfigService,
   context?: QuestionnaireAgentContext,
+  webSearchService?: WebSearchService,
 ) {
-  const provider = createSiliconFlowProvider(configService)
-  const modelId = getSiliconFlowModelId(configService)
+  const provider = createLlmProvider(configService)
+  const modelId = getLlmModelId(configService)
   const baseModel = provider.chat(modelId)
   const model = wrapLanguageModel({
     model: baseModel,
@@ -170,8 +241,9 @@ export function createQuestionnaireAgent(
     model,
     instructions: buildQuestionnaireAgentSystemPrompt(context),
     tools: {
-      ...createQuestionnaireTools(),
+      ...createQuestionnaireTools(context),
       ...createSkillTools(context),
+      ...(webSearchService ? createSearchTools(webSearchService) : {}),
     },
     stopWhen: stepCountIs(12),
     temperature: 0.7,

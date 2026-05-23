@@ -5,9 +5,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useDispatch } from 'react-redux'
 import { loginUser, getUserProfile } from '@/api/modules/user'
-import { isStaffRole } from '@/utils/permission-bounds'
+import { isStaffRole, canAccessAdminPanel } from '@/utils/permission-bounds'
 import { loginReducer } from '@/store/modules/user'
-import { setUserPermissions } from '@/store/modules/admin'
+import { resetAdminState, setUserPermissions } from '@/store/modules/admin'
 import { useRequest } from 'ahooks'
 import Logo from '@/components/Logo'
 
@@ -131,12 +131,14 @@ const Login: FC = () => {
               rolePermissions: userInfo.rolePermissions || [],
             })
           )
+        } else {
+          dispatch(resetAdminState())
         }
         
         message.success('登录成功')
         
         // 6. 根据角色跳转到合适的页面
-        if (isStaffRole(userInfo.role) || userInfo.role === 'super_admin') {
+        if (canAccessAdminPanel(userInfo.role, userInfo.grantedRoutes)) {
           console.log('✅ 步骤6: 准备跳转到 /admin/dashboard')
           navigate('/admin/dashboard', { replace: true })
           console.log('✅ navigate 调用完成')

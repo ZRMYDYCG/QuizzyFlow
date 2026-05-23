@@ -9,6 +9,7 @@ import { resolveAssistantDisplayContent } from '../utils/follow-up'
 import ThinkingBlock from './ThinkingBlock'
 import ToolCallsBlock from './ToolCallsBlock'
 import ActionProposalPanel from './ActionProposalPanel'
+import WebReferencesBlock from './WebReferencesBlock'
 import UserChatAvatar from '@/components/user-chat-avatar'
 import AssistantStreamMarkdown from './AssistantStreamMarkdown'
 import MessageAttachedComponents from './MessageAttachedComponents'
@@ -112,6 +113,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             isExecuting={isExecuting}
             executingActionId={executingActionId}
           />
+        )}
+
+        {isAssistant && message.webReferences && message.webReferences.length > 0 && (
+          <WebReferencesBlock references={message.webReferences} />
         )}
 
         {/* 时间戳 */}

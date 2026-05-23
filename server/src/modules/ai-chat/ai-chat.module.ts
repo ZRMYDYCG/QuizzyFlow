@@ -5,6 +5,7 @@ import { AIChatController } from './ai-chat.controller'
 import { AIChatService } from './ai-chat.service'
 import { AIChatProxyService } from './ai-chat-proxy.service'
 import { QuestionnaireAgentService } from './questionnaire-agent.service'
+import { WebSearchService } from './services/web-search.service'
 import { AIChat, AIChatSchema } from './schemas/ai-chat.schema'
 
 @Module({
@@ -13,7 +14,12 @@ import { AIChat, AIChatSchema } from './schemas/ai-chat.schema'
     ConfigModule,
   ],
   controllers: [AIChatController],
-  providers: [AIChatService, AIChatProxyService, QuestionnaireAgentService],
+  providers: [
+    AIChatService,
+    AIChatProxyService,
+    QuestionnaireAgentService,
+    WebSearchService,
+  ],
   exports: [AIChatService, AIChatProxyService, QuestionnaireAgentService],
 })
 export class AIChatModule {}

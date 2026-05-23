@@ -62,6 +62,7 @@ export function normalizeMessagesForDb(messages: AddMessageDto[]): ChatMessage[]
       attachedComponents: msg.attachedComponents?.length
         ? msg.attachedComponents
         : undefined,
+      webReferences: msg.webReferences?.length ? msg.webReferences : undefined,
     }
   })
 }

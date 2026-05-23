@@ -69,10 +69,18 @@ function ToolCallRow({ call }: { call: ToolCallDisplay }) {
               ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
               : call.kind === 'component'
                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                : call.kind === 'search'
+                  ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
           )}
         >
-          {call.kind === 'skill' ? 'Skill' : call.kind === 'component' ? '组件' : 'Tool'}
+          {call.kind === 'skill'
+            ? 'Skill'
+            : call.kind === 'component'
+              ? '组件'
+              : call.kind === 'search'
+                ? '搜索'
+                : 'Tool'}
         </span>
         <span className="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-200">
           {call.displayName}

@@ -28,6 +28,11 @@ export interface ChatMessage {
     title: string
     props?: Record<string, unknown>
   }>
+  webReferences?: Array<{
+    title: string
+    url: string
+    snippet?: string
+  }>
 }
 
 /** 嵌套子文档必须 _id: false，且不可用字段名 id（会映射到 _id） */
@@ -62,6 +67,16 @@ export const ChatMessageSubSchema = new MongooseSchema(
           type: { type: String, required: true },
           title: { type: String, required: true },
           props: { type: Object, default: undefined },
+        },
+      ],
+      default: [],
+    },
+    webReferences: {
+      type: [
+        {
+          title: { type: String, required: true },
+          url: { type: String, required: true },
+          snippet: { type: String, default: '' },
         },
       ],
       default: [],

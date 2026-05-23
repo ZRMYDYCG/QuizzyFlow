@@ -58,12 +58,12 @@ export const validateComponentData = (data: any): {
     errors.push('缺少必需字段: title')
   }
 
-  // 检查 fe_id 格式
-  if (data.fe_id && !data.fe_id.startsWith('c_')) {
-    errors.push('fe_id 格式不正确，应该以 c_ 开头')
+  // 检查 fe_id 格式（画布 ID 为任意非空字符串，不强制 c_ 前缀）
+  if (data.fe_id && typeof data.fe_id !== 'string') {
+    errors.push('fe_id 必须是字符串')
   }
 
-  // 确保有 fe_id（如果没有则生成）
+  // 新增时若无 fe_id 则生成
   if (!data.fe_id) {
     data.fe_id = `c_${nanoid(8)}`
   }

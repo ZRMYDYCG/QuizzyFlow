@@ -2,7 +2,8 @@
  * AI 对话面板核心内容（供侧边栏 / Drawer 复用）
  */
 import React, { useState, useCallback, useEffect, useRef } from 'react'
-import { Divider, Tabs, Spin, Tooltip } from 'antd'
+import { Divider, Tabs, Tooltip } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import { MessageOutlined, HistoryOutlined } from '@ant-design/icons'
 import { Plus } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -212,7 +213,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
     >
       {isLoadingHistory && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
-          <Spin tip="加载对话历史中..." size="large" />
+          <LoadingSpin tip="加载对话历史中..." size="large" />
         </div>
       )}
 
@@ -294,7 +295,7 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({
           <div className="relative min-h-0 flex-1 overflow-hidden">
             {isSwitchingSession ? (
               <div className="flex h-full items-center justify-center">
-                <Spin tip="加载对话中..." />
+                <LoadingSpin tip="加载对话中..." />
               </div>
             ) : (
               <ChatWindow

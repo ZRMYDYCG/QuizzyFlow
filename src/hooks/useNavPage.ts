@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { useGetUserInfo } from './useGetUserInfo'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ROLES } from '@/constants/roles'
-import { isStaffRole } from '@/utils/permission-bounds'
+import { canAccessAdminPanel } from '@/utils/permission-bounds'
 
 /**
  * 路由导航守卫 Hook
  * 统一处理所有路由级别的权限拦截和重定向
  */
 export const useNavPage = (waitingUserData: boolean) => {
-  const { username, token, role } = useGetUserInfo()
+  const { username, token, role, grantedRoutes } = useGetUserInfo()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const lastPathRef = useRef<string>('')
@@ -53,8 +52,8 @@ export const useNavPage = (waitingUserData: boolean) => {
     // admin 路径（需要管理员权限）
     const isAdminPath = pathname.startsWith('/admin')
     
-    // 判断是否为管理员
-    const isAdmin = role === ROLES.SUPER_ADMIN || isStaffRole(role)
+    // 判断是否有管理后台访问权限
+    const isAdmin = canAccessAdminPanel(role, grantedRoutes)
 
     // ========== 公开路径，直接放行 ==========
     if (isPublicPath || isPublishPath) {
@@ -78,5 +77,5 @@ export const useNavPage = (waitingUserData: boolean) => {
       return
     }
     
-  }, [username, token, role, pathname, waitingUserData, navigate])
+  }, [username, token, role, grantedRoutes, pathname, waitingUserData, navigate])
 }

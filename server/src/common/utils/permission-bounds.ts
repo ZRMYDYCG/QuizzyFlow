@@ -1,13 +1,29 @@
+import { normalizeStaffRolePermissions } from '../constants/admin-assignable'
+
 export const SYSTEM_ROLE_USER = 'user'
 export const SYSTEM_ROLE_SUPER_ADMIN = 'super_admin'
 
 /** 管理后台员工（含自定义角色，不含 super_admin / user） */
 export function isStaffRole(role: string | undefined): boolean {
   if (!role) return false
-  return role !== SYSTEM_ROLE_USER && role !== SYSTEM_ROLE_SUPER_ADMIN
+  const normalized = role.trim().toLowerCase()
+  return (
+    normalized !== SYSTEM_ROLE_USER && normalized !== SYSTEM_ROLE_SUPER_ADMIN
+  )
 }
 
-import { normalizeStaffRolePermissions } from '../constants/admin-assignable'
+/** 是否可进入管理后台 */
+export function canAccessAdminPanel(
+  role: string | undefined,
+  grantedRoutes: string[] | undefined,
+): boolean {
+  if (!role) return false
+  const normalized = role.trim().toLowerCase()
+  if (normalized === SYSTEM_ROLE_USER) return false
+  if (normalized === SYSTEM_ROLE_SUPER_ADMIN) return true
+  if (!isStaffRole(normalized)) return false
+  return (grantedRoutes?.length ?? 0) > 0
+}
 
 /**
  * 解析角色权限上限（员工角色会剔除不可分配的普通用户侧权限，保证与分配弹窗数量一致）

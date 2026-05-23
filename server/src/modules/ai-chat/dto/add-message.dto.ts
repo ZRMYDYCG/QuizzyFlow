@@ -40,5 +40,13 @@ export class AddMessageDto {
     title: string
     props?: Record<string, unknown>
   }>
+
+  @IsArray()
+  @IsOptional()
+  webReferences?: Array<{
+    title: string
+    url: string
+    snippet?: string
+  }>
 }
 

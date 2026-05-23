@@ -13,8 +13,8 @@ export const QUESTION_COMPONENT_JSON_SCHEMA = {
   properties: {
     fe_id: {
       type: 'string',
-      pattern: '^c_[a-z0-9]{6,12}$',
-      description: '前端唯一 ID，格式 c_ + 随机字符',
+      minLength: 1,
+      description: '画布上组件的唯一 ID，必须与当前问卷上下文中的 fe_id 完全一致',
     },
     type: {
       type: 'string',

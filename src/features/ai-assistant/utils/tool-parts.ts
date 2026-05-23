@@ -4,7 +4,7 @@
 
 import { isToolUIPart, type UIMessage } from 'ai'
 import { nanoid } from 'nanoid'
-import { AIAction, AIActionType, ToolCallDisplay, ToolCallKind, ToolCallState, FollowUpGuide } from '../types'
+import { AIAction, AIActionType, ToolCallDisplay, ToolCallKind, ToolCallState, FollowUpGuide, WebReference } from '../types'
 import { isFollowUpGuide } from './follow-up'
 
 interface ToolOutputPayload {
@@ -53,6 +53,7 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
   skill_list_materials: '物料库查询',
   skill_get_component_info: '组件详情查询',
   skill_check_quality: '问卷质量检查',
+  web_search: '联网搜索',
 }
 
 function resolveToolName(partType: string): string {
@@ -60,6 +61,7 @@ function resolveToolName(partType: string): string {
 }
 
 function resolveToolKind(toolName: string): ToolCallKind {
+  if (toolName === 'web_search') return 'search'
   if (toolName.startsWith('skill_')) return 'skill'
   if (
     toolName.startsWith('propose_') ||
@@ -187,7 +189,8 @@ export function extractActionsFromUIMessage(message: UIMessage): AIAction[] {
     // Skill 结果仅展示，不进入操作提案
     if (
       payload.actionType === 'skill_result' ||
-      payload.actionType === 'skill_match'
+      payload.actionType === 'skill_match' ||
+      payload.actionType === 'web_search_result'
     ) {
       continue
     }
@@ -223,6 +226,35 @@ export function extractActionsFromUIMessage(message: UIMessage): AIAction[] {
   }
 
   return actions
+}
+
+export function extractWebReferencesFromUIMessage(message: UIMessage): WebReference[] {
+  const refs: WebReference[] = []
+  const seen = new Set<string>()
+
+  for (const part of message.parts ?? []) {
+    if (!isToolUIPart(part)) continue
+    if (part.state !== 'output-available' || part.output == null) continue
+
+    const toolName = resolveToolName((part as { type: string }).type)
+    if (toolName !== 'web_search') continue
+
+    const payload = parseToolOutput(part.output)
+    if (!payload || payload.actionType !== 'web_search_result') continue
+
+    const data = payload.data as { results?: WebReference[] } | undefined
+    for (const item of data?.results ?? []) {
+      if (!item?.url || seen.has(item.url)) continue
+      seen.add(item.url)
+      refs.push({
+        title: item.title || item.url,
+        url: item.url,
+        snippet: item.snippet,
+      })
+    }
+  }
+
+  return refs
 }
 
 export function getTextFromUIMessage(message: UIMessage): string {
@@ -264,6 +296,8 @@ export function uiMessageToLocalMessage(
     message.role === 'assistant' ? extractActionsFromUIMessage(message) : undefined
   const toolCalls =
     message.role === 'assistant' ? extractToolCallsFromUIMessage(message) : undefined
+  const webReferences =
+    message.role === 'assistant' ? extractWebReferencesFromUIMessage(message) : undefined
   return {
     id: message.id,
     role: message.role as 'user' | 'assistant' | 'system',
@@ -272,6 +306,7 @@ export function uiMessageToLocalMessage(
     timestamp: Date.now(),
     actions: actions?.length ? actions : undefined,
     toolCalls: toolCalls?.length ? toolCalls : undefined,
+    webReferences: webReferences?.length ? webReferences : undefined,
     isStreaming,
   }
 }

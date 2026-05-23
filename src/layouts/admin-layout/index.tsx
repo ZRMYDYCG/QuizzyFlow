@@ -5,8 +5,7 @@ import { SettingOutlined } from '@ant-design/icons'
 import { LoadingSpin } from '@/components/loading-spin'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useLoadUserData } from '@/hooks/useLoadUserData'
-import { ROLES } from '@/constants/roles'
-import { isStaffRole } from '@/utils/permission-bounds'
+import { canAccessAdminPanel } from '@/utils/permission-bounds'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLayoutConfig } from '@/contexts/LayoutContext'
 import LayoutSettings from './components/layout-settings'
@@ -23,14 +22,14 @@ const ColumnsLayout = lazy(() => import('./components/layouts/columns-layout'))
  * 根据配置动态选择布局模式
  */
 const AdminLayout: React.FC = () => {
-  const { token, role } = useGetUserInfo()
+  const { token, role, grantedRoutes } = useGetUserInfo()
   const { waitingUserData } = useLoadUserData()
   const { theme } = useTheme()
   const { config } = useLayoutConfig()
   const [settingsVisible, setSettingsVisible] = useState(false)
 
-  // 权限检查
-  const isAdmin = role === ROLES.SUPER_ADMIN || isStaffRole(role)
+  // 权限检查：须为 super_admin 或已分配管理后台路由的员工
+  const isAdmin = canAccessAdminPanel(role, grantedRoutes)
 
   // 刷新时 Redux token 尚未恢复，须先等待 useLoadUserData，避免误跳登录页
   if (waitingUserData) {
