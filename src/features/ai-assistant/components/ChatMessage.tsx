@@ -9,7 +9,7 @@ import { resolveAssistantDisplayContent } from '../utils/follow-up'
 import ThinkingBlock from './ThinkingBlock'
 import ToolCallsBlock from './ToolCallsBlock'
 import ActionProposalPanel from './ActionProposalPanel'
-import UserChatAvatar from './UserChatAvatar'
+import UserChatAvatar from '@/components/user-chat-avatar'
 import AssistantStreamMarkdown from './AssistantStreamMarkdown'
 import MessageAttachedComponents from './MessageAttachedComponents'
 

@@ -1,107 +1,60 @@
-import React, { useState, useMemo } from 'react'
-import { useTitle } from 'ahooks'
+import React, { useMemo, useState } from 'react'
+import { useTitle, useRequest } from 'ahooks'
 import useLoadQuestionListData from '@/hooks/useLoadQuestionListData'
+import QuestionListPagination from '@/pages/manage/list/components/QuestionListPagination'
 import { restoreQuestion, permanentDeleteQuestion } from '@/api/modules/question'
-import { useRequest } from 'ahooks'
 import { message } from '@/utils/app-message'
-import { 
-  Loader2, 
-  Trash2, 
-  Calendar, 
-  TrendingUp, 
-  Database, 
-  AlertCircle,
-  RefreshCw
-} from 'lucide-react'
+import { Loader2, Trash2, Calendar, TrendingUp, FileText, RefreshCw } from 'lucide-react'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useManageTheme } from '@/hooks/useManageTheme'
-
-// 组件导入
+import { cn } from '@/utils'
 import TrashStatCard from './components/TrashStatCard'
-import UrgentAlert from './components/UrgentAlert'
-import SmartFilter, { FilterType } from './components/SmartFilter'
-import EnhancedTrashItem from './components/EnhancedTrashItem'
-import SmartSuggestions from './components/SmartSuggestions'
-
-const AUTO_DELETE_DAYS = 30
+import TrashListItem from './components/TrashListItem'
 
 const Trash: React.FC = () => {
   useTitle('回收站')
   const t = useManageTheme()
 
   const {
-    data = {},
+    list,
+    total,
     loading,
     refresh,
+    page,
+    pageSize,
+    handlePageChange,
+    handlePageSizeChange,
   } = useLoadQuestionListData({ isDeleted: true })
-  const { list = [], total = 0 } = data
 
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [currentFilter, setCurrentFilter] = useState<FilterType>('all')
 
-  // 计算统计数据
   const stats = useMemo(() => {
-    const now = new Date().getTime()
     const today = new Date().setHours(0, 0, 0, 0)
     const weekAgo = today - 7 * 24 * 60 * 60 * 1000
 
     return {
-      total: list.length,
-      today: list.filter((q: any) => {
-        if (!q.deletedAt) return false
-        return new Date(q.deletedAt).getTime() >= today
-      }).length,
-      thisWeek: list.filter((q: any) => {
-        if (!q.deletedAt) return false
-        return new Date(q.deletedAt).getTime() >= weekAgo
-      }).length,
-      highValue: list.filter((q: any) => (q.answerCount || 0) >= 50).length,
-      urgent: list.filter((q: any) => {
-        if (!q.deletedAt) return false
-        const daysAgo = Math.floor((now - new Date(q.deletedAt).getTime()) / (1000 * 60 * 60 * 24))
-        return daysAgo >= AUTO_DELETE_DAYS - 3
-      }).length,
+      total,
+      today: list.filter((q: any) => q.deletedAt && new Date(q.deletedAt).getTime() >= today)
+        .length,
+      thisWeek: list.filter(
+        (q: any) => q.deletedAt && new Date(q.deletedAt).getTime() >= weekAgo
+      ).length,
       draft: list.filter((q: any) => !q.isPublished).length,
-      published: list.filter((q: any) => q.isPublished).length,
     }
-  }, [list])
+  }, [list, total])
 
-  // 筛选列表
-  const filteredList = useMemo(() => {
-    const now = new Date().getTime()
-    
-    switch (currentFilter) {
-      case 'high-value':
-        return list.filter((q: any) => (q.answerCount || 0) >= 50)
-      case 'urgent':
-        return list.filter((q: any) => {
-          if (!q.deletedAt) return false
-          const daysAgo = Math.floor((now - new Date(q.deletedAt).getTime()) / (1000 * 60 * 60 * 24))
-          return daysAgo >= AUTO_DELETE_DAYS - 3
-        })
-      case 'draft':
-        return list.filter((q: any) => !q.isPublished)
-      case 'published':
-        return list.filter((q: any) => q.isPublished)
-      default:
-        return list
-    }
-  }, [list, currentFilter])
-
-  // 恢复操作
   const { run: restore, loading: restoreLoading } = useRequest(
     async (ids: string[]) => {
-      for await (const id of ids) {
+      for (const id of ids) {
         await restoreQuestion(id)
       }
     },
     {
       manual: true,
-      debounceWait: 500,
-      onSuccess: async () => {
+      onSuccess: () => {
         message.success('恢复成功')
         refresh()
         setSelectedIds([])
@@ -109,16 +62,15 @@ const Trash: React.FC = () => {
     }
   )
 
-  // 永久删除操作
   const { run: deleteQuestions, loading: deleteLoading } = useRequest(
     async (ids: string[]) => {
-      for await (const id of ids) {
+      for (const id of ids) {
         await permanentDeleteQuestion(id)
       }
     },
     {
       manual: true,
-      onSuccess: async () => {
+      onSuccess: () => {
         message.success('永久删除成功')
         refresh()
         setSelectedIds([])
@@ -127,85 +79,40 @@ const Trash: React.FC = () => {
     }
   )
 
-  // 选择操作
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredList.length) {
+    if (selectedIds.length === list.length) {
       setSelectedIds([])
     } else {
-      setSelectedIds(filteredList.map((q: any) => q._id))
+      setSelectedIds(list.map((q: any) => q._id))
     }
   }
 
   const toggleSelect = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id))
-    } else {
-      setSelectedIds([...selectedIds, id])
-    }
-  }
-
-  // 智能建议操作
-  const handleSuggestionAction = (action: string, ids: string[]) => {
-    switch (action) {
-      case 'export':
-        message.info('导出功能开发中...')
-        break
-      case 'clean-drafts':
-        setSelectedIds(ids)
-        setShowDeleteDialog(true)
-        break
-      case 'restore-urgent':
-        restore(ids)
-        break
-      case 'review':
-        setCurrentFilter('all')
-        setSelectedIds(ids)
-        break
-      default:
-        break
-    }
-  }
-
-  // 恢复全部紧急问卷
-  const restoreAllUrgent = () => {
-    const now = new Date().getTime()
-    const urgentIds = list
-      .filter((q: any) => {
-        if (!q.deletedAt) return false
-        const daysAgo = Math.floor((now - new Date(q.deletedAt).getTime()) / (1000 * 60 * 60 * 24))
-        return daysAgo >= AUTO_DELETE_DAYS - 3
-      })
-      .map((q: any) => q._id)
-    
-    if (urgentIds.length > 0) {
-      restore(urgentIds)
-    }
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    )
   }
 
   return (
-    <div className="min-h-full">
-      {/* 加载状态 */}
-      {loading && (
-        <div className={`flex items-center justify-center gap-2 py-20 ${t.text.secondary}`}>
-          <Loader2 className="w-6 h-6 animate-spin" />
+    <div className="min-h-full space-y-6">
+      {loading && list.length === 0 ? (
+        <div className={cn('flex items-center justify-center gap-2 py-20', t.text.secondary)}>
+          <Loader2 className="w-5 h-5 animate-spin" />
           <span>加载中...</span>
         </div>
-      )}
+      ) : null}
 
-      {/* 空状态 */}
-      {!loading && list.length === 0 && (
-        <div className={`flex flex-col items-center justify-center py-20 ${t.text.secondary}`}>
-          <Trash2 className={`w-20 h-20 mb-4 ${t.text.tertiary}`} />
+      {!loading && total === 0 ? (
+        <div className={cn('flex flex-col items-center justify-center py-20', t.text.secondary)}>
+          <Trash2 className={cn('w-16 h-16 mb-4', t.text.tertiary)} />
           <p className="text-lg font-medium">回收站为空</p>
-          <p className={`text-sm mt-1 ${t.text.tertiary}`}>删除的问卷会暂存在这里</p>
+          <p className={cn('text-sm mt-1', t.text.tertiary)}>删除的问卷会暂存在这里</p>
         </div>
-      )}
+      ) : null}
 
-      {/* 内容区域 */}
-      {!loading && list.length > 0 && (
-        <div className="space-y-6">
-          {/* 统计卡片 */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+      {total > 0 ? (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <TrashStatCard
               title="总计"
               value={stats.total}
@@ -218,160 +125,129 @@ const Trash: React.FC = () => {
               value={stats.today}
               icon={Calendar}
               color="text-blue-400"
-              subtitle="最近删除"
+              subtitle="本页统计"
             />
             <TrashStatCard
               title="本周删除"
               value={stats.thisWeek}
               icon={TrendingUp}
               color="text-purple-400"
-              subtitle="7天内"
+              subtitle="本页统计"
             />
             <TrashStatCard
-              title="高价值"
-              value={stats.highValue}
-              icon={Database}
-              color="text-yellow-400"
-              subtitle="答卷≥50"
-            />
-            <TrashStatCard
-              title="即将清理"
-              value={stats.urgent}
-              icon={AlertCircle}
-              color="text-red-400"
-              subtitle="3天内"
-              isWarning={true}
+              title="草稿"
+              value={stats.draft}
+              icon={FileText}
+              color="text-amber-400"
+              subtitle="本页统计"
             />
           </div>
 
-          {/* 紧急提醒 */}
-          {stats.urgent > 0 && (
-            <UrgentAlert
-              questions={list}
-              onRestoreAll={restoreAllUrgent}
-              autoDeleteDays={AUTO_DELETE_DAYS}
-            />
-          )}
-
-          {/* 智能筛选 */}
-          <SmartFilter
-            currentFilter={currentFilter}
-            onFilterChange={setCurrentFilter}
-            counts={{
-              all: stats.total,
-              highValue: stats.highValue,
-              urgent: stats.urgent,
-              draft: stats.draft,
-              published: stats.published,
-            }}
-          />
-
-          {/* 主要内容区域 */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左侧：列表区域 */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* 批量操作栏 */}
-              <div className={`flex flex-wrap items-center gap-3 p-4 rounded-xl border ${
-                t.isDark 
-                  ? 'bg-slate-800/30 border-slate-700/50' 
-                  : 'bg-white border-gray-200 shadow-sm'
-              }`}>
-                <Checkbox.Root
-                  checked={selectedIds.length === filteredList.length && filteredList.length > 0}
-                  onCheckedChange={toggleSelectAll}
-                  className={`w-5 h-5 rounded border hover:border-blue-500 transition-colors data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 ${
-                    t.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-300'
-                  }`}
-                >
-                  <Checkbox.Indicator>
-                    <Check className="w-4 h-4 text-white" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
-
-                <button
-                  onClick={() => restore(selectedIds)}
-                  disabled={selectedIds.length === 0 || restoreLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  恢复选中
-                </button>
-
-                <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                  <AlertDialog.Trigger asChild>
-                    <button
-                      disabled={selectedIds.length === 0}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      彻底删除
-                    </button>
-                  </AlertDialog.Trigger>
-                  <AlertDialog.Portal>
-                    <AlertDialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in-0" />
-                    <AlertDialog.Content className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${t.dialog.bg} border ${t.dialog.border} rounded-xl p-6 w-full max-w-md z-50 animate-in fade-in-0 zoom-in-95 shadow-2xl`}>
-                      <AlertDialog.Title className={`text-lg font-semibold ${t.dialog.title} mb-2`}>
-                        确认彻底删除？
-                      </AlertDialog.Title>
-                      <AlertDialog.Description className={`text-sm ${t.dialog.description} mb-6`}>
-                        删除后将无法恢复，请谨慎操作！您将删除 {selectedIds.length} 个问卷。
-                      </AlertDialog.Description>
-                      <div className="flex gap-3 justify-end">
-                        <AlertDialog.Cancel asChild>
-                          <button className={`px-4 py-2 text-sm ${t.button.default} rounded-lg transition-colors`}>
-                            取消
-                          </button>
-                        </AlertDialog.Cancel>
-                        <AlertDialog.Action asChild>
-                          <button
-                            onClick={() => deleteQuestions(selectedIds)}
-                            disabled={deleteLoading}
-                            className="px-4 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            确认删除
-                          </button>
-                        </AlertDialog.Action>
-                      </div>
-                    </AlertDialog.Content>
-                  </AlertDialog.Portal>
-                </AlertDialog.Root>
-
-                {selectedIds.length > 0 && (
-                  <span className={`text-sm ${t.text.secondary}`}>
-                    已选择 <span className="font-medium text-blue-400">{selectedIds.length}</span> 项
-                  </span>
-                )}
-              </div>
-
-              {/* 问卷列表 */}
-              <div className="space-y-3">
-                {filteredList.map((question: any) => (
-                  <EnhancedTrashItem
-                    key={question._id}
-                    question={question}
-                    isSelected={selectedIds.includes(question._id)}
-                    onSelect={() => toggleSelect(question._id)}
-                    onRestore={() => restore([question._id])}
-                    onDelete={() => deleteQuestions([question._id])}
-                    autoDeleteDays={AUTO_DELETE_DAYS}
-                  />
-                ))}
-              </div>
-
-              {filteredList.length === 0 && (
-                <div className={`text-center py-12 ${t.text.secondary}`}>
-                  <p className="text-sm">没有符合条件的问卷</p>
-                </div>
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-3 p-3 md:p-4 rounded-lg border',
+              t.isDark ? 'bg-slate-800/30 border-slate-700/50' : 'bg-white border-gray-200 shadow-sm'
+            )}
+          >
+            <Checkbox.Root
+              checked={selectedIds.length === list.length && list.length > 0}
+              onCheckedChange={toggleSelectAll}
+              className={cn(
+                'w-5 h-5 rounded border data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500',
+                t.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50 border-gray-300'
               )}
-            </div>
+            >
+              <Checkbox.Indicator>
+                <Check className="w-4 h-4 text-white" />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
 
-            {/* 右侧：智能建议 */}
-            <div className="lg:col-span-1">
-              <SmartSuggestions questions={list} onAction={handleSuggestionAction} />
-            </div>
+            <button
+              type="button"
+              onClick={() => restore(selectedIds)}
+              disabled={selectedIds.length === 0 || restoreLoading}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-emerald-500 hover:bg-emerald-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className="w-4 h-4" />
+              恢复选中
+            </button>
+
+            <AlertDialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <AlertDialog.Trigger asChild>
+                <button
+                  type="button"
+                  disabled={selectedIds.length === 0}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-red-500 hover:bg-red-600 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  彻底删除
+                </button>
+              </AlertDialog.Trigger>
+              <AlertDialog.Portal>
+                <AlertDialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+                <AlertDialog.Content
+                  className={cn(
+                    'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg p-6 w-full max-w-md z-50 shadow-xl border',
+                    t.dialog.bg,
+                    t.dialog.border
+                  )}
+                >
+                  <AlertDialog.Title className={cn('text-lg font-semibold mb-2', t.dialog.title)}>
+                    确认彻底删除？
+                  </AlertDialog.Title>
+                  <AlertDialog.Description className={cn('text-sm mb-6', t.dialog.description)}>
+                    删除后将无法恢复，您将删除 {selectedIds.length} 个问卷。
+                  </AlertDialog.Description>
+                  <div className="flex gap-3 justify-end">
+                    <AlertDialog.Cancel asChild>
+                      <button type="button" className={cn('px-4 py-2 text-sm rounded-md', t.button.default)}>
+                        取消
+                      </button>
+                    </AlertDialog.Cancel>
+                    <AlertDialog.Action asChild>
+                      <button
+                        type="button"
+                        onClick={() => deleteQuestions(selectedIds)}
+                        disabled={deleteLoading}
+                        className="px-4 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded-md disabled:opacity-50"
+                      >
+                        确认删除
+                      </button>
+                    </AlertDialog.Action>
+                  </div>
+                </AlertDialog.Content>
+              </AlertDialog.Portal>
+            </AlertDialog.Root>
+
+            {selectedIds.length > 0 ? (
+              <span className={cn('text-sm', t.text.secondary)}>
+                已选择 {selectedIds.length} 项
+              </span>
+            ) : null}
           </div>
-        </div>
-      )}
+
+          <div className="space-y-2">
+            {list.map((question: any) => (
+              <TrashListItem
+                key={question._id}
+                question={question}
+                isSelected={selectedIds.includes(question._id)}
+                onSelect={() => toggleSelect(question._id)}
+                onRestore={() => restore([question._id])}
+                onDelete={() => deleteQuestions([question._id])}
+              />
+            ))}
+          </div>
+
+          <QuestionListPagination
+            total={total}
+            page={page}
+            pageSize={pageSize}
+            onChange={handlePageChange}
+            onShowSizeChange={handlePageSizeChange}
+          />
+        </>
+      ) : null}
     </div>
   )
 }

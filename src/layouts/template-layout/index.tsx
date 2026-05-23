@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
 import { Outlet, ScrollRestoration } from 'react-router-dom'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/utils'
 import CommunityBackdrop from './components/community-backdrop'
+import TemplateFooter from './components/template-footer'
 import TemplateHeader from './components/template-header'
 
 const TemplateLayout = () => {
@@ -22,6 +22,7 @@ const TemplateLayout = () => {
         <Outlet />
       </main>
 
+      <TemplateFooter />
       <ScrollRestoration />
     </div>
   )

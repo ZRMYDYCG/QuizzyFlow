@@ -3,6 +3,7 @@
  */
 import React from 'react'
 import { Card, Row, Col, Statistic, Progress, Empty, Tag } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,

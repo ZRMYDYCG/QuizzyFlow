@@ -38,10 +38,32 @@ function patchDelta(delta: Record<string, unknown>, state: StreamState) {
   }
 }
 
+type StreamChoice = {
+  index?: number
+  delta?: Record<string, unknown>
+}
+
+type StreamChunk = {
+  choices?: StreamChoice[]
+}
+
+/** AI SDK OpenAI parser requires choices[].index on every SSE chunk */
+function normalizeStreamChunk(parsed: StreamChunk): StreamChunk {
+  if (parsed.choices?.length) {
+    parsed.choices = parsed.choices.map((choice, i) => ({
+      ...choice,
+      index: choice.index ?? i,
+    }))
+  }
+  return parsed
+}
+
 function buildCloseThinkingChunk(): string {
-  const payload = JSON.stringify({
-    choices: [{ delta: { content: THINK_CLOSE } }],
-  })
+  const payload = JSON.stringify(
+    normalizeStreamChunk({
+      choices: [{ index: 0, delta: { content: THINK_CLOSE } }],
+    }),
+  )
   return `data: ${payload}\n\n`
 }
 
@@ -57,14 +79,14 @@ function transformSseLine(line: string, state: StreamState): string {
   }
 
   try {
-    const parsed = JSON.parse(payload) as {
+    const parsed = JSON.parse(payload) as StreamChunk & {
       choices?: Array<{ delta?: Record<string, unknown> }>
     }
     const delta = parsed.choices?.[0]?.delta
     if (delta) {
       patchDelta(delta, state)
     }
-    return `data: ${JSON.stringify(parsed)}`
+    return `data: ${JSON.stringify(normalizeStreamChunk(parsed))}`
   } catch {
     return line
   }

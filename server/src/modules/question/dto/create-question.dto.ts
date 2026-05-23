@@ -82,6 +82,14 @@ export class CreateQuestionDto {
   desc?: string
 
   @ApiPropertyOptional({
+    description: '问卷类型，如 survey、exam、vote、form 等',
+    example: 'survey',
+  })
+  @IsString()
+  @IsOptional()
+  type?: string
+
+  @ApiPropertyOptional({
     description: '自定义 JavaScript 代码',
     example: 'console.log("问卷加载完成");',
   })

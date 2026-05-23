@@ -16,14 +16,22 @@ import StarViewSwitcher, { StarViewMode } from './components/StarViewSwitcher'
 import QuestionsCard from '../list/components/QuestionsCard'
 import QuestionListView from '../list/components/QuestionListView'
 import QuestionTableView from '../list/components/QuestionTableView'
+import QuestionListPagination from '../list/components/QuestionListPagination'
 
 const Star = () => {
   useTitle('星标问卷')
   const { username, nickname } = useGetUserInfo()
   const t = useManageTheme()
 
-  const { data = {}, loading } = useLoadQuestionListData({ isStar: true })
-  const { list = [], total = 0 } = data
+  const {
+    list,
+    total,
+    loading,
+    page,
+    pageSize,
+    handlePageChange,
+    handlePageSizeChange,
+  } = useLoadQuestionListData({ isStar: true })
 
   // 视图模式状态
   const [viewMode, setViewMode] = useState<StarViewMode>(() => {
@@ -152,6 +160,16 @@ const Star = () => {
           {/* 时间线视图（使用表格视图代替） */}
           {viewMode === 'timeline' && (
             <QuestionTableView questions={list} />
+          )}
+
+          {viewMode !== 'dashboard' && (
+            <QuestionListPagination
+              total={total}
+              page={page}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              onShowSizeChange={handlePageSizeChange}
+            />
           )}
         </>
       )}

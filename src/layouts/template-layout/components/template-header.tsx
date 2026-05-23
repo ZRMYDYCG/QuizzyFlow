@@ -20,11 +20,22 @@ const TemplateHeader: FC = () => {
       )}
     >
       <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between px-4 sm:px-6">
-        <Logo
-          size="small"
-          showText
-          onClick={() => navigate('/template/market')}
-        />
+        <div className="flex items-center gap-6">
+          <Logo size="small" showText onClick={() => navigate('/')} />
+
+          <nav className="hidden items-center gap-6 sm:flex">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className={cn(
+                'text-sm font-medium transition-colors',
+                theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+              )}
+            >
+              首页
+            </button>
+          </nav>
+        </div>
 
         {token ? (
           <button

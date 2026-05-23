@@ -1,7 +1,9 @@
+import type { QuestionComponentType } from '@/store/modules/question-component'
+
 export interface CommunityTemplateSchema {
   title: string
   desc: string
-  componentList: Array<Record<string, unknown>>
+  componentList: QuestionComponentType[]
 }
 
 export interface CommunityTemplate {

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, Typography, Row, Col, Statistic, Empty } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import {
   FileTextOutlined,
   CheckCircleOutlined,

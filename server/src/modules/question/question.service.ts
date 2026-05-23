@@ -56,6 +56,7 @@ export class QuestionService {
     const defaultQuestion = {
       title: createDto?.title || `问卷标题_${Date.now()}`,
       desc: createDto?.desc || '问卷描述',
+      type: createDto?.type || 'form',
       author: username,
       componentList: createDto?.componentList ?? [],
       js: createDto?.js || '',
@@ -80,23 +81,44 @@ export class QuestionService {
       pageSize = 10,
       isDeleted = false,
       isStar,
+      type,
     } = query
 
     // 构建查询条件
     const filter: any = {
       author: username,
-      isDeleted: isDeleted,
+      isDeleted: isDeleted ?? false,
     }
 
-    // 星标筛选
-    if (isStar !== undefined) {
-      filter.isStar = isStar
+    // 星标筛选（仅显式传 true 时生效）
+    if (isStar === true) {
+      filter.isStar = true
+    }
+
+    // 问卷类型筛选
+    if (type) {
+      if (type === 'form') {
+        filter.$and = [
+          ...(filter.$and ?? []),
+          {
+            $or: [
+              { type: 'form' },
+              { type: { $exists: false } },
+              { type: null },
+              { type: '' },
+            ],
+          },
+        ]
+      } else {
+        filter.type = type
+      }
     }
 
     // 关键词搜索（标题或描述）
     if (keyword) {
       const reg = new RegExp(keyword, 'i')
-      filter.$or = [{ title: reg }, { desc: reg }]
+      const keywordFilter = { $or: [{ title: reg }, { desc: reg }] }
+      filter.$and = [...(filter.$and ?? []), keywordFilter]
     }
 
     // 执行查询

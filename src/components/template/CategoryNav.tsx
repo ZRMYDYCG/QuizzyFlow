@@ -58,9 +58,6 @@ const CategoryNav: FC<CategoryNavProps> = ({ activeCategory, onCategoryChange })
                 {category.label}
               </span>
 
-              {/* Emoji */}
-              <span className="text-lg">{category.emoji}</span>
-
               {/* 激活指示器 */}
               {isActive && (
                 <motion.div

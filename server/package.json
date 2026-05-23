@@ -12,6 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "prestart:prod": "nest build",
     "init:rbac": "ts-node -r tsconfig-paths/register src/scripts/init-rbac.ts",
     "init:config": "ts-node src/scripts/init-system-config.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

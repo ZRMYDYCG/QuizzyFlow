@@ -1,4 +1,5 @@
 import {
+  Allow,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -22,7 +23,8 @@ export class AnswerItemDto {
   @IsNotEmpty()
   componentType: string
 
-  // value 可以是任意类型，根据组件类型不同而不同
+  /** 答案值（字符串 / 数组 / 对象等）；须 @Allow() 否则 whitelist 会剥离该字段 */
+  @Allow()
   value: any
 }
 

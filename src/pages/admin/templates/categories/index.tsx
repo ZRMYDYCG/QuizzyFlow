@@ -3,6 +3,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { Table, Card, Tag, Space, Alert } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import { FolderOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useRequest } from 'ahooks'

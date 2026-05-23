@@ -8,13 +8,10 @@ interface SearchOption {
   keyword?: string
   isStar?: boolean
   isDeleted?: boolean
+  type?: string
   page?: number
   pageSize?: number
 }
-
-/**
- * 问卷列表响应接口
- */
 interface QuestionListResponse {
   list: any[]
   total: number

@@ -1,6 +1,7 @@
 import { IsString, IsBoolean, IsNumber, IsOptional, Min } from 'class-validator'
 import { Type } from 'class-transformer'
 import { ApiPropertyOptional } from '@nestjs/swagger'
+import { QueryBoolean } from '../../../common/transforms/query-boolean.transform'
 
 /**
  * 查询问卷列表 DTO
@@ -20,7 +21,7 @@ export class QueryQuestionDto {
   })
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
+  @QueryBoolean()
   isStar?: boolean
 
   @ApiPropertyOptional({
@@ -29,8 +30,16 @@ export class QueryQuestionDto {
   })
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
+  @QueryBoolean()
   isDeleted?: boolean
+
+  @ApiPropertyOptional({
+    description: '问卷类型筛选，如 survey、exam、vote 等',
+    example: 'survey',
+  })
+  @IsString()
+  @IsOptional()
+  type?: string
 
   @ApiPropertyOptional({
     description: '页码',

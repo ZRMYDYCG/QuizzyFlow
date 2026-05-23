@@ -1,7 +1,4 @@
-/**
- * 聊天场景下的用户头像（登录后显示真实头像，否则显示首字母）
- */
-import React from 'react'
+import type { FC } from 'react'
 import { Avatar } from 'antd'
 import { useGetUserInfo } from '@/hooks/useGetUserInfo'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -12,7 +9,7 @@ interface UserChatAvatarProps {
   className?: string
 }
 
-const UserChatAvatar: React.FC<UserChatAvatarProps> = ({ size = 32, className }) => {
+const UserChatAvatar: FC<UserChatAvatarProps> = ({ size = 32, className }) => {
   const { avatar, nickname, username } = useGetUserInfo()
   const { primaryColor, themeColors } = useTheme()
   const displayName = (nickname || username || 'U').charAt(0).toUpperCase()

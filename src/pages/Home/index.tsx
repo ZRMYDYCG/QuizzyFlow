@@ -1,19 +1,28 @@
-import { useNavigate } from 'react-router-dom'
-import { CyberBackdrop, HomeFooter, HomeHeader, HomeHero } from './components'
-import './home.css'
+import { useTitle } from 'ahooks'
+import { useTheme } from '@/contexts/ThemeContext'
+import CommunityBackdrop from '@/layouts/template-layout/components/community-backdrop'
+import TemplateFooter from '@/layouts/template-layout/components/template-footer'
+import { cn } from '@/utils'
+import { LandingHeader, LandingHero, LandingShowcase } from './components'
 
 const Home = () => {
-  const navigate = useNavigate()
-
-  const handleRegisterClick = () => navigate('/register')
-  const handleLoginClick = () => navigate('/login')
+  useTitle('QuizzyFlow - AI 问卷创作平台')
+  const { theme } = useTheme()
 
   return (
-    <div className="home-cyber relative flex min-h-screen flex-col overflow-hidden bg-[var(--cyber-bg)] text-zinc-300 selection:bg-[rgba(0,229,255,0.2)] selection:text-white">
-      <CyberBackdrop />
-      <HomeHeader onLoginClick={handleLoginClick} onRegisterClick={handleRegisterClick} />
-      <HomeHero onLoginClick={handleLoginClick} onRegisterClick={handleRegisterClick} />
-      <HomeFooter />
+    <div
+      className={cn(
+        'relative flex min-h-screen flex-col',
+        theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-gray-50 text-gray-900'
+      )}
+    >
+      <CommunityBackdrop />
+      <LandingHeader />
+      <main className="relative flex-1">
+        <LandingHero />
+        <LandingShowcase />
+      </main>
+      <TemplateFooter />
     </div>
   )
 }

@@ -53,9 +53,9 @@ export const TEMPLATE_FOOTER_SECTIONS: TemplateFooterSection[] = [
   {
     title: '产品',
     links: [
+      { label: '首页', href: '/' },
       { label: '模板市场', href: '/template/market' },
       { label: '问卷编辑器', href: '/manage/list' },
-      { label: '数据统计', href: '/manage/list' },
     ],
   },
   {

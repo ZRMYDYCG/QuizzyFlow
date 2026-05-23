@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, Avatar, Tag, Button, Row, Col, Statistic } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import {
   UserOutlined,
   EditOutlined,

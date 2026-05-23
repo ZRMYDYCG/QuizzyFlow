@@ -21,7 +21,7 @@ const TemplateFooter: FC = () => {
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <div className="max-w-sm">
-            <Logo size="small" showText onClick={() => navigate('/template/market')} />
+            <Logo size="small" showText onClick={() => navigate('/')} />
             <p
               className={cn(
                 'mt-4 text-sm leading-relaxed',

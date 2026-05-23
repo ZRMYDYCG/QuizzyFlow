@@ -1,4 +1,5 @@
 import { Result, Button, Drawer } from 'antd'
+import { LoadingSpin } from '@/components/loading-spin'
 import { MenuOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTitle, useResponsive } from 'ahooks'

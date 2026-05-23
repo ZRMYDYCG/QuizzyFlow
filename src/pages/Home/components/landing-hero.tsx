@@ -9,14 +9,7 @@ import AIPromptInput from '@/components/ai-prompt-input'
 import { inferQuestionnaireType } from '@/utils/infer-questionnaire-type'
 import { cn } from '@/utils'
 
-const QUICK_PROMPTS = [
-  '创建一份用户满意度调查问卷',
-  '设计一个活动报名表',
-  '制作员工反馈收集表',
-  '生成产品需求调研问卷',
-]
-
-const MarketAIDialog: FC = () => {
+const LandingHero: FC = () => {
   const navigate = useNavigate()
   const { theme } = useTheme()
   const { token } = useGetUserInfo()
@@ -54,24 +47,20 @@ const MarketAIDialog: FC = () => {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-4 pt-10 pb-6 text-center">
+    <section className="mx-auto max-w-3xl px-4 pt-16 pb-8 text-center sm:pt-20">
       <h1
         className={cn(
-          'mb-2 text-3xl font-bold tracking-tight md:text-4xl',
+          'mb-8 text-2xl font-semibold tracking-tight md:text-3xl',
           theme === 'dark' ? 'text-white' : 'text-gray-900'
         )}
       >
-        模板市场
-      </h1>
-      <p className={cn('mb-8 text-sm md:text-base', theme === 'dark' ? 'text-slate-400' : 'text-gray-500')}>
         描述你想要的问卷，AI 帮你快速生成
-      </p>
+      </h1>
 
       <AIPromptInput
         variant="chat"
         showAvatar={false}
         placeholder="描述你想要的问卷，例如：创建一份关于用户购物习惯的调查..."
-        quickPrompts={QUICK_PROMPTS}
         isLoading={loading}
         onSend={handleSend}
       />
@@ -79,4 +68,4 @@ const MarketAIDialog: FC = () => {
   )
 }
 
-export default MarketAIDialog
+export default LandingHero

@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react'
 import AdminLayout from '@/layouts/admin-layout'
 import { PermissionGuard } from '@/components/permission-guard'
+import { LoadingSpin } from '@/components/loading-spin'
 
 const Dashboard = lazy(() => import('@/pages/admin/dashboard'))
 const UsersManagement = lazy(() => import('@/pages/admin/users'))
